@@ -4,7 +4,7 @@ import './components/Editor.scss'
 import { HocuspocusProvider } from '@hocuspocus/provider'
 import * as Y from 'yjs'
 
-import EditorComponent from './components/Editor'
+import EditorComponent from './components/Editor.jsx'
 
 // self-host 서버 주소로 변경 => 호스팅 되고있는 hocuspocus 주소로 변경 필요 => localhost시 컴퓨터 localhost
 const SERVER_URL = 'ws://192.168.2.45:1234'

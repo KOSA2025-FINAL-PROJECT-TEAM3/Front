@@ -1,11 +1,10 @@
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 import Highlight from '@tiptap/extension-highlight'
 import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { CharacterCount } from '@tiptap/extensions'
-import { Editor as TiptapEditor, EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 /* 🎨 유저 색상 / 이름 목록 */
 const COLORS = [
@@ -31,30 +30,14 @@ const DEFAULT_CONTENT = `
 `
 
 /* 🔧 유틸 */
-const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)]
 const getInitialUser = () => ({
   name: getRandomElement(NAMES),
   color: getRandomElement(COLORS),
 })
 
-/* 🧩 타입 */
-interface EditorProps {
-  ydoc: any
-  provider: any
-  room: string
-}
-
-/* 🪶 실행 가능한 커맨드 목록 */
-type ToggleCommand = 'bold' | 'italic' | 'strike' | 'bulletList' | 'code'
-
 /* 🎛️ 툴바 버튼 */
-const ToolbarButton = ({
-  cmd,
-  editor,
-}: {
-  cmd: ToggleCommand
-  editor: TiptapEditor
-}) => {
+const ToolbarButton = ({ cmd, editor }) => {
   const handleClick = useCallback(() => {
     switch (cmd) {
       case 'bold':
@@ -86,7 +69,7 @@ const ToolbarButton = ({
 }
 
 /* ✨ 메인 Editor 컴포넌트 */
-const EditorComponent: React.FC<EditorProps> = ({ ydoc, provider, room }) => {
+const EditorComponent = ({ ydoc, provider, room }) => {
   const [status, setStatus] = useState('connecting')
   const [currentUser, setCurrentUser] = useState(getInitialUser)
 
@@ -104,7 +87,7 @@ const EditorComponent: React.FC<EditorProps> = ({ ydoc, provider, room }) => {
 
   /* 🔄 연결 상태 감지 */
   useEffect(() => {
-    const handleStatus = (event: any) => setStatus(event.status)
+    const handleStatus = (event) => setStatus(event.status)
     provider.on('status', handleStatus)
     return () => provider.off('status', handleStatus)
   }, [provider])
@@ -122,7 +105,7 @@ const EditorComponent: React.FC<EditorProps> = ({ ydoc, provider, room }) => {
       {/* Toolbar */}
       <div className="control-group">
         <div className="button-group">
-          {(['bold', 'italic', 'strike', 'bulletList', 'code'] as ToggleCommand[]).map(cmd => (
+          {['bold', 'italic', 'strike', 'bulletList', 'code'].map((cmd) => (
             <ToolbarButton key={cmd} cmd={cmd} editor={editor} />
           ))}
         </div>
