@@ -1,0 +1,487 @@
+{
+  "name": "설정",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+  "children": [
+    {
+      "name": "Header",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 40,
+      "paddingBottom": 20,
+      "paddingLeft": 40,
+      "itemSpacing": 16,
+      "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+      "strokes": [{"type": "SOLID", "color": {"r": 0.88, "g": 0.88, "b": 0.88}}],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "Logo Group",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 10,
+          "fills": [],
+          "children": [
+            {
+              "name": "Logo",
+              "type": "ELLIPSE",
+              "width": 40,
+              "height": 40,
+              "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}]
+            },
+            {
+              "name": "실버케어",
+              "type": "TEXT",
+              "characters": "실버케어",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Bold"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.2, "g": 0.2, "b": 0.2}}]
+            }
+          ]
+        },
+        {
+          "name": "User Info",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 16,
+          "fills": [],
+          "children": [
+            {
+              "name": "🔔",
+              "type": "TEXT",
+              "characters": "🔔",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            },
+            {
+              "name": "김철수 님 (시니어)",
+              "type": "TEXT",
+              "characters": "김철수 님 (시니어)",
+              "fontSize": 16,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Content",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 640,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "paddingTop": 40,
+      "paddingRight": 100,
+      "paddingBottom": 40,
+      "paddingLeft": 100,
+      "itemSpacing": 0,
+      "fills": [],
+      "children": [
+        {
+          "name": "Settings Content",
+          "type": "FRAME",
+          "width": 1000,
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "FIXED",
+          "itemSpacing": 30,
+          "fills": [],
+          "children": [
+            {
+              "name": "Title",
+              "type": "TEXT",
+              "characters": "설정",
+              "fontSize": 28,
+              "fontName": {"family": "Inter", "style": "Bold"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.2, "g": 0.2, "b": 0.2}}]
+            },
+            {
+              "name": "Settings List",
+              "type": "FRAME",
+              "width": 1000,
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "FIXED",
+              "itemSpacing": 0,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Profile Settings",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "프로필 설정",
+                      "type": "TEXT",
+                      "characters": "프로필 설정",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                    },
+                    {
+                      "name": ">",
+                      "type": "TEXT",
+                      "characters": ">",
+                      "fontSize": 18,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                    }
+                  ]
+                },
+                {
+                  "name": "Notification Settings",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "알림 설정",
+                      "type": "TEXT",
+                      "characters": "알림 설정",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                    },
+                    {
+                      "name": ">",
+                      "type": "TEXT",
+                      "characters": ">",
+                      "fontSize": 18,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                    }
+                  ]
+                },
+                {
+                  "name": "Account Settings",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "계정 관리",
+                      "type": "TEXT",
+                      "characters": "계정 관리",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                    },
+                    {
+                      "name": ">",
+                      "type": "TEXT",
+                      "characters": ">",
+                      "fontSize": 18,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                    }
+                  ]
+                },
+                {
+                  "name": "Privacy Settings",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "개인정보 보호",
+                      "type": "TEXT",
+                      "characters": "개인정보 보호",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                    },
+                    {
+                      "name": ">",
+                      "type": "TEXT",
+                      "characters": ">",
+                      "fontSize": 18,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                    }
+                  ]
+                },
+                {
+                  "name": "Help",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "도움말",
+                      "type": "TEXT",
+                      "characters": "도움말",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                    },
+                    {
+                      "name": ">",
+                      "type": "TEXT",
+                      "characters": ">",
+                      "fontSize": 18,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                    }
+                  ]
+                },
+                {
+                  "name": "Logout",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "height": 70,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "로그아웃",
+                      "type": "TEXT",
+                      "characters": "로그아웃",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.96, "g": 0.26, "b": 0.21}}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Navigation",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 200,
+      "paddingBottom": 20,
+      "paddingLeft": 200,
+      "itemSpacing": 40,
+      "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+      "strokes": [{"type": "SOLID", "color": {"r": 0.88, "g": 0.88, "b": 0.88}}],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "🏠 홈",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 4,
+          "fills": [],
+          "children": [
+            {
+              "name": "Icon",
+              "type": "TEXT",
+              "characters": "🏠",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            },
+            {
+              "name": "홈",
+              "type": "TEXT",
+              "characters": "홈",
+              "fontSize": 14,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            }
+          ]
+        },
+        {
+          "name": "💊 약 관리",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 4,
+          "fills": [],
+          "children": [
+            {
+              "name": "Icon",
+              "type": "TEXT",
+              "characters": "💊",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            },
+            {
+              "name": "약 관리",
+              "type": "TEXT",
+              "characters": "약 관리",
+              "fontSize": 14,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            }
+          ]
+        },
+        {
+          "name": "👨‍👩‍👧 가족",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 4,
+          "fills": [],
+          "children": [
+            {
+              "name": "Icon",
+              "type": "TEXT",
+              "characters": "👨‍👩‍👧",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            },
+            {
+              "name": "가족",
+              "type": "TEXT",
+              "characters": "가족",
+              "fontSize": 14,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+            }
+          ]
+        },
+        {
+          "name": "⚙️ 설정",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 4,
+          "fills": [],
+          "children": [
+            {
+              "name": "Icon",
+              "type": "TEXT",
+              "characters": "⚙️",
+              "fontSize": 24,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}]
+            },
+            {
+              "name": "설정",
+              "type": "TEXT",
+              "characters": "설정",
+              "fontSize": 14,
+              "fontName": {"family": "Inter", "style": "Bold"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1448 @@
+{
+  "name": "보호자 대시보드",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "children": [
+    {
+      "name": "Header",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 40,
+      "paddingBottom": 20,
+      "paddingLeft": 40,
+      "itemSpacing": 16,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "Logo Group",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 10,
+          "fills": [],
+          "children": [
+            {
+              "name": "Logo",
+              "type": "ELLIPSE",
+              "width": 40,
+              "height": 40,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.3,
+                    "g": 0.69,
+                    "b": 0.31
+                  }
+                }
+              ]
+            },
+            {
+              "name": "실버케어",
+              "type": "TEXT",
+              "characters": "실버케어",
+              "fontSize": 24,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "User Info",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 20,
+          "fills": [],
+          "children": [
+            {
+              "name": "김영희 님 (보호자)",
+              "type": "TEXT",
+              "characters": "김영희 님 (보호자)",
+              "fontSize": 18,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.4,
+                    "g": 0.4,
+                    "b": 0.4
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Alert Badge",
+              "type": "FRAME",
+              "width": 30,
+              "height": 30,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 15,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "name": "2",
+                  "type": "TEXT",
+                  "characters": "2",
+                  "fontSize": 12,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    },
+    {
+      "name": "Main Content",
+      "type": "FRAME",
+      "width": 1200,
+      "layoutMode": "VERTICAL",
+      "paddingTop": 40,
+      "paddingRight": 60,
+      "paddingBottom": 40,
+      "paddingLeft": 60,
+      "itemSpacing": 20,
+      "fills": [],
+      "children": [
+        {
+          "name": "Page Header",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 8,
+          "fills": [],
+          "children": [
+            {
+              "name": "가족 돌봄 센터",
+              "type": "TEXT",
+              "characters": "가족 돌봄 센터",
+              "fontSize": 32,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            },
+            {
+              "name": "실시간 가족 약 복용 현황",
+              "type": "TEXT",
+              "characters": "실시간 가족 약 복용 현황",
+              "fontSize": 16,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.6,
+                    "g": 0.6,
+                    "b": 0.6
+                  }
+                }
+              ]
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "Alert Card",
+          "type": "FRAME",
+          "width": 1080,
+          "height": 80,
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "counterAxisAlignItems": "CENTER",
+          "paddingTop": 20,
+          "paddingRight": 30,
+          "paddingBottom": 20,
+          "paddingLeft": 30,
+          "itemSpacing": 20,
+          "cornerRadius": 8,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.96,
+                "g": 0.26,
+                "b": 0.21
+              }
+            }
+          ],
+          "strokeWeight": 3,
+          "children": [
+            {
+              "name": "Alert Info",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 15,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Icon",
+                  "type": "ELLIPSE",
+                  "width": 30,
+                  "height": 30,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.96,
+                        "g": 0.26,
+                        "b": 0.21
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Text Group",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 6,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "긴급 알림",
+                      "type": "TEXT",
+                      "characters": "긴급 알림",
+                      "fontSize": 18,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.83,
+                            "g": 0.18,
+                            "b": 0.18
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "어머니(김철수)가 점심 당뇨약을 30분 이상 복용하지 않았습니다",
+                      "type": "TEXT",
+                      "characters": "어머니(김철수)가 점심 당뇨약을 30분 이상 복용하지 않았습니다",
+                      "fontSize": 15,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.78,
+                            "g": 0.16,
+                            "b": 0.16
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Call Button",
+              "type": "FRAME",
+              "width": 120,
+              "height": 40,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 4,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "name": "전화하기",
+                  "type": "TEXT",
+                  "characters": "전화하기",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "Family Members Grid",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 40,
+          "fills": [],
+          "children": [
+            {
+              "name": "Family Member Card - Father",
+              "type": "COMPONENT",
+              "width": 520,
+              "height": 180,
+              "layoutMode": "VERTICAL",
+              "paddingTop": 30,
+              "paddingRight": 30,
+              "paddingBottom": 30,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.88,
+                    "g": 0.88,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "Member Info",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Avatar",
+                      "type": "ELLIPSE",
+                      "width": 60,
+                      "height": 60,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.89,
+                            "g": 0.95,
+                            "b": 0.99
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.13,
+                            "g": 0.59,
+                            "b": 0.95
+                          }
+                        }
+                      ],
+                      "strokeWeight": 2
+                    },
+                    {
+                      "name": "Info",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 6,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "아버지 (김철수)",
+                          "type": "TEXT",
+                          "characters": "아버지 (김철수)",
+                          "fontSize": 20,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.2,
+                                "g": 0.2,
+                                "b": 0.2
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "70세 · 혈압, 당뇨, 고지혈증",
+                          "type": "TEXT",
+                          "characters": "70세 · 혈압, 당뇨, 고지혈증",
+                          "fontSize": 14,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Progress Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 10,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Progress Bar",
+                      "type": "FRAME",
+                      "width": 460,
+                      "height": 30,
+                      "layoutMode": "HORIZONTAL",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 5,
+                      "paddingRight": 10,
+                      "paddingBottom": 5,
+                      "paddingLeft": 10,
+                      "itemSpacing": 10,
+                      "cornerRadius": 4,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "children": [
+                        {
+                          "name": "오늘 복용률",
+                          "type": "TEXT",
+                          "characters": "오늘 복용률",
+                          "fontSize": 13,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Bar",
+                          "type": "RECTANGLE",
+                          "width": 300,
+                          "height": 20,
+                          "cornerRadius": 10,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.88,
+                                "g": 0.88,
+                                "b": 0.88
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "2/3 (67%)",
+                          "type": "TEXT",
+                          "characters": "2/3 (67%)",
+                          "fontSize": 13,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.69,
+                                "b": 0.31
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    },
+                    {
+                      "name": "Status Tags",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 10,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Completed Tag",
+                          "type": "FRAME",
+                          "width": 150,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "✓ 아침 복용 완료",
+                              "type": "TEXT",
+                              "characters": "✓ 아침 복용 완료",
+                              "fontSize": 12,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.3,
+                                    "g": 0.69,
+                                    "b": 0.31
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Missed Tag",
+                          "type": "FRAME",
+                          "width": 150,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "✗ 점심 미복용",
+                              "type": "TEXT",
+                              "characters": "✗ 점심 미복용",
+                              "fontSize": 12,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.96,
+                                    "g": 0.26,
+                                    "b": 0.21
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Scheduled Tag",
+                          "type": "FRAME",
+                          "width": 140,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "저녁 예정",
+                              "type": "TEXT",
+                              "characters": "저녁 예정",
+                              "fontSize": 12,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.6,
+                                    "g": 0.6,
+                                    "b": 0.6
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Family Member Card - Mother",
+              "type": "COMPONENT",
+              "width": 520,
+              "height": 180,
+              "layoutMode": "VERTICAL",
+              "paddingTop": 30,
+              "paddingRight": 30,
+              "paddingBottom": 30,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.88,
+                    "g": 0.88,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "Member Info",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Avatar",
+                      "type": "ELLIPSE",
+                      "width": 60,
+                      "height": 60,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.99,
+                            "g": 0.89,
+                            "b": 0.92
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.91,
+                            "g": 0.12,
+                            "b": 0.39
+                          }
+                        }
+                      ],
+                      "strokeWeight": 2
+                    },
+                    {
+                      "name": "Info",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 6,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "어머니 (박순자)",
+                          "type": "TEXT",
+                          "characters": "어머니 (박순자)",
+                          "fontSize": 20,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.2,
+                                "g": 0.2,
+                                "b": 0.2
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "68세 · 관절염, 골다공증",
+                          "type": "TEXT",
+                          "characters": "68세 · 관절염, 골다공증",
+                          "fontSize": 14,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Progress Section",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 10,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Progress Bar",
+                      "type": "FRAME",
+                      "width": 460,
+                      "height": 30,
+                      "layoutMode": "HORIZONTAL",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 5,
+                      "paddingRight": 10,
+                      "paddingBottom": 5,
+                      "paddingLeft": 10,
+                      "itemSpacing": 10,
+                      "cornerRadius": 4,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "children": [
+                        {
+                          "name": "오늘 복용률",
+                          "type": "TEXT",
+                          "characters": "오늘 복용률",
+                          "fontSize": 13,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Bar Full",
+                          "type": "RECTANGLE",
+                          "width": 300,
+                          "height": 20,
+                          "cornerRadius": 10,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.69,
+                                "b": 0.31
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "2/2 (100%)",
+                          "type": "TEXT",
+                          "characters": "2/2 (100%)",
+                          "fontSize": 13,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.69,
+                                "b": 0.31
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    },
+                    {
+                      "name": "Status Tags",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 10,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Completed Tag 1",
+                          "type": "FRAME",
+                          "width": 150,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "✓ 아침 복용 완료",
+                              "type": "TEXT",
+                              "characters": "✓ 아침 복용 완료",
+                              "fontSize": 12,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.3,
+                                    "g": 0.69,
+                                    "b": 0.31
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Completed Tag 2",
+                          "type": "FRAME",
+                          "width": 150,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "✓ 점심 복용 완료",
+                              "type": "TEXT",
+                              "characters": "✓ 점심 복용 완료",
+                              "fontSize": 12,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.3,
+                                    "g": 0.69,
+                                    "b": 0.31
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "Statistics Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 20,
+          "fills": [],
+          "children": [
+            {
+              "name": "이번 주 통계",
+              "type": "TEXT",
+              "characters": "이번 주 통계",
+              "fontSize": 24,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Stats Grid",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "itemSpacing": 30,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Stat Card - Average",
+                  "type": "FRAME",
+                  "width": 340,
+                  "height": 120,
+                  "layoutMode": "VERTICAL",
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "itemSpacing": 15,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.88,
+                        "g": 0.88,
+                        "b": 0.88
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "평균 복용률",
+                      "type": "TEXT",
+                      "characters": "평균 복용률",
+                      "fontSize": 16,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.4,
+                            "g": 0.4,
+                            "b": 0.4
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "87%",
+                      "type": "TEXT",
+                      "characters": "87%",
+                      "fontSize": 48,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.3,
+                            "g": 0.69,
+                            "b": 0.31
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Stat Card - Alerts",
+                  "type": "FRAME",
+                  "width": 340,
+                  "height": 120,
+                  "layoutMode": "VERTICAL",
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "itemSpacing": 15,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.88,
+                        "g": 0.88,
+                        "b": 0.88
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "미복용 알림",
+                      "type": "TEXT",
+                      "characters": "미복용 알림",
+                      "fontSize": 16,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.4,
+                            "g": 0.4,
+                            "b": 0.4
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "3회",
+                      "type": "TEXT",
+                      "characters": "3회",
+                      "fontSize": 48,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 0.6,
+                            "b": 0
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Stat Card - OnTime",
+                  "type": "FRAME",
+                  "width": 340,
+                  "height": 120,
+                  "layoutMode": "VERTICAL",
+                  "primaryAxisAlignItems": "MIN",
+                  "counterAxisAlignItems": "MIN",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "itemSpacing": 15,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.88,
+                        "g": 0.88,
+                        "b": 0.88
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "정시 복용률",
+                      "type": "TEXT",
+                      "characters": "정시 복용률",
+                      "fontSize": 16,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.4,
+                            "g": 0.4,
+                            "b": 0.4
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "92%",
+                      "type": "TEXT",
+                      "characters": "92%",
+                      "fontSize": 48,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.13,
+                            "g": 0.59,
+                            "b": 0.95
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    },
+    {
+      "name": "Bottom Navigation",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 16,
+      "paddingRight": 40,
+      "paddingBottom": 16,
+      "paddingLeft": 40,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "🏠 홈",
+          "type": "TEXT",
+          "characters": "🏠 홈",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Bold"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.3,
+                "g": 0.69,
+                "b": 0.31
+              }
+            }
+          ]
+        },
+        {
+          "name": "💊 약 관리",
+          "type": "TEXT",
+          "characters": "💊 약 관리",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "👨‍👩‍👧 가족",
+          "type": "TEXT",
+          "characters": "👨‍👩‍👧 가족",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚙️ 설정",
+          "type": "TEXT",
+          "characters": "⚙️ 설정",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    }
+  ],
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "AUTO"
+}

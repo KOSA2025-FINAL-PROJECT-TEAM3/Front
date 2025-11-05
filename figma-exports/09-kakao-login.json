@@ -1,0 +1,185 @@
+{
+  "name": "카카오 로그인",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "CENTER",
+  "counterAxisAlignItems": "CENTER",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [{"type": "SOLID", "color": {"r": 0.97, "g": 0.97, "b": 0.97}}],
+  "children": [
+    {
+      "name": "Login Container",
+      "type": "FRAME",
+      "width": 450,
+      "height": 550,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "CENTER",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 60,
+      "paddingRight": 50,
+      "paddingBottom": 60,
+      "paddingLeft": 50,
+      "itemSpacing": 30,
+      "cornerRadius": 16,
+      "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+      "strokes": [{"type": "SOLID", "color": {"r": 0.9, "g": 0.9, "b": 0.9}}],
+      "strokeWeight": 1,
+      "children": [
+        {
+          "name": "Logo Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 12,
+          "fills": [],
+          "children": [
+            {
+              "name": "Logo",
+              "type": "ELLIPSE",
+              "width": 80,
+              "height": 80,
+              "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}]
+            },
+            {
+              "name": "실버케어",
+              "type": "TEXT",
+              "characters": "실버케어",
+              "fontSize": 32,
+              "fontName": {"family": "Inter", "style": "Bold"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.2, "g": 0.2, "b": 0.2}}]
+            },
+            {
+              "name": "약 먹을 시간이에요?",
+              "type": "TEXT",
+              "characters": "약 먹을 시간이에요?",
+              "fontSize": 14,
+              "fontName": {"family": "Inter", "style": "Regular"},
+              "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+            }
+          ]
+        },
+        {
+          "name": "Login Methods",
+          "type": "FRAME",
+          "width": 350,
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "FIXED",
+          "itemSpacing": 16,
+          "fills": [],
+          "children": [
+            {
+              "name": "Kakao Login Button",
+              "type": "FRAME",
+              "width": 350,
+              "height": 56,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 12,
+              "cornerRadius": 8,
+              "fills": [{"type": "SOLID", "color": {"r": 0.996, "g": 0.898, "b": 0}}],
+              "children": [
+                {
+                  "name": "카카오톡으로 계속하기",
+                  "type": "TEXT",
+                  "characters": "🗨 카카오톡으로 계속하기",
+                  "fontSize": 16,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.2, "g": 0.2, "b": 0.2}}]
+                }
+              ]
+            },
+            {
+              "name": "Divider",
+              "type": "FRAME",
+              "width": 350,
+              "height": 40,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 16,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Line1",
+                  "type": "RECTANGLE",
+                  "width": 150,
+                  "height": 1,
+                  "fills": [{"type": "SOLID", "color": {"r": 0.85, "g": 0.85, "b": 0.85}}]
+                },
+                {
+                  "name": "또는",
+                  "type": "TEXT",
+                  "characters": "또는",
+                  "fontSize": 14,
+                  "fontName": {"family": "Inter", "style": "Regular"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+                },
+                {
+                  "name": "Line2",
+                  "type": "RECTANGLE",
+                  "width": 150,
+                  "height": 1,
+                  "fills": [{"type": "SOLID", "color": {"r": 0.85, "g": 0.85, "b": 0.85}}]
+                }
+              ]
+            },
+            {
+              "name": "Email Login Button",
+              "type": "FRAME",
+              "width": 350,
+              "height": 56,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 8,
+              "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+              "strokes": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "이메일로 로그인",
+                  "type": "TEXT",
+                  "characters": "이메일로 로그인",
+                  "fontSize": 16,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Terms",
+          "type": "TEXT",
+          "characters": "계속 진행하면 실버케어의 이용약관 및\n개인정보처리방침에 동의하게 됩니다",
+          "fontSize": 12,
+          "lineHeight": {"value": 150, "unit": "PERCENT"},
+          "textAlignHorizontal": "CENTER",
+          "fontName": {"family": "Inter", "style": "Regular"},
+          "fills": [{"type": "SOLID", "color": {"r": 0.6, "g": 0.6, "b": 0.6}}]
+        }
+      ]
+    }
+  ]
+}

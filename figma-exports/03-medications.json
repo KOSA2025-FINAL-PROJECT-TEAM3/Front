@@ -1,0 +1,1313 @@
+{
+  "name": "약 관리",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "children": [
+    {
+      "name": "Header",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 40,
+      "paddingBottom": 20,
+      "paddingLeft": 40,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "Logo",
+          "type": "ELLIPSE",
+          "width": 40,
+          "height": 40,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.3,
+                "g": 0.69,
+                "b": 0.31
+              }
+            }
+          ]
+        },
+        {
+          "name": "실버케어",
+          "type": "TEXT",
+          "characters": "실버케어",
+          "fontSize": 24,
+          "fontName": {
+            "family": "Inter",
+            "style": "Bold"
+          }
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    },
+    {
+      "name": "Main Content",
+      "type": "FRAME",
+      "layoutMode": "VERTICAL",
+      "paddingTop": 40,
+      "paddingRight": 60,
+      "paddingBottom": 40,
+      "paddingLeft": 60,
+      "itemSpacing": 30,
+      "fills": [],
+      "children": [
+        {
+          "name": "Page Header",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "counterAxisAlignItems": "MAX",
+          "fills": [],
+          "children": [
+            {
+              "name": "Title Group",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "약 관리",
+                  "type": "TEXT",
+                  "characters": "약 관리",
+                  "fontSize": 32,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  }
+                },
+                {
+                  "name": "가족 구성원의 약을 관리하고 스케줄을 설정하세요",
+                  "type": "TEXT",
+                  "characters": "가족 구성원의 약을 관리하고 스케줄을 설정하세요",
+                  "fontSize": 16,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.6,
+                        "g": 0.6,
+                        "b": 0.6
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Add Button",
+              "type": "FRAME",
+              "width": 240,
+              "height": 50,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "name": "+ 새 약 추가",
+                  "type": "TEXT",
+                  "characters": "+ 새 약 추가",
+                  "fontSize": 18,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "Input Methods Grid",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "itemSpacing": 40,
+          "fills": [],
+          "children": [
+            {
+              "name": "OCR Scan Card",
+              "type": "FRAME",
+              "width": 520,
+              "height": 240,
+              "layoutMode": "VERTICAL",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "paddingTop": 40,
+              "paddingBottom": 40,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.13,
+                    "g": 0.59,
+                    "b": 0.95
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "strokeDasharray": [
+                8,
+                4
+              ],
+              "children": [
+                {
+                  "name": "Camera Icon",
+                  "type": "ELLIPSE",
+                  "width": 80,
+                  "height": 80,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.13,
+                        "g": 0.59,
+                        "b": 0.95
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "처방전 스캔하기",
+                  "type": "TEXT",
+                  "characters": "처방전 스캔하기",
+                  "fontSize": 20,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.1,
+                        "g": 0.46,
+                        "b": 0.82
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Description",
+                  "type": "TEXT",
+                  "characters": "약 봉투나 처방전을 촬영하면 자동으로\n약 정보를 인식하여 등록해드립니다",
+                  "fontSize": 14,
+                  "textAlign": "CENTER",
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.1,
+                        "g": 0.46,
+                        "b": 0.82
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Scan Button",
+                  "type": "FRAME",
+                  "width": 180,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 6,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "스캔 시작하기",
+                      "type": "TEXT",
+                      "characters": "스캔 시작하기",
+                      "fontSize": 15,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Manual Input Card",
+              "type": "FRAME",
+              "width": 520,
+              "height": 240,
+              "layoutMode": "VERTICAL",
+              "paddingTop": 30,
+              "paddingRight": 30,
+              "paddingBottom": 30,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.88,
+                    "g": 0.88,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "직접 입력하기",
+                  "type": "TEXT",
+                  "characters": "직접 입력하기",
+                  "fontSize": 18,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  }
+                },
+                {
+                  "name": "Form Fields",
+                  "type": "FRAME",
+                  "layoutMode": "VERTICAL",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Med Name Field",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "itemSpacing": 6,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "약 이름",
+                          "type": "TEXT",
+                          "characters": "약 이름",
+                          "fontSize": 13,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Input",
+                          "type": "RECTANGLE",
+                          "width": 460,
+                          "height": 40,
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.96,
+                                "g": 0.96,
+                                "b": 0.96
+                              }
+                            }
+                          ],
+                          "strokes": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.8,
+                                "g": 0.8,
+                                "b": 0.8
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    },
+                    {
+                      "name": "Time and Dose Row",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 30,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Time Field",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 6,
+                          "fills": [],
+                          "children": [
+                            {
+                              "name": "복용 시간",
+                              "type": "TEXT",
+                              "characters": "복용 시간",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Input",
+                              "type": "RECTANGLE",
+                              "width": 220,
+                              "height": 40,
+                              "cornerRadius": 4,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.96,
+                                    "g": 0.96,
+                                    "b": 0.96
+                                  }
+                                }
+                              ],
+                              "strokes": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.8,
+                                    "g": 0.8,
+                                    "b": 0.8
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Dose Field",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 6,
+                          "fills": [],
+                          "children": [
+                            {
+                              "name": "복용량",
+                              "type": "TEXT",
+                              "characters": "복용량",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "name": "Input",
+                              "type": "RECTANGLE",
+                              "width": 210,
+                              "height": 40,
+                              "cornerRadius": 4,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.96,
+                                    "g": 0.96,
+                                    "b": 0.96
+                                  }
+                                }
+                              ],
+                              "strokes": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.8,
+                                    "g": 0.8,
+                                    "b": 0.8
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Submit Button",
+                  "type": "FRAME",
+                  "width": 160,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 6,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "등록하기",
+                      "type": "TEXT",
+                      "characters": "등록하기",
+                      "fontSize": 15,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        },
+        {
+          "name": "Medication List Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "itemSpacing": 25,
+          "fills": [],
+          "children": [
+            {
+              "name": "List Header",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "SPACE_BETWEEN",
+              "counterAxisAlignItems": "CENTER",
+              "fills": [],
+              "children": [
+                {
+                  "name": "등록된 약 목록",
+                  "type": "TEXT",
+                  "characters": "등록된 약 목록",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  }
+                },
+                {
+                  "name": "Search Box",
+                  "type": "RECTANGLE",
+                  "width": 240,
+                  "height": 35,
+                  "cornerRadius": 4,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.8,
+                        "g": 0.8,
+                        "b": 0.8
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Med List Items",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "itemSpacing": 15,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Med Item 1",
+                  "type": "COMPONENT",
+                  "width": 1080,
+                  "height": 80,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "cornerRadius": 6,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.88,
+                        "g": 0.88,
+                        "b": 0.88
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "Med Info",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "counterAxisAlignItems": "CENTER",
+                      "itemSpacing": 20,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Icon",
+                          "type": "RECTANGLE",
+                          "width": 40,
+                          "height": 40,
+                          "cornerRadius": 6,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.89,
+                                "g": 0.95,
+                                "b": 0.99
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Text Group",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 6,
+                          "fills": [],
+                          "children": [
+                            {
+                              "name": "아모디핀정 5mg",
+                              "type": "TEXT",
+                              "characters": "아모디핀정 5mg",
+                              "fontSize": 18,
+                              "fontName": {
+                                "family": "Inter",
+                                "style": "Bold"
+                              }
+                            },
+                            {
+                              "name": "혈압약 · 아침 식후 · 1알",
+                              "type": "TEXT",
+                              "characters": "혈압약 · 아침 식후 · 1알",
+                              "fontSize": 14,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    },
+                    {
+                      "name": "Actions",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 10,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Status Badge",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "복용중",
+                              "type": "TEXT",
+                              "characters": "복용중",
+                              "fontSize": 13,
+                              "fontName": {
+                                "family": "Inter",
+                                "style": "Bold"
+                              },
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.3,
+                                    "g": 0.69,
+                                    "b": 0.31
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Edit Button",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "strokes": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.8,
+                                "g": 0.8,
+                                "b": 0.8
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "수정",
+                              "type": "TEXT",
+                              "characters": "수정",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Delete Button",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "strokes": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.96,
+                                "g": 0.26,
+                                "b": 0.21
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "삭제",
+                              "type": "TEXT",
+                              "characters": "삭제",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.96,
+                                    "g": 0.26,
+                                    "b": 0.21
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                },
+                {
+                  "name": "Med Item 2",
+                  "type": "COMPONENT",
+                  "width": 1080,
+                  "height": 80,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "SPACE_BETWEEN",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 20,
+                  "paddingRight": 20,
+                  "paddingBottom": 20,
+                  "paddingLeft": 20,
+                  "cornerRadius": 6,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.88,
+                        "g": 0.88,
+                        "b": 0.88
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "Med Info",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "counterAxisAlignItems": "CENTER",
+                      "itemSpacing": 20,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Icon",
+                          "type": "RECTANGLE",
+                          "width": 40,
+                          "height": 40,
+                          "cornerRadius": 6,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 0.95,
+                                "b": 0.88
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Text Group",
+                          "type": "FRAME",
+                          "layoutMode": "VERTICAL",
+                          "itemSpacing": 6,
+                          "fills": [],
+                          "children": [
+                            {
+                              "name": "메트포르민정 500mg",
+                              "type": "TEXT",
+                              "characters": "메트포르민정 500mg",
+                              "fontSize": 18,
+                              "fontName": {
+                                "family": "Inter",
+                                "style": "Bold"
+                              }
+                            },
+                            {
+                              "name": "당뇨약 · 점심/저녁 식후 · 1알씩",
+                              "type": "TEXT",
+                              "characters": "당뇨약 · 점심/저녁 식후 · 1알씩",
+                              "fontSize": 14,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    },
+                    {
+                      "name": "Actions",
+                      "type": "FRAME",
+                      "layoutMode": "HORIZONTAL",
+                      "itemSpacing": 10,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "Status Badge",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "복용중",
+                              "type": "TEXT",
+                              "characters": "복용중",
+                              "fontSize": 13,
+                              "fontName": {
+                                "family": "Inter",
+                                "style": "Bold"
+                              },
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.3,
+                                    "g": 0.69,
+                                    "b": 0.31
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Edit Button",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "strokes": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.8,
+                                "g": 0.8,
+                                "b": 0.8
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "수정",
+                              "type": "TEXT",
+                              "characters": "수정",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.4,
+                                    "g": 0.4,
+                                    "b": 0.4
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        },
+                        {
+                          "name": "Delete Button",
+                          "type": "FRAME",
+                          "width": 80,
+                          "height": 30,
+                          "layoutMode": "HORIZONTAL",
+                          "primaryAxisAlignItems": "CENTER",
+                          "counterAxisAlignItems": "CENTER",
+                          "cornerRadius": 4,
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 1,
+                                "g": 1,
+                                "b": 1
+                              }
+                            }
+                          ],
+                          "strokes": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.96,
+                                "g": 0.26,
+                                "b": 0.21
+                              }
+                            }
+                          ],
+                          "children": [
+                            {
+                              "name": "삭제",
+                              "type": "TEXT",
+                              "characters": "삭제",
+                              "fontSize": 13,
+                              "fills": [
+                                {
+                                  "type": "SOLID",
+                                  "color": {
+                                    "r": 0.96,
+                                    "g": 0.26,
+                                    "b": 0.21
+                                  }
+                                }
+                              ]
+                            }
+                          ],
+                          "primaryAxisSizingMode": "AUTO",
+                          "counterAxisSizingMode": "AUTO"
+                        }
+                      ],
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO"
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ],
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO"
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    },
+    {
+      "name": "Bottom Navigation",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "🏠 홈",
+          "type": "TEXT",
+          "characters": "🏠 홈",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "💊 약 관리",
+          "type": "TEXT",
+          "characters": "💊 약 관리",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Bold"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.3,
+                "g": 0.69,
+                "b": 0.31
+              }
+            }
+          ]
+        },
+        {
+          "name": "👨‍👩‍👧 가족",
+          "type": "TEXT",
+          "characters": "👨‍👩‍👧 가족",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚙️ 설정",
+          "type": "TEXT",
+          "characters": "⚙️ 설정",
+          "fontSize": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        }
+      ],
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "AUTO"
+    }
+  ],
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "AUTO"
+}

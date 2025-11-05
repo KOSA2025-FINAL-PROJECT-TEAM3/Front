@@ -1,0 +1,994 @@
+{
+  "name": "시니어 대시보드",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      }
+    }
+  ],
+  "children": [
+    {
+      "name": "Header",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 40,
+      "paddingBottom": 20,
+      "paddingLeft": 40,
+      "itemSpacing": 16,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "Logo Group",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 10,
+          "fills": [],
+          "children": [
+            {
+              "name": "Logo",
+              "type": "ELLIPSE",
+              "width": 40,
+              "height": 40,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.3,
+                    "g": 0.69,
+                    "b": 0.31
+                  }
+                }
+              ]
+            },
+            {
+              "name": "실버케어",
+              "type": "TEXT",
+              "characters": "실버케어",
+              "fontSize": 24,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "User Info Group",
+          "type": "FRAME",
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 20,
+          "fills": [],
+          "children": [
+            {
+              "name": "김철수 님 (시니어)",
+              "type": "TEXT",
+              "characters": "김철수 님 (시니어)",
+              "fontSize": 18,
+              "fontName": {
+                "family": "Inter",
+                "style": "Regular"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.4,
+                    "g": 0.4,
+                    "b": 0.4
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Notification Badge",
+              "type": "FRAME",
+              "width": 30,
+              "height": 30,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 15,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "name": "3",
+                  "type": "TEXT",
+                  "characters": "3",
+                  "fontSize": 12,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ]
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Main Content",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 640,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "paddingTop": 40,
+      "paddingRight": 60,
+      "paddingBottom": 40,
+      "paddingLeft": 60,
+      "itemSpacing": 40,
+      "fills": [],
+      "children": [
+        {
+          "name": "Page Header",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "itemSpacing": 12,
+          "fills": [],
+          "children": [
+            {
+              "name": "오늘의 약 복용",
+              "type": "TEXT",
+              "characters": "오늘의 약 복용",
+              "fontSize": 32,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            },
+            {
+              "name": "2025년 11월 5일 화요일",
+              "type": "TEXT",
+              "characters": "2025년 11월 5일 화요일",
+              "fontSize": 16,
+              "fontName": {
+                "family": "Inter",
+                "style": "Regular"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.6,
+                    "g": 0.6,
+                    "b": 0.6
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Medication List",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "itemSpacing": 20,
+          "fills": [],
+          "children": [
+            {
+              "name": "Medication Card - Morning (Completed)",
+              "type": "COMPONENT",
+              "width": 1080,
+              "height": 120,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "SPACE_BETWEEN",
+              "counterAxisAlignItems": "CENTER",
+              "paddingTop": 20,
+              "paddingRight": 30,
+              "paddingBottom": 20,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.88,
+                    "g": 0.88,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "Med Info",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Checkbox",
+                      "type": "RECTANGLE",
+                      "width": 40,
+                      "height": 40,
+                      "cornerRadius": 4,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.3,
+                            "g": 0.69,
+                            "b": 0.31
+                          }
+                        }
+                      ],
+                      "strokeWeight": 3
+                    },
+                    {
+                      "name": "Text Group",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO",
+                      "itemSpacing": 8,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "아침 식후 (오전 8:00)",
+                          "type": "TEXT",
+                          "characters": "아침 식후 (오전 8:00)",
+                          "fontSize": 14,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "혈압약 (아모디핀)",
+                          "type": "TEXT",
+                          "characters": "혈압약 (아모디핀)",
+                          "fontSize": 20,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.2,
+                                "g": 0.2,
+                                "b": 0.2
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "1알 복용",
+                          "type": "TEXT",
+                          "characters": "1알 복용",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Status Button - Completed",
+                  "type": "FRAME",
+                  "width": 150,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 20,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "복용 완료 ✓",
+                      "type": "TEXT",
+                      "characters": "복용 완료 ✓",
+                      "fontSize": 14,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.3,
+                            "g": 0.69,
+                            "b": 0.31
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Medication Card - Lunch (Pending)",
+              "type": "COMPONENT",
+              "width": 1080,
+              "height": 120,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "SPACE_BETWEEN",
+              "counterAxisAlignItems": "CENTER",
+              "paddingTop": 20,
+              "paddingRight": 30,
+              "paddingBottom": 20,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 0.95,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 0.6,
+                    "b": 0
+                  }
+                }
+              ],
+              "strokeWeight": 3,
+              "children": [
+                {
+                  "name": "Med Info",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Checkbox",
+                      "type": "RECTANGLE",
+                      "width": 40,
+                      "height": 40,
+                      "cornerRadius": 4,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 0.6,
+                            "b": 0
+                          }
+                        }
+                      ],
+                      "strokeWeight": 3
+                    },
+                    {
+                      "name": "Text Group",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO",
+                      "itemSpacing": 8,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "점심 식후 (오후 1:00)",
+                          "type": "TEXT",
+                          "characters": "점심 식후 (오후 1:00)",
+                          "fontSize": 14,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "당뇨약 (메트포르민)",
+                          "type": "TEXT",
+                          "characters": "당뇨약 (메트포르민)",
+                          "fontSize": 20,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.2,
+                                "g": 0.2,
+                                "b": 0.2
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "1알 복용",
+                          "type": "TEXT",
+                          "characters": "1알 복용",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Status Button - Action",
+                  "type": "FRAME",
+                  "width": 150,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 20,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "지금 복용하기",
+                      "type": "TEXT",
+                      "characters": "지금 복용하기",
+                      "fontSize": 14,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            },
+            {
+              "name": "Medication Card - Dinner (Scheduled)",
+              "type": "COMPONENT",
+              "width": 1080,
+              "height": 120,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisAlignItems": "SPACE_BETWEEN",
+              "counterAxisAlignItems": "CENTER",
+              "paddingTop": 20,
+              "paddingRight": 30,
+              "paddingBottom": 20,
+              "paddingLeft": 30,
+              "itemSpacing": 20,
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 1,
+                    "g": 1,
+                    "b": 1
+                  }
+                }
+              ],
+              "strokes": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.88,
+                    "g": 0.88,
+                    "b": 0.88
+                  }
+                }
+              ],
+              "strokeWeight": 2,
+              "children": [
+                {
+                  "name": "Med Info",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 20,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Checkbox",
+                      "type": "RECTANGLE",
+                      "width": 40,
+                      "height": 40,
+                      "cornerRadius": 4,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.8,
+                            "g": 0.8,
+                            "b": 0.8
+                          }
+                        }
+                      ],
+                      "strokeWeight": 2
+                    },
+                    {
+                      "name": "Text Group",
+                      "type": "FRAME",
+                      "layoutMode": "VERTICAL",
+                      "primaryAxisSizingMode": "AUTO",
+                      "counterAxisSizingMode": "AUTO",
+                      "itemSpacing": 8,
+                      "fills": [],
+                      "children": [
+                        {
+                          "name": "저녁 식후 (오후 7:00)",
+                          "type": "TEXT",
+                          "characters": "저녁 식후 (오후 7:00)",
+                          "fontSize": 14,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "고지혈증약 (아토르바스타틴)",
+                          "type": "TEXT",
+                          "characters": "고지혈증약 (아토르바스타틴)",
+                          "fontSize": 20,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Bold"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.2,
+                                "g": 0.2,
+                                "b": 0.2
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": "1알 복용",
+                          "type": "TEXT",
+                          "characters": "1알 복용",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.4,
+                                "g": 0.4,
+                                "b": 0.4
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Status Button - Scheduled",
+                  "type": "FRAME",
+                  "width": 150,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 20,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.8,
+                        "g": 0.8,
+                        "b": 0.8
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "예정",
+                      "type": "TEXT",
+                      "characters": "예정",
+                      "fontSize": 14,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.6,
+                            "g": 0.6,
+                            "b": 0.6
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO"
+                }
+              ],
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bottom Navigation",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 16,
+      "paddingRight": 40,
+      "paddingBottom": 16,
+      "paddingLeft": 40,
+      "itemSpacing": 0,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.88,
+            "g": 0.88,
+            "b": 0.88
+          }
+        }
+      ],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "🏠 홈",
+          "type": "TEXT",
+          "characters": "🏠 홈",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Bold"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.3,
+                "g": 0.69,
+                "b": 0.31
+              }
+            }
+          ]
+        },
+        {
+          "name": "💊 약 관리",
+          "type": "TEXT",
+          "characters": "💊 약 관리",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Regular"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "👨‍👩‍👧 가족",
+          "type": "TEXT",
+          "characters": "👨‍👩‍👧 가족",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Regular"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚙️ 설정",
+          "type": "TEXT",
+          "characters": "⚙️ 설정",
+          "fontSize": 16,
+          "fontName": {
+            "family": "Inter",
+            "style": "Regular"
+          },
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.6,
+                "g": 0.6,
+                "b": 0.6
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

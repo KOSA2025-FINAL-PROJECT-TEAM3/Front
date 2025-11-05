@@ -1,6 +1,6 @@
 {
-  "version": "3.0",
-  "description": "실버케어 프로젝트 - MVP 전체 화면 (8개) + 프로토타입 플로우",
+  "version": "5.0",
+  "description": "실버케어 MVP - 10개 화면 + 프로토타입 플로우",
   "screens": [
     {
       "name": "로그인",
@@ -1145,6 +1145,347 @@
                       }
                     }
                   ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "카카오 로그인",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 800,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "CENTER",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 0,
+      "paddingRight": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "itemSpacing": 0,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.97,
+            "g": 0.97,
+            "b": 0.97
+          }
+        }
+      ],
+      "children": [
+        {
+          "name": "Login Container",
+          "type": "FRAME",
+          "width": 450,
+          "height": 550,
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "FIXED",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "paddingTop": 60,
+          "paddingRight": 50,
+          "paddingBottom": 60,
+          "paddingLeft": 50,
+          "itemSpacing": 30,
+          "cornerRadius": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.9,
+                "g": 0.9,
+                "b": 0.9
+              }
+            }
+          ],
+          "strokeWeight": 1,
+          "children": [
+            {
+              "name": "Logo Section",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 12,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Logo",
+                  "type": "ELLIPSE",
+                  "width": 80,
+                  "height": 80,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "실버케어",
+                  "type": "TEXT",
+                  "characters": "실버케어",
+                  "fontSize": 32,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.2,
+                        "g": 0.2,
+                        "b": 0.2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "약 먹을 시간이에요?",
+                  "type": "TEXT",
+                  "characters": "약 먹을 시간이에요?",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.6,
+                        "g": 0.6,
+                        "b": 0.6
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Login Methods",
+              "type": "FRAME",
+              "width": 350,
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "FIXED",
+              "itemSpacing": 16,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Kakao Login Button",
+                  "type": "FRAME",
+                  "width": 350,
+                  "height": 56,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 12,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.996,
+                        "g": 0.898,
+                        "b": 0
+                      }
+                    }
+                  ],
+                  "children": [
+                    {
+                      "name": "카카오톡으로 계속하기",
+                      "type": "TEXT",
+                      "characters": "🗨 카카오톡으로 계속하기",
+                      "fontSize": 16,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.2,
+                            "g": 0.2,
+                            "b": 0.2
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Divider",
+                  "type": "FRAME",
+                  "width": 350,
+                  "height": 40,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "itemSpacing": 16,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Line1",
+                      "type": "RECTANGLE",
+                      "width": 150,
+                      "height": 1,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.85,
+                            "g": 0.85,
+                            "b": 0.85
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "또는",
+                      "type": "TEXT",
+                      "characters": "또는",
+                      "fontSize": 14,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Regular"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.6,
+                            "g": 0.6,
+                            "b": 0.6
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Line2",
+                      "type": "RECTANGLE",
+                      "width": 150,
+                      "height": 1,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.85,
+                            "g": 0.85,
+                            "b": 0.85
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Email Login Button",
+                  "type": "FRAME",
+                  "width": 350,
+                  "height": 56,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "primaryAxisAlignItems": "CENTER",
+                  "counterAxisAlignItems": "CENTER",
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ],
+                  "strokeWeight": 2,
+                  "children": [
+                    {
+                      "name": "이메일로 로그인",
+                      "type": "TEXT",
+                      "characters": "이메일로 로그인",
+                      "fontSize": 16,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Bold"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.3,
+                            "g": 0.69,
+                            "b": 0.31
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Terms",
+              "type": "TEXT",
+              "characters": "계속 진행하면 실버케어의 이용약관 및\n개인정보처리방침에 동의하게 됩니다",
+              "fontSize": 12,
+              "lineHeight": {
+                "value": 150,
+                "unit": "PERCENT"
+              },
+              "textAlignHorizontal": "CENTER",
+              "fontName": {
+                "family": "Inter",
+                "style": "Regular"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.6,
+                    "g": 0.6,
+                    "b": 0.6
+                  }
                 }
               ]
             }
@@ -7154,119 +7495,1100 @@
       ],
       "primaryAxisSizingMode": "AUTO",
       "counterAxisSizingMode": "AUTO"
+    },
+    {
+      "name": "설정",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 800,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "paddingTop": 0,
+      "paddingRight": 0,
+      "paddingBottom": 0,
+      "paddingLeft": 0,
+      "itemSpacing": 0,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "children": [
+        {
+          "name": "Header",
+          "type": "FRAME",
+          "width": 1200,
+          "height": 80,
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "FIXED",
+          "counterAxisSizingMode": "FIXED",
+          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "counterAxisAlignItems": "CENTER",
+          "paddingTop": 20,
+          "paddingRight": 40,
+          "paddingBottom": 20,
+          "paddingLeft": 40,
+          "itemSpacing": 16,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.88,
+                "g": 0.88,
+                "b": 0.88
+              }
+            }
+          ],
+          "strokeWeight": 2,
+          "children": [
+            {
+              "name": "Logo Group",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 10,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Logo",
+                  "type": "ELLIPSE",
+                  "width": 40,
+                  "height": 40,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "실버케어",
+                  "type": "TEXT",
+                  "characters": "실버케어",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.2,
+                        "g": 0.2,
+                        "b": 0.2
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "User Info",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 16,
+              "fills": [],
+              "children": [
+                {
+                  "name": "🔔",
+                  "type": "TEXT",
+                  "characters": "🔔",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "김철수 님 (시니어)",
+                  "type": "TEXT",
+                  "characters": "김철수 님 (시니어)",
+                  "fontSize": 16,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Content",
+          "type": "FRAME",
+          "width": 1200,
+          "height": 640,
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "FIXED",
+          "counterAxisSizingMode": "FIXED",
+          "paddingTop": 40,
+          "paddingRight": 100,
+          "paddingBottom": 40,
+          "paddingLeft": 100,
+          "itemSpacing": 0,
+          "fills": [],
+          "children": [
+            {
+              "name": "Settings Content",
+              "type": "FRAME",
+              "width": 1000,
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "FIXED",
+              "itemSpacing": 30,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Title",
+                  "type": "TEXT",
+                  "characters": "설정",
+                  "fontSize": 28,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.2,
+                        "g": 0.2,
+                        "b": 0.2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Settings List",
+                  "type": "FRAME",
+                  "width": 1000,
+                  "layoutMode": "VERTICAL",
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "FIXED",
+                  "itemSpacing": 0,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "Profile Settings",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "프로필 설정",
+                          "type": "TEXT",
+                          "characters": "프로필 설정",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.3,
+                                "b": 0.3
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": ">",
+                          "type": "TEXT",
+                          "characters": ">",
+                          "fontSize": 18,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Notification Settings",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "알림 설정",
+                          "type": "TEXT",
+                          "characters": "알림 설정",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.3,
+                                "b": 0.3
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": ">",
+                          "type": "TEXT",
+                          "characters": ">",
+                          "fontSize": 18,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Account Settings",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "계정 관리",
+                          "type": "TEXT",
+                          "characters": "계정 관리",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.3,
+                                "b": 0.3
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": ">",
+                          "type": "TEXT",
+                          "characters": ">",
+                          "fontSize": 18,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Privacy Settings",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "개인정보 보호",
+                          "type": "TEXT",
+                          "characters": "개인정보 보호",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.3,
+                                "b": 0.3
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": ">",
+                          "type": "TEXT",
+                          "characters": ">",
+                          "fontSize": 18,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Help",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "도움말",
+                          "type": "TEXT",
+                          "characters": "도움말",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.3,
+                                "g": 0.3,
+                                "b": 0.3
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "name": ">",
+                          "type": "TEXT",
+                          "characters": ">",
+                          "fontSize": 18,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.6,
+                                "g": 0.6,
+                                "b": 0.6
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Logout",
+                      "type": "FRAME",
+                      "width": 1000,
+                      "height": 70,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "SPACE_BETWEEN",
+                      "counterAxisAlignItems": "CENTER",
+                      "paddingTop": 20,
+                      "paddingRight": 20,
+                      "paddingBottom": 20,
+                      "paddingLeft": 20,
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 1,
+                            "g": 1,
+                            "b": 1
+                          }
+                        }
+                      ],
+                      "strokes": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.9,
+                            "g": 0.9,
+                            "b": 0.9
+                          }
+                        }
+                      ],
+                      "strokeWeight": 1,
+                      "children": [
+                        {
+                          "name": "로그아웃",
+                          "type": "TEXT",
+                          "characters": "로그아웃",
+                          "fontSize": 16,
+                          "fontName": {
+                            "family": "Inter",
+                            "style": "Regular"
+                          },
+                          "fills": [
+                            {
+                              "type": "SOLID",
+                              "color": {
+                                "r": 0.96,
+                                "g": 0.26,
+                                "b": 0.21
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Navigation",
+          "type": "FRAME",
+          "width": 1200,
+          "height": 80,
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "FIXED",
+          "counterAxisSizingMode": "FIXED",
+          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "counterAxisAlignItems": "CENTER",
+          "paddingTop": 20,
+          "paddingRight": 200,
+          "paddingBottom": 20,
+          "paddingLeft": 200,
+          "itemSpacing": 40,
+          "fills": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 1,
+                "g": 1,
+                "b": 1
+              }
+            }
+          ],
+          "strokes": [
+            {
+              "type": "SOLID",
+              "color": {
+                "r": 0.88,
+                "g": 0.88,
+                "b": 0.88
+              }
+            }
+          ],
+          "strokeWeight": 2,
+          "children": [
+            {
+              "name": "🏠 홈",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 4,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Icon",
+                  "type": "TEXT",
+                  "characters": "🏠",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "홈",
+                  "type": "TEXT",
+                  "characters": "홈",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "💊 약 관리",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 4,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Icon",
+                  "type": "TEXT",
+                  "characters": "💊",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "약 관리",
+                  "type": "TEXT",
+                  "characters": "약 관리",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "👨‍👩‍👧 가족",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 4,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Icon",
+                  "type": "TEXT",
+                  "characters": "👨‍👩‍👧",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "가족",
+                  "type": "TEXT",
+                  "characters": "가족",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "⚙️ 설정",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 4,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Icon",
+                  "type": "TEXT",
+                  "characters": "⚙️",
+                  "fontSize": 24,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "설정",
+                  "type": "TEXT",
+                  "characters": "설정",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "flows": [
     {
       "from": "로그인",
-      "fromElement": "로그인",
+      "fromElement": "Login Button",
       "to": "역할 선택",
       "action": "CLICK",
-      "description": "로그인 성공 후 역할 선택"
+      "description": "로그인"
     },
     {
       "from": "로그인",
-      "fromElement": "회원가입",
+      "fromElement": "Signup Link",
       "to": "회원가입",
       "action": "CLICK",
-      "description": "회원가입 페이지로 이동"
+      "description": "회원가입으로"
     },
     {
       "from": "회원가입",
-      "fromElement": "다음",
+      "fromElement": "Signup Button",
       "to": "역할 선택",
       "action": "CLICK",
-      "description": "회원가입 완료 후 역할 선택"
+      "description": "가입완료"
     },
     {
       "from": "회원가입",
-      "fromElement": "로그인",
+      "fromElement": "Login Link",
       "to": "로그인",
       "action": "CLICK",
-      "description": "로그인 페이지로 돌아가기"
+      "description": "로그인으로"
+    },
+    {
+      "from": "카카오 로그인",
+      "fromElement": "Kakao Login Button",
+      "to": "역할 선택",
+      "action": "CLICK",
+      "description": "카카오 로그인"
+    },
+    {
+      "from": "카카오 로그인",
+      "fromElement": "Email Login Button",
+      "to": "로그인",
+      "action": "CLICK",
+      "description": "이메일 로그인"
     },
     {
       "from": "역할 선택",
       "fromElement": "시니어 선택",
       "to": "시니어 대시보드",
       "action": "CLICK",
-      "description": "시니어 역할 선택"
+      "description": "시니어"
     },
     {
       "from": "역할 선택",
       "fromElement": "보호자 선택",
       "to": "보호자 대시보드",
       "action": "CLICK",
-      "description": "보호자 역할 선택"
+      "description": "보호자"
     },
     {
       "from": "시니어 대시보드",
       "fromElement": "💊 약 관리",
       "to": "약 관리",
       "action": "CLICK",
-      "description": "약 관리 메뉴 클릭"
+      "description": "약관리"
     },
     {
       "from": "시니어 대시보드",
       "fromElement": "👨‍👩‍👧 가족",
       "to": "가족 관리",
       "action": "CLICK",
-      "description": "가족 관리 메뉴 클릭"
+      "description": "가족"
+    },
+    {
+      "from": "시니어 대시보드",
+      "fromElement": "⚙️ 설정",
+      "to": "설정",
+      "action": "CLICK",
+      "description": "설정"
     },
     {
       "from": "보호자 대시보드",
       "fromElement": "💊 약 관리",
       "to": "약 관리",
       "action": "CLICK",
-      "description": "약 관리 메뉴 클릭"
+      "description": "약관리"
     },
     {
       "from": "보호자 대시보드",
       "fromElement": "👨‍👩‍👧 가족",
       "to": "가족 관리",
       "action": "CLICK",
-      "description": "가족 관리 메뉴 클릭"
+      "description": "가족"
     },
     {
-      "from": "약 관리",
-      "fromElement": "+ 약 추가",
-      "to": "약 등록",
+      "from": "보호자 대시보드",
+      "fromElement": "⚙️ 설정",
+      "to": "설정",
       "action": "CLICK",
-      "description": "새 약 등록하기"
-    },
-    {
-      "from": "약 등록",
-      "fromElement": "저장",
-      "to": "약 관리",
-      "action": "CLICK",
-      "description": "약 등록 완료 후 약 관리로 돌아가기"
-    },
-    {
-      "from": "약 등록",
-      "fromElement": "← 약 관리",
-      "to": "약 관리",
-      "action": "CLICK",
-      "description": "약 관리로 돌아가기"
+      "description": "설정"
     },
     {
       "from": "약 관리",
       "fromElement": "🏠 홈",
       "to": "시니어 대시보드",
       "action": "CLICK",
-      "description": "홈으로 돌아가기"
+      "description": "홈"
+    },
+    {
+      "from": "약 관리",
+      "fromElement": "👨‍👩‍👧 가족",
+      "to": "가족 관리",
+      "action": "CLICK",
+      "description": "가족"
+    },
+    {
+      "from": "약 관리",
+      "fromElement": "⚙️ 설정",
+      "to": "설정",
+      "action": "CLICK",
+      "description": "설정"
     },
     {
       "from": "가족 관리",
       "fromElement": "🏠 홈",
       "to": "시니어 대시보드",
       "action": "CLICK",
-      "description": "홈으로 돌아가기"
+      "description": "홈"
+    },
+    {
+      "from": "가족 관리",
+      "fromElement": "💊 약 관리",
+      "to": "약 관리",
+      "action": "CLICK",
+      "description": "약관리"
+    },
+    {
+      "from": "가족 관리",
+      "fromElement": "⚙️ 설정",
+      "to": "설정",
+      "action": "CLICK",
+      "description": "설정"
+    },
+    {
+      "from": "설정",
+      "fromElement": "🏠 홈",
+      "to": "시니어 대시보드",
+      "action": "CLICK",
+      "description": "홈"
+    },
+    {
+      "from": "설정",
+      "fromElement": "💊 약 관리",
+      "to": "약 관리",
+      "action": "CLICK",
+      "description": "약관리"
+    },
+    {
+      "from": "설정",
+      "fromElement": "👨‍👩‍👧 가족",
+      "to": "가족 관리",
+      "action": "CLICK",
+      "description": "가족"
     }
   ],
-  "notes": [
-    "총 8개 화면: 로그인, 회원가입, 역할 선택, 시니어 대시보드, 보호자 대시보드, 약 관리, 약 등록, 가족 관리",
-    "총 15개 프로토타입 플로우 연결",
-    "피그마 플러그인으로 import하면 자동으로 화살표 연결됨",
-    "모든 화면은 Auto Layout 적용됨"
+  "changelog": [
+    "v5.0: 10개 화면 완성 (로그인, 회원가입, 카카오로그인, 역할선택, 대시보드x2, 약관리, 약등록, 가족관리, 설정)",
+    "네비게이션 바 레이아웃 수정 (고정 폭으로 찌그러짐 방지)",
+    "23개 프로토타입 플로우 연결",
+    "모든 화면 Auto Layout 적용"
   ]
 }
