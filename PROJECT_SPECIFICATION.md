@@ -30,11 +30,12 @@
 - **스타일링**: SCSS / CSS Modules
 
 ### Backend
-- **Framework**: Spring Boot
-- **보안**: Spring Boot Security / Spring Cloud Security (프로젝트에 따라 결정)
-- **AI 통합**: Spring Boot AI (OCR, 추천 시스템)
-- **클라우드**: Spring Boot Cloud
-- **메시징**: Kafka (이벤트 기반 알림 처리)
+- **Language**: Java 21 LTS (2029년까지 지원, Virtual Threads, ZGC)
+- **Framework**: Spring Boot 3.4.7 (안정 버전, 49개 버그 수정)
+- **Cloud**: Spring Cloud 2024.0.2 (Moorgate, Spring Boot 3.4.x 호환)
+- **보안**: Spring Security (JWT 인증)
+- **AI 통합**: Spring AI (OCR, 약-음식 충돌 분석)
+- **메시징**: Apache Kafka (이벤트 기반 알림 처리)
 - **워크플로우 자동화**: n8n (알림 스케줄링)
 
 ### Database
@@ -2191,6 +2192,17 @@ notifications (
 - [ ] 카카오톡 알림톡 구현 여부 (시간 보고 결정)
 
 ### ✅ 확정된 기술 결정 (2025-11-05 업데이트)
+
+#### 백엔드 기술 스택
+- ✅ **Java 21 LTS**: 2029년까지 장기 지원, Virtual Threads, ZGC
+- ✅ **Spring Boot 3.4.7**: 6개월 이상 검증된 안정 버전 (49개 버그 수정)
+  - 3.5.0 제외 이유: 너무 최신 (2025년 5월 출시, 검증 부족)
+  - 프로덕션 환경에서 충분히 검증됨
+- ✅ **Spring Cloud 2024.0.2 (Moorgate)**: Spring Boot 3.4.x 완벽 호환
+  - Spring Framework 6.2.0 통합
+  - Eureka Server 최신 기능 지원
+
+#### OCR 및 외부 API
 - ✅ **OCR**: Google Cloud Vision API (메인) + Tesseract.js (Fallback)
   - Naver Clova OCR 제외 이유: 유료 (기본 유지비 발생), 무료 한도 불명확
   - Google Vision 선택 이유: 무료 한도 1,000건/월, 한글 인식률 95%+

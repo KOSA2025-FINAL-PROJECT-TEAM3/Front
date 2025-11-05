@@ -439,7 +439,9 @@ mindmap
       TipTap
       Hocuspocus Provider
     Backend
-      Spring Boot 3
+      Java 21 LTS
+      Spring Boot 3.4.7
+      Spring Cloud 2024.0.2
       Spring Security
       Spring AI
       Kafka
@@ -452,6 +454,26 @@ mindmap
       카카오톡 API
       n8n
 ```
+
+### 백엔드 기술 스택 선정 이유
+
+#### Java 21 LTS
+- **장기 지원**: 2029년까지 지원 보장
+- **Virtual Threads**: 고성능 동시성 처리
+- **ZGC**: 저지연 가비지 컬렉션
+- **프로덕션 검증**: 충분히 안정화된 LTS 버전
+
+#### Spring Boot 3.4.7 (2025년 6월)
+- **안정성**: 6개월 이상 검증된 안정 버전
+- **버그 수정**: 49개 버그 수정 및 의존성 업그레이드
+- **프로덕션 준비**: 실무 환경에서 충분히 검증됨
+- **3.5.0 제외 이유**: 너무 최신 (2025년 5월 출시, 검증 부족)
+
+#### Spring Cloud 2024.0.2 (Moorgate)
+- **Spring Boot 3.4.x 완벽 호환**
+- **Spring Framework 6.2.0 통합**
+- **Eureka Server 최신 기능 지원**
+- **마이크로서비스 아키텍처 대비**
 
 ---
 
