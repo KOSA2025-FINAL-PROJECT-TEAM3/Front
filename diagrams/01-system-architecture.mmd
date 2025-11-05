@@ -1,0 +1,83 @@
+graph TB
+    subgraph "Frontend Layer"
+        A[React Web App]
+        A1[Auth Components]
+        A2[Family Components]
+        A3[Medication Components]
+        A4[Diet Components]
+        A5[Dashboard]
+
+        A --> A1
+        A --> A2
+        A --> A3
+        A --> A4
+        A --> A5
+    end
+
+    subgraph "Real-time Sync"
+        H[Hocuspocus Server]
+        H1[Family WebSocket]
+    end
+
+    subgraph "Backend Layer"
+        B[Spring Boot API]
+        B1[Auth Controller]
+        B2[Medication Controller]
+        B3[Family Controller]
+        B4[Diet Controller]
+
+        B --> B1
+        B --> B2
+        B --> B3
+        B --> B4
+
+        S1[Medication Service]
+        S2[Family Service]
+        S3[Drug Interaction Service]
+        S4[OCR Service]
+
+        B2 --> S1
+        B3 --> S2
+        B4 --> S3
+        B2 --> S4
+    end
+
+    subgraph "Event Processing"
+        K[Apache Kafka]
+        K1[Medication Events]
+        K2[Notification Events]
+
+        K --> K1
+        K --> K2
+    end
+
+    subgraph "Database Layer"
+        DB[(MySQL/PostgreSQL)]
+        R[(Redis Cache)]
+    end
+
+    subgraph "External Services"
+        E1[식약처 API]
+        E2[Google Vision OCR]
+        E3[카카오톡 API]
+        E4[n8n Workflow]
+    end
+
+    A -->|REST API| B
+    A -->|WebSocket| H
+    H --> B
+
+    B --> DB
+    B --> R
+    B --> K
+
+    B --> E1
+    S4 --> E2
+    B --> E3
+    K --> E4
+
+    style A fill:#61dafb
+    style B fill:#6db33f
+    style K fill:#231f20
+    style DB fill:#4479a1
+    style R fill:#dc382d

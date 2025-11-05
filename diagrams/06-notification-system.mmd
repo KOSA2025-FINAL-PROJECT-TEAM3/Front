@@ -1,0 +1,43 @@
+graph TB
+    subgraph "알림 발생 원인"
+        T1[복약 시간]
+        T2[약 재고 부족]
+        T3[유효기간 임박]
+        T4[약-음식 충돌]
+        T5[가족 이벤트]
+    end
+
+    subgraph "Event Bus"
+        K[Kafka]
+    end
+
+    T1 --> K
+    T2 --> K
+    T3 --> K
+    T4 --> K
+    T5 --> K
+
+    subgraph "Notification Service"
+        N[Spring Scheduler]
+        N2[n8n Workflow]
+    end
+
+    K --> N
+    K --> N2
+
+    subgraph "Phase 1 - 필수"
+        P1[웹 푸시 알림]
+        P2[브라우저 알림]
+    end
+
+    subgraph "Phase 2 - 선택"
+        P3[카카오톡 알림톡]
+    end
+
+    N --> P1
+    N --> P2
+    N2 --> P3
+
+    style P1 fill:#6bcf7f
+    style P2 fill:#6bcf7f
+    style P3 fill:#ffd93d

@@ -1,0 +1,33 @@
+graph LR
+    subgraph "Family Group"
+        P1[👴 부모님 1]
+        P2[👵 부모님 2]
+        C1[👨 자녀 1]
+        C2[👩 자녀 2]
+    end
+
+    subgraph "Shared Data"
+        M[약 정보]
+        S[복용 스케줄]
+        L[복용 로그]
+        D[식단 기록]
+    end
+
+    subgraph "Real-time Sync"
+        HCS[Hocuspocus Server]
+    end
+
+    P1 -->|읽기/쓰기| HCS
+    P2 -->|읽기/쓰기| HCS
+    C1 -->|읽기/쓰기| HCS
+    C2 -->|읽기/쓰기| HCS
+
+    HCS <--> M
+    HCS <--> S
+    HCS <--> L
+    HCS <--> D
+
+    style P1 fill:#ffd1dc
+    style P2 fill:#ffd1dc
+    style C1 fill:#b4e7f8
+    style C2 fill:#b4e7f8

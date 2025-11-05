@@ -1,0 +1,81 @@
+erDiagram
+    USERS ||--o{ FAMILY_MEMBERS : belongs_to
+    FAMILY_GROUPS ||--o{ FAMILY_MEMBERS : contains
+    USERS ||--o{ MEDICATIONS : owns
+    MEDICATIONS ||--o{ MEDICATION_SCHEDULES : has
+    MEDICATIONS ||--o{ MEDICATION_LOGS : tracks
+    USERS ||--o{ DIET_LOGS : records
+    DIET_LOGS ||--o{ DIET_WARNINGS : generates
+    MEDICATIONS ||--o{ DIET_WARNINGS : causes
+    USERS ||--o{ NOTIFICATIONS : receives
+
+    USERS {
+        int id PK
+        string email
+        string password_hash
+        string name
+        enum role
+    }
+
+    FAMILY_GROUPS {
+        int id PK
+        string name
+        int created_by FK
+    }
+
+    FAMILY_MEMBERS {
+        int id PK
+        int family_group_id FK
+        int user_id FK
+        enum role
+    }
+
+    MEDICATIONS {
+        int id PK
+        int user_id FK
+        string name
+        string ingredient
+        date start_date
+        date end_date
+    }
+
+    MEDICATION_SCHEDULES {
+        int id PK
+        int medication_id FK
+        time time
+        string days_of_week
+    }
+
+    MEDICATION_LOGS {
+        int id PK
+        int medication_id FK
+        int user_id FK
+        timestamp scheduled_time
+        boolean completed
+    }
+
+    DIET_LOGS {
+        int id PK
+        int user_id FK
+        enum meal_type
+        string food_name
+        int calories
+    }
+
+    DIET_WARNINGS {
+        int id PK
+        int user_id FK
+        int diet_log_id FK
+        int medication_id FK
+        text warning_message
+        enum severity
+    }
+
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK
+        enum type
+        string title
+        text message
+        boolean read
+    }
