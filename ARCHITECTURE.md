@@ -128,36 +128,36 @@ graph TB
 ```mermaid
 sequenceDiagram
     participant Senior as 👴 시니어
-    participant SeniorApp as 시니어 앱
+    participant SeniorWeb as 시니어 웹
     participant Backend as Spring Boot
     participant DB as Database
     participant Hocuspocus as 실시간 동기화
-    participant CaregiverApp as 자녀 앱
+    participant CaregiverWeb as 자녀 웹
     participant Caregiver as 👨‍👩‍👧 자녀
 
     Note over Senior,Caregiver: 약 복용 체크 시나리오
 
-    Senior->>SeniorApp: 약 복용 체크
-    SeniorApp->>Backend: POST /medications/logs
+    Senior->>SeniorWeb: 약 복용 체크
+    SeniorWeb->>Backend: POST /medications/logs
     Backend->>DB: 복용 기록 저장
     Backend->>Hocuspocus: 상태 변경 이벤트
-    Hocuspocus->>CaregiverApp: 실시간 업데이트
-    CaregiverApp->>Caregiver: 알림: 부모님이 약 드셨어요! ✅
+    Hocuspocus->>CaregiverWeb: 실시간 업데이트
+    CaregiverWeb->>Caregiver: 알림: 부모님이 약 드셨어요! ✅
 
     Note over Senior,Caregiver: 자녀가 원격으로 약 등록
 
-    Caregiver->>CaregiverApp: 부모님 약 등록
-    CaregiverApp->>Backend: POST /medications
+    Caregiver->>CaregiverWeb: 부모님 약 등록
+    CaregiverWeb->>Backend: POST /medications
     Backend->>DB: 약 정보 저장
     Backend->>Hocuspocus: 약 추가 이벤트
-    Hocuspocus->>SeniorApp: 실시간 업데이트
-    SeniorApp->>Senior: 새로운 약이 등록되었습니다
+    Hocuspocus->>SeniorWeb: 실시간 업데이트
+    SeniorWeb->>Senior: 새로운 약이 등록되었습니다
 ```
 
 ### 핵심 시나리오
 
 1. **시니어 → 자녀**: 부모님이 약 복용 체크 → 자녀에게 실시간 알림
-2. **자녀 → 시니어**: 자녀가 원격으로 약 등록 → 부모님 앱에 즉시 반영
+2. **자녀 → 시니어**: 자녀가 원격으로 약 등록 → 부모님 웹에 즉시 반영
 
 ---
 
