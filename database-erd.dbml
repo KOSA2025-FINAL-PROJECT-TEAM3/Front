@@ -1,0 +1,211 @@
+// 실버케어 (SilverCare) - 데이터베이스 ERD
+// 가족 돌봄 네트워크 기반 약 관리 플랫폼
+// Generated: 2025-11-05
+
+// ============================================
+// 사용자 및 가족 관리
+// ============================================
+
+Table users {
+  id int [pk, increment]
+  email varchar(255) [not null, unique]
+  password_hash varchar(255) [not null]
+  name varchar(100) [not null]
+  phone varchar(20)
+  role enum('senior', 'caregiver') [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+  updated_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    email [unique]
+  }
+}
+
+Table family_groups {
+  id int [pk, increment]
+  name varchar(100) [not null]
+  created_by int [not null, ref: > users.id]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  Note: '가족 그룹 (여러 사용자를 묶음)'
+}
+
+Table family_members {
+  id int [pk, increment]
+  family_group_id int [not null, ref: > family_groups.id]
+  user_id int [not null, ref: > users.id]
+  role enum('parent', 'child') [not null]
+  joined_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    (family_group_id, user_id) [unique]
+  }
+
+  Note: '가족 구성원 매핑 테이블'
+}
+
+// ============================================
+// 약 관리
+// ============================================
+
+Table medications {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  name varchar(255) [not null]
+  ingredient varchar(255)
+  dosage varchar(100)
+  timing varchar(50)
+  start_date date [not null]
+  end_date date
+  quantity int
+  remaining int
+  expiry_date date
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    user_id
+    name
+  }
+
+  Note: '사용자별 약 정보'
+}
+
+Table medication_schedules {
+  id int [pk, increment]
+  medication_id int [not null, ref: > medications.id]
+  time time [not null]
+  days_of_week varchar(20)
+  active boolean [default: true]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    medication_id
+  }
+
+  Note: '약 복용 일정 (매일, 특정 요일 등)'
+}
+
+Table medication_logs {
+  id int [pk, increment]
+  medication_id int [not null, ref: > medications.id]
+  user_id int [not null, ref: > users.id]
+  scheduled_time timestamp [not null]
+  completed_time timestamp
+  completed boolean [default: false]
+  missed boolean [default: false]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    medication_id
+    user_id
+    scheduled_time
+  }
+
+  Note: '약 복용 기록 (체크/미체크)'
+}
+
+// ============================================
+// 약-음식 상호작용 (차별화 기능)
+// ============================================
+
+Table drug_food_interactions {
+  id int [pk, increment]
+  drug_name varchar(255) [not null]
+  drug_ingredient varchar(255)
+  food_name varchar(255) [not null]
+  food_category varchar(100)
+  conflict_ingredient varchar(255)
+  reason text
+  severity enum('높음', '중간', '낮음') [not null]
+  alternatives text
+  source varchar(500)
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    drug_name
+    food_name
+    drug_ingredient
+  }
+
+  Note: '약-음식 충돌 정보 (룰 베이스 시스템)'
+}
+
+// ============================================
+// 식단 관리
+// ============================================
+
+Table diet_logs {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  meal_type enum('breakfast', 'lunch', 'dinner', 'snack') [not null]
+  food_name varchar(255) [not null]
+  calories int
+  recorded_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    user_id
+    recorded_at
+  }
+
+  Note: '사용자 식단 기록'
+}
+
+Table diet_warnings {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  diet_log_id int [not null, ref: > diet_logs.id]
+  medication_id int [not null, ref: > medications.id]
+  warning_message text [not null]
+  severity enum('높음', '중간', '낮음') [not null]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    user_id
+    diet_log_id
+  }
+
+  Note: '식단-약 충돌 경고'
+}
+
+// ============================================
+// 알림 시스템
+// ============================================
+
+Table notifications {
+  id int [pk, increment]
+  user_id int [not null, ref: > users.id]
+  type enum('medication_reminder', 'diet_warning', 'family_alert', 'system') [not null]
+  title varchar(255) [not null]
+  message text [not null]
+  read boolean [default: false]
+  created_at timestamp [default: `CURRENT_TIMESTAMP`]
+
+  indexes {
+    user_id
+    created_at
+    read
+  }
+
+  Note: '웹 알림 (Phase 1)'
+}
+
+// ============================================
+// 관계 설명
+// ============================================
+
+// 사용자 - 가족 관계
+// users -> family_groups (생성자)
+// users -> family_members (구성원)
+// family_groups -> family_members (그룹-구성원 매핑)
+
+// 약 관리 관계
+// users -> medications (약 소유)
+// medications -> medication_schedules (복용 일정)
+// medications -> medication_logs (복용 기록)
+
+// 식단 관리 관계
+// users -> diet_logs (식단 기록)
+// diet_logs + medications -> diet_warnings (충돌 경고)
+
+// 알림 관계
+// users -> notifications (사용자별 알림)
