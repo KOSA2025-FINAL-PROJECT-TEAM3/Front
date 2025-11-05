@@ -1,6 +1,6 @@
 {
-  "version": "5.0",
-  "description": "실버케어 MVP - 10개 화면 + 프로토타입 플로우",
+  "version": "6.0",
+  "description": "실버케어 MVP - 10개 화면 (크기 통일) + 23개 프로토타입 플로우",
   "screens": [
     {
       "name": "로그인",
@@ -8176,13 +8176,13 @@
           "layoutMode": "HORIZONTAL",
           "primaryAxisSizingMode": "FIXED",
           "counterAxisSizingMode": "FIXED",
-          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "primaryAxisAlignItems": "CENTER",
           "counterAxisAlignItems": "CENTER",
-          "paddingTop": 20,
-          "paddingRight": 200,
-          "paddingBottom": 20,
-          "paddingLeft": 200,
-          "itemSpacing": 40,
+          "paddingTop": 16,
+          "paddingRight": 300,
+          "paddingBottom": 16,
+          "paddingLeft": 300,
+          "itemSpacing": 0,
           "fills": [
             {
               "type": "SOLID",
@@ -8206,21 +8206,23 @@
           "strokeWeight": 2,
           "children": [
             {
-              "name": "🏠 홈",
+              "name": "홈 버튼",
               "type": "FRAME",
+              "width": 150,
+              "height": 48,
               "layoutMode": "VERTICAL",
-              "primaryAxisSizingMode": "AUTO",
-              "counterAxisSizingMode": "AUTO",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
               "primaryAxisAlignItems": "CENTER",
               "counterAxisAlignItems": "CENTER",
-              "itemSpacing": 4,
+              "itemSpacing": 2,
               "fills": [],
               "children": [
                 {
                   "name": "Icon",
                   "type": "TEXT",
                   "characters": "🏠",
-                  "fontSize": 24,
+                  "fontSize": 20,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8240,7 +8242,7 @@
                   "name": "홈",
                   "type": "TEXT",
                   "characters": "홈",
-                  "fontSize": 14,
+                  "fontSize": 13,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8259,21 +8261,23 @@
               ]
             },
             {
-              "name": "💊 약 관리",
+              "name": "약 관리 버튼",
               "type": "FRAME",
+              "width": 150,
+              "height": 48,
               "layoutMode": "VERTICAL",
-              "primaryAxisSizingMode": "AUTO",
-              "counterAxisSizingMode": "AUTO",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
               "primaryAxisAlignItems": "CENTER",
               "counterAxisAlignItems": "CENTER",
-              "itemSpacing": 4,
+              "itemSpacing": 2,
               "fills": [],
               "children": [
                 {
                   "name": "Icon",
                   "type": "TEXT",
                   "characters": "💊",
-                  "fontSize": 24,
+                  "fontSize": 20,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8293,7 +8297,7 @@
                   "name": "약 관리",
                   "type": "TEXT",
                   "characters": "약 관리",
-                  "fontSize": 14,
+                  "fontSize": 13,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8312,21 +8316,23 @@
               ]
             },
             {
-              "name": "👨‍👩‍👧 가족",
+              "name": "가족 버튼",
               "type": "FRAME",
+              "width": 150,
+              "height": 48,
               "layoutMode": "VERTICAL",
-              "primaryAxisSizingMode": "AUTO",
-              "counterAxisSizingMode": "AUTO",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
               "primaryAxisAlignItems": "CENTER",
               "counterAxisAlignItems": "CENTER",
-              "itemSpacing": 4,
+              "itemSpacing": 2,
               "fills": [],
               "children": [
                 {
                   "name": "Icon",
                   "type": "TEXT",
                   "characters": "👨‍👩‍👧",
-                  "fontSize": 24,
+                  "fontSize": 20,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8346,7 +8352,7 @@
                   "name": "가족",
                   "type": "TEXT",
                   "characters": "가족",
-                  "fontSize": 14,
+                  "fontSize": 13,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8365,21 +8371,23 @@
               ]
             },
             {
-              "name": "⚙️ 설정",
+              "name": "설정 버튼",
               "type": "FRAME",
+              "width": 150,
+              "height": 48,
               "layoutMode": "VERTICAL",
-              "primaryAxisSizingMode": "AUTO",
-              "counterAxisSizingMode": "AUTO",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
               "primaryAxisAlignItems": "CENTER",
               "counterAxisAlignItems": "CENTER",
-              "itemSpacing": 4,
+              "itemSpacing": 2,
               "fills": [],
               "children": [
                 {
                   "name": "Icon",
                   "type": "TEXT",
                   "characters": "⚙️",
-                  "fontSize": 24,
+                  "fontSize": 20,
                   "fontName": {
                     "family": "Inter",
                     "style": "Regular"
@@ -8388,9 +8396,9 @@
                     {
                       "type": "SOLID",
                       "color": {
-                        "r": 0.3,
-                        "g": 0.69,
-                        "b": 0.31
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
                       }
                     }
                   ]
@@ -8399,18 +8407,18 @@
                   "name": "설정",
                   "type": "TEXT",
                   "characters": "설정",
-                  "fontSize": 14,
+                  "fontSize": 13,
                   "fontName": {
                     "family": "Inter",
-                    "style": "Bold"
+                    "style": "Regular"
                   },
                   "fills": [
                     {
                       "type": "SOLID",
                       "color": {
-                        "r": 0.3,
-                        "g": 0.69,
-                        "b": 0.31
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
                       }
                     }
                   ]
@@ -8427,168 +8435,145 @@
       "from": "로그인",
       "fromElement": "Login Button",
       "to": "역할 선택",
-      "action": "CLICK",
-      "description": "로그인"
+      "action": "CLICK"
     },
     {
       "from": "로그인",
       "fromElement": "Signup Link",
       "to": "회원가입",
-      "action": "CLICK",
-      "description": "회원가입으로"
+      "action": "CLICK"
     },
     {
       "from": "회원가입",
       "fromElement": "Signup Button",
       "to": "역할 선택",
-      "action": "CLICK",
-      "description": "가입완료"
+      "action": "CLICK"
     },
     {
       "from": "회원가입",
       "fromElement": "Login Link",
       "to": "로그인",
-      "action": "CLICK",
-      "description": "로그인으로"
+      "action": "CLICK"
     },
     {
       "from": "카카오 로그인",
       "fromElement": "Kakao Login Button",
       "to": "역할 선택",
-      "action": "CLICK",
-      "description": "카카오 로그인"
+      "action": "CLICK"
     },
     {
       "from": "카카오 로그인",
       "fromElement": "Email Login Button",
       "to": "로그인",
-      "action": "CLICK",
-      "description": "이메일 로그인"
+      "action": "CLICK"
     },
     {
       "from": "역할 선택",
       "fromElement": "시니어 선택",
       "to": "시니어 대시보드",
-      "action": "CLICK",
-      "description": "시니어"
+      "action": "CLICK"
     },
     {
       "from": "역할 선택",
       "fromElement": "보호자 선택",
       "to": "보호자 대시보드",
-      "action": "CLICK",
-      "description": "보호자"
+      "action": "CLICK"
     },
     {
       "from": "시니어 대시보드",
-      "fromElement": "💊 약 관리",
+      "fromElement": "약 관리 버튼",
       "to": "약 관리",
-      "action": "CLICK",
-      "description": "약관리"
+      "action": "CLICK"
     },
     {
       "from": "시니어 대시보드",
-      "fromElement": "👨‍👩‍👧 가족",
+      "fromElement": "가족 버튼",
       "to": "가족 관리",
-      "action": "CLICK",
-      "description": "가족"
+      "action": "CLICK"
     },
     {
       "from": "시니어 대시보드",
-      "fromElement": "⚙️ 설정",
+      "fromElement": "설정 버튼",
       "to": "설정",
-      "action": "CLICK",
-      "description": "설정"
+      "action": "CLICK"
     },
     {
       "from": "보호자 대시보드",
-      "fromElement": "💊 약 관리",
+      "fromElement": "약 관리 버튼",
       "to": "약 관리",
-      "action": "CLICK",
-      "description": "약관리"
+      "action": "CLICK"
     },
     {
       "from": "보호자 대시보드",
-      "fromElement": "👨‍👩‍👧 가족",
+      "fromElement": "가족 버튼",
       "to": "가족 관리",
-      "action": "CLICK",
-      "description": "가족"
+      "action": "CLICK"
     },
     {
       "from": "보호자 대시보드",
-      "fromElement": "⚙️ 설정",
+      "fromElement": "설정 버튼",
       "to": "설정",
-      "action": "CLICK",
-      "description": "설정"
+      "action": "CLICK"
     },
     {
       "from": "약 관리",
-      "fromElement": "🏠 홈",
+      "fromElement": "홈 버튼",
       "to": "시니어 대시보드",
-      "action": "CLICK",
-      "description": "홈"
+      "action": "CLICK"
     },
     {
       "from": "약 관리",
-      "fromElement": "👨‍👩‍👧 가족",
+      "fromElement": "가족 버튼",
       "to": "가족 관리",
-      "action": "CLICK",
-      "description": "가족"
+      "action": "CLICK"
     },
     {
       "from": "약 관리",
-      "fromElement": "⚙️ 설정",
+      "fromElement": "설정 버튼",
       "to": "설정",
-      "action": "CLICK",
-      "description": "설정"
+      "action": "CLICK"
     },
     {
       "from": "가족 관리",
-      "fromElement": "🏠 홈",
+      "fromElement": "홈 버튼",
       "to": "시니어 대시보드",
-      "action": "CLICK",
-      "description": "홈"
+      "action": "CLICK"
     },
     {
       "from": "가족 관리",
-      "fromElement": "💊 약 관리",
+      "fromElement": "약 관리 버튼",
       "to": "약 관리",
-      "action": "CLICK",
-      "description": "약관리"
+      "action": "CLICK"
     },
     {
       "from": "가족 관리",
-      "fromElement": "⚙️ 설정",
+      "fromElement": "설정 버튼",
       "to": "설정",
-      "action": "CLICK",
-      "description": "설정"
+      "action": "CLICK"
     },
     {
       "from": "설정",
-      "fromElement": "🏠 홈",
+      "fromElement": "홈 버튼",
       "to": "시니어 대시보드",
-      "action": "CLICK",
-      "description": "홈"
+      "action": "CLICK"
     },
     {
       "from": "설정",
-      "fromElement": "💊 약 관리",
+      "fromElement": "약 관리 버튼",
       "to": "약 관리",
-      "action": "CLICK",
-      "description": "약관리"
+      "action": "CLICK"
     },
     {
       "from": "설정",
-      "fromElement": "👨‍👩‍👧 가족",
+      "fromElement": "가족 버튼",
       "to": "가족 관리",
-      "action": "CLICK",
-      "description": "가족"
+      "action": "CLICK"
     }
   ],
   "changelog": [
-    "v5.0: 10개 화면 완성 (로그인, 회원가입, 카카오로그인, 역할선택, 대시보드x2, 약관리, 약등록, 가족관리, 설정)",
-    "네비게이션 바 레이아웃 수정 (고정 폭으로 찌그러짐 방지)",
-    "23개 프로토타입 플로우 연결",
-    "모든 화면 Auto Layout 적용"
+    "v6.0: 모든 화면 크기 1200x800 통일",
+    "네비게이션 바 버튼 크기 균일화 (150x48)",
+    "프로토타입 플로우 버튼 이름 업데이트",
+    "23개 프로토타입 플로우 완벽 연결"
   ]
 }
