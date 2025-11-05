@@ -1,0 +1,476 @@
+{
+  "name": "로그인",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "CENTER",
+  "counterAxisAlignItems": "CENTER",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [
+    {
+      "type": "SOLID",
+      "color": {
+        "r": 0.97,
+        "g": 0.97,
+        "b": 0.97
+      }
+    }
+  ],
+  "children": [
+    {
+      "name": "Login Container",
+      "type": "FRAME",
+      "width": 450,
+      "height": 600,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "AUTO",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "CENTER",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 60,
+      "paddingRight": 50,
+      "paddingBottom": 60,
+      "paddingLeft": 50,
+      "itemSpacing": 30,
+      "cornerRadius": 16,
+      "fills": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          }
+        }
+      ],
+      "strokes": [
+        {
+          "type": "SOLID",
+          "color": {
+            "r": 0.9,
+            "g": 0.9,
+            "b": 0.9
+          }
+        }
+      ],
+      "strokeWeight": 1,
+      "children": [
+        {
+          "name": "Logo Section",
+          "type": "FRAME",
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "CENTER",
+          "counterAxisAlignItems": "CENTER",
+          "itemSpacing": 12,
+          "fills": [],
+          "children": [
+            {
+              "name": "Logo",
+              "type": "ELLIPSE",
+              "width": 80,
+              "height": 80,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.3,
+                    "g": 0.69,
+                    "b": 0.31
+                  }
+                }
+              ]
+            },
+            {
+              "name": "실버케어",
+              "type": "TEXT",
+              "characters": "실버케어",
+              "fontSize": 32,
+              "fontName": {
+                "family": "Inter",
+                "style": "Bold"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.2,
+                    "g": 0.2,
+                    "b": 0.2
+                  }
+                }
+              ]
+            },
+            {
+              "name": "약 먹을 시간이에요?",
+              "type": "TEXT",
+              "characters": "약 먹을 시간이에요?",
+              "fontSize": 14,
+              "fontName": {
+                "family": "Inter",
+                "style": "Regular"
+              },
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.6,
+                    "g": 0.6,
+                    "b": 0.6
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Login Form",
+          "type": "FRAME",
+          "width": 350,
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "FIXED",
+          "itemSpacing": 20,
+          "fills": [],
+          "children": [
+            {
+              "name": "Email Input Group",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "이메일",
+                  "type": "TEXT",
+                  "characters": "이메일",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.3,
+                        "b": 0.3
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Email Input",
+                  "type": "FRAME",
+                  "width": 350,
+                  "height": 50,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 15,
+                  "paddingRight": 16,
+                  "paddingBottom": 15,
+                  "paddingLeft": 16,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.98,
+                        "g": 0.98,
+                        "b": 0.98
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.85,
+                        "g": 0.85,
+                        "b": 0.85
+                      }
+                    }
+                  ],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "example@email.com",
+                      "type": "TEXT",
+                      "characters": "example@email.com",
+                      "fontSize": 16,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Regular"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.7,
+                            "g": 0.7,
+                            "b": 0.7
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Password Input Group",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "비밀번호",
+                  "type": "TEXT",
+                  "characters": "비밀번호",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.3,
+                        "b": 0.3
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "Password Input",
+                  "type": "FRAME",
+                  "width": 350,
+                  "height": 50,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 15,
+                  "paddingRight": 16,
+                  "paddingBottom": 15,
+                  "paddingLeft": 16,
+                  "cornerRadius": 8,
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.98,
+                        "g": 0.98,
+                        "b": 0.98
+                      }
+                    }
+                  ],
+                  "strokes": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.85,
+                        "g": 0.85,
+                        "b": 0.85
+                      }
+                    }
+                  ],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "••••••••",
+                      "type": "TEXT",
+                      "characters": "••••••••",
+                      "fontSize": 16,
+                      "fontName": {
+                        "family": "Inter",
+                        "style": "Regular"
+                      },
+                      "fills": [
+                        {
+                          "type": "SOLID",
+                          "color": {
+                            "r": 0.7,
+                            "g": 0.7,
+                            "b": 0.7
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Remember & Forgot",
+              "type": "FRAME",
+              "width": 350,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "AUTO",
+              "primaryAxisAlignItems": "SPACE_BETWEEN",
+              "counterAxisAlignItems": "CENTER",
+              "fills": [],
+              "children": [
+                {
+                  "name": "로그인 유지",
+                  "type": "TEXT",
+                  "characters": "☐ 로그인 유지",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "비밀번호 찾기",
+                  "type": "TEXT",
+                  "characters": "비밀번호 찾기",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.13,
+                        "g": 0.59,
+                        "b": 0.95
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Login Button",
+              "type": "FRAME",
+              "width": 350,
+              "height": 50,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 8,
+              "fills": [
+                {
+                  "type": "SOLID",
+                  "color": {
+                    "r": 0.3,
+                    "g": 0.69,
+                    "b": 0.31
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "name": "로그인",
+                  "type": "TEXT",
+                  "characters": "로그인",
+                  "fontSize": 16,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 1,
+                        "g": 1,
+                        "b": 1
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Signup Link",
+              "type": "FRAME",
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "counterAxisAlignItems": "CENTER",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "계정이 없으신가요?",
+                  "type": "TEXT",
+                  "characters": "계정이 없으신가요?",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Regular"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.5,
+                        "g": 0.5,
+                        "b": 0.5
+                      }
+                    }
+                  ]
+                },
+                {
+                  "name": "회원가입",
+                  "type": "TEXT",
+                  "characters": "회원가입",
+                  "fontSize": 14,
+                  "fontName": {
+                    "family": "Inter",
+                    "style": "Bold"
+                  },
+                  "fills": [
+                    {
+                      "type": "SOLID",
+                      "color": {
+                        "r": 0.3,
+                        "g": 0.69,
+                        "b": 0.31
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

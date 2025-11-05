@@ -1,0 +1,391 @@
+{
+  "name": "약 등록",
+  "type": "FRAME",
+  "width": 1200,
+  "height": 800,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "FIXED",
+  "counterAxisSizingMode": "FIXED",
+  "paddingTop": 0,
+  "paddingRight": 0,
+  "paddingBottom": 0,
+  "paddingLeft": 0,
+  "itemSpacing": 0,
+  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+  "children": [
+    {
+      "name": "Header",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 80,
+      "layoutMode": "HORIZONTAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "SPACE_BETWEEN",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 20,
+      "paddingRight": 40,
+      "paddingBottom": 20,
+      "paddingLeft": 40,
+      "itemSpacing": 16,
+      "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}],
+      "strokes": [{"type": "SOLID", "color": {"r": 0.88, "g": 0.88, "b": 0.88}}],
+      "strokeWeight": 2,
+      "children": [
+        {
+          "name": "실버케어",
+          "type": "TEXT",
+          "characters": "← 약 관리",
+          "fontSize": 20,
+          "fontName": {"family": "Inter", "style": "Bold"},
+          "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+        },
+        {
+          "name": "김철수 님 (시니어)",
+          "type": "TEXT",
+          "characters": "김철수 님 (시니어)",
+          "fontSize": 16,
+          "fontName": {"family": "Inter", "style": "Regular"},
+          "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+        }
+      ]
+    },
+    {
+      "name": "Content",
+      "type": "FRAME",
+      "width": 1200,
+      "height": 720,
+      "layoutMode": "VERTICAL",
+      "primaryAxisSizingMode": "FIXED",
+      "counterAxisSizingMode": "FIXED",
+      "primaryAxisAlignItems": "CENTER",
+      "counterAxisAlignItems": "CENTER",
+      "paddingTop": 60,
+      "paddingRight": 300,
+      "paddingBottom": 60,
+      "paddingLeft": 300,
+      "itemSpacing": 40,
+      "fills": [],
+      "children": [
+        {
+          "name": "Title",
+          "type": "TEXT",
+          "characters": "새 약 등록",
+          "fontSize": 28,
+          "fontName": {"family": "Inter", "style": "Bold"},
+          "fills": [{"type": "SOLID", "color": {"r": 0.2, "g": 0.2, "b": 0.2}}]
+        },
+        {
+          "name": "Form",
+          "type": "FRAME",
+          "width": 600,
+          "layoutMode": "VERTICAL",
+          "primaryAxisSizingMode": "AUTO",
+          "counterAxisSizingMode": "FIXED",
+          "itemSpacing": 24,
+          "fills": [],
+          "children": [
+            {
+              "name": "약 이름",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Label",
+                  "type": "TEXT",
+                  "characters": "약 이름 *",
+                  "fontSize": 14,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                },
+                {
+                  "name": "Input",
+                  "type": "FRAME",
+                  "width": 600,
+                  "height": 48,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 14,
+                  "paddingRight": 16,
+                  "paddingBottom": 14,
+                  "paddingLeft": 16,
+                  "cornerRadius": 8,
+                  "fills": [{"type": "SOLID", "color": {"r": 0.98, "g": 0.98, "b": 0.98}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.85, "g": 0.85, "b": 0.85}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "예: 아스피린",
+                      "type": "TEXT",
+                      "characters": "예: 아스피린",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.7, "g": 0.7, "b": 0.7}}]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "복용 시간",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Label",
+                  "type": "TEXT",
+                  "characters": "복용 시간 *",
+                  "fontSize": 14,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                },
+                {
+                  "name": "Time Select",
+                  "type": "FRAME",
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "AUTO",
+                  "counterAxisSizingMode": "AUTO",
+                  "itemSpacing": 12,
+                  "fills": [],
+                  "children": [
+                    {
+                      "name": "아침 식후",
+                      "type": "FRAME",
+                      "width": 140,
+                      "height": 48,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "CENTER",
+                      "counterAxisAlignItems": "CENTER",
+                      "cornerRadius": 8,
+                      "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}],
+                      "children": [
+                        {
+                          "name": "아침 식후",
+                          "type": "TEXT",
+                          "characters": "아침 식후",
+                          "fontSize": 14,
+                          "fontName": {"family": "Inter", "style": "Bold"},
+                          "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "점심 식후",
+                      "type": "FRAME",
+                      "width": 140,
+                      "height": 48,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "CENTER",
+                      "counterAxisAlignItems": "CENTER",
+                      "cornerRadius": 8,
+                      "fills": [{"type": "SOLID", "color": {"r": 0.95, "g": 0.95, "b": 0.95}}],
+                      "children": [
+                        {
+                          "name": "점심 식후",
+                          "type": "TEXT",
+                          "characters": "점심 식후",
+                          "fontSize": 14,
+                          "fontName": {"family": "Inter", "style": "Regular"},
+                          "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "저녁 식후",
+                      "type": "FRAME",
+                      "width": 140,
+                      "height": 48,
+                      "layoutMode": "HORIZONTAL",
+                      "primaryAxisSizingMode": "FIXED",
+                      "counterAxisSizingMode": "FIXED",
+                      "primaryAxisAlignItems": "CENTER",
+                      "counterAxisAlignItems": "CENTER",
+                      "cornerRadius": 8,
+                      "fills": [{"type": "SOLID", "color": {"r": 0.95, "g": 0.95, "b": 0.95}}],
+                      "children": [
+                        {
+                          "name": "저녁 식후",
+                          "type": "TEXT",
+                          "characters": "저녁 식후",
+                          "fontSize": 14,
+                          "fontName": {"family": "Inter", "style": "Regular"},
+                          "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "복용량",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Label",
+                  "type": "TEXT",
+                  "characters": "복용량",
+                  "fontSize": 14,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                },
+                {
+                  "name": "Input",
+                  "type": "FRAME",
+                  "width": 600,
+                  "height": 48,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "counterAxisAlignItems": "CENTER",
+                  "paddingTop": 14,
+                  "paddingRight": 16,
+                  "paddingBottom": 14,
+                  "paddingLeft": 16,
+                  "cornerRadius": 8,
+                  "fills": [{"type": "SOLID", "color": {"r": 0.98, "g": 0.98, "b": 0.98}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.85, "g": 0.85, "b": 0.85}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "1알",
+                      "type": "TEXT",
+                      "characters": "1알",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.7, "g": 0.7, "b": 0.7}}]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "메모",
+              "type": "FRAME",
+              "layoutMode": "VERTICAL",
+              "primaryAxisSizingMode": "AUTO",
+              "counterAxisSizingMode": "AUTO",
+              "itemSpacing": 8,
+              "fills": [],
+              "children": [
+                {
+                  "name": "Label",
+                  "type": "TEXT",
+                  "characters": "메모 (선택사항)",
+                  "fontSize": 14,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.3, "b": 0.3}}]
+                },
+                {
+                  "name": "Textarea",
+                  "type": "FRAME",
+                  "width": 600,
+                  "height": 100,
+                  "layoutMode": "HORIZONTAL",
+                  "primaryAxisSizingMode": "FIXED",
+                  "counterAxisSizingMode": "FIXED",
+                  "paddingTop": 14,
+                  "paddingRight": 16,
+                  "paddingBottom": 14,
+                  "paddingLeft": 16,
+                  "cornerRadius": 8,
+                  "fills": [{"type": "SOLID", "color": {"r": 0.98, "g": 0.98, "b": 0.98}}],
+                  "strokes": [{"type": "SOLID", "color": {"r": 0.85, "g": 0.85, "b": 0.85}}],
+                  "strokeWeight": 1,
+                  "children": [
+                    {
+                      "name": "추가 정보를 입력하세요",
+                      "type": "TEXT",
+                      "characters": "추가 정보를 입력하세요",
+                      "fontSize": 16,
+                      "fontName": {"family": "Inter", "style": "Regular"},
+                      "fills": [{"type": "SOLID", "color": {"r": 0.7, "g": 0.7, "b": 0.7}}]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Buttons",
+          "type": "FRAME",
+          "width": 600,
+          "layoutMode": "HORIZONTAL",
+          "primaryAxisSizingMode": "FIXED",
+          "counterAxisSizingMode": "AUTO",
+          "primaryAxisAlignItems": "SPACE_BETWEEN",
+          "itemSpacing": 16,
+          "fills": [],
+          "children": [
+            {
+              "name": "Cancel",
+              "type": "FRAME",
+              "width": 292,
+              "height": 50,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 8,
+              "fills": [{"type": "SOLID", "color": {"r": 0.95, "g": 0.95, "b": 0.95}}],
+              "children": [
+                {
+                  "name": "취소",
+                  "type": "TEXT",
+                  "characters": "취소",
+                  "fontSize": 16,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 0.5, "g": 0.5, "b": 0.5}}]
+                }
+              ]
+            },
+            {
+              "name": "Save",
+              "type": "FRAME",
+              "width": 292,
+              "height": 50,
+              "layoutMode": "HORIZONTAL",
+              "primaryAxisSizingMode": "FIXED",
+              "counterAxisSizingMode": "FIXED",
+              "primaryAxisAlignItems": "CENTER",
+              "counterAxisAlignItems": "CENTER",
+              "cornerRadius": 8,
+              "fills": [{"type": "SOLID", "color": {"r": 0.3, "g": 0.69, "b": 0.31}}],
+              "children": [
+                {
+                  "name": "저장",
+                  "type": "TEXT",
+                  "characters": "저장",
+                  "fontSize": 16,
+                  "fontName": {"family": "Inter", "style": "Bold"},
+                  "fills": [{"type": "SOLID", "color": {"r": 1, "g": 1, "b": 1}}]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
