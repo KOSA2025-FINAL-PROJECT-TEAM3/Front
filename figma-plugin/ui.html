@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>실버케어 JSON Importer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 16px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo {
+      width: 24px;
+      height: 24px;
+      background: #4CAF50;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    p {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .upload-area {
+      border: 2px dashed #4CAF50;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: #f8fef8;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 16px;
+    }
+
+    .upload-area:hover {
+      background: #e8f5e9;
+      border-color: #45a049;
+    }
+
+    .upload-area.dragover {
+      background: #c8e6c9;
+      border-color: #2e7d32;
+    }
+
+    .upload-content {
+      pointer-events: none;
+    }
+
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+
+    .upload-text {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .btn-upload {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      pointer-events: all;
+      transition: background 0.2s;
+    }
+
+    .btn-upload:hover {
+      background: #45a049;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e0e0e0;
+    }
+
+    .divider span {
+      background: white;
+      padding: 0 10px;
+      color: #999;
+      font-size: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    textarea::placeholder {
+      color: #999;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #45a049;
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border: 1px solid #2196F3;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .info-box h3 {
+      font-size: 14px;
+      color: #1976D2;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .info-box ul {
+      margin-left: 20px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .error {
+      background: #ffebee;
+      border: 1px solid #f44336;
+      color: #c62828;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .examples {
+      font-size: 11px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    .examples a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+
+    .examples a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <span class="logo"></span>
+      실버케어 JSON Importer
+    </h2>
+
+    <p>
+      와이어프레임 JSON을 붙여넣으면 Figma에 Auto Layout이 적용된 프레임이 생성됩니다.
+    </p>
+
+    <div class="info-box">
+      <h3>📁 JSON 파일 위치</h3>
+      <ul>
+        <li><code>figma-exports/01-dashboard-senior.json</code></li>
+        <li><code>figma-exports/02-dashboard-caregiver.json</code></li>
+        <li><code>figma-exports/03-medications.json</code></li>
+        <li><code>figma-exports/04-family.json</code></li>
+        <li><code>figma-exports/all-screens-with-flows.json</code></li>
+      </ul>
+    </div>
+
+    <!-- File Upload Area -->
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-content">
+        <div class="upload-icon">📁</div>
+        <p class="upload-text">JSON 파일을 드래그하거나 클릭하여 선택하세요</p>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button class="btn-upload" id="uploadBtn">파일 선택</button>
+      </div>
+    </div>
+
+    <div class="divider">
+      <span>또는</span>
+    </div>
+
+    <textarea
+      id="jsonInput"
+      placeholder='{"name": "시니어 대시보드", "type": "FRAME", ...}'
+      spellcheck="false"
+    ></textarea>
+
+    <div class="examples">
+      💡 Tip: 파일을 선택하거나, JSON 내용을 직접 붙여넣으세요
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <div class="button-group">
+      <button class="btn-secondary" id="cancel">취소</button>
+      <button class="btn-primary" id="import">🚀 Import</button>
+    </div>
+  </div>
+
+  <script>
+    const jsonInput = document.getElementById('jsonInput');
+    const importBtn = document.getElementById('import');
+    const cancelBtn = document.getElementById('cancel');
+    const errorDiv = document.getElementById('error');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+
+    // Import button
+    importBtn.onclick = () => {
+      const jsonText = jsonInput.value.trim();
+
+      if (!jsonText) {
+        showError('JSON을 입력해주세요.');
+        return;
+      }
+
+      try {
+        const jsonData = JSON.parse(jsonText);
+
+        // Check if it's a multi-screen JSON (all-screens.json format)
+        if (jsonData.screens && Array.isArray(jsonData.screens)) {
+          // Validate screens array
+          if (jsonData.screens.length === 0) {
+            showError('screens 배열이 비어있습니다.');
+            return;
+          }
+
+          // Validate each screen has a type field
+          for (let i = 0; i < jsonData.screens.length; i++) {
+            const screen = jsonData.screens[i];
+            if (!screen.type) {
+              const screenName = screen.name || `Screen ${i + 1}`;
+              showError(`"${screenName}"에 "type" 필드가 없습니다.`);
+              return;
+            }
+          }
+
+          // Multi-screen format: import all screens with flows
+          parent.postMessage({
+            pluginMessage: {
+              type: 'import-multiple-json',
+              data: jsonData  // Send entire JSON to include flows
+            }
+          }, '*');
+          hideError();
+        } else if (jsonData.type) {
+          // Single screen format: import one screen
+          parent.postMessage({
+            pluginMessage: {
+              type: 'import-json',
+              data: jsonData
+            }
+          }, '*');
+          hideError();
+        } else {
+          const availableKeys = Object.keys(jsonData).join(', ');
+          showError(`Invalid JSON: "type" 필드가 필요하거나 "screens" 배열 형식을 사용하세요. 현재 키: ${availableKeys}`);
+          return;
+        }
+
+      } catch (error) {
+        showError(`JSON 파싱 오류: ${error.message}`);
+      }
+    };
+
+    // Cancel button
+    cancelBtn.onclick = () => {
+      parent.postMessage({
+        pluginMessage: { type: 'cancel' }
+      }, '*');
+    };
+
+    // File upload button click
+    uploadBtn.onclick = (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    };
+
+    // Upload area click
+    uploadArea.onclick = () => {
+      fileInput.click();
+    };
+
+    // File input change
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        readJsonFile(file);
+      }
+    };
+
+    // Drag and drop events
+    uploadArea.ondragover = (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    };
+
+    uploadArea.ondragleave = () => {
+      uploadArea.classList.remove('dragover');
+    };
+
+    uploadArea.ondrop = (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        if (file.name.endsWith('.json')) {
+          readJsonFile(file);
+        } else {
+          showError('JSON 파일만 업로드 가능합니다.');
+        }
+      }
+    };
+
+    // Read JSON file
+    function readJsonFile(file) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        try {
+          const text = e.target.result;
+          jsonInput.value = text;
+          hideError();
+
+          // Show success message
+          uploadArea.style.background = '#c8e6c9';
+          uploadArea.querySelector('.upload-text').textContent = `✓ ${file.name} 로드 완료`;
+
+          setTimeout(() => {
+            uploadArea.style.background = '#f8fef8';
+            uploadArea.querySelector('.upload-text').textContent = 'JSON 파일을 드래그하거나 클릭하여 선택하세요';
+          }, 2000);
+
+        } catch (error) {
+          showError(`파일 읽기 오류: ${error.message}`);
+        }
+      };
+
+      reader.onerror = () => {
+        showError('파일을 읽을 수 없습니다.');
+      };
+
+      reader.readAsText(file);
+    }
+
+    // Error handling
+    function showError(message) {
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function hideError() {
+      errorDiv.style.display = 'none';
+    }
+
+    // Auto-validate JSON on input
+    jsonInput.addEventListener('input', () => {
+      hideError();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Cmd/Ctrl + Enter to import
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+        importBtn.click();
+      }
+      // Escape to cancel
+      if (e.key === 'Escape') {
+        cancelBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
