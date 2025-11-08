@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuth } from '../../contexts/AuthContext'
 import styles from './Login.module.css'
 
 /**
@@ -17,7 +17,7 @@ import styles from './Login.module.css'
  */
 export const Login = () => {
   const navigate = useNavigate()
-  const { login, loading, error, clearError } = useAuthStore()
+  const { login, loading, error, clearError } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

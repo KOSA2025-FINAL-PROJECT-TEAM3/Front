@@ -4,12 +4,14 @@
  * 라우팅 구조:
  * / → Login (로그인 페이지 + 개발자 뒷구멍)
  * /signup → Signup (회원가입)
- * /role-select → RoleSelection (역할 선택)
- * /dashboard → SeniorDashboard (시니어 대시보드)
- * /guardian → GuardianDashboard (보호자 대시보드)
+ * /role-select → RoleSelection (역할 선택) - PrivateRoute 보호
+ * /dashboard → SeniorDashboard (시니어 대시보드) - PrivateRoute 보호
+ * /guardian → GuardianDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from './pages/Auth/Login'
 import { Signup } from './pages/Auth/Signup'
 import { RoleSelection } from './pages/RoleSelection'
@@ -24,29 +26,55 @@ import './App.css'
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* 인증 페이지 */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/role-select" element={<RoleSelection />} />
+      <AuthProvider>
+        <Routes>
+          {/* 공개 페이지: 인증 불필요 */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* 대시보드 */}
-        <Route path="/dashboard" element={<SeniorDashboard />} />
-        <Route path="/guardian" element={<GuardianDashboard />} />
+          {/* 보호된 페이지: 인증 필요 */}
+          <Route
+            path="/role-select"
+            element={<PrivateRoute element={<RoleSelection />} />}
+          />
+          <Route
+            path="/dashboard"
+            element={<PrivateRoute element={<SeniorDashboard />} />}
+          />
+          <Route
+            path="/guardian"
+            element={<PrivateRoute element={<GuardianDashboard />} />}
+          />
 
-        {/* 메뉴바의 다른 페이지들 (스텁) */}
-        <Route path="/medication" element={<SeniorDashboard />} />
-        <Route path="/search" element={<SeniorDashboard />} />
-        <Route path="/counsel" element={<SeniorDashboard />} />
-        <Route path="/disease" element={<GuardianDashboard />} />
-        <Route path="/settings" element={<SeniorDashboard />} />
+          {/* 메뉴바의 다른 페이지들 (스텁) - PrivateRoute 보호 */}
+          <Route
+            path="/medication"
+            element={<PrivateRoute element={<SeniorDashboard />} />}
+          />
+          <Route
+            path="/search"
+            element={<PrivateRoute element={<SeniorDashboard />} />}
+          />
+          <Route
+            path="/counsel"
+            element={<PrivateRoute element={<SeniorDashboard />} />}
+          />
+          <Route
+            path="/disease"
+            element={<PrivateRoute element={<GuardianDashboard />} />}
+          />
+          <Route
+            path="/settings"
+            element={<PrivateRoute element={<SeniorDashboard />} />}
+          />
 
-        {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* 404: 존재하지 않는 경로 */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          {/* 404: 존재하지 않는 경로 */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
