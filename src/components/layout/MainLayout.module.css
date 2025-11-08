@@ -1,0 +1,27 @@
+.layoutContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%);
+}
+
+.mainContent {
+  flex: 1;
+  margin-top: 80px;
+  margin-bottom: 80px;
+  padding: 40px 60px;
+  max-width: 1400px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-y: auto;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .mainContent {
+    padding: 20px;
+    margin-top: 80px;
+    margin-bottom: 80px;
+  }
+}
