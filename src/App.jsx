@@ -3,6 +3,7 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { RoleSelection } from './pages/RoleSelection'
 import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
 import { GuardianDashboard } from './pages/Dashboard/GuardianDashboard'
 import './App.css'
@@ -15,8 +16,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 기본 경로: 시니어 대시보드로 이동 */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* 루트: 역할 선택 페이지 */}
+        <Route path="/" element={<RoleSelection />} />
 
         {/* 시니어 대시보드 */}
         <Route path="/dashboard" element={<SeniorDashboard />} />
@@ -32,7 +33,7 @@ function App() {
         <Route path="/settings" element={<SeniorDashboard />} />
 
         {/* 404: 존재하지 않는 경로 */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
