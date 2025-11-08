@@ -1,8 +1,17 @@
 /**
  * App.jsx - 메인 라우팅 설정
+ *
+ * 라우팅 구조:
+ * / → Login (로그인 페이지 + 개발자 뒷구멍)
+ * /signup → Signup (회원가입)
+ * /role-select → RoleSelection (역할 선택)
+ * /dashboard → SeniorDashboard (시니어 대시보드)
+ * /guardian → GuardianDashboard (보호자 대시보드)
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Login } from './pages/Auth/Login'
+import { Signup } from './pages/Auth/Signup'
 import { RoleSelection } from './pages/RoleSelection'
 import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
 import { GuardianDashboard } from './pages/Dashboard/GuardianDashboard'
@@ -16,13 +25,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 루트: 역할 선택 페이지 */}
-        <Route path="/" element={<RoleSelection />} />
+        {/* 인증 페이지 */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/role-select" element={<RoleSelection />} />
 
-        {/* 시니어 대시보드 */}
+        {/* 대시보드 */}
         <Route path="/dashboard" element={<SeniorDashboard />} />
-
-        {/* 보호자 대시보드 */}
         <Route path="/guardian" element={<GuardianDashboard />} />
 
         {/* 메뉴바의 다른 페이지들 (스텁) */}
@@ -32,8 +41,11 @@ function App() {
         <Route path="/disease" element={<GuardianDashboard />} />
         <Route path="/settings" element={<SeniorDashboard />} />
 
+        {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/* 404: 존재하지 않는 경로 */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   )
