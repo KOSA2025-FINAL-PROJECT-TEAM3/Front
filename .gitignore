@@ -1,4 +1,23 @@
+# ═══════════════════════════════════════════════════════════
+# Dependencies
+# ═══════════════════════════════════════════════════════════
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ═══════════════════════════════════════════════════════════
+# Build outputs
+# ═══════════════════════════════════════════════════════════
+dist/
+dist-ssr/
+build/
+*.local
+*.tsbuildinfo
+
+# ═══════════════════════════════════════════════════════════
 # Logs
+# ═══════════════════════════════════════════════════════════
 logs
 *.log
 npm-debug.log*
@@ -7,18 +26,96 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ═══════════════════════════════════════════════════════════
+# Environment variables
+# ═══════════════════════════════════════════════════════════
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
 
-# Editor directories and files
-.vscode/*
+# ═══════════════════════════════════════════════════════════
+# IDE / Editor
+# ═══════════════════════════════════════════════════════════
+# VSCode
+.vscode/
 !.vscode/extensions.json
-.idea
+.vscode/*.log
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# IntelliJ IDEA / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse
+.classpath
+.project
+.settings/
+*.launch
+.c9/
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ═══════════════════════════════════════════════════════════
+# OS specific files
+# ═══════════════════════════════════════════════════════════
+# macOS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+._*
+.env.macos
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+.windows
+
+# Linux
+.directory
+.Trash-*
+
+# ═══════════════════════════════════════════════════════════
+# Cache
+# ═══════════════════════════════════════════════════════════
+.cache/
+.eslintcache
+.stylelintcache
+.next/
+.nuxt/
+out/
+
+# ═══════════════════════════════════════════════════════════
+# Testing
+# ═══════════════════════════════════════════════════════════
+coverage/
+.nyc_output/
+junit.xml
+
+# ═══════════════════════════════════════════════════════════
+# OS temporary files
+# ═══════════════════════════════════════════════════════════
+*.tmp
+*.temp
+*.bak
+*.orig
