@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }) => {
     setError(null)
     try {
       const response = await AuthApiClient.login(email, password)
-      saveAuthData(response.user, response.token, response.role)
+      saveAuthData(response.user, response.accessToken, response.role)
     } catch (err) {
       setError(err.message || '로그인에 실패했습니다')
       throw err
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
     setError(null)
     try {
       const response = await AuthApiClient.signup(email, password, name, userRole)
-      saveAuthData(response.user, response.token, userRole)
+      saveAuthData(response.user, response.accessToken, userRole)
     } catch (err) {
       setError(err.message || '회원가입에 실패했습니다')
       throw err
@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }) => {
     setError(null)
     try {
       const response = await AuthApiClient.kakaoLogin(kakaoAccessToken)
-      saveAuthData(response.user, response.token, response.role)
+      saveAuthData(response.user, response.accessToken, response.role)
     } catch (err) {
       setError(err.message || '카카오 로그인에 실패했습니다')
       throw err

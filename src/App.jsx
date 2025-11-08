@@ -4,7 +4,7 @@
  * 라우팅 구조:
  * / → Login (로그인 페이지 + 개발자 뒷구멍)
  * /signup → Signup (회원가입)
- * /role-select → RoleSelection (역할 선택) - PrivateRoute 보호
+ * /role-selection → RoleSelection (역할 선택) - PrivateRoute 보호
  * /dashboard → SeniorDashboard (시니어 대시보드) - PrivateRoute 보호
  * /guardian → GuardianDashboard (보호자 대시보드) - PrivateRoute 보호
  */
@@ -34,7 +34,7 @@ function App() {
 
           {/* 보호된 페이지: 인증 필요 */}
           <Route
-            path="/role-select"
+            path="/role-selection"
             element={<PrivateRoute element={<RoleSelection />} />}
           />
           <Route

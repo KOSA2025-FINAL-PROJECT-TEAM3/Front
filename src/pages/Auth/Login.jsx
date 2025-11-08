@@ -61,7 +61,7 @@ export const Login = () => {
 
     try {
       await login(email, password)
-      navigate('/role-select')
+      navigate('/role-selection')
     } catch (err) {
       setFormError(err.message)
     }
@@ -167,7 +167,7 @@ export const Login = () => {
               <button
                 type="button"
                 className={styles.backdoorButton}
-                onClick={() => navigate('/role-select')}
+                onClick={() => navigate('/role-selection')}
               >
                 👴 시니어 / 👩‍👩‍👧‍👦 보호자 선택하기
               </button>
