@@ -15,7 +15,7 @@ export const AuthApiClient = {
    * 이메일/비번 로그인
    * @param {string} email - 이메일
    * @param {string} password - 비밀번호
-   * @returns {Promise<Object>} {user, token, role}
+   * @returns {Promise<Object>} {user, accessToken, role}
    * @throws {Error} 로그인 실패
    */
   login: async (email, password) => {
@@ -30,7 +30,7 @@ export const AuthApiClient = {
           email,
           name: email.split('@')[0],
         },
-        token: 'jwt_token_' + Date.now(),
+        accessToken: 'accessToken_' + Date.now(),
         role: null,
       }
     } catch (error) {
@@ -44,7 +44,7 @@ export const AuthApiClient = {
    * @param {string} password - 비밀번호
    * @param {string} name - 이름
    * @param {string} role - 역할 (senior, guardian)
-   * @returns {Promise<Object>} {user, token}
+   * @returns {Promise<Object>} {user, accessToken}
    * @throws {Error} 회원가입 실패
    */
   signup: async (email, password, name, role) => {
@@ -64,7 +64,7 @@ export const AuthApiClient = {
           email,
           name,
         },
-        token: 'jwt_token_' + Date.now(),
+        accessToken: 'accessToken_' + Date.now(),
       }
     } catch (error) {
       throw new Error(error.response?.data?.message || '회원가입에 실패했습니다')
@@ -74,7 +74,7 @@ export const AuthApiClient = {
   /**
    * 카카오 로그인
    * @param {string} kakaoAccessToken - 카카오 액세스 토큰
-   * @returns {Promise<Object>} {user, token, role}
+   * @returns {Promise<Object>} {user, accessToken, role}
    * @throws {Error} 카카오 로그인 실패
    */
   kakaoLogin: async (kakaoAccessToken) => {
@@ -91,7 +91,7 @@ export const AuthApiClient = {
           email: 'user@kakao.com',
           name: '카카오 사용자',
         },
-        token: 'jwt_token_' + Date.now(),
+        accessToken: 'accessToken_' + Date.now(),
         role: null,
       }
     } catch (error) {
