@@ -1,0 +1,115 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+  display: flex;
+  align-items: center;
+  z-index: 101;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 60px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.logoIcon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.appName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: -0.5px;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  text-align: right;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.userRole {
+  font-size: 12px;
+  color: #888;
+}
+
+.notificationBadge {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .headerContainer {
+    padding: 0 20px;
+  }
+
+  .logoIcon {
+    font-size: 24px;
+  }
+
+  .appName {
+    font-size: 18px;
+  }
+
+  .userName {
+    font-size: 12px;
+  }
+
+  .userRole {
+    font-size: 10px;
+  }
+
+  .rightSection {
+    gap: 12px;
+  }
+
+  .notificationBadge {
+    min-width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+}

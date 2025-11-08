@@ -1,0 +1,46 @@
+.dashboardContent {
+  width: 100%;
+}
+
+.titleSection {
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+.pageTitle {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.dateInfo {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+.medicationList {
+  width: 100%;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .dashboardContent {
+    width: 100%;
+  }
+
+  .titleSection {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  .pageTitle {
+    font-size: 24px;
+  }
+
+  .dateInfo {
+    font-size: 12px;
+  }
+}

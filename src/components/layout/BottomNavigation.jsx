@@ -1,0 +1,50 @@
+/**
+ * BottomNavigation Component
+ * - 하단 메뉴바 (Vision Pro 스타일)
+ * - 6개 메뉴: 홈, 약관리, 증상검색, 약사상담, 질병관리, 설정
+ */
+
+import { useLocation, useNavigate } from 'react-router-dom'
+import styles from './BottomNavigation.module.css'
+
+const menuItems = [
+  { id: 'home', label: '홈', icon: '🏠', path: '/dashboard' },
+  { id: 'medication', label: '약관리', icon: '💊', path: '/medication' },
+  { id: 'search', label: '증상검색', icon: '🔍', path: '/search' },
+  { id: 'counsel', label: '약사상담', icon: '💬', path: '/counsel' },
+  { id: 'disease', label: '질병관리', icon: '🏥', path: '/disease' },
+  { id: 'settings', label: '설정', icon: '⚙️', path: '/settings' },
+]
+
+/**
+ * 하단 네비게이션 메뉴바
+ * @returns {JSX.Element} 메뉴바 컴포넌트
+ */
+export const BottomNavigation = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isActive = (path) => {
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
+
+  return (
+    <nav className={styles.bottomNav}>
+      <div className={styles.navContainer}>
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
+            onClick={() => navigate(item.path)}
+            aria-label={item.label}
+          >
+            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navLabel}>{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
+export default BottomNavigation
