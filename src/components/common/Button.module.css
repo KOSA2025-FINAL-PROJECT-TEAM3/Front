@@ -1,0 +1,149 @@
+/**
+ * Button 컴포넌트 CSS Module
+ * - 다양한 변형(variant)과 크기(size) 지원
+ */
+
+/* ═══════════════════════════════════════════════════════════
+   기본 버튼 스타일
+   ═══════════════════════════════════════════════════════════ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.button:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   크기(size) 변형
+   ═══════════════════════════════════════════════════════════ */
+
+.sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.md {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   색상 변형
+   ═══════════════════════════════════════════════════════════ */
+
+/* Primary 버튼 */
+.primary {
+  background-color: #4f46e5; /* indigo-600 */
+  color: white;
+}
+
+.primary:hover:not(.disabled) {
+  background-color: #4338ca; /* indigo-700 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+}
+
+.primary:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary 버튼 */
+.secondary {
+  background-color: #e5e7eb; /* gray-200 */
+  color: #1f2937; /* gray-900 */
+}
+
+.secondary:hover:not(.disabled) {
+  background-color: #d1d5db; /* gray-300 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.secondary:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+/* Danger 버튼 */
+.danger {
+  background-color: #ef4444; /* red-500 */
+  color: white;
+}
+
+.danger:hover:not(.disabled) {
+  background-color: #dc2626; /* red-600 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+}
+
+.danger:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+/* Ghost 버튼 */
+.ghost {
+  background-color: transparent;
+  color: #4f46e5;
+  border: 1px solid #4f46e5;
+}
+
+.ghost:hover:not(.disabled) {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+.ghost:active:not(.disabled) {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   상태
+   ═══════════════════════════════════════════════════════════ */
+
+/* 로딩 상태 */
+.loading {
+  opacity: 0.7;
+}
+
+/* 비활성화 상태 */
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 로딩 스피너 */
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 로딩 텍스트 */
+.loadingText {
+  opacity: 0.8;
+}

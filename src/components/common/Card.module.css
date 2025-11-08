@@ -1,0 +1,71 @@
+/**
+ * Card 컴포넌트 CSS Module
+ */
+
+/* ═══════════════════════════════════════════════════════════
+   카드
+   ═══════════════════════════════════════════════════════════ */
+
+.card {
+  background-color: white;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   카드 헤더
+   ═══════════════════════════════════════════════════════════ */
+
+.header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937; /* gray-900 */
+}
+
+.description {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280; /* gray-500 */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   카드 바디
+   ═══════════════════════════════════════════════════════════ */
+
+.body {
+  padding: 1.5rem;
+}
+
+.body > * + * {
+  margin-top: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   카드 푸터
+   ═══════════════════════════════════════════════════════════ */
+
+.footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb; /* gray-200 */
+  background-color: #f9fafb; /* gray-50 */
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.footer > * {
+  min-width: max-content;
+}
