@@ -51,6 +51,52 @@ src/
 - **Booleans**: `is/has` prefix (`isLoading`, `hasError`)
 - **Folders**: lowercase (`components`, `hooks`)
 
+### Code Examples
+
+**✅ Good JavaScript**:
+```javascript
+const handleSubmit = (event) => {
+  event.preventDefault()
+  const userData = {
+    name: event.target.name.value,
+    email: event.target.email.value,
+  }
+  submitForm(userData)
+}
+```
+
+**✅ Good JSX**:
+```jsx
+export const UserProfile = ({ user, isLoading }) => {
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
+
+  return (
+    <Card>
+      <CardHeader title={user.name} />
+      <CardBody>
+        <p>Email: {user.email}</p>
+      </CardBody>
+    </Card>
+  )
+}
+```
+
+**✅ Good Comments**:
+```javascript
+/**
+ * Fetch user data by ID
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} User info
+ * @throws {Error} If user not found
+ */
+export const getUserData = async (userId) => {
+  const response = await apiClient.get(`/users/${userId}`)
+  return response.data
+}
+```
+
 ### Git Workflow
 **Branch strategy**:
 ```
