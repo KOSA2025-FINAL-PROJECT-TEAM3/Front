@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuth } from '../../contexts/AuthContext'
 import styles from './Signup.module.css'
 
 /**
@@ -16,7 +16,7 @@ import styles from './Signup.module.css'
  */
 export const Signup = () => {
   const navigate = useNavigate()
-  const { signup, loading, error, clearError } = useAuthStore()
+  const { signup, loading, error, clearError } = useAuth()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -5,6 +5,7 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import styles from './RoleSelection.module.css'
 
 /**
@@ -13,12 +14,18 @@ import styles from './RoleSelection.module.css'
  */
 export const RoleSelection = () => {
   const navigate = useNavigate()
+  const { selectRole } = useAuth()
 
-  const handleSelectRole = (role) => {
-    if (role === 'senior') {
-      navigate('/dashboard')
-    } else if (role === 'guardian') {
-      navigate('/guardian')
+  const handleSelectRole = async (role) => {
+    try {
+      await selectRole(role)
+      if (role === 'senior') {
+        navigate('/dashboard')
+      } else if (role === 'guardian') {
+        navigate('/guardian')
+      }
+    } catch (err) {
+      console.error('역할 선택 실패:', err)
     }
   }
 
