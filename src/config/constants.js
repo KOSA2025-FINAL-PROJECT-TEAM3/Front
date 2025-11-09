@@ -125,4 +125,5 @@ export const STORAGE_KEYS = {
   FAMILY_GROUP: 'amapill_family',
   DEV_MODE: 'amapill_dev_mode',
   ROLE: 'amapill_role',
+  KAKAO_STATE: 'amapill_kakao_oauth_state',
 }

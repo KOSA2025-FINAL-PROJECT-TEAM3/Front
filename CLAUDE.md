@@ -116,8 +116,9 @@ export const getUserData = async (userId) => {
    - Goal: 빠르게 UI 골격 확보, 백엔드 없이도 페이지 이동·상태 흐름을 확인
 
 2. **Stage 2: Auth & Dev Mode**
-   - Kakao OAuth 흐름 + 이메일 로그인 화면, 역할 선택, AuthContext
-   - 백엔드가 없을 때를 대비해 **Developer Mode**(로컬 storage 토큰/더미 계정)로 화면 접근 가능하도록 구현
+   - Kakao OAuth 버튼 + `/auth/kakao/callback` 처리, 이메일 로그인/회원가입, 역할 선택 흐름 확립
+   - 백엔드가 없을 때를 대비해 **Developer Mode**(로컬 storage 토큰/더미 계정)로 화면 접근 가능하도록 구현  
+     _(※ Dev Mode 가이드는 Stage가 올라갈 때마다 갱신되며, 백엔드가 완성되면 제거합니다.)_
 
 3. **Stage 3: Family Prototype**
    - 가족 관리 페이지, 멤버 카드/초대/상세 UI, Dev Mode 데이터로 동작하는 리액트 쿼리 mock

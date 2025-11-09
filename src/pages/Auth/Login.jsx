@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { KakaoLoginButton } from '../../components/auth/KakaoLoginButton'
 import styles from './Login.module.css'
 
 /**
@@ -65,11 +66,6 @@ export const Login = () => {
     } catch (err) {
       setFormError(err.message)
     }
-  }
-
-  const handleKakaoLogin = () => {
-    alert('카카오 로그인은 나중에 구현됩니다')
-    // TODO: 카카오 OAuth 구현
   }
 
   return (
@@ -137,14 +133,11 @@ export const Login = () => {
         <div className={styles.divider}>또는</div>
 
         {/* 카카오 로그인 */}
-        <button
+        <KakaoLoginButton
           className={styles.kakaoButton}
-          onClick={handleKakaoLogin}
           disabled={loading}
-        >
-          <span className={styles.kakaoIcon}>☕</span>
-          카카오로 로그인
-        </button>
+          onUnavailable={(message) => setFormError(message)}
+        />
 
         {/* 회원가입 링크 */}
         <div className={styles.signupLink}>
