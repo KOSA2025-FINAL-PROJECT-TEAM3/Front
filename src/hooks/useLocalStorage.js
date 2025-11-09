@@ -4,7 +4,7 @@
  * - 페이지 새로고침 후에도 데이터 유지
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 /**
  * 로컬 스토리지와 동기화되는 상태를 제공하는 훅

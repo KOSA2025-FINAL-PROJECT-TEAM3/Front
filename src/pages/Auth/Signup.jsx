@@ -103,8 +103,8 @@ export const Signup = () => {
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.logo}>💊</div>
-          <h1 className={styles.title}>실버케어</h1>
-          <p className={styles.subtitle}>회원가입</p>
+          <h1 className={styles.title}>뭐냑? (AMA...Pill)</h1>
+          <p className={styles.subtitle}>새 계정 만들기</p>
         </div>
 
         {/* 회원가입 폼 */}

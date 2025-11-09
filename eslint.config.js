@@ -16,7 +16,30 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: 'module',
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    rules: {
+      'no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          varsIgnorePattern: '^[A-Z][A-Za-z0-9]*$',
+        },
+      ],
+      'react-refresh/only-export-components': [
+        'error',
+        { allowConstantExport: true },
+      ],
     },
   },
 ])

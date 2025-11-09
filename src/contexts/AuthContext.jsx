@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * AuthContext - 인증 상태 전역 관리
  * - React Context API 기반 (명세서 준수)
@@ -7,6 +8,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { AuthApiClient } from '../core/api/authApiClient'
+import { STORAGE_KEYS } from '../config/constants'
 
 /**
  * AuthContext 생성
@@ -40,9 +42,9 @@ export const AuthProvider = ({ children }) => {
 
   // localStorage에서 저장된 인증 정보 복원
   useEffect(() => {
-    const savedToken = localStorage.getItem('silvercare-token')
-    const savedUser = localStorage.getItem('silvercare-user')
-    const savedRole = localStorage.getItem('silvercare-role')
+    const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    const savedUser = localStorage.getItem(STORAGE_KEYS.USER_DATA)
+    const savedRole = localStorage.getItem(STORAGE_KEYS.ROLE)
 
     if (savedToken && savedUser) {
       setToken(savedToken)
@@ -55,10 +57,10 @@ export const AuthProvider = ({ children }) => {
    * 인증 정보 저장
    */
   const saveAuthData = useCallback((userData, userToken, userRole) => {
-    localStorage.setItem('silvercare-token', userToken)
-    localStorage.setItem('silvercare-user', JSON.stringify(userData))
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, userToken)
+    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData))
     if (userRole) {
-      localStorage.setItem('silvercare-role', userRole)
+      localStorage.setItem(STORAGE_KEYS.ROLE, userRole)
     }
     setUser(userData)
     setToken(userToken)
@@ -131,9 +133,9 @@ export const AuthProvider = ({ children }) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await AuthApiClient.selectRole(token, selectedRole)
+      await AuthApiClient.selectRole(token, selectedRole)
       setRole(selectedRole)
-      localStorage.setItem('silvercare-role', selectedRole)
+      localStorage.setItem(STORAGE_KEYS.ROLE, selectedRole)
     } catch (err) {
       setError(err.message || '역할 선택에 실패했습니다')
       throw err
@@ -150,9 +152,9 @@ export const AuthProvider = ({ children }) => {
     setRole(null)
     setToken(null)
     setError(null)
-    localStorage.removeItem('silvercare-token')
-    localStorage.removeItem('silvercare-user')
-    localStorage.removeItem('silvercare-role')
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA)
+    localStorage.removeItem(STORAGE_KEYS.ROLE)
   }, [])
 
   /**

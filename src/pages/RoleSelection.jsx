@@ -35,8 +35,8 @@ export const RoleSelection = () => {
         {/* 헤더 */}
         <div className={styles.header}>
           <div className={styles.logo}>💊</div>
-          <h1 className={styles.title}>실버케어</h1>
-          <p className={styles.subtitle}>당신의 건강한 약 복용을 도와드립니다</p>
+          <h1 className={styles.title}>뭐냑? (AMA...Pill)</h1>
+          <p className={styles.subtitle}>역할을 선택하고 맞춤 대시보드로 이동하세요</p>
         </div>
 
         {/* 역할 선택 */}

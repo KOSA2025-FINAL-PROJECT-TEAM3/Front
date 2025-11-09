@@ -20,7 +20,7 @@ export const Header = ({ userName = '사용자', userRole = '시니어', notific
         {/* 좌측: 로고 및 앱 이름 */}
         <div className={styles.logoSection}>
           <div className={styles.logoIcon}>💊</div>
-          <span className={styles.appName}>실버케어</span>
+          <span className={styles.appName}>뭐냑? (AMA...Pill)</span>
         </div>
 
         {/* 우측: 사용자 정보 및 알림 */}
