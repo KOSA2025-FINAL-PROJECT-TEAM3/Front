@@ -4,8 +4,8 @@
  */
 
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@components/common'
-import styles from './ErrorPage.module.css'
+import { Button } from '@shared/components/ui'
+import styles from './ErrorPage.module.scss'
 
 /**
  * 404 에러 페이지

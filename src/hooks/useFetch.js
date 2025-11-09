@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import apiClient from '@config/api'
+import apiClient from '@/core/api/axiosConfig'
 
 /**
  * API 호출을 처리하는 커스텀 훅

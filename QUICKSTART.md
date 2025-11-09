@@ -1,7 +1,7 @@
 # 🚀 뭐냑? (AMA...Pill) 빠른 시작 가이드
 
 > 백엔드 없이도 5분 안에 프런트 프로토타입 실행하기  
-> (Dev Mode 안내는 각 Stage 완료 시마다 업데이트합니다. 백엔드 연결이 끝나면 제거 예정입니다.)
+> **Dev Mode는 백엔드가 완성되면 VITE_ENABLE_DEV_MODE=false로 비활성화하고, 필요 시 컴포넌트를 제거하세요.**
 
 ---
 
@@ -181,7 +181,8 @@ npm run dev
 
 ## 🔑 Developer Mode (Frontend-first)
 
-백엔드가 아직 없더라도 Stage 1~3 작업을 진행할 수 있도록 **Developer Mode**를 제공합니다.
+백엔드가 아직 없더라도 Stage 1~3 작업을 진행할 수 있도록 **Developer Mode**를 제공합니다.  
+Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거하거나 비활성화해야 합니다.
 
 ### 왜 필요한가?
 - UI/UX를 앞당겨 검증하기 위해 프런트가 먼저 구축되는 구조입니다.
@@ -190,25 +191,28 @@ npm run dev
 ### 동작 방식
 1. `npm run dev`로 프런트 서버를 띄우면 `localStorage`에 Dev Mode 플래그를 심어 임시 토큰/사용자 정보를 저장합니다.
 2. Axios 인터셉터는 Dev Mode가 감지되면 실제 API 호출을 막고 Mock 응답을 반환합니다.
-3. AuthContext/FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
+3. AuthStore + FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
 
 ### 사용 방법
 - **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Guardian Dashboard)
+- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Guardian Dashboard, Family Management)
 - **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
 - **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
 
 ### 실제 백엔드 연결로 전환
-1. `.env`에서 `VITE_USE_MOCK_API=false` 설정
+1. `.env`에서 `VITE_USE_MOCK_API=false` 설정 (기본값)
 2. Dev Mode 플래그(`localStorage.setItem('amapill_dev_mode', 'false')`) 제거
-3. 다시 로그인하면 Axios가 실제 API Gateway로 요청을 보냅니다
+3. Stage 4 이후에는 `DeveloperModePanel` 자체를 삭제하거나 `VITE_ENABLE_DEV_MODE=false`로 고정
 
 ### Kakao OAuth 설정
 1. `.env`에 `VITE_KAKAO_CLIENT_ID`와 `VITE_KAKAO_REDIRECT_URI`를 입력합니다. (기본 콜백: `http://localhost:5173/auth/kakao/callback`)
 2. 카카오 개발자 콘솔에서 Redirect URI를 동일하게 등록합니다.
 3. 로그인 화면의 “카카오로 로그인” 버튼을 누르면 카카오 인증 후 콜백 페이지가 자동으로 `/role-selection`까지 안내합니다.
 
-> ※ `VITE_USE_MOCK_API` 기본값은 `false`입니다. Mock 모드를 써야 할 때만 `true`로 바꿔주세요.
+### Stage 3 참고 (Family Prototype)
+- FamilyContext는 `@tanstack/react-query` + `FamilyMockService`(localStorage 기반) 조합으로 데이터를 로드/초대/삭제합니다. Dev Mode에서도 동일하게 작동합니다.
+- QueryClientProvider는 `src/main.jsx`에 전역으로 선언되어 있어 Stage 4에서 실제 API/실시간 연동 시 그대로 확장할 수 있습니다.
+- FamilyProvider는 AuthProvider 내부에 배치되어 있어 인증된 사용자만 가족 데이터를 로드합니다. Stage 4에서 실 API 연동과 함께 구조를 조정합니다.
 
 ---
 

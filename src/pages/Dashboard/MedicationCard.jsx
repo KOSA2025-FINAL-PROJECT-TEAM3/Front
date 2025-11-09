@@ -3,7 +3,7 @@
  * - 약 복용 일정 카드
  */
 
-import styles from './MedicationCard.module.css'
+import styles from './MedicationCard.module.scss'
 
 /**
  * 약 복용 카드 컴포넌트

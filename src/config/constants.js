@@ -123,6 +123,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: import.meta.env.VITE_REFRESH_TOKEN_KEY || 'amapill_refresh_token',
   USER_DATA: 'amapill_user',
   FAMILY_GROUP: 'amapill_family',
+  FAMILY_MEMBER_DETAILS: 'amapill_family_member_details',
   DEV_MODE: 'amapill_dev_mode',
   ROLE: 'amapill_role',
   KAKAO_STATE: 'amapill_kakao_oauth_state',

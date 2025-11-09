@@ -48,9 +48,8 @@ npm run lint
 
 ```
 src/
-├── components/           # UI 컴포넌트
-│   ├── common/          # 기본 컴포넌트 (Button, Input, Card 등)
-│   └── layout/          # 레이아웃 컴포넌트
+├── shared/
+│   └── components/      # 재사용 UI (ui/, layout/, editor/)
 ├── pages/               # 페이지 컴포넌트
 │   └── errors/          # 에러 페이지 (404, 500)
 ├── hooks/               # Custom Hooks
