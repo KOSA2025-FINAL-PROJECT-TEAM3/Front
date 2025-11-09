@@ -1,0 +1,18 @@
+.page {
+  padding-bottom: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: #64748b;
+}

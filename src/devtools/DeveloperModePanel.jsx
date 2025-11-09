@@ -1,7 +1,7 @@
 /**
  * DeveloperModePanel
- * - Dev Mode shortcut launcher (kept outside shared UI)
- * - Styles use SCSS module to avoid leaking globals
+ * - 개발 모드 단축키 실행기 (공유 UI 외부에 유지)
+ * - 전역 스타일 유출 방지를 위해 SCSS 모듈 사용
  */
 
 import { useState } from 'react'

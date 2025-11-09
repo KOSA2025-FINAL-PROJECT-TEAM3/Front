@@ -1,52 +1,27 @@
 /* eslint-disable react-refresh/only-export-components */
+import { useEffect } from 'react'
+import { useFamilyStore } from '@/stores/familyStore'
+
 /**
- * FamilyContext
- * - Stage 3: 가족 관리 프로토타입 (Mock 데이터 + Dev Mode 지원)
+ * FamilyProvider
+ * - Zustand store 초기화용 래퍼 (Context 대신 store 직접 사용)
  */
-
-import { createContext, useContext, useMemo } from 'react'
-import { DEFAULT_FAMILY_GROUP, DEFAULT_FAMILY_MEMBERS } from '@/data/mockFamily'
-import { useFamilyQuery } from '../hooks/useFamilyQuery'
-
-export const FamilyContext = createContext(null)
-
 export const FamilyProvider = ({ children }) => {
-  const {
-    familyGroup,
-    members,
-    loading,
-    inviteMember,
-    removeMember,
-    refetch,
-    error,
-  } = useFamilyQuery()
+  const initialize = useFamilyStore((state) => state.initialize)
 
-  const value = useMemo(
-    () => ({
-      familyGroup: familyGroup ?? DEFAULT_FAMILY_GROUP,
-      members: members ?? DEFAULT_FAMILY_MEMBERS,
-      loading,
-      error,
-      inviteMember,
-      removeMember,
-      refetchFamily: refetch,
-    }),
-    [familyGroup, members, loading, error, inviteMember, removeMember, refetch],
-  )
+  useEffect(() => {
+    initialize()
+  }, [initialize])
 
-  return (
-    <FamilyContext.Provider value={value}>
-      {children}
-    </FamilyContext.Provider>
-  )
+  return children
 }
 
+/**
+ * useFamilyContext (legacy helper)
+ * - 기존 코드 호환용으로 Zustand store를 그대로 반환
+ */
 export const useFamilyContext = () => {
-  const ctx = useContext(FamilyContext)
-  if (!ctx) {
-    throw new Error('useFamilyContext must be used within FamilyProvider')
-  }
-  return ctx
+  return useFamilyStore()
 }
 
 export default FamilyProvider

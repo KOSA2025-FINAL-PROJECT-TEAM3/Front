@@ -1,6 +1,6 @@
 /**
  * KakaoLoginButton
- * - Kakao OAuth 로그인 버튼
+ * - 카카오 OAuth 로그인 버튼
  * - 필수 환경변수: VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI
  */
 

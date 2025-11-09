@@ -210,9 +210,14 @@ Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거�
 3. 로그인 화면의 “카카오로 로그인” 버튼을 누르면 카카오 인증 후 콜백 페이지가 자동으로 `/role-selection`까지 안내합니다.
 
 ### Stage 3 참고 (Family Prototype)
-- FamilyContext는 `@tanstack/react-query` + `FamilyMockService`(localStorage 기반) 조합으로 데이터를 로드/초대/삭제합니다. Dev Mode에서도 동일하게 작동합니다.
-- QueryClientProvider는 `src/main.jsx`에 전역으로 선언되어 있어 Stage 4에서 실제 API/실시간 연동 시 그대로 확장할 수 있습니다.
-- FamilyProvider는 AuthProvider 내부에 배치되어 있어 인증된 사용자만 가족 데이터를 로드합니다. Stage 4에서 실 API 연동과 함께 구조를 조정합니다.
+- Family 상태는 `src/stores/familyStore.js`(Zustand)에서 관리하며, Dev Mode에서는 `FamilyMockService`가 localStorage 기반 데이터를 공급합니다.
+- FamilyProvider는 store 초기화만 담당하며, 화면에서는 `useFamily` 훅을 통해 상태를 구독합니다.
+- Stage 4에서 API/실시간 연동 시 동일한 store 액션(loadFamily/invite/remove)을 실제 엔드포인트로 교체하면 됩니다.
+
+### Stage 4 실시간 동기화
+- `VITE_WS_BASE_URL`에 Hocuspocus 서버 주소를 입력하고, `VITE_ENABLE_REALTIME`(기본값 true)을 유지하면 `useFamilySync`가 `FamilySyncService`를 통해 실시간 상태를 구독합니다.
+- WS URL이 비어 있거나 `VITE_ENABLE_REALTIME=false`로 설정하면 Stage 3와 동일한 Mock 동작을 유지합니다.
+- Dev Mode에서는 여전히 Mock 데이터를 주입하지만, 실 WS가 연결되어 있을 경우 Dev 계정도 동일한 `family-group-{id}` 룸에 입장합니다.
 
 ---
 

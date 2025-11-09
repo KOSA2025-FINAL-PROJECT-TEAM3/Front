@@ -120,7 +120,7 @@ export const AuthApiClient = {
 
   /**
    * 카카오 로그인
-   * @param {string} authorizationCode - 카카오 OAuth authorization code
+   * @param {string} authorizationCode - 카카오 OAuth 인증 코드
    * @returns {Promise<Object>} {user, accessToken, role}
    * @throws {Error} 카카오 로그인 실패
    */

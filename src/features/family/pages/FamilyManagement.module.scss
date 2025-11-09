@@ -50,3 +50,30 @@
   font-weight: 600;
   color: #1f2937;
 }
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.statusBadge[data-state='connected'] {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.statusBadge[data-state='connecting'] {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.statusBadge[data-state='waiting'],
+.statusBadge[data-state='disabled'] {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.onlineCount {
+  color: #2563eb;
+  font-weight: 600;
+}

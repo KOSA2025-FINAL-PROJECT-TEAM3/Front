@@ -3,6 +3,7 @@
  * - 전체 페이지 레이아웃 (헤더 + 콘텐츠 + 하단 메뉴)
  */
 
+import classNames from 'classnames'
 import { Header } from './Header'
 import { BottomNavigation } from './BottomNavigation'
 import styles from './MainLayout.module.scss'
@@ -19,10 +20,12 @@ export const MainLayout = ({
   children,
   userName = '사용자',
   userRole = '시니어',
-  notificationCount = 0
+  notificationCount = 0,
+  showBottomNav = true,
+  className,
 }) => {
   return (
-    <div className={styles.layoutContainer}>
+    <div className={classNames(styles.layoutContainer, className)}>
       <Header
         userName={userName}
         userRole={userRole}
@@ -33,7 +36,7 @@ export const MainLayout = ({
         {children}
       </main>
 
-      <BottomNavigation />
+      {showBottomNav && <BottomNavigation />}
     </div>
   )
 }

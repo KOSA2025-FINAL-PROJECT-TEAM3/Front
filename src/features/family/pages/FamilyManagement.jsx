@@ -15,6 +15,9 @@ export const FamilyManagementPage = () => {
     error,
     isSyncing,
     lastSyncTime,
+    onlineUsers,
+    connectionStatus,
+    onlineMemberIds,
   } = useFamilySync()
 
   const handleDetail = (memberId) => {
@@ -42,10 +45,20 @@ export const FamilyManagementPage = () => {
         ) : (
           <>
             <div className={styles.syncMeta}>
-              <span>{isSyncing ? '동기화 중...' : '동기화 완료'}</span>
+              <span className={styles.statusBadge} data-state={connectionStatus}>
+                {connectionStatus === 'connected' && (isSyncing ? '동기화 중...' : '실시간 연결됨')}
+                {connectionStatus === 'connecting' && '연결 중...'}
+                {connectionStatus === 'waiting' && '대기 중'}
+                {connectionStatus === 'disabled' && '실시간 비활성화'}
+              </span>
               {lastSyncTime && (
                 <span className={styles.syncTime}>
                   마지막 동기화: {lastSyncTime.toLocaleTimeString('ko-KR')}
+                </span>
+              )}
+              {onlineUsers?.length > 0 && (
+                <span className={styles.onlineCount}>
+                  👥 온라인 {onlineUsers.length}명
                 </span>
               )}
             </div>
@@ -54,6 +67,7 @@ export const FamilyManagementPage = () => {
               members={members}
               onDetail={handleDetail}
               onRemove={removeMember}
+              onlineMemberIds={onlineMemberIds}
             />
           </>
         )}
