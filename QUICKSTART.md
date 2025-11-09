@@ -1,6 +1,7 @@
 # 🚀 뭐냑? (AMA...Pill) 빠른 시작 가이드
 
-> 백엔드 없이도 5분 안에 프런트 프로토타입 실행하기
+> 백엔드 없이도 5분 안에 프런트 프로토타입 실행하기  
+> (Dev Mode 안내는 각 Stage 완료 시마다 업데이트합니다. 백엔드 연결이 끝나면 제거 예정입니다.)
 
 ---
 
@@ -193,9 +194,7 @@ npm run dev
 
 ### 사용 방법
 - **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (선택 즉시 해당 화면으로 새로고침되며 더미 토큰 주입)
-  - 예: “Role Selection” → 자동으로 더미 계정 + 토큰 저장 후 `/role-selection` 이동
-  - “Family Management”를 누르면 기본 `familyGroupId=group-1`이 주입된 상태로 가족 페이지에 진입
+- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Guardian Dashboard)
 - **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
 - **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
 
@@ -203,6 +202,13 @@ npm run dev
 1. `.env`에서 `VITE_USE_MOCK_API=false` 설정
 2. Dev Mode 플래그(`localStorage.setItem('amapill_dev_mode', 'false')`) 제거
 3. 다시 로그인하면 Axios가 실제 API Gateway로 요청을 보냅니다
+
+### Kakao OAuth 설정
+1. `.env`에 `VITE_KAKAO_CLIENT_ID`와 `VITE_KAKAO_REDIRECT_URI`를 입력합니다. (기본 콜백: `http://localhost:5173/auth/kakao/callback`)
+2. 카카오 개발자 콘솔에서 Redirect URI를 동일하게 등록합니다.
+3. 로그인 화면의 “카카오로 로그인” 버튼을 누르면 카카오 인증 후 콜백 페이지가 자동으로 `/role-selection`까지 안내합니다.
+
+> ※ `VITE_USE_MOCK_API` 기본값은 `false`입니다. Mock 모드를 써야 할 때만 `true`로 바꿔주세요.
 
 ---
 

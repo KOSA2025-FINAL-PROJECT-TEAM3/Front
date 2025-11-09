@@ -17,6 +17,7 @@ import { Signup } from './pages/Auth/Signup'
 import { RoleSelection } from './pages/RoleSelection'
 import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
 import { GuardianDashboard } from './pages/Dashboard/GuardianDashboard'
+import KakaoCallbackPage from './pages/Auth/KakaoCallback'
 import DeveloperModePanel from './components/common/DeveloperModePanel'
 import './App.css'
 
@@ -32,6 +33,7 @@ function App() {
           {/* 공개 페이지: 인증 불필요 */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
 
           {/* 보호된 페이지: 인증 필요 */}
           <Route

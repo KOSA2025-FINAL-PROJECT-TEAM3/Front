@@ -8,7 +8,7 @@ import { apiClient } from './axiosConfig'
 import { STORAGE_KEYS } from '../../config/constants'
 
 const runtimeEnv = typeof import.meta !== 'undefined' ? import.meta.env : {}
-const USE_MOCK_API = runtimeEnv?.VITE_USE_MOCK_API !== 'false'
+const USE_MOCK_API = runtimeEnv?.VITE_USE_MOCK_API === 'true'
 const MOCK_DELAY_MS = 250
 
 const delay = (ms = MOCK_DELAY_MS) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -120,14 +120,14 @@ export const AuthApiClient = {
 
   /**
    * 카카오 로그인
-   * @param {string} kakaoAccessToken - 카카오 액세스 토큰
+   * @param {string} authorizationCode - 카카오 OAuth authorization code
    * @returns {Promise<Object>} {user, accessToken, role}
    * @throws {Error} 카카오 로그인 실패
    */
-  kakaoLogin: async (kakaoAccessToken) => {
-    const payload = { token: kakaoAccessToken }
+  kakaoLogin: async (authorizationCode) => {
+    const payload = { authorizationCode }
     const mock = () => {
-      logMockRequest('kakaoLogin', { lastFour: kakaoAccessToken?.slice(-4) })
+      logMockRequest('kakaoLogin', { lastFour: authorizationCode?.slice(-4) })
       return {
         user: {
           id: '1',
