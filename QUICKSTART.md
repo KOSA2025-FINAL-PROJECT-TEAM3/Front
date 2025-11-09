@@ -193,10 +193,11 @@ npm run dev
 
 ### 사용 방법
 - **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택
+- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (선택 즉시 해당 화면으로 새로고침되며 더미 토큰 주입)
   - 예: “Role Selection” → 자동으로 더미 계정 + 토큰 저장 후 `/role-selection` 이동
   - “Family Management”를 누르면 기본 `familyGroupId=group-1`이 주입된 상태로 가족 페이지에 진입
-- **3)** Dev Mode 해제: `localStorage.clear()` 또는 Dev Mode 메뉴에서 Logout 페이지로 이동
+- **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
+- **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
 
 ### 실제 백엔드 연결로 전환
 1. `.env`에서 `VITE_USE_MOCK_API=false` 설정
