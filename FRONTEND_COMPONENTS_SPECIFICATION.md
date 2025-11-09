@@ -38,6 +38,20 @@
 - **폰트**: Inter (Bold, SemiBold, Regular, Medium)
 - **코너 반경**: 12px (카드), 8px (버튼)
 
+### Tailwind Theme 매핑
+| 토큰 | 값 | Tailwind key |
+|------|-----|--------------|
+| Primary | `#2563eb` | `theme.colors.primary` |
+| Guardian Accent | `#a5b4fc` | `theme.colors.guardian` |
+| Senior Accent | `#f9a8d4` | `theme.colors.senior` |
+| Warning | `#f97316` | `theme.colors.warning` |
+| Danger | `#ef4444` | `theme.colors.danger` |
+| Success | `#22c55e` | `theme.colors.success` |
+| Font | `Inter, system-ui` | `theme.fontFamily.sans` |
+| Radii | 12px / 8px | `theme.borderRadius.card`, `theme.borderRadius.control` |
+
+> 전역 스타일은 `src/styles/tailwind.css` + `src/styles/base.scss`에서 초기화하며, 레이아웃/모듈 디자인은 SCSS Modules로 구성한다.
+
 ---
 
 ## 📂 프로젝트 구조
@@ -1051,11 +1065,12 @@ MyDiseasesSettingsPage
 #### BottomNavigation
 ```jsx
 // src/shared/components/layout/BottomNavigation.jsx
-<BottomNavigation activeTab="home|medications|family|settings">
+<BottomNavigation>
   <NavItem icon={HomeIcon} label="홈" to="/dashboard" />
   <NavItem icon={PillIcon} label="약관리" to="/medications" />
   <NavItem icon={FamilyIcon} label="가족" to="/family" />
   <NavItem icon={SettingsIcon} label="설정" to="/settings" />
+  <QuickAction icon="🚪" label="로그아웃" onClick={logout} />
 </BottomNavigation>
 ```
 

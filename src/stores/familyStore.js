@@ -1,0 +1,74 @@
+/**
+ * Family Store
+ * - 가족 그룹/멤버 상태를 Zustand로 관리
+ */
+
+import { create } from 'zustand'
+import {
+  DEFAULT_FAMILY_GROUP,
+  DEFAULT_FAMILY_MEMBERS,
+} from '@/data/mockFamily'
+import { FamilyMockService } from '@/features/family/services/familyService'
+
+const initialState = {
+  familyGroup: DEFAULT_FAMILY_GROUP,
+  members: DEFAULT_FAMILY_MEMBERS,
+  loading: false,
+  error: null,
+  initialized: false,
+}
+
+const withLoading = async (set, fn) => {
+  set({ loading: true, error: null })
+  try {
+    return await fn()
+  } catch (error) {
+    set({ error })
+    throw error
+  } finally {
+    set({ loading: false })
+  }
+}
+
+export const useFamilyStore = create((set, get) => ({
+  ...initialState,
+
+  initialize: async ({ force } = {}) => {
+    if (get().initialized && !force) return
+    await get().loadFamily()
+  },
+
+  loadFamily: async () =>
+    withLoading(set, async () => {
+      const data = await FamilyMockService.getFamily()
+      set({
+        familyGroup: data?.group || DEFAULT_FAMILY_GROUP,
+        members: data?.members || DEFAULT_FAMILY_MEMBERS,
+        error: null,
+        initialized: true,
+      })
+    }),
+
+  inviteMember: async (payload) =>
+    withLoading(set, async () => {
+      const member = await FamilyMockService.inviteMember(payload)
+      set((state) => ({
+        members: [...state.members, member],
+        error: null,
+      }))
+      return member
+    }),
+
+  removeMember: async (memberId) =>
+    withLoading(set, async () => {
+      await FamilyMockService.removeMember(memberId)
+      set((state) => ({
+        members: state.members.filter((member) => member.id !== memberId),
+        error: null,
+      }))
+    }),
+
+  refetchFamily: async () => get().loadFamily(),
+}))
+
+export default useFamilyStore

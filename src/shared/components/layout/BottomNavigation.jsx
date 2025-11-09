@@ -5,6 +5,7 @@
  */
 
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '@features/auth/hooks/useAuth'
 import styles from './BottomNavigation.module.scss'
 
 const menuItems = [
@@ -12,6 +13,8 @@ const menuItems = [
   { id: 'medication', label: '약관리', icon: '💊', path: '/medication' },
   { id: 'search', label: '증상검색', icon: '🔍', path: '/search' },
   { id: 'family', label: '가족', icon: '👨‍👩‍👧', path: '/family' },
+  { id: 'diet', label: '음식경고', icon: '🍽', path: '/diet/warning' },
+  { id: 'ocr', label: 'OCR', icon: '📷', path: '/ocr/scan' },
   { id: 'counsel', label: '약사상담', icon: '💬', path: '/counsel' },
   { id: 'settings', label: '설정', icon: '⚙️', path: '/settings' },
 ]
@@ -23,6 +26,9 @@ const menuItems = [
 export const BottomNavigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAuth((state) => ({
+    logout: state.logout,
+  }))
 
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/')
@@ -42,6 +48,18 @@ export const BottomNavigation = () => {
             <span className={styles.navLabel}>{item.label}</span>
           </button>
         ))}
+        <button
+          type="button"
+          className={`${styles.navItem} ${styles.logout}`}
+          onClick={async () => {
+            await logout()
+            navigate('/login', { replace: true })
+          }}
+          aria-label="로그아웃"
+        >
+          <span className={styles.navIcon}>🚪</span>
+          <span className={styles.navLabel}>로그아웃</span>
+        </button>
       </div>
     </nav>
   )

@@ -1,0 +1,49 @@
+.card {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.detail {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.instructions {
+  margin: 0;
+  font-size: 13px;
+  color: #b45309;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+button:last-child {
+  background: #fee2e2;
+  color: #b91c1c;
+}

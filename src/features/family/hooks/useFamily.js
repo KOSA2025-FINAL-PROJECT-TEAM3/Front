@@ -1,11 +1,9 @@
-/**
- * useFamily - 가족 관리 데이터를 제공하는 커스텀 훅
- */
+import { useFamilyStore } from '@/stores/familyStore'
 
-import { useFamilyContext } from '../context/FamilyContext'
+const defaultSelector = (state) => state
 
-export const useFamily = () => {
-  return useFamilyContext()
+export const useFamily = (selector = defaultSelector) => {
+  return useFamilyStore(selector)
 }
 
 export default useFamily

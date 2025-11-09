@@ -1,5 +1,5 @@
 /**
- * KakaoCallback Page
+ * KakaoCallback 페이지
  * - 카카오 OAuth 성공/실패 처리
  * - code 쿼리 파라미터를 Auth Store kakaoLogin에 전달
  */

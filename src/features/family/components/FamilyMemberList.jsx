@@ -1,7 +1,12 @@
 import FamilyMemberCard from './FamilyMemberCard'
 import styles from './FamilyMemberList.module.scss'
 
-export const FamilyMemberList = ({ members = [], onDetail, onRemove }) => {
+export const FamilyMemberList = ({
+  members = [],
+  onDetail,
+  onRemove,
+  onlineMemberIds = [],
+}) => {
   if (!members.length) {
     return (
       <section className={styles.emptyState}>
@@ -21,6 +26,7 @@ export const FamilyMemberList = ({ members = [], onDetail, onRemove }) => {
             member={member}
             onDetail={onDetail}
             onRemove={onRemove}
+            isOnline={onlineMemberIds.includes(member.id)}
           />
         ))}
       </div>

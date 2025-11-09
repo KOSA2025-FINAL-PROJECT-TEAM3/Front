@@ -5,18 +5,21 @@ const roleLabels = {
   CAREGIVER: '보호자',
 }
 
-export const FamilyMemberCard = ({ member, onDetail, onRemove }) => {
+export const FamilyMemberCard = ({ member, onDetail, onRemove, isOnline }) => {
   if (!member) return null
   const initials = member.name?.[0] ?? '멤'
   const joinedDate = new Date(member.joinedAt).toLocaleDateString('ko-KR')
 
   return (
     <div className={styles.card}>
-      <div
-        className={styles.avatar}
-        style={{ backgroundColor: member.avatarColor || '#c7d2fe' }}
-      >
-        {initials}
+      <div className={styles.avatarWrapper}>
+        <div
+          className={styles.avatar}
+          style={{ backgroundColor: member.avatarColor || '#c7d2fe' }}
+        >
+          {initials}
+        </div>
+        {isOnline && <span className={styles.onlineDot} aria-label="온라인" />}
       </div>
       <div className={styles.info}>
         <div className={styles.topRow}>

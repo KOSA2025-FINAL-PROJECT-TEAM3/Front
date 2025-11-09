@@ -21,6 +21,12 @@ import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
 import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
+import SettingsPage from '@features/settings/pages/Settings'
+import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
+import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
+import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
+import FoodWarningPage from '@features/diet/pages/FoodWarning'
+import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
 
 /**
@@ -54,7 +60,7 @@ function App() {
           {/* 메뉴바의 다른 페이지들 (스텁) - PrivateRoute 보호 */}
           <Route
             path="/medication"
-            element={<PrivateRoute element={<SeniorDashboard />} />}
+            element={<PrivateRoute element={<MedicationManagementPage />} />}
           />
           <Route
             path="/search"
@@ -69,8 +75,24 @@ function App() {
             element={<PrivateRoute element={<GuardianDashboard />} />}
           />
           <Route
+            path="/diet/warning"
+            element={<PrivateRoute element={<FoodWarningPage />} />}
+          />
+          <Route
+            path="/ocr/scan"
+            element={<PrivateRoute element={<PrescriptionScanPage />} />}
+          />
+          <Route
             path="/settings"
-            element={<PrivateRoute element={<SeniorDashboard />} />}
+            element={<PrivateRoute element={<SettingsPage />} />}
+          />
+          <Route
+            path="/settings/profile"
+            element={<PrivateRoute element={<ProfileEditPage />} />}
+          />
+          <Route
+            path="/settings/notifications"
+            element={<PrivateRoute element={<NotificationSettingsPage />} />}
           />
           <Route
             path="/family"

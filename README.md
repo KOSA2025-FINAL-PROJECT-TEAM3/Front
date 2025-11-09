@@ -52,25 +52,39 @@ src/
 │   └── components/      # 재사용 UI (ui/, layout/, editor/)
 ├── pages/               # 페이지 컴포넌트
 │   └── errors/          # 에러 페이지 (404, 500)
-├── hooks/               # Custom Hooks
+├── hooks/               # Custom Hooks (공통)
 │   ├── useAuth.js       # 인증 관리
 │   ├── useDebounce.js   # 디바운싱
 │   ├── useLocalStorage.js # 로컬 스토리지
 │   └── useFetch.js      # API 호출
 ├── stores/              # Zustand 저장소
-│   └── authStore.js     # 인증 상태 관리
+│   ├── authStore.js     # 인증 상태 관리
+│   ├── familyStore.js   # 가족 관리 상태
+│   └── medicationStore.js # 약 목록/CRUD
+├── core/
+│   └── api/
+│       └── axiosConfig.js # Axios 인스턴스 & 인터셉터
 ├── utils/               # 유틸리티 함수
 │   ├── validation.js    # 데이터 검증
 │   ├── formatting.js    # 데이터 형식 변환
 │   ├── stringUtils.js   # 문자열 처리
 │   └── errorHandler.js  # 에러 처리
-├── config/              # 설정 파일
-│   ├── api.js          # Axios 인스턴스 & 인터셉터
-│   └── constants.js    # 전역 상수
-├── styles/              # 전역 스타일
+├── config/
+│   └── constants.js     # 전역 상수
+├── devtools/            # 개발 모드 도구
+│   └── DeveloperModePanel.jsx
+├── features/            # Feature 모듈 (auth, family, editor 등)
+├── styles/              # 전역 스타일 (tailwind.css + base.scss)
 ├── App.jsx              # 메인 앱 컴포넌트
 └── main.jsx             # 엔트리 포인트
 ```
+
+## 🎨 스타일 가이드
+
+- `tailwind.config.js` : Design System 색상/폰트/라운딩 토큰 정의
+- `src/styles/tailwind.css` : `@tailwind base/components/utilities` 선언
+- `src/styles/base.scss` : 최소한의 reset + root 변수 정의
+- 컴포넌트 스타일은 `.module.scss`에서 작성하며, 반복되는 여백/색상은 Tailwind utility를 조합해 사용합니다.
 
 ## 🔧 주요 기능
 
