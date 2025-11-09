@@ -33,6 +33,17 @@
   color: #cbd5f5;
 }
 
+.resultPanel ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #e2e8f0;
+  font-size: 13px;
+}
+
+.resultPanel li + li {
+  margin-top: 4px;
+}
+
 .placeholder {
   color: #94a3b8;
 }

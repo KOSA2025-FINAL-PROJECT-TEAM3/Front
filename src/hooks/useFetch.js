@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import apiClient from '@/core/api/axiosConfig'
+import httpClient from '@/core/services/api/httpClient'
 
 /**
  * API 호출을 처리하는 커스텀 훅
@@ -33,13 +33,14 @@ export const useFetch = (url, options = {}, skip = false) => {
         ...customOptions,
       }
 
-      const response = await apiClient({
+      const response = await httpClient.request({
         url,
         ...finalOptions,
       })
 
-      setData(response.data)
-      return response.data
+      const payload = response?.data ?? response
+      setData(payload)
+      return payload
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || '요청 실패'
       setError(errorMessage)

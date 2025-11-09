@@ -21,7 +21,7 @@ export default defineConfig({
       '@stores': path.resolve(rootDir, './src/stores'),
       '@pages': path.resolve(rootDir, './src/pages'),
       '@styles': path.resolve(rootDir, './src/styles'),
-      '@config': path.resolve(rootDir, './src/config'),
+      '@config': path.resolve(rootDir, './src/core/config'),
     },
   },
   server: {

@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { STORAGE_KEYS } from '@/config/constants'
+import { STORAGE_KEYS } from '@config/constants'
 import styles from './KakaoCallback.module.scss'
 
 export const KakaoCallbackPage = () => {

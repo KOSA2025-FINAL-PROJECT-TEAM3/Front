@@ -27,6 +27,7 @@ export const useMedicationStore = create((set, get) => ({
       const newMed = {
         id: `med-${Date.now()}`,
         status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
         ...payload,
       }
       set((state) => ({
@@ -39,7 +40,9 @@ export const useMedicationStore = create((set, get) => ({
     withLoading(set, async () => {
       set((state) => ({
         medications: state.medications.map((med) =>
-          med.id === medId ? { ...med, ...patch } : med,
+          med.id === medId
+            ? { ...med, ...patch, updatedAt: new Date().toISOString() }
+            : med,
         ),
       }))
     }),
@@ -58,7 +61,9 @@ export const useMedicationStore = create((set, get) => ({
       const nextStatus = target.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
       set((state) => ({
         medications: state.medications.map((med) =>
-          med.id === medId ? { ...med, status: nextStatus } : med,
+          med.id === medId
+            ? { ...med, status: nextStatus, updatedAt: new Date().toISOString() }
+            : med,
         ),
       }))
     }),

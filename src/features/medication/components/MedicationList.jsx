@@ -1,7 +1,12 @@
 import MedicationCard from './MedicationCard.jsx'
 import styles from './MedicationList.module.scss'
 
-export const MedicationList = ({ medications = [], onToggle, onRemove }) => {
+export const MedicationList = ({
+  medications = [],
+  onToggle,
+  onRemove,
+  onSelect,
+}) => {
   if (!medications.length) {
     return (
       <div className={styles.empty}>
@@ -18,6 +23,7 @@ export const MedicationList = ({ medications = [], onToggle, onRemove }) => {
           medication={med}
           onToggle={onToggle}
           onRemove={onRemove}
+          onSelect={onSelect}
         />
       ))}
     </div>
