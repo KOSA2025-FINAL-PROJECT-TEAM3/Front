@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios'
+import { STORAGE_KEYS } from '../../config/constants'
 
 /**
  * API 클라이언트 생성
@@ -22,7 +23,7 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('silvercare-token')
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -39,9 +40,9 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // 토큰 만료: 로그아웃
-      localStorage.removeItem('silvercare-token')
-      localStorage.removeItem('silvercare-user')
-      localStorage.removeItem('silvercare-role')
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA)
+      localStorage.removeItem(STORAGE_KEYS.ROLE)
       window.location.href = '/login'
     }
     return Promise.reject(error)

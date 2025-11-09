@@ -119,8 +119,10 @@ export const RETRY_CONFIG = {
 
 // 로컬 스토리지 키
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: import.meta.env.VITE_TOKEN_STORAGE_KEY || 'silvercare_token',
-  REFRESH_TOKEN: import.meta.env.VITE_REFRESH_TOKEN_KEY || 'silvercare_refresh_token',
-  USER_DATA: 'silvercare_user',
-  FAMILY_GROUP: 'silvercare_family',
+  AUTH_TOKEN: import.meta.env.VITE_TOKEN_STORAGE_KEY || 'amapill_token',
+  REFRESH_TOKEN: import.meta.env.VITE_REFRESH_TOKEN_KEY || 'amapill_refresh_token',
+  USER_DATA: 'amapill_user',
+  FAMILY_GROUP: 'amapill_family',
+  DEV_MODE: 'amapill_dev_mode',
+  ROLE: 'amapill_role',
 }

@@ -7,6 +7,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+const runtimeEnv = typeof import.meta !== 'undefined' ? import.meta.env : {}
+const logMockStore = (action, payload) => {
+  if (runtimeEnv?.DEV) {
+    console.info(`[Mock AuthStore] ${action}`, payload)
+  }
+}
+
 /**
  * 인증 저장소 생성
  * @typedef {Object} AuthStore
@@ -65,6 +72,10 @@ export const useAuthStore = create(
         try {
           // TODO: 실제 API 호출로 대체
           // const response = await loginApi(email, password)
+          logMockStore('login', {
+            email,
+            passwordLength: password?.length || 0,
+          })
 
           const userData = {
             id: '1',
@@ -94,6 +105,11 @@ export const useAuthStore = create(
         try {
           // TODO: 실제 API 호출로 대체
           // const response = await signupApi(email, password, name, role)
+          logMockStore('signup', {
+            email,
+            passwordLength: password?.length || 0,
+            role,
+          })
 
           const userData = {
             id: '1',
@@ -124,6 +140,9 @@ export const useAuthStore = create(
         try {
           // TODO: 실제 API 호출로 대체
           // const response = await kakaoLoginApi(kakaoAccessToken)
+          logMockStore('kakaoLogin', {
+            tokenSuffix: kakaoAccessToken?.slice(-4),
+          })
 
           const userData = {
             id: '1',
@@ -164,7 +183,7 @@ export const useAuthStore = create(
         })),
     }),
     {
-      name: 'silvercare-auth-storage',
+      name: 'amapill-auth-storage',
       partialize: (state) => ({
         user: state.user,
         token: state.token,

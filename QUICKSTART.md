@@ -1,6 +1,6 @@
-# 🚀 실버케어 빠른 시작 가이드
+# 🚀 뭐냑? (AMA...Pill) 빠른 시작 가이드
 
-> 5분 안에 실버케어 개발 환경 구축하기
+> 백엔드 없이도 5분 안에 프런트 프로토타입 실행하기
 
 ---
 
@@ -30,7 +30,9 @@ docker-compose ps
 docker-compose logs -f
 ```
 
-### 3단계: Frontend 실행
+> **주의**: 현재 프로젝트는 **프런트엔드 선행 개발**을 기본 흐름으로 잡았습니다. 백엔드가 준비되기 전까지 Dev Mode로 화면을 검증하고, 이후 실제 API를 붙입니다.
+
+### 3단계: Frontend 실행 (Dev Mode 우선)
 
 ```bash
 # 의존성 설치
@@ -38,6 +40,9 @@ npm install
 
 # 개발 서버 시작 (React 19 + Vite)
 npm run dev
+```
+
+Dev Mode가 필요한 이유와 절차는 아래 “🔑 Developer Mode (Frontend-first)” 섹션을 참고하세요.
 ```
 
 ### 4단계: 브라우저에서 확인
@@ -173,7 +178,34 @@ npm run dev
 
 ---
 
-## 🧪 테스트 API 호출
+## 🔑 Developer Mode (Frontend-first)
+
+백엔드가 아직 없더라도 Stage 1~3 작업을 진행할 수 있도록 **Developer Mode**를 제공합니다.
+
+### 왜 필요한가?
+- UI/UX를 앞당겨 검증하기 위해 프런트가 먼저 구축되는 구조입니다.
+- 실서비스 API가 준비되지 않아도 로그인·역할 선택·가족 관리 화면을 확인할 수 있어야 합니다.
+
+### 동작 방식
+1. `npm run dev`로 프런트 서버를 띄우면 `localStorage`에 Dev Mode 플래그를 심어 임시 토큰/사용자 정보를 저장합니다.
+2. Axios 인터셉터는 Dev Mode가 감지되면 실제 API 호출을 막고 Mock 응답을 반환합니다.
+3. AuthContext/FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
+
+### 사용 방법
+- **1)** 브라우저에서 `http://localhost:5173` 접속
+- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택
+  - 예: “Role Selection” → 자동으로 더미 계정 + 토큰 저장 후 `/role-selection` 이동
+  - “Family Management”를 누르면 기본 `familyGroupId=group-1`이 주입된 상태로 가족 페이지에 진입
+- **3)** Dev Mode 해제: `localStorage.clear()` 또는 Dev Mode 메뉴에서 Logout 페이지로 이동
+
+### 실제 백엔드 연결로 전환
+1. `.env`에서 `VITE_USE_MOCK_API=false` 설정
+2. Dev Mode 플래그(`localStorage.setItem('amapill_dev_mode', 'false')`) 제거
+3. 다시 로그인하면 Axios가 실제 API Gateway로 요청을 보냅니다
+
+---
+
+## 🧪 테스트 API 호출 (백엔드 준비 후)
 
 ### 회원가입
 
@@ -250,4 +282,4 @@ npm install
 ---
 
 **최종 수정일**: 2025-11-06
-**작성자**: 실버케어 개발팀
+**작성자**: 뭐냑? (AMA...Pill) 개발팀

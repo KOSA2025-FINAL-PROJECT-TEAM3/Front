@@ -6,6 +6,43 @@
 
 import { apiClient } from './axiosConfig'
 
+const runtimeEnv = typeof import.meta !== 'undefined' ? import.meta.env : {}
+const USE_MOCK_API = runtimeEnv?.VITE_USE_MOCK_API !== 'false'
+const MOCK_DELAY_MS = 250
+
+const delay = (ms = MOCK_DELAY_MS) => new Promise((resolve) => setTimeout(resolve, ms))
+const buildMockToken = (prefix) => `${prefix}_${Date.now()}`
+const getErrorMessage = (error, fallbackMessage) =>
+  error?.response?.data?.message || error?.message || fallbackMessage
+const buildAuthHeaders = (token) =>
+  token
+    ? {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    : undefined
+
+const logMockRequest = (label, payload) => {
+  if (runtimeEnv?.DEV) {
+    console.info(`[Mock AuthApiClient] ${label}`, payload)
+  }
+}
+
+const requestOrMock = async ({ request, mock, fallbackMessage }) => {
+  if (!USE_MOCK_API && typeof request === 'function') {
+    try {
+      const response = await request()
+      return response?.data ?? response
+    } catch (error) {
+      throw new Error(getErrorMessage(error, fallbackMessage))
+    }
+  }
+
+  await delay()
+  return typeof mock === 'function' ? mock() : mock
+}
+
 /**
  * 인증 API 클라이언트
  * @namespace AuthApiClient
@@ -19,23 +56,25 @@ export const AuthApiClient = {
    * @throws {Error} 로그인 실패
    */
   login: async (email, password) => {
-    try {
-      // TODO: 실제 API 엔드포인트로 변경
-      // const response = await apiClient.post('/api/auth/login', { email, password })
-
-      // 임시: 더미 데이터
+    const payload = { email, password }
+    const mock = () => {
+      logMockRequest('login', { email, passwordLength: password?.length || 0 })
       return {
         user: {
           id: '1',
           email,
           name: email.split('@')[0],
         },
-        accessToken: 'accessToken_' + Date.now(),
+        accessToken: buildMockToken('accessToken'),
         role: null,
       }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || '로그인에 실패했습니다')
     }
+
+    return requestOrMock({
+      request: () => apiClient.post('/api/auth/login', payload),
+      mock,
+      fallbackMessage: '로그인에 실패했습니다',
+    })
   },
 
   /**
@@ -48,27 +87,28 @@ export const AuthApiClient = {
    * @throws {Error} 회원가입 실패
    */
   signup: async (email, password, name, role) => {
-    try {
-      // TODO: 실제 API 엔드포인트로 변경
-      // const response = await apiClient.post('/api/auth/signup', {
-      //   email,
-      //   password,
-      //   name,
-      //   role,
-      // })
-
-      // 임시: 더미 데이터
+    const payload = { email, password, name, role }
+    const mock = () => {
+      logMockRequest('signup', {
+        email,
+        passwordLength: password?.length || 0,
+        role,
+      })
       return {
         user: {
           id: '1',
           email,
           name,
         },
-        accessToken: 'accessToken_' + Date.now(),
+        accessToken: buildMockToken('accessToken'),
       }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || '회원가입에 실패했습니다')
     }
+
+    return requestOrMock({
+      request: () => apiClient.post('/api/auth/signup', payload),
+      mock,
+      fallbackMessage: '회원가입에 실패했습니다',
+    })
   },
 
   /**
@@ -78,25 +118,25 @@ export const AuthApiClient = {
    * @throws {Error} 카카오 로그인 실패
    */
   kakaoLogin: async (kakaoAccessToken) => {
-    try {
-      // TODO: 실제 API 엔드포인트로 변경
-      // const response = await apiClient.post('/api/auth/kakao-login', {
-      //   token: kakaoAccessToken,
-      // })
-
-      // 임시: 더미 데이터
+    const payload = { token: kakaoAccessToken }
+    const mock = () => {
+      logMockRequest('kakaoLogin', { lastFour: kakaoAccessToken?.slice(-4) })
       return {
         user: {
           id: '1',
           email: 'user@kakao.com',
           name: '카카오 사용자',
         },
-        accessToken: 'accessToken_' + Date.now(),
+        accessToken: buildMockToken('accessToken'),
         role: null,
       }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || '카카오 로그인에 실패했습니다')
     }
+
+    return requestOrMock({
+      request: () => apiClient.post('/api/auth/kakao-login', payload),
+      mock,
+      fallbackMessage: '카카오 로그인에 실패했습니다',
+    })
   },
 
   /**
@@ -107,19 +147,16 @@ export const AuthApiClient = {
    * @throws {Error} 역할 선택 실패
    */
   selectRole: async (token, role) => {
-    try {
-      // TODO: 실제 API 엔드포인트로 변경
-      // const response = await apiClient.post('/api/auth/select-role', {
-      //   role,
-      // }, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // })
-
-      // 임시: 더미 데이터
-      return { success: true }
-    } catch (error) {
-      throw new Error(error.response?.data?.message || '역할 선택에 실패했습니다')
-    }
+    const payload = { role }
+    return requestOrMock({
+      request: () =>
+        apiClient.post('/api/auth/select-role', payload, buildAuthHeaders(token)),
+      mock: () => {
+        logMockRequest('selectRole', { tokenPresent: Boolean(token), role })
+        return { success: true }
+      },
+      fallbackMessage: '역할 선택에 실패했습니다',
+    })
   },
 
   /**
@@ -128,17 +165,15 @@ export const AuthApiClient = {
    * @returns {Promise<Object>} {success: boolean}
    */
   logout: async (token) => {
-    try {
-      // TODO: 실제 API 엔드포인트로 변경
-      // const response = await apiClient.post('/api/auth/logout', {}, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // })
-
-      return { success: true }
-    } catch (error) {
-      // 로그아웃 실패해도 로컬 토큰 삭제
-      return { success: true }
-    }
+    return requestOrMock({
+      request: () =>
+        apiClient.post('/api/auth/logout', {}, buildAuthHeaders(token)),
+      mock: () => {
+        logMockRequest('logout', { tokenPresent: Boolean(token) })
+        return { success: true }
+      },
+      fallbackMessage: '로그아웃에 실패했습니다',
+    }).catch(() => ({ success: true }))
   },
 }
 

@@ -110,21 +110,22 @@ export const getUserData = async (userId) => {
   - ♻️ Refactor: Code refactor
   - 🧪 Test: Tests
 
-### Development Stages
-1. **Stage 1: Project Setup** (✅ Complete)
-   - Routing, Zustand, common components, Axios config, layouts
+### Development Stages (Frontend-first plan)
+1. **Stage 1: Prototype Shell**
+   - React/Vite setup, routing, base layout, Zustand scaffolding, Axios config
+   - Goal: 빠르게 UI 골격 확보, 백엔드 없이도 페이지 이동·상태 흐름을 확인
 
-2. **Stage 2: Authentication** (Kakao OAuth)
-   - Login page, role selection, auth store, JWT management
+2. **Stage 2: Auth & Dev Mode**
+   - Kakao OAuth 흐름 + 이메일 로그인 화면, 역할 선택, AuthContext
+   - 백엔드가 없을 때를 대비해 **Developer Mode**(로컬 storage 토큰/더미 계정)로 화면 접근 가능하도록 구현
 
-3. **Stage 3: Dashboard**
-   - Senior dashboard, Guardian dashboard
+3. **Stage 3: Family Prototype**
+   - 가족 관리 페이지, 멤버 카드/초대/상세 UI, Dev Mode 데이터로 동작하는 리액트 쿼리 mock
+   - 실시간 동기화 훅(`useFamilySync`)은 Hocuspocus 서버 준비 전까지 Mock Provider로 대체
 
-4. **Stage 4: Feature Development** (Priority Order)
-   - Family care network (real-time sync)
-   - Drug-food interaction alerts
-   - OCR & pill reverse search
-   - Medication CRUD operations
+4. **Stage 4: Feature Build-out**
+   - 본 기능 개발(순서): 가족 실시간 네트워크 → 약-음식 경고 → OCR/역검색 → Medication CRUD
+   - Backend API 준비되면 Dev Mode 토글 없이 실제 엔드포인트로 전환
 
 ## Environment Variables
 Required (`.env` file):

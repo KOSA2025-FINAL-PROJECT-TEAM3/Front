@@ -32,7 +32,7 @@ export const useAuth = () => {
       // 실제로는 토큰 검증을 위해 서버 호출 필요
       setIsAuthenticated(true)
     }
-  }, [])
+  }, [isAuthenticated, setIsAuthenticated])
 
   /**
    * 로그아웃 처리
