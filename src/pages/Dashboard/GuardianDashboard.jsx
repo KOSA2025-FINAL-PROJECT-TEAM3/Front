@@ -3,9 +3,9 @@
  * - 보호자용 가족 약 복용 모니터링 대시보드
  */
 
-import { MainLayout } from '../../components/layout/MainLayout'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
 import { FamilyMemberCard } from './FamilyMemberCard'
-import styles from './GuardianDashboard.module.css'
+import styles from './GuardianDashboard.module.scss'
 
 /**
  * 보호자 대시보드 페이지

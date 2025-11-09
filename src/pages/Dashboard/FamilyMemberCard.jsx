@@ -3,7 +3,7 @@
  * - 가족 구성원의 약 복용 현황 카드
  */
 
-import styles from './FamilyMemberCard.module.css'
+import styles from './FamilyMemberCard.module.scss'
 
 /**
  * 가족 구성원 카드 컴포넌트

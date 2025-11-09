@@ -12,7 +12,10 @@ export default defineConfig({
     // 경로 alias 설정으로 import 경로를 간단하게
     alias: {
       '@': path.resolve(rootDir, './src'),
-      '@components': path.resolve(rootDir, './src/components'),
+      '@features': path.resolve(rootDir, './src/features'),
+      '@shared': path.resolve(rootDir, './src/shared'),
+      '@components': path.resolve(rootDir, './src/shared/components'),
+      '@devtools': path.resolve(rootDir, './src/devtools'),
       '@hooks': path.resolve(rootDir, './src/hooks'),
       '@utils': path.resolve(rootDir, './src/utils'),
       '@stores': path.resolve(rootDir, './src/stores'),

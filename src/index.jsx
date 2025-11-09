@@ -1,9 +1,7 @@
 /**
- * Editor Component (임시 보관)
- * - 실시간 협업 편집기 (Hocuspocus + TipTap)
- * - 향후 Feature 페이지로 마이그레이션 예정
+ * Placeholder entry
+ * - 실제 Collaborative Editor 구현은 src/features/editor/components에 위치
+ * - 아직 라우팅되지 않아 null을 반환
  */
-
-// 에디터 관련 코드는 나중에 별도 페이지로 구현
 
 export default null

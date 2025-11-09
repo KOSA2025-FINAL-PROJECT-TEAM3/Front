@@ -5,7 +5,7 @@
  */
 
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '@features/auth/hooks/useAuth'
 
 /**
  * 보호된 라우트 컴포넌트

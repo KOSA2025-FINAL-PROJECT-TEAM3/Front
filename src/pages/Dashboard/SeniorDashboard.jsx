@@ -3,9 +3,9 @@
  * - 시니어용 약 복용 일정 관리 대시보드
  */
 
-import { MainLayout } from '../../components/layout/MainLayout'
+import { MainLayout } from '@/shared/components/layout/MainLayout'
 import { MedicationCard } from './MedicationCard'
-import styles from './SeniorDashboard.module.css'
+import styles from './SeniorDashboard.module.scss'
 
 /**
  * 시니어 대시보드 페이지
