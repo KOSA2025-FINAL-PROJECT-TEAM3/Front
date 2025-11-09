@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
   const [token, setToken] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   // localStorage에서 저장된 인증 정보 복원
@@ -51,6 +51,7 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(savedUser))
       setRole(savedRole)
     }
+    setLoading(false)
   }, [])
 
   /**
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }) => {
   const saveAuthData = useCallback((userData, userToken, userRole) => {
     localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, userToken)
     localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData))
+    localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
     if (userRole) {
       localStorage.setItem(STORAGE_KEYS.ROLE, userRole)
     }
@@ -155,6 +157,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
     localStorage.removeItem(STORAGE_KEYS.USER_DATA)
     localStorage.removeItem(STORAGE_KEYS.ROLE)
+    localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
   }, [])
 
   /**

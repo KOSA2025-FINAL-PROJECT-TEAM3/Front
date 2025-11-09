@@ -5,6 +5,7 @@
  */
 
 import { apiClient } from './axiosConfig'
+import { STORAGE_KEYS } from '../../config/constants'
 
 const runtimeEnv = typeof import.meta !== 'undefined' ? import.meta.env : {}
 const USE_MOCK_API = runtimeEnv?.VITE_USE_MOCK_API !== 'false'
@@ -29,8 +30,14 @@ const logMockRequest = (label, payload) => {
   }
 }
 
+const isDevModeEnabled = () =>
+  typeof window !== 'undefined' &&
+  window.localStorage.getItem(STORAGE_KEYS.DEV_MODE) === 'true'
+
+const shouldUseMock = () => USE_MOCK_API || isDevModeEnabled()
+
 const requestOrMock = async ({ request, mock, fallbackMessage }) => {
-  if (!USE_MOCK_API && typeof request === 'function') {
+  if (!shouldUseMock() && typeof request === 'function') {
     try {
       const response = await request()
       return response?.data ?? response

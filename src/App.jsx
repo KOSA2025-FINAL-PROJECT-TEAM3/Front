@@ -17,6 +17,7 @@ import { Signup } from './pages/Auth/Signup'
 import { RoleSelection } from './pages/RoleSelection'
 import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
 import { GuardianDashboard } from './pages/Dashboard/GuardianDashboard'
+import DeveloperModePanel from './components/common/DeveloperModePanel'
 import './App.css'
 
 /**
@@ -74,6 +75,7 @@ function App() {
           {/* 404: 존재하지 않는 경로 */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        <DeveloperModePanel />
       </AuthProvider>
     </BrowserRouter>
   )

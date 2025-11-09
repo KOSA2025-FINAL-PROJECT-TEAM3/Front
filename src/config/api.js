@@ -5,8 +5,17 @@
  */
 
 import axios from 'axios'
-import Cookies from 'js-cookie'
 import { STORAGE_KEYS } from './constants'
+
+const getStorageItem = (key) => {
+  if (typeof window === 'undefined') return null
+  return window.localStorage.getItem(key)
+}
+
+const setStorageItem = (key, value) => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(key, value)
+}
 
 // 기본 API 인스턴스 생성
 const apiClient = axios.create({
@@ -23,7 +32,7 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get(import.meta.env.VITE_TOKEN_STORAGE_KEY || STORAGE_KEYS.AUTH_TOKEN)
+    const token = getStorageItem(import.meta.env.VITE_TOKEN_STORAGE_KEY || STORAGE_KEYS.AUTH_TOKEN)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -47,7 +56,7 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true
 
       try {
-        const refreshToken = Cookies.get(import.meta.env.VITE_REFRESH_TOKEN_KEY || STORAGE_KEYS.REFRESH_TOKEN)
+        const refreshToken = getStorageItem(import.meta.env.VITE_REFRESH_TOKEN_KEY || STORAGE_KEYS.REFRESH_TOKEN)
         if (refreshToken) {
           // 토큰 갱신 API 호출 (실제 엔드포인트는 백엔드에서 확인)
           const response = await axios.post(
@@ -56,7 +65,7 @@ apiClient.interceptors.response.use(
           )
 
           const { accessToken } = response.data
-          Cookies.set(import.meta.env.VITE_TOKEN_STORAGE_KEY || STORAGE_KEYS.AUTH_TOKEN, accessToken)
+          setStorageItem(import.meta.env.VITE_TOKEN_STORAGE_KEY || STORAGE_KEYS.AUTH_TOKEN, accessToken)
 
           // 원래 요청 재시도
           originalRequest.headers.Authorization = `Bearer ${accessToken}`

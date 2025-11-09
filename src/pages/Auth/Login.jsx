@@ -154,26 +154,7 @@ export const Login = () => {
           </Link>
         </div>
 
-        {/* 개발자용 뒷구멍: 바로 대시보드 접근 */}
-        <div className={styles.backdoor}>
-          <details className={styles.details}>
-            <summary className={styles.summary}>
-              🚀 개발 모드 (클릭하여 확장)
-            </summary>
-            <div className={styles.backdoorContent}>
-              <p className={styles.backdoorText}>
-                로그인 없이 바로 역할을 선택하여 대시보드에 접근합니다
-              </p>
-              <button
-                type="button"
-                className={styles.backdoorButton}
-                onClick={() => navigate('/role-selection')}
-              >
-                👴 시니어 / 👩‍👩‍👧‍👦 보호자 선택하기
-              </button>
-            </div>
-          </details>
-        </div>
+        {/* Dev Mode는 플로팅 패널에서 진입 */}
       </div>
     </div>
   )
