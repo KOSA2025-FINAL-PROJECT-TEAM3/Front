@@ -160,6 +160,15 @@ export const DeveloperModePanel = () => {
               </button>
             </li>
             <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, '/medication')}
+              >
+                💊 약 관리 (Stage 4 • CRUD)
+              </button>
+            </li>
+            <li>
               <hr className={styles.divider} aria-hidden="true" />
             </li>
             <li>

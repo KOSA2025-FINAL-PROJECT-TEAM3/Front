@@ -6,8 +6,8 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { AuthApiClient } from '@/core/api/authApiClient'
-import { STORAGE_KEYS } from '@/config/constants'
+import { authApiClient } from '@/core/services/api/authApiClient'
+import { STORAGE_KEYS } from '@config/constants'
 
 const initialState = {
   isAuthenticated: false,
@@ -76,7 +76,7 @@ export const useAuthStore = create(
 
       login: async (email, password) =>
         withLoading(set, async () => {
-          const response = await AuthApiClient.login(email, password)
+          const response = await authApiClient.login(email, password)
           const role = response.role || response.user?.role || null
           get().setAuthData({
             user: response.user,
@@ -87,7 +87,7 @@ export const useAuthStore = create(
 
       signup: async (email, password, name, role) =>
         withLoading(set, async () => {
-          const response = await AuthApiClient.signup(email, password, name, role)
+          const response = await authApiClient.signup(email, password, name, role)
           get().setAuthData({
             user: response.user,
             token: response.accessToken,
@@ -97,7 +97,7 @@ export const useAuthStore = create(
 
       kakaoLogin: async (authorizationCode) =>
         withLoading(set, async () => {
-          const response = await AuthApiClient.kakaoLogin(authorizationCode)
+          const response = await authApiClient.kakaoLogin(authorizationCode)
           get().setAuthData({
             user: response.user,
             token: response.accessToken,
@@ -108,7 +108,7 @@ export const useAuthStore = create(
       selectRole: async (selectedRole) =>
         withLoading(set, async () => {
           const token = get().token
-          await AuthApiClient.selectRole(token, selectedRole)
+          await authApiClient.selectRole(token, selectedRole)
           const user = get().user
           get().setAuthData({
             user: user ? { ...user, role: selectedRole } : null,
@@ -121,7 +121,7 @@ export const useAuthStore = create(
         withLoading(set, async () => {
           const token = get().token
           try {
-            await AuthApiClient.logout(token)
+            await authApiClient.logout(token)
           } catch (error) {
             console.warn('로그아웃 요청 실패 (무시):', error)
           } finally {

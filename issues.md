@@ -28,6 +28,25 @@
 
 ---
 
+## TODO: OCR Stage 4 플로우 재구성 필요
+
+**배경**  
+현재 `src/features/ocr/pages/PrescriptionScan.jsx`는 Dev용 Mock OCR 흐름(파일 업로드 + 임시 인식)만 제공하고, 정의서에 있는 `ImageUploader`, `OCRResultPreview`(고급 버전), `PrescriptionScan` 페이지 레이아웃이 삭제된 상태였습니다. 임시로 최소 구성 컴포넌트를 복구했지만, Stage 4 요구사항(드래그 드롭 업로더, 수동 교정, 실제 OCR API 연동)과는 여전히 차이가 큽니다.
+
+**필요 작업**  
+1. 문서에 맞춘 업로더/미리보기/수동 교정 UI를 재도입하거나 최신 기획에 맞춰 명확히 재정의  
+2. 백엔드 OCR API(또는 외부 서비스) 연동 전략 수립 후 `PrescriptionScanPage`에 실제 호출 연결  
+3. 약 관리 CRUD와의 연계(인식된 결과를 곧바로 등록/수정) 고민  
+
+**차단 요소**  
+- 백엔드 OCR 엔드포인트 및 응답 스키마 미정  
+- Stage 4 세부 기획 안 확정 (업로더/교정 flow 정의 필요)
+
+**긴급도**  
+보통 (Medium) — CRUD 및 Dev Mode QA는 가능하지만 Stage 4 전체 데모를 위해 OCR 스펙 확정이 요구됨.
+
+---
+
 ✅ 프로젝트 문서를 먼저 확인했습니다  
 ✅ 기존 질문을 검색했습니다  
 ✅ 충분히 구체적으로 질문을 작성했습니다

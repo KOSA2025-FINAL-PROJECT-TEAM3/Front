@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import styles from './MedicationForm.module.scss'
 
 const initialForm = {
@@ -8,8 +8,27 @@ const initialForm = {
   instructions: '',
 }
 
-export const MedicationForm = ({ onSubmit, loading }) => {
-  const [form, setForm] = useState(initialForm)
+export const MedicationForm = ({
+  initialValues,
+  onSubmit,
+  loading,
+  submitLabel = '약 등록',
+  onCancel,
+  shouldResetOnSubmit = true,
+}) => {
+  const mergedInitial = useMemo(
+    () => ({
+      ...initialForm,
+      ...(initialValues || {}),
+    }),
+    [initialValues],
+  )
+
+  const [form, setForm] = useState(mergedInitial)
+
+  useEffect(() => {
+    setForm(mergedInitial)
+  }, [mergedInitial])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -19,7 +38,9 @@ export const MedicationForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     await onSubmit?.(form)
-    setForm(initialForm)
+    if (shouldResetOnSubmit) {
+      setForm(initialForm)
+    }
   }
 
   return (
@@ -61,9 +82,21 @@ export const MedicationForm = ({ onSubmit, loading }) => {
           placeholder="예: 자몽 주스와 함께 복용 금지"
         />
       </label>
-      <button type="submit" disabled={loading}>
-        {loading ? '등록 중...' : '약 등록'}
-      </button>
+      <div className={styles.actions}>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className={styles.secondaryButton}
+            disabled={loading}
+          >
+            취소
+          </button>
+        )}
+        <button type="submit" disabled={loading}>
+          {loading ? '저장 중...' : submitLabel}
+        </button>
+      </div>
     </form>
   )
 }

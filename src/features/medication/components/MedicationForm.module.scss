@@ -29,13 +29,27 @@ textarea {
   resize: vertical;
 }
 
-button {
+.actions {
   grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.actions button {
   border: none;
   border-radius: 12px;
-  padding: 12px 0;
+  padding: 10px 20px;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.actions button[type='submit'] {
   background: #2563eb;
   color: #fff;
-  cursor: pointer;
+}
+
+.secondaryButton {
+  background: #e2e8f0;
+  color: #0f172a;
 }

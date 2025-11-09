@@ -257,6 +257,16 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 ---
 
+## 🚧 남은 단계 (Frontend 기준)
+
+1. **Medication API 연동**: `src/stores/medicationStore.js`가 mock 데이터를 사용하는 상태라, Stage 4 CRUD 완료를 위해 `src/core/services/api/medicationApiClient.js`와 실제 엔드포인트를 연결해야 합니다.
+2. **OCR 플로우 완성**: `src/features/ocr/pages/PrescriptionScan.jsx`는 최소 플로우만 복구된 상태입니다. 정의서의 `ImageUploader`/`ManualCorrection` UI와 실제 OCR API 연동, 약 관리와의 연결 로직이 필요합니다.
+3. **Diet 모듈 확장**: 현재 `FoodWarningPage` 하나만 존재하므로 정의서에 명시된 `DietLogPage`, `HospitalDietResourcesPage` 및 관련 컴포넌트를 추가해야 합니다.
+4. **API 서비스 확장**: `src/core/services/api`에 Auth/Medication/Family/Diet/OCR 클라이언트를 추가했지만, 각 스토어/서비스에서 실제로 사용하도록 단계별 치환이 필요합니다.
+5. **Stage 4 QA**: Dev Mode로 기본 동작 확인은 가능하지만, 실제 백엔드 연동이 완료되면 통합 QA 시나리오를 갱신하고 `VITE_USE_MOCK_API`/Dev Mode 설정을 정리해야 합니다.
+
+---
+
 ## 🆘 문제 해결
 
 ### Docker 컨테이너가 시작되지 않음

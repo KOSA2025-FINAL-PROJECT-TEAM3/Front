@@ -4,7 +4,7 @@
  * - Dev Mode/로컬 환경에서 가족 데이터를 localStorage에 저장/조회
  */
 
-import { STORAGE_KEYS } from '@/config/constants'
+import { STORAGE_KEYS } from '@config/constants'
 import {
   DEFAULT_FAMILY_GROUP,
   DEFAULT_FAMILY_MEMBERS,

@@ -6,6 +6,22 @@
   border-radius: 16px;
   padding: 16px;
   border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.card:hover {
+  border-color: #cbd5f5;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.body {
+  flex: 1;
 }
 
 .name {
@@ -30,10 +46,29 @@
 .actions {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 
-button {
+.actionButtons button {
   border: none;
   border-radius: 8px;
   padding: 6px 12px;
@@ -43,7 +78,7 @@ button {
   color: #0369a1;
 }
 
-button:last-child {
+.actionButtons button:last-child {
   background: #fee2e2;
   color: #b91c1c;
 }

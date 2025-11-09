@@ -1,26 +1,34 @@
 import styles from './OCRResultPreview.module.scss'
 
-export const OCRResultPreview = ({ imageUrl, result }) => {
+export const OCRResultPreview = ({ imageSrc, resultText, insights }) => {
   return (
-    <section className={styles.preview}>
+    <div className={styles.preview}>
       <div className={styles.imageFrame}>
-        {imageUrl ? (
-          <img src={imageUrl} alt="처방전 미리보기" />
+        {imageSrc ? (
+          <img src={imageSrc} alt="처방전 미리보기" />
         ) : (
-          <p>이미지를 업로드하면 이곳에 미리보기가 표시됩니다.</p>
+          <p className={styles.placeholder}>이미지를 첨부하면 미리보기를 제공합니다</p>
         )}
       </div>
       <div className={styles.resultPanel}>
-        <h3>추출 결과</h3>
-        {result ? (
-          <pre>{result}</pre>
+        <h3>인식 결과</h3>
+        {resultText ? (
+          <pre>{resultText}</pre>
         ) : (
-          <p className={styles.placeholder}>
-            아직 추출된 정보가 없습니다. 이미지를 업로드하고 인식 버튼을 눌러주세요.
-          </p>
+          <p className={styles.placeholder}>AI 인식 결과가 여기에 표시됩니다.</p>
+        )}
+        {insights && insights.length > 0 && (
+          <>
+            <h3>추출된 정보</h3>
+            <ul>
+              {insights.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
-    </section>
+    </div>
   )
 }
 
