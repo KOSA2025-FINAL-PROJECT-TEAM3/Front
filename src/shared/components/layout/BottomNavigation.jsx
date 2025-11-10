@@ -1,41 +1,40 @@
 /**
  * BottomNavigation Component
- * - 하단 메뉴바 (Vision Pro 스타일)
- * - 6개 메뉴: 홈, 약관리, 증상검색, 약사상담, 질병관리, 설정
+ * - 하단 네비게이션 메뉴
  */
 
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
 import styles from './BottomNavigation.module.scss'
 
-const menuItems = [
-  { id: 'home', label: '홈', icon: '🏠', path: '/dashboard' },
-  { id: 'medication', label: '약관리', icon: '💊', path: '/medication' },
-  { id: 'search', label: '증상검색', icon: '🔍', path: '/search' },
-  { id: 'family', label: '가족', icon: '👨‍👩‍👧', path: '/family' },
-  { id: 'diet', label: '음식경고', icon: '🍽', path: '/diet/warning' },
-  { id: 'ocr', label: 'OCR', icon: '📷', path: '/ocr/scan' },
-  { id: 'counsel', label: '약사상담', icon: '💬', path: '/counsel' },
-  { id: 'settings', label: '설정', icon: '⚙️', path: '/settings' },
+const makeMenu = (homePath) => [
+  { id: 'home', label: '홈', icon: '🏠', path: homePath, roles: 'ALL' },
+  { id: 'medication', label: '약 관리', icon: '💊', path: ROUTE_PATHS.medication, roles: 'ALL' },
+  { id: 'search', label: '증상 검색', icon: '🔎', path: ROUTE_PATHS.search, roles: 'ALL' },
+  { id: 'family', label: '가족', icon: '👨‍👩‍👧', path: ROUTE_PATHS.family, roles: 'ALL' },
+  { id: 'disease', label: '질환', icon: '🩺', path: ROUTE_PATHS.disease, roles: 'ALL' },
+  { id: 'diet', label: '식이 경고', icon: '⚠️', path: ROUTE_PATHS.dietWarning, roles: 'ALL' },
+  { id: 'ocr', label: 'OCR', icon: '📸', path: ROUTE_PATHS.ocrScan, roles: 'ALL' },
+  { id: 'counsel', label: '의사와 상담', icon: '💬', path: ROUTE_PATHS.counsel, roles: 'ALL' },
+  { id: 'settings', label: '설정', icon: '⚙️', path: ROUTE_PATHS.settings, roles: 'ALL' },
 ]
 
-/**
- * 하단 네비게이션 메뉴바
- * @returns {JSX.Element} 메뉴바 컴포넌트
- */
 export const BottomNavigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout } = useAuth((state) => ({
-    logout: state.logout,
-  }))
+  const { logout, role } = useAuth((state) => ({ logout: state.logout, role: state.role }))
 
-  const isActive = (path) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/')
-  }
+  // 역할 기반 홈 경로 분기
+  const isCaregiver = role === USER_ROLES.CAREGIVER || role === 'CAREGIVER' || role === 'caregiver'
+  const homePath = isCaregiver ? ROUTE_PATHS.guardianDashboard : ROUTE_PATHS.seniorDashboard
+  const menuItems = makeMenu(homePath).filter((item) => item.roles === 'ALL')
+
+  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
 
   return (
-    <nav className={styles.bottomNav}>
+    <nav className={styles.bottomNav} role="navigation" aria-label="하단 네비게이션">
       <div className={styles.navContainer}>
         {menuItems.map((item) => (
           <button
@@ -43,6 +42,8 @@ export const BottomNavigation = () => {
             className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
             onClick={() => navigate(item.path)}
             aria-label={item.label}
+            aria-current={isActive(item.path) ? 'page' : undefined}
+            type="button"
           >
             <span className={styles.navIcon}>{item.icon}</span>
             <span className={styles.navLabel}>{item.label}</span>
@@ -53,7 +54,7 @@ export const BottomNavigation = () => {
           className={`${styles.navItem} ${styles.logout}`}
           onClick={async () => {
             await logout()
-            navigate('/login', { replace: true })
+            navigate(ROUTE_PATHS.login, { replace: true })
           }}
           aria-label="로그아웃"
         >

@@ -1,12 +1,13 @@
-/**
+﻿/**
  * KakaoLoginButton
- * - 카카오 OAuth 로그인 버튼
- * - 필수 환경변수: VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI
+ * - Kakao OAuth login button
+ * - Requires: VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI
  */
 
 import classNames from 'classnames'
 import { STORAGE_KEYS } from '@config/constants'
 import styles from './KakaoLoginButton.module.scss'
+import { ROUTE_PATHS } from '@config/routes.config'
 
 const KAKAO_AUTH_BASE = 'https://kauth.kakao.com/oauth/authorize'
 
@@ -15,7 +16,7 @@ const buildRedirectUri = () => {
     return import.meta.env.VITE_KAKAO_REDIRECT_URI
   }
   if (typeof window !== 'undefined') {
-    return `${window.location.origin}/auth/kakao/callback`
+    return `${window.location.origin}${ROUTE_PATHS.kakaoCallback}`
   }
   return ''
 }
@@ -31,10 +32,11 @@ export const KakaoLoginButton = ({
 
   const handleClick = () => {
     if (!clientId || !redirectUri) {
+      const msg = '카카오 OAuth 환경 변수가 설정되지 않았습니다.'
       if (typeof onUnavailable === 'function') {
-        onUnavailable('카카오 OAuth 환경 변수가 설정되지 않았습니다.')
+        onUnavailable(msg)
       } else {
-        window.alert('카카오 로그인 설정이 완료되지 않았습니다.')
+        window.alert(msg)
       }
       return
     }
@@ -44,7 +46,13 @@ export const KakaoLoginButton = ({
       window.localStorage.setItem(STORAGE_KEYS.KAKAO_STATE, state)
     }
 
-    const authUrl = `${KAKAO_AUTH_BASE}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${state}`
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      state,
+    })
+    const authUrl = `${KAKAO_AUTH_BASE}?${params.toString()}`
     window.location.href = authUrl
   }
 
@@ -55,7 +63,7 @@ export const KakaoLoginButton = ({
       onClick={handleClick}
       disabled={disabled}
     >
-      <span className={styles.icon}>☕</span>
+      <span className={styles.icon}>K</span>
       {label}
     </button>
   )

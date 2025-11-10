@@ -1,16 +1,13 @@
 /**
  * NotFound Page (404)
- * - 요청한 페이지를 찾을 수 없을 때 표시
+ * - 요청하신 페이지를 찾을 수 없을 때 표시
  */
 
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@shared/components/ui'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './ErrorPage.module.scss'
 
-/**
- * 404 에러 페이지
- * @returns {JSX.Element} 404 에러 페이지
- */
 export const NotFound = () => {
   const navigate = useNavigate()
 
@@ -24,7 +21,7 @@ export const NotFound = () => {
         </p>
 
         <div className={styles.actions}>
-          <Button onClick={() => navigate('/')} variant="primary">
+          <Button onClick={() => navigate(ROUTE_PATHS.root)} variant="primary">
             홈으로 이동
           </Button>
           <Button onClick={() => navigate(-1)} variant="secondary">
@@ -37,3 +34,4 @@ export const NotFound = () => {
 }
 
 export default NotFound
+

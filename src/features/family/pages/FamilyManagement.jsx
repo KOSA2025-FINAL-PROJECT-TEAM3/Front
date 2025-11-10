@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@/shared/components/layout/MainLayout'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
@@ -21,7 +22,7 @@ export const FamilyManagementPage = () => {
   } = useFamilySync()
 
   const handleDetail = (memberId) => {
-    navigate(`/family/member/${memberId}`)
+    navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
 
   return (
@@ -32,7 +33,7 @@ export const FamilyManagementPage = () => {
           <button
             type="button"
             className={styles.inviteButton}
-            onClick={() => navigate('/family/invite')}
+            onClick={() => navigate(ROUTE_PATHS.familyInvite)}
           >
             + 가족 초대
           </button>
@@ -41,24 +42,24 @@ export const FamilyManagementPage = () => {
         {loading ? (
           <p className={styles.loading}>가족 정보를 불러오는 중입니다...</p>
         ) : error ? (
-          <p className={styles.error}>가족 정보를 불러오지 못했습니다: {error.message}</p>
+          <p className={styles.error}>가족 정보를 불러오지 못했습니다. {error.message}</p>
         ) : (
           <>
             <div className={styles.syncMeta}>
               <span className={styles.statusBadge} data-state={connectionStatus}>
-                {connectionStatus === 'connected' && (isSyncing ? '동기화 중...' : '실시간 연결됨')}
+                {connectionStatus === 'connected' && (isSyncing ? '동기화 중...' : '실시간 연결')}
                 {connectionStatus === 'connecting' && '연결 중...'}
-                {connectionStatus === 'waiting' && '대기 중'}
+                {connectionStatus === 'waiting' && '대기'}
                 {connectionStatus === 'disabled' && '실시간 비활성화'}
               </span>
               {lastSyncTime && (
                 <span className={styles.syncTime}>
-                  마지막 동기화: {lastSyncTime.toLocaleTimeString('ko-KR')}
+                  마지막 동기화 {lastSyncTime.toLocaleTimeString('ko-KR')}
                 </span>
               )}
               {onlineUsers?.length > 0 && (
                 <span className={styles.onlineCount}>
-                  👥 온라인 {onlineUsers.length}명
+                  현재 접속 {onlineUsers.length}명
                 </span>
               )}
             </div>

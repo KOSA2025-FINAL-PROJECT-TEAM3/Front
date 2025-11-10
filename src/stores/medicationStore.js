@@ -1,8 +1,8 @@
 import { create } from 'zustand'
-import { MOCK_MEDICATIONS } from '@/features/medication/data/mockMedications'
+import { medicationApiClient } from '@/core/services/api/medicationApiClient'
 
 const initialState = {
-  medications: MOCK_MEDICATIONS,
+  medications: [],
   loading: false,
   error: null,
 }
@@ -22,14 +22,15 @@ const withLoading = async (set, fn) => {
 export const useMedicationStore = create((set, get) => ({
   ...initialState,
 
+  fetchMedications: async () =>
+    withLoading(set, async () => {
+      const list = await medicationApiClient.list()
+      set({ medications: Array.isArray(list) ? list : [] })
+    }),
+
   addMedication: async (payload) =>
     withLoading(set, async () => {
-      const newMed = {
-        id: `med-${Date.now()}`,
-        status: 'ACTIVE',
-        createdAt: new Date().toISOString(),
-        ...payload,
-      }
+      const newMed = await medicationApiClient.create(payload)
       set((state) => ({
         medications: [newMed, ...state.medications],
       }))
@@ -38,17 +39,17 @@ export const useMedicationStore = create((set, get) => ({
 
   updateMedication: async (medId, patch) =>
     withLoading(set, async () => {
+      const updated = await medicationApiClient.update(medId, patch)
       set((state) => ({
         medications: state.medications.map((med) =>
-          med.id === medId
-            ? { ...med, ...patch, updatedAt: new Date().toISOString() }
-            : med,
+          med.id === medId ? { ...med, ...updated } : med,
         ),
       }))
     }),
 
   removeMedication: async (medId) =>
     withLoading(set, async () => {
+      await medicationApiClient.remove(medId)
       set((state) => ({
         medications: state.medications.filter((med) => med.id !== medId),
       }))
@@ -59,11 +60,10 @@ export const useMedicationStore = create((set, get) => ({
       const target = get().medications.find((med) => med.id === medId)
       if (!target) return
       const nextStatus = target.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
+      const updated = await medicationApiClient.update(medId, { status: nextStatus })
       set((state) => ({
         medications: state.medications.map((med) =>
-          med.id === medId
-            ? { ...med, status: nextStatus, updatedAt: new Date().toISOString() }
-            : med,
+          med.id === medId ? { ...med, ...updated } : med,
         ),
       }))
     }),

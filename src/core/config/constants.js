@@ -1,37 +1,37 @@
 /**
- * 전역 상수 정의
- * - 사용자 역할, 알림 유형, 약 복용 상태 등
+ * 공용 상수 정의
+ * - 사용자 역할, 알림 타입, 복약 상태 등
  */
 
 // 사용자 역할
 export const USER_ROLES = {
-  SENIOR: 'SENIOR', // 노인 부모
-  CAREGIVER: 'CAREGIVER', // 성인 자식 (보호자)
+  SENIOR: 'SENIOR', // 어르신(부모)
+  CAREGIVER: 'CAREGIVER', // 보호자(자녀)
 }
 
 // 사용자 역할 라벨
 export const USER_ROLE_LABELS = {
-  [USER_ROLES.SENIOR]: '부모 (어르신)',
-  [USER_ROLES.CAREGIVER]: '자녀 (보호자)',
+  [USER_ROLES.SENIOR]: '어르신(부모)',
+  [USER_ROLES.CAREGIVER]: '보호자(자녀)',
 }
 
-// 약 복용 상태
+// 복약 상태
 export const MEDICATION_STATUS = {
-  PENDING: 'PENDING', // 대기 중
+  PENDING: 'PENDING', // 예정
   COMPLETED: 'COMPLETED', // 복용 완료
   SKIPPED: 'SKIPPED', // 건너뜀
-  MISSED: 'MISSED', // 놓침
+  MISSED: 'MISSED', // 미복용
 }
 
-// 약 복용 상태 라벨
+// 복약 상태 라벨
 export const MEDICATION_STATUS_LABELS = {
-  [MEDICATION_STATUS.PENDING]: '대기 중',
+  [MEDICATION_STATUS.PENDING]: '예정',
   [MEDICATION_STATUS.COMPLETED]: '복용 완료',
   [MEDICATION_STATUS.SKIPPED]: '건너뜀',
-  [MEDICATION_STATUS.MISSED]: '놓침',
+  [MEDICATION_STATUS.MISSED]: '미복용',
 }
 
-// 알림 유형
+// 알림 타입
 export const NOTIFICATION_TYPES = {
   MEDICATION_REMINDER: 'MEDICATION_REMINDER', // 복약 알림
   DIET_WARNING: 'DIET_WARNING', // 식단 경고
@@ -39,7 +39,7 @@ export const NOTIFICATION_TYPES = {
   SYSTEM: 'SYSTEM', // 시스템
 }
 
-// 알림 유형 라벨
+// 알림 타입 라벨
 export const NOTIFICATION_TYPE_LABELS = {
   [NOTIFICATION_TYPES.MEDICATION_REMINDER]: '복약 알림',
   [NOTIFICATION_TYPES.DIET_WARNING]: '식단 경고',
@@ -47,14 +47,14 @@ export const NOTIFICATION_TYPE_LABELS = {
   [NOTIFICATION_TYPES.SYSTEM]: '시스템',
 }
 
-// 약-음식 충돌 심각도
+// 식품 상호작용(충돌) 심각도
 export const CONFLICT_SEVERITY = {
   HIGH: 'HIGH', // 높음
   MEDIUM: 'MEDIUM', // 중간
   LOW: 'LOW', // 낮음
 }
 
-// 약-음식 충돌 심각도 라벨 및 색상
+// 식품 상호작용 심각도 라벨/색상
 export const CONFLICT_SEVERITY_CONFIG = {
   [CONFLICT_SEVERITY.HIGH]: {
     label: '높음',
@@ -102,7 +102,7 @@ export const HTTP_STATUS = {
   SERVER_ERROR: 500,
 }
 
-// 페이지네이션
+// 페이징/업로드 제한
 export const PAGINATION = {
   ITEMS_PER_PAGE: parseInt(import.meta.env.VITE_ITEMS_PER_PAGE || '10', 10),
   MAX_FILE_SIZE: parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '5242880', 10), // 5MB
@@ -131,3 +131,4 @@ export const STORAGE_KEYS = {
   ROLE: 'amapill_role',
   KAKAO_STATE: 'amapill_kakao_oauth_state',
 }
+

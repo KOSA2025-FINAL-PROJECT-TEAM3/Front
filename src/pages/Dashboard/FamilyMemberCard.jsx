@@ -1,33 +1,29 @@
-/**
+﻿/**
  * FamilyMemberCard Component
- * - 가족 구성원의 약 복용 현황 카드
+ * - 가족 구성원의 복약 현황 카드
  */
 
 import styles from './FamilyMemberCard.module.scss'
 
 /**
- * 가족 구성원 카드 컴포넌트
- * @param {Object} member - 가족 구성원 정보
- * @param {number} member.id - 구성원 ID
- * @param {string} member.name - 이름
- * @param {string} member.relation - 관계
- * @param {number} member.age - 나이
- * @param {Object} member.todayStatus - 오늘 상태
- * @param {string} member.lastMedicationTime - 마지막 복용 시간
- * @param {string} member.nextMedicationTime - 다음 복용 시간
- * @returns {JSX.Element} 가족 구성원 카드
+ * @param {Object} member
+ * @param {string|number} member.id
+ * @param {string} member.name
+ * @param {string} member.relation
+ * @param {number} member.age
+ * @param {{scheduled:number,completed:number,missed:number}} member.todayStatus
+ * @param {string} member.lastMedicationTime
+ * @param {string} member.nextMedicationTime
+ * @param {(id:string|number)=>void} onDetail
  */
-export const FamilyMemberCard = ({ member }) => {
-  const getComplianceRate = () => {
-    const { scheduled, completed } = member.todayStatus
-    return scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0
-  }
-
-  const complianceRate = getComplianceRate()
+export const FamilyMemberCard = ({ member, onDetail }) => {
+  if (!member) return null
+  const { scheduled = 0, completed = 0, missed = 0 } = member.todayStatus || {}
+  const complianceRate = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0
 
   return (
     <div className={styles.memberCard}>
-      {/* 헤더: 이름 및 상태 */}
+      {/* 헤더: 이름 · 기본정보 */}
       <div className={styles.cardHeader}>
         <div className={styles.memberInfo}>
           <h3 className={styles.memberName}>{member.name}</h3>
@@ -37,34 +33,42 @@ export const FamilyMemberCard = ({ member }) => {
           </div>
         </div>
 
-        {/* 순응도 배지 */}
-        <div className={styles.complianceBadge} style={{
-          background: complianceRate === 100 ? '#00b300' : complianceRate >= 50 ? '#ff9900' : '#ff6b6b'
-        }}>
+        {/* 준수율 뱃지 */}
+        <div
+          className={styles.complianceBadge}
+          style={{
+            background:
+              complianceRate === 100
+                ? '#00b300'
+                : complianceRate >= 50
+                ? '#ff9900'
+                : '#ff6b6b',
+          }}
+        >
           <span className={styles.complianceValue}>{complianceRate}%</span>
-          <span className={styles.complianceLabel}>순응도</span>
+          <span className={styles.complianceLabel}>준수율</span>
         </div>
       </div>
 
       {/* 상태 통계 */}
       <div className={styles.statusStats}>
         <div className={styles.statItem}>
-          <span className={styles.statNumber}>{member.todayStatus.scheduled}</span>
+          <span className={styles.statNumber}>{scheduled}</span>
           <span className={styles.statName}>예정</span>
         </div>
         <div className={styles.divider} />
         <div className={styles.statItem}>
           <span className={styles.statNumber} style={{ color: '#00b300' }}>
-            {member.todayStatus.completed}
+            {completed}
           </span>
           <span className={styles.statName}>완료</span>
         </div>
         <div className={styles.divider} />
         <div className={styles.statItem}>
           <span className={styles.statNumber} style={{ color: '#ff6b6b' }}>
-            {member.todayStatus.missed}
+            {missed}
           </span>
-          <span className={styles.statName}>미흡</span>
+          <span className={styles.statName}>미복용</span>
         </div>
       </div>
 
@@ -81,7 +85,11 @@ export const FamilyMemberCard = ({ member }) => {
       </div>
 
       {/* 액션 버튼 */}
-      <button className={styles.detailButton}>
+      <button
+        type="button"
+        className={styles.detailButton}
+        onClick={() => onDetail?.(member.id)}
+      >
         상세 보기
       </button>
     </div>

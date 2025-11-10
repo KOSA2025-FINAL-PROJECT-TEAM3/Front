@@ -10,6 +10,7 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from '@features/auth/pages/Login'
@@ -27,6 +28,9 @@ import NotificationSettingsPage from '@features/settings/pages/Notifications/Not
 import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
 import FoodWarningPage from '@features/diet/pages/FoodWarning'
 import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
+import SymptomSearchPage from '@features/search/pages/SymptomSearch'
+import DoctorCounselPage from '@features/counsel/pages/DoctorCounsel'
+import DiseasePage from '@features/disease/pages/Disease'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
 
 /**
@@ -39,79 +43,79 @@ function App() {
       <FamilyProvider>
         <Routes>
             {/* 공개 페이지: 인증 불필요 */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-          <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
+            <Route path={ROUTE_PATHS.login} element={<Login />} />
+            <Route path={ROUTE_PATHS.signup} element={<Signup />} />
+          <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
 
           {/* 보호된 페이지: 인증 필요 */}
           <Route
-            path="/role-selection"
+            path={ROUTE_PATHS.roleSelection}
             element={<PrivateRoute element={<RoleSelection />} />}
           />
           <Route
-            path="/dashboard"
+            path={ROUTE_PATHS.seniorDashboard}
             element={<PrivateRoute element={<SeniorDashboard />} />}
           />
           <Route
-            path="/guardian"
+            path={ROUTE_PATHS.guardianDashboard}
             element={<PrivateRoute element={<GuardianDashboard />} />}
           />
 
           {/* 메뉴바의 다른 페이지들 (스텁) - PrivateRoute 보호 */}
           <Route
-            path="/medication"
+            path={ROUTE_PATHS.medication}
             element={<PrivateRoute element={<MedicationManagementPage />} />}
           />
           <Route
-            path="/search"
-            element={<PrivateRoute element={<SeniorDashboard />} />}
+            path={ROUTE_PATHS.search}
+            element={<PrivateRoute element={<SymptomSearchPage />} />}
           />
           <Route
-            path="/counsel"
-            element={<PrivateRoute element={<SeniorDashboard />} />}
+            path={ROUTE_PATHS.counsel}
+            element={<PrivateRoute element={<DoctorCounselPage />} />}
           />
           <Route
-            path="/disease"
-            element={<PrivateRoute element={<GuardianDashboard />} />}
+            path={ROUTE_PATHS.disease}
+            element={<PrivateRoute element={<DiseasePage />} />}
           />
           <Route
-            path="/diet/warning"
+            path={ROUTE_PATHS.dietWarning}
             element={<PrivateRoute element={<FoodWarningPage />} />}
           />
           <Route
-            path="/ocr/scan"
+            path={ROUTE_PATHS.ocrScan}
             element={<PrivateRoute element={<PrescriptionScanPage />} />}
           />
           <Route
-            path="/settings"
+            path={ROUTE_PATHS.settings}
             element={<PrivateRoute element={<SettingsPage />} />}
           />
           <Route
-            path="/settings/profile"
+            path={ROUTE_PATHS.settingsProfile}
             element={<PrivateRoute element={<ProfileEditPage />} />}
           />
           <Route
-            path="/settings/notifications"
+            path={ROUTE_PATHS.settingsNotifications}
             element={<PrivateRoute element={<NotificationSettingsPage />} />}
           />
           <Route
-            path="/family"
+            path={ROUTE_PATHS.family}
             element={<PrivateRoute element={<FamilyManagementPage />} />}
           />
           <Route
-            path="/family/invite"
+            path={ROUTE_PATHS.familyInvite}
             element={<PrivateRoute element={<FamilyInvitePage />} />}
           />
           <Route
-            path="/family/member/:id"
+            path={ROUTE_PATHS.familyMemberDetail}
             element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
           />
 
           {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.login} replace />} />
 
           {/* 404: 존재하지 않는 경로 */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
         </Routes>
         <DeveloperModePanel />
       </FamilyProvider>

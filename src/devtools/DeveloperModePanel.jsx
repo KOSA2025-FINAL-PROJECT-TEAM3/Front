@@ -1,12 +1,12 @@
-/**
+﻿/**
  * DeveloperModePanel
- * - 개발 모드 단축키 실행기 (공유 UI 외부에 유지)
- * - 전역 스타일 유출 방지를 위해 SCSS 모듈 사용
+ * - 개발 모드 진입/바로가기 패널 (UI는 SCSS 모듈)
  */
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
+import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuthStore } from '@/stores/authStore'
 import { DEFAULT_FAMILY_GROUP, DEFAULT_FAMILY_MEMBERS } from '@/data/mockFamily'
 import styles from './DeveloperModePanel.module.scss'
@@ -16,13 +16,13 @@ const DEV_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEV_MODE !== 'false'
 const DEV_PROFILES = {
   [USER_ROLES.SENIOR]: {
     id: 'dev-senior',
-    name: '김시니어',
+    name: '김어르신',
     email: 'senior@amapill.dev',
     role: USER_ROLES.SENIOR,
   },
   [USER_ROLES.CAREGIVER]: {
     id: 'dev-guardian',
-    name: '이지킴',
+    name: '홍보호자',
     email: 'guardian@amapill.dev',
     role: USER_ROLES.CAREGIVER,
   },
@@ -32,10 +32,7 @@ const seedFamilyData = () => {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(
     STORAGE_KEYS.FAMILY_GROUP,
-    JSON.stringify({
-      group: DEFAULT_FAMILY_GROUP,
-      members: DEFAULT_FAMILY_MEMBERS,
-    }),
+    JSON.stringify({ group: DEFAULT_FAMILY_GROUP, members: DEFAULT_FAMILY_MEMBERS }),
   )
 }
 
@@ -73,29 +70,17 @@ export const DeveloperModePanel = () => {
   const handleShortcut = (role, path) => {
     const record = persistDevAuth(role)
     if (record?.userProfile) {
-      setAuthData({
-        user: record.userProfile,
-        token: record.token,
-        role,
-      })
+      setAuthData({ user: record.userProfile, token: record.token, role })
     }
-    if (typeof window !== 'undefined') {
-      window.location.href = path
-    } else {
-      setOpen(false)
-      navigate(path, { replace: true })
-    }
+    setOpen(false)
+    navigate(path, { replace: true })
   }
 
   const handleClear = () => {
     clearDevAuth()
     clearAuthState()
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login'
-    } else {
-      setOpen(false)
-      navigate('/login', { replace: true })
-    }
+    setOpen(false)
+    navigate(ROUTE_PATHS.login, { replace: true })
   }
 
   return (
@@ -106,13 +91,13 @@ export const DeveloperModePanel = () => {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
-        ⚙️ Dev Mode
+        🧪 Dev Mode
       </button>
 
       {open && (
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
-            <span>Developer Shortcuts</span>
+            <span>개발자 바로가기</span>
             <button
               type="button"
               className={styles.closeButton}
@@ -127,45 +112,45 @@ export const DeveloperModePanel = () => {
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.SENIOR, '/role-selection')}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.roleSelection)}
               >
-                🧭 역할 선택 (Stage 2)
+                역할 선택 (Stage 2)
               </button>
             </li>
             <li>
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.SENIOR, '/dashboard')}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.seniorDashboard)}
               >
-                👵 시니어 대시보드
+                어르신 대시보드
               </button>
             </li>
             <li>
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, '/guardian')}
+                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.guardianDashboard)}
               >
-                👨‍👩‍👧 보호자 대시보드
+                보호자 대시보드
               </button>
             </li>
             <li>
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, '/family')}
+                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.family)}
               >
-                👨‍👩‍👧‍👦 가족 관리 (Stage 3)
+                가족 관리 (Stage 3)
               </button>
             </li>
             <li>
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.SENIOR, '/medication')}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.medication)}
               >
-                💊 약 관리 (Stage 4 • CRUD)
+                약 관리 (Stage 4 CRUD)
               </button>
             </li>
             <li>
@@ -177,7 +162,7 @@ export const DeveloperModePanel = () => {
                 className={`${styles.shortcutButton} ${styles.resetButton}`}
                 onClick={handleClear}
               >
-                🔒 Dev Mode 토큰 초기화
+                Dev Mode 초기화
               </button>
             </li>
           </ul>

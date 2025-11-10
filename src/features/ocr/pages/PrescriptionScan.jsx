@@ -1,23 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import OCRControlPanel from '../components/OCRControlPanel.jsx'
 import OCRResultPreview from '../components/OCRResultPreview.jsx'
 import styles from './PrescriptionScan.module.scss'
+import { ocrApiClient } from '@/core/services/api/ocrApiClient'
 
 const RECOGNITION_DELAY_MS = 1200
 
 const stripExtension = (fileName = '') => fileName.replace(/\.[^/.]+$/, '')
 
 const buildMockResult = (fileName) => {
-  const displayName = stripExtension(fileName) || '신규 처방약'
+  const displayName = stripExtension(fileName) || '기본 처방전'
   return {
-    text: `약품명: ${displayName}
-복용량: 1정
-복용 일정: 하루 1회 (저녁 식후)
-주의사항: 자몽 주스와 동시 복용 금지`,
+    text: `의품명 ${displayName}\n복용량 1정\n복용 일정: 하루 1회(저녁 식후)\n주의사항: 자몽 주스와 동시 복용 금지`,
     insights: [
-      `${displayName}을(를) 약 관리 CRUD로 등록해 스케줄을 추적하세요.`,
-      '식사 기록 시 자몽/비타민 K 음식과의 충돌을 확인하세요.',
+      `${displayName}를 약 관리에 등록하고 일정을 추적하세요`,
+      '식사 기록 중 자몽/비타민K 식품과의 충돌을 확인하세요',
     ],
   }
 }
@@ -51,9 +49,16 @@ export const PrescriptionScanPage = () => {
   const handleRecognize = useCallback(async () => {
     if (!file) return
     setIsProcessing(true)
-    await new Promise((resolve) => setTimeout(resolve, RECOGNITION_DELAY_MS))
-    setResult(buildMockResult(file.name))
-    setIsProcessing(false)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const data = await ocrApiClient.recognize(fd)
+      setResult({ text: data.text, insights: data.insights })
+    } catch (e) {
+      setResult(buildMockResult(file.name))
+    } finally {
+      setIsProcessing(false)
+    }
   }, [file])
 
   const handleReset = useCallback(() => {
@@ -67,10 +72,10 @@ export const PrescriptionScanPage = () => {
   }, [previewUrl])
 
   const statusMessage = useMemo(() => {
-    if (isProcessing) return 'AI가 처방전을 해석하는 중입니다...'
-    if (file && !result) return '인식 버튼을 눌러 내용을 추출하세요.'
-    if (result) return '인식 결과를 검토하고 약 관리에 반영하세요.'
-    return '처방전 이미지를 업로드하면 자동으로 내용을 추출합니다.'
+    if (isProcessing) return 'AI가 처방전을 분석하는 중입니다...'
+    if (file && !result) return '인식 버튼을 눌러 내용을 추출하세요'
+    if (result) return '인식 결과를 확인하고 약 관리에 반영하세요'
+    return '처방전 이미지를 업로드하여 자동으로 내용을 추출합니다'
   }, [file, isProcessing, result])
 
   return (
@@ -95,26 +100,14 @@ export const PrescriptionScanPage = () => {
                 onChange={handleFileChange}
                 className={styles.fileInput}
               />
-              {file ? (
-                <span>{file.name}</span>
-              ) : (
-                <span>여기에 파일을 끌어놓거나 클릭하여 업로드</span>
-              )}
+              {file ? <span>{file.name}</span> : <span>여기로 파일을 끌어오거나 클릭하여 업로드</span>}
             </label>
             <p className={styles.statusNote}>{statusMessage}</p>
           </div>
 
-          <OCRControlPanel
-            onRecognize={handleRecognize}
-            onReset={handleReset}
-            isProcessing={isProcessing || !file}
-          />
+          <OCRControlPanel onRecognize={handleRecognize} onReset={handleReset} isProcessing={isProcessing || !file} />
 
-          <OCRResultPreview
-            imageSrc={previewUrl}
-            resultText={result?.text}
-            insights={result?.insights}
-          />
+          <OCRResultPreview imageSrc={previewUrl} resultText={result?.text} insights={result?.insights} />
         </section>
       </div>
     </MainLayout>

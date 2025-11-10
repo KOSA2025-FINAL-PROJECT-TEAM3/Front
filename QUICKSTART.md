@@ -1,52 +1,52 @@
-# 🚀 뭐냑? (AMA...Pill) 빠른 시작 가이드
+﻿# ?? 萸먮깙? (AMA...Pill) 鍮좊Ⅸ ?쒖옉 媛?대뱶
 
-> 백엔드 없이도 5분 안에 프런트 프로토타입 실행하기  
-> **Dev Mode는 백엔드가 완성되면 VITE_ENABLE_DEV_MODE=false로 비활성화하고, 필요 시 컴포넌트를 제거하세요.**
+> 諛깆뿏???놁씠??5遺??덉뿉 ?꾨윴???꾨줈?좏????ㅽ뻾?섍린  
+> **Dev Mode??諛깆뿏?쒓? ?꾩꽦?섎㈃ VITE_ENABLE_DEV_MODE=false濡?鍮꾪솢?깊솕?섍퀬, ?꾩슂 ??而댄룷?뚰듃瑜??쒓굅?섏꽭??**
 
 ---
 
-## ⚡ 빠른 실행 (Docker Compose 추천)
+## ??鍮좊Ⅸ ?ㅽ뻾 (Docker Compose 異붿쿇)
 
-### 1단계: 환경 설정
+### 1?④퀎: ?섍꼍 ?ㅼ젙
 
 ```bash
-# 저장소 클론
+# ??μ냼 ?대줎
 git clone https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Front.git
 cd Front
 
-# 환경 변수 파일 생성
+# ?섍꼍 蹂???뚯씪 ?앹꽦
 cp .env.example .env
 ```
 
-### 2단계: Docker Compose로 전체 스택 실행
+### 2?④퀎: Docker Compose濡??꾩껜 ?ㅽ깮 ?ㅽ뻾
 
 ```bash
-# 모든 서비스 시작 (MySQL, PostgreSQL, Redis, Kafka, 9개 마이크로서비스)
+# 紐⑤뱺 ?쒕퉬???쒖옉 (MySQL, PostgreSQL, Redis, Kafka, 9媛?留덉씠?щ줈?쒕퉬??
 docker-compose up -d
 
-# 서비스 상태 확인
+# ?쒕퉬???곹깭 ?뺤씤
 docker-compose ps
 
-# 로그 확인
+# 濡쒓렇 ?뺤씤
 docker-compose logs -f
 ```
 
-> **주의**: 현재 프로젝트는 **프런트엔드 선행 개발**을 기본 흐름으로 잡았습니다. 백엔드가 준비되기 전까지 Dev Mode로 화면을 검증하고, 이후 실제 API를 붙입니다.
+> **二쇱쓽**: ?꾩옱 ?꾨줈?앺듃??**?꾨윴?몄뿏???좏뻾 媛쒕컻**??湲곕낯 ?먮쫫?쇰줈 ?≪븯?듬땲?? 諛깆뿏?쒓? 以鍮꾨릺湲??꾧퉴吏 Dev Mode濡??붾㈃??寃利앺븯怨? ?댄썑 ?ㅼ젣 API瑜?遺숈엯?덈떎.
 
-### 3단계: Frontend 실행 (Dev Mode 우선)
+### 3?④퀎: Frontend ?ㅽ뻾 (Dev Mode ?곗꽑)
 
 ```bash
-# 의존성 설치
+# ?섏〈???ㅼ튂
 npm install
 
-# 개발 서버 시작 (React 19 + Vite)
+# 媛쒕컻 ?쒕쾭 ?쒖옉 (React 19 + Vite)
 npm run dev
 ```
 
-Dev Mode가 필요한 이유와 절차는 아래 “🔑 Developer Mode (Frontend-first)” 섹션을 참고하세요.
+Dev Mode媛 ?꾩슂???댁쑀? ?덉감???꾨옒 ?쒚윍?Developer Mode (Frontend-first)???뱀뀡??李멸퀬?섏꽭??
 ```
 
-### 4단계: 브라우저에서 확인
+### 4?④퀎: 釉뚮씪?곗??먯꽌 ?뺤씤
 
 - **Frontend**: http://localhost:5173
 - **API Gateway**: http://localhost:8080
@@ -54,34 +54,34 @@ Dev Mode가 필요한 이유와 절차는 아래 “🔑 Developer Mode (Fronten
 
 ---
 
-## 🗄️ 데이터베이스 초기화
+## ?뾼截??곗씠?곕쿋?댁뒪 珥덇린??
 
-### MySQL (트랜잭션 DB)
+### MySQL (?몃옖??뀡 DB)
 
 ```bash
-# Docker 컨테이너에서 스키마 실행
+# Docker 而⑦뀒?대꼫?먯꽌 ?ㅽ궎留??ㅽ뻾
 docker exec -i silvercare-mysql mysql -u root -psilvercare_root_2025 silvercare < database-schema-mysql.sql
 
-# 또는 MySQL 클라이언트로 직접 연결
+# ?먮뒗 MySQL ?대씪?댁뼵?몃줈 吏곸젒 ?곌껐
 mysql -h localhost -P 3306 -u silvercare_app -psilvercare_pass_2025 silvercare < database-schema-mysql.sql
 ```
 
-### PostgreSQL (실시간 동기화 DB)
+### PostgreSQL (?ㅼ떆媛??숆린??DB)
 
 ```bash
-# Docker 컨테이너에서 스키마 실행
+# Docker 而⑦뀒?대꼫?먯꽌 ?ㅽ궎留??ㅽ뻾
 docker exec -i silvercare-postgresql psql -U silvercare_sync_app -d silvercare_sync -f /docker-entrypoint-initdb.d/01-schema.sql
 
-# 또는 psql 클라이언트로 직접 연결
+# ?먮뒗 psql ?대씪?댁뼵?몃줈 吏곸젒 ?곌껐
 psql -h localhost -p 5432 -U silvercare_sync_app -d silvercare_sync -f database-schema-postgresql.sql
-# 비밀번호: silvercare_sync_pass_2025
+# 鍮꾨?踰덊샇: silvercare_sync_pass_2025
 ```
 
 ---
 
-## 🔍 서비스 확인
+## ?뵇 ?쒕퉬???뺤씤
 
-### 헬스 체크
+### ?ъ뒪 泥댄겕
 
 ```bash
 # API Gateway
@@ -93,11 +93,11 @@ curl http://localhost:8081/actuator/health
 # Medication Service
 curl http://localhost:8082/actuator/health
 
-# Eureka 등록 확인
+# Eureka ?깅줉 ?뺤씤
 curl http://localhost:8761/eureka/apps
 ```
 
-### 데이터베이스 연결 테스트
+### ?곗씠?곕쿋?댁뒪 ?곌껐 ?뚯뒪??
 
 ```bash
 # MySQL
@@ -112,33 +112,33 @@ docker exec -it silvercare-redis redis-cli ping
 
 ---
 
-## 🛑 서비스 중지
+## ?썞 ?쒕퉬??以묒?
 
 ```bash
-# 모든 서비스 중지
+# 紐⑤뱺 ?쒕퉬??以묒?
 docker-compose down
 
-# 볼륨까지 삭제 (데이터 초기화)
+# 蹂쇰ⅷ源뚯? ??젣 (?곗씠??珥덇린??
 docker-compose down -v
 ```
 
 ---
 
-## 📦 개별 서비스만 실행하기
+## ?벀 媛쒕퀎 ?쒕퉬?ㅻ쭔 ?ㅽ뻾?섍린
 
-### 데이터베이스만 실행
+### ?곗씠?곕쿋?댁뒪留??ㅽ뻾
 
 ```bash
 docker-compose up -d mysql postgresql redis
 ```
 
-### Kafka만 실행
+### Kafka留??ㅽ뻾
 
 ```bash
 docker-compose up -d zookeeper kafka
 ```
 
-### Spring Cloud 인프라만 실행
+### Spring Cloud ?명봽?쇰쭔 ?ㅽ뻾
 
 ```bash
 docker-compose up -d config-server eureka-server api-gateway
@@ -146,9 +146,9 @@ docker-compose up -d config-server eureka-server api-gateway
 
 ---
 
-## 🔧 개발 환경 설정
+## ?뵩 媛쒕컻 ?섍꼍 ?ㅼ젙
 
-### Frontend 개발 (React 19)
+### Frontend 媛쒕컻 (React 19)
 
 ```bash
 cd Front
@@ -157,18 +157,18 @@ npm run dev
 # http://localhost:5173
 ```
 
-### Backend 개발 (Spring Boot)
+### Backend 媛쒕컻 (Spring Boot)
 
 ```bash
-# 각 마이크로서비스 디렉토리에서
+# 媛?留덉씠?щ줈?쒕퉬???붾젆?좊━?먯꽌
 cd auth-service
 mvn spring-boot:run
 
-# 또는 IDE에서 실행
-# IntelliJ IDEA: Run → Edit Configurations → Spring Boot
+# ?먮뒗 IDE?먯꽌 ?ㅽ뻾
+# IntelliJ IDEA: Run ??Edit Configurations ??Spring Boot
 ```
 
-### Hocuspocus 서버 개발 (Node.js)
+### Hocuspocus ?쒕쾭 媛쒕컻 (Node.js)
 
 ```bash
 cd hocuspocus-server
@@ -179,51 +179,51 @@ npm run dev
 
 ---
 
-## 🔑 Developer Mode (Frontend-first)
+## ?뵎 Developer Mode (Frontend-first)
 
-백엔드가 아직 없더라도 Stage 1~3 작업을 진행할 수 있도록 **Developer Mode**를 제공합니다.  
-Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거하거나 비활성화해야 합니다.
+諛깆뿏?쒓? ?꾩쭅 ?녿뜑?쇰룄 Stage??~3 ?묒뾽??吏꾪뻾?????덈룄濡?**Developer Mode**瑜??쒓났?⑸땲??  
+Stage 4(?ㅼ떆媛??숆린?붋룹떎??API ?곕룞) ?댄썑?먮뒗 Dev Mode瑜??쒓굅?섍굅??鍮꾪솢?깊솕?댁빞 ?⑸땲??
 
-### 왜 필요한가?
-- UI/UX를 앞당겨 검증하기 위해 프런트가 먼저 구축되는 구조입니다.
-- 실서비스 API가 준비되지 않아도 로그인·역할 선택·가족 관리 화면을 확인할 수 있어야 합니다.
+### ???꾩슂?쒓??
+- UI/UX瑜??욌떦寃?寃利앺븯湲??꾪빐 ?꾨윴?멸? 癒쇱? 援ъ텞?섎뒗 援ъ“?낅땲??
+- ?ㅼ꽌鍮꾩뒪 API媛 以鍮꾨릺吏 ?딆븘??濡쒓렇?맞룹뿭???좏깮쨌媛議?愿由??붾㈃???뺤씤?????덉뼱???⑸땲??
 
-### 동작 방식
-1. `npm run dev`로 프런트 서버를 띄우면 `localStorage`에 Dev Mode 플래그를 심어 임시 토큰/사용자 정보를 저장합니다.
-2. Axios 인터셉터는 Dev Mode가 감지되면 실제 API 호출을 막고 Mock 응답을 반환합니다.
-3. AuthStore + FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
+### ?숈옉 諛⑹떇
+1. `npm run dev`濡??꾨윴???쒕쾭瑜??꾩슦硫?`localStorage`??Dev Mode ?뚮옒洹몃? ?ъ뼱 ?꾩떆 ?좏겙/?ъ슜???뺣낫瑜???ν빀?덈떎.
+2. Axios ?명꽣?됲꽣??Dev Mode媛 媛먯??섎㈃ ?ㅼ젣 API ?몄텧??留됯퀬 Mock ?묐떟??諛섑솚?⑸땲??
+3. AuthStore + FamilyContext??Dev Mode ?곗씠?곕? ?댁슜????븷쨌媛議?ID ?깆쓣 ?ы쁽?⑸땲??
 
-### 사용 방법
-- **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Guardian Dashboard, Family Management)
-- **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
-- **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
+### ?ъ슜 諛⑸쾿
+- **1)** 釉뚮씪?곗??먯꽌 `http://localhost:5173` ?묒냽
+- **2)** ?붾㈃ ?쇱そ ?꾨옒 `?숋툘 Dev Mode` 踰꾪듉 ?대┃ ???먰븯??寃쎈줈 ?좏깮 (?꾩옱 ?쒓났: Role Selection, Senior Dashboard, Guardian Dashboard, Family Management)
+- **3)** Dev Mode ?댁젣: Dev Mode 硫붾돱???쒗넗??珥덇린?붴?踰꾪듉???꾨Ⅴ嫄곕굹 `localStorage.clear()` ?ㅽ뻾
+- **?섍꼍 蹂?섎줈 鍮꾪솢?깊솕**: `.env`?먯꽌 `VITE_ENABLE_DEV_MODE=false`濡??ㅼ젙?섎㈃ 踰꾪듉???뚮뜑留곷릺吏 ?딆뒿?덈떎.
 
-### 실제 백엔드 연결로 전환
-1. `.env`에서 `VITE_USE_MOCK_API=false` 설정 (기본값)
-2. Dev Mode 플래그(`localStorage.setItem('amapill_dev_mode', 'false')`) 제거
-3. Stage 4 이후에는 `DeveloperModePanel` 자체를 삭제하거나 `VITE_ENABLE_DEV_MODE=false`로 고정
+### ?ㅼ젣 諛깆뿏???곌껐濡??꾪솚
+1. `.env`?먯꽌 `VITE_USE_MOCK_API=false` ?ㅼ젙 (湲곕낯媛?
+2. Dev Mode ?뚮옒洹?`localStorage.setItem('amapill_dev_mode', 'false')`) ?쒓굅
+3. Stage 4 ?댄썑?먮뒗 `DeveloperModePanel` ?먯껜瑜???젣?섍굅??`VITE_ENABLE_DEV_MODE=false`濡?怨좎젙
 
-### Kakao OAuth 설정
-1. `.env`에 `VITE_KAKAO_CLIENT_ID`와 `VITE_KAKAO_REDIRECT_URI`를 입력합니다. (기본 콜백: `http://localhost:5173/auth/kakao/callback`)
-2. 카카오 개발자 콘솔에서 Redirect URI를 동일하게 등록합니다.
-3. 로그인 화면의 “카카오로 로그인” 버튼을 누르면 카카오 인증 후 콜백 페이지가 자동으로 `/role-selection`까지 안내합니다.
+### Kakao OAuth ?ㅼ젙
+1. `.env`??`VITE_KAKAO_CLIENT_ID`? `VITE_KAKAO_REDIRECT_URI`瑜??낅젰?⑸땲?? (湲곕낯 肄쒕갚: `http://localhost:5173/auth/kakao/callback`)
+2. 移댁뭅??媛쒕컻??肄섏넄?먯꽌 Redirect URI瑜??숈씪?섍쾶 ?깅줉?⑸땲??
+3. 濡쒓렇???붾㈃???쒖뭅移댁삤濡?濡쒓렇?멤?踰꾪듉???꾨Ⅴ硫?移댁뭅???몄쬆 ??肄쒕갚 ?섏씠吏媛 ?먮룞?쇰줈 `/role-selection`源뚯? ?덈궡?⑸땲??
 
-### Stage 3 참고 (Family Prototype)
-- Family 상태는 `src/stores/familyStore.js`(Zustand)에서 관리하며, Dev Mode에서는 `FamilyMockService`가 localStorage 기반 데이터를 공급합니다.
-- FamilyProvider는 store 초기화만 담당하며, 화면에서는 `useFamily` 훅을 통해 상태를 구독합니다.
-- Stage 4에서 API/실시간 연동 시 동일한 store 액션(loadFamily/invite/remove)을 실제 엔드포인트로 교체하면 됩니다.
+### Stage 3 李멸퀬 (Family Prototype)
+- Family ?곹깭??`src/stores/familyStore.js`(Zustand)?먯꽌 愿由ы븯硫? Dev Mode?먯꽌??`FamilyMockService`媛 localStorage 湲곕컲 ?곗씠?곕? 怨듦툒?⑸땲??
+- FamilyProvider??store 珥덇린?붾쭔 ?대떦?섎ŉ, ?붾㈃?먯꽌??`useFamily` ?낆쓣 ?듯빐 ?곹깭瑜?援щ룆?⑸땲??
+- Stage 4?먯꽌 API/?ㅼ떆媛??곕룞 ???숈씪??store ?≪뀡(loadFamily/invite/remove)???ㅼ젣 ?붾뱶?ъ씤?몃줈 援먯껜?섎㈃ ?⑸땲??
 
-### Stage 4 실시간 동기화
-- `VITE_WS_BASE_URL`에 Hocuspocus 서버 주소를 입력하고, `VITE_ENABLE_REALTIME`(기본값 true)을 유지하면 `useFamilySync`가 `FamilySyncService`를 통해 실시간 상태를 구독합니다.
-- WS URL이 비어 있거나 `VITE_ENABLE_REALTIME=false`로 설정하면 Stage 3와 동일한 Mock 동작을 유지합니다.
-- Dev Mode에서는 여전히 Mock 데이터를 주입하지만, 실 WS가 연결되어 있을 경우 Dev 계정도 동일한 `family-group-{id}` 룸에 입장합니다.
+### Stage 4 ?ㅼ떆媛??숆린??
+- `VITE_WS_BASE_URL`??Hocuspocus ?쒕쾭 二쇱냼瑜??낅젰?섍퀬, `VITE_ENABLE_REALTIME`(湲곕낯媛?true)???좎??섎㈃ `useFamilySync`媛 `FamilySyncService`瑜??듯빐 ?ㅼ떆媛??곹깭瑜?援щ룆?⑸땲??
+- WS URL??鍮꾩뼱 ?덇굅??`VITE_ENABLE_REALTIME=false`濡??ㅼ젙?섎㈃ Stage 3? ?숈씪??Mock ?숈옉???좎??⑸땲??
+- Dev Mode?먯꽌???ъ쟾??Mock ?곗씠?곕? 二쇱엯?섏?留? ??WS媛 ?곌껐?섏뼱 ?덉쓣 寃쎌슦 Dev 怨꾩젙???숈씪??`family-group-{id}` 猷몄뿉 ?낆옣?⑸땲??
 
 ---
 
-## 🧪 테스트 API 호출 (백엔드 준비 후)
+## ?㎦ ?뚯뒪??API ?몄텧 (諛깆뿏??以鍮???
 
-### 회원가입
+### ?뚯썝媛??
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/register \
@@ -231,12 +231,12 @@ curl -X POST http://localhost:8080/api/auth/register \
   -d '{
     "email": "test@silvercare.com",
     "password": "password123",
-    "name": "테스트 사용자",
+    "name": "?뚯뒪???ъ슜??,
     "role": "senior"
   }'
 ```
 
-### 로그인
+### 濡쒓렇??
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -249,63 +249,73 @@ curl -X POST http://localhost:8080/api/auth/login \
 
 ---
 
-## 📚 다음 단계
+## ?뱴 ?ㅼ쓬 ?④퀎
 
-1. **아키텍처 이해하기**: [MICROSERVICES_SETUP.md](./MICROSERVICES_SETUP.md)
-2. **API 명세 확인**: [MVP_DTO_SPECIFICATION.md](./MVP_DTO_SPECIFICATION.md)
-3. **개발 로드맵**: [DEVELOPMENT_ROADMAP.md](./DEVELOPMENT_ROADMAP.md)
-
----
-
-## 🚧 남은 단계 (Frontend 기준)
-
-1. **Medication API 연동**: `src/stores/medicationStore.js`가 mock 데이터를 사용하는 상태라, Stage 4 CRUD 완료를 위해 `src/core/services/api/medicationApiClient.js`와 실제 엔드포인트를 연결해야 합니다.
-2. **OCR 플로우 완성**: `src/features/ocr/pages/PrescriptionScan.jsx`는 최소 플로우만 복구된 상태입니다. 정의서의 `ImageUploader`/`ManualCorrection` UI와 실제 OCR API 연동, 약 관리와의 연결 로직이 필요합니다.
-3. **Diet 모듈 확장**: 현재 `FoodWarningPage` 하나만 존재하므로 정의서에 명시된 `DietLogPage`, `HospitalDietResourcesPage` 및 관련 컴포넌트를 추가해야 합니다.
-4. **API 서비스 확장**: `src/core/services/api`에 Auth/Medication/Family/Diet/OCR 클라이언트를 추가했지만, 각 스토어/서비스에서 실제로 사용하도록 단계별 치환이 필요합니다.
-5. **Stage 4 QA**: Dev Mode로 기본 동작 확인은 가능하지만, 실제 백엔드 연동이 완료되면 통합 QA 시나리오를 갱신하고 `VITE_USE_MOCK_API`/Dev Mode 설정을 정리해야 합니다.
+1. **?꾪궎?띿쿂 ?댄빐?섍린**: [MICROSERVICES_SETUP.md](./MICROSERVICES_SETUP.md)
+2. **API 紐낆꽭 ?뺤씤**: [MVP_DTO_SPECIFICATION.md](./MVP_DTO_SPECIFICATION.md)
+3. **媛쒕컻 濡쒕뱶留?*: [DEVELOPMENT_ROADMAP.md](./DEVELOPMENT_ROADMAP.md)
 
 ---
 
-## 🆘 문제 해결
+## ?슙 ?⑥? ?④퀎 (Frontend 湲곗?)
 
-### Docker 컨테이너가 시작되지 않음
+1. **Medication API ?곕룞**: `src/stores/medicationStore.js`媛 mock ?곗씠?곕? ?ъ슜?섎뒗 ?곹깭?? Stage 4 CRUD ?꾨즺瑜??꾪빐 `src/core/services/api/medicationApiClient.js`? ?ㅼ젣 ?붾뱶?ъ씤?몃? ?곌껐?댁빞 ?⑸땲??
+2. **OCR ?뚮줈???꾩꽦**: `src/features/ocr/pages/PrescriptionScan.jsx`??理쒖냼 ?뚮줈?곕쭔 蹂듦뎄???곹깭?낅땲?? ?뺤쓽?쒖쓽 `ImageUploader`/`ManualCorrection` UI? ?ㅼ젣 OCR API ?곕룞, ??愿由ъ????곌껐 濡쒖쭅???꾩슂?⑸땲??
+3. **Diet 紐⑤뱢 ?뺤옣**: ?꾩옱 `FoodWarningPage` ?섎굹留?議댁옱?섎?濡??뺤쓽?쒖뿉 紐낆떆??`DietLogPage`, `HospitalDietResourcesPage` 諛?愿??而댄룷?뚰듃瑜?異붽??댁빞 ?⑸땲??
+4. **API ?쒕퉬???뺤옣**: `src/core/services/api`??Auth/Medication/Family/Diet/OCR ?대씪?댁뼵?몃? 異붽??덉?留? 媛??ㅽ넗???쒕퉬?ㅼ뿉???ㅼ젣濡??ъ슜?섎룄濡??④퀎蹂?移섑솚???꾩슂?⑸땲??
+5. **Stage 4 QA**: Dev Mode濡?湲곕낯 ?숈옉 ?뺤씤? 媛?ν븯吏留? ?ㅼ젣 諛깆뿏???곕룞???꾨즺?섎㈃ ?듯빀 QA ?쒕굹由ъ삤瑜?媛깆떊?섍퀬 `VITE_USE_MOCK_API`/Dev Mode ?ㅼ젙???뺣━?댁빞 ?⑸땲??
+
+---
+
+## ?넊 臾몄젣 ?닿껐
+
+### Docker 而⑦뀒?대꼫媛 ?쒖옉?섏? ?딆쓬
 
 ```bash
-# 기존 컨테이너 및 볼륨 삭제
+# 湲곗〈 而⑦뀒?대꼫 諛?蹂쇰ⅷ ??젣
 docker-compose down -v
 
-# Docker 시스템 정리
+# Docker ?쒖뒪???뺣━
 docker system prune -a
 
-# 다시 시작
+# ?ㅼ떆 ?쒖옉
 docker-compose up -d
 ```
 
-### 포트 충돌
+### ?ы듃 異⑸룎
 
 ```bash
-# 사용 중인 포트 확인
+# ?ъ슜 以묒씤 ?ы듃 ?뺤씤
 lsof -i :8080
 lsof -i :3306
 lsof -i :5432
 
-# 프로세스 종료
+# ?꾨줈?몄뒪 醫낅즺
 kill -9 <PID>
 ```
 
-### npm install 실패
+### npm install ?ㅽ뙣
 
 ```bash
-# 캐시 삭제
+# 罹먯떆 ??젣
 rm -rf node_modules package-lock.json
 npm cache clean --force
 
-# 재설치
+# ?ъ꽕移?
 npm install
 ```
 
 ---
 
-**최종 수정일**: 2025-11-06
-**작성자**: 뭐냑? (AMA...Pill) 개발팀
+**理쒖쥌 ?섏젙??*: 2025-11-06
+**?묒꽦??*: 萸먮깙? (AMA...Pill) 媛쒕컻?
+
+
+
+## 라우팅 가이드 (프로토타입)
+
+- 모든 경로는 src/core/config/routes.config.js의 ROUTE_PATHS 상수를 사용합니다.
+- 컴포넌트, 내비게이션, 리다이렉트에서 하드코딩 문자열 경로 사용을 지양합니다.
+- 적용 완료: App 라우트, Dev Mode 패널, 카카오 콜백, Family 페이지, Settings, BottomNavigation.
+- 새 페이지/링크 추가 시 반드시 상수만 참조해 일관성을 유지하세요.
+
