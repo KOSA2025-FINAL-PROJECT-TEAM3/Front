@@ -1,18 +1,18 @@
-﻿// 실버케어 Database Schema
-// dbdiagram.io의 DBML
+// AMA...Pill (실버케어) Database Schema
+// dbdiagram.io용 DBML
 // 카카오 OAuth 인증 포함
 
 Project AMA_Pill {
   database_type: 'PostgreSQL'
   Note: '''
-    # 실버케어 - 가족 중심 약 관리 플랫폼
+    # AMA...Pill - 가족 중심 약 관리 플랫폼
 
     ## 주요 기능
     - 카카오 OAuth 소셜 로그인
-    - 가족 네트워크 (Senior/Caregiver 역할)
+    - 가족 네트워크 (Senior/Guardian 역할)
     - 약 관리 및 복약 알림
     - 약-음식 상호작용 경고
-    - 약사/AI 챗봇 상담
+    - 의사/AI 챗봇 상담
     - OCR 처방전 스캔
     - 실시간 동기화 (Hocuspocus)
   '''
@@ -33,7 +33,7 @@ Table users {
   profile_image_url text
 
   // 역할
-  role varchar(20) [not null, default: 'senior', note: 'senior | caregiver']
+  role varchar(20) [not null, default: 'senior', note: 'senior | guardian']
 
   // 카카오 OAuth
   kakao_id varchar(100) [unique, note: 'Kakao OAuth user ID']
@@ -111,7 +111,7 @@ Table family_groups {
   description text
   created_by bigint [ref: > users.id, not null]
 
-  // Hocuspocus 실시간 동기화용
+  // Hocuspocus 실시간 동기화 키
   sync_document_id varchar(255) [unique, note: 'family-group-{id}']
 
   created_at timestamp [default: `now()`]
@@ -132,7 +132,7 @@ Table family_members {
 
   // 가족 내 역할
   member_role varchar(20) [not null, note: 'parent | child | guardian']
-  nickname varchar(50) [note: '가족 내 별명']
+  nickname varchar(50) [note: '가족 내 별칭']
 
   // 권한
   can_edit_medications boolean [default: false]
@@ -218,7 +218,7 @@ Table medication_schedules {
   // 스케줄 정보
   time time [not null, note: '복용 시간 (예: 08:00)']
   days_of_week json [note: '[0,1,2,3,4,5,6] 일요일=0']
-  timing varchar(50) [note: '식전, 식후, 기상 직후 등']
+  timing varchar(50) [note: '식전, 식후, 기상 시 등']
   dosage_amount varchar(50) [note: '1회 복용량']
 
   // 알림 설정
@@ -285,7 +285,7 @@ Table drug_food_interactions {
 
   // 약물 정보
   drug_name varchar(255) [not null]
-  drug_ingredient varchar(255) [note: '주성분(예: Warfarin)']
+  drug_ingredient varchar(255) [note: '주성분 (예: Warfarin)']
 
   // 음식 정보
   food_name varchar(255) [not null]
@@ -325,7 +325,7 @@ Table diet_logs {
   meal_type varchar(20) [not null, note: 'breakfast | lunch | dinner | snack']
   food_name varchar(255) [not null]
   food_category varchar(100)
-  quantity varchar(100) [note: '양(선택)']
+  quantity varchar(100) [note: '양 (선택)']
 
   // 시간
   meal_time timestamp [not null]
@@ -424,7 +424,7 @@ Table ocr_records {
 }
 
 // ========================================
-// 약사/AI 챗봇 상담
+// 의사/AI 챗봇 상담
 // ========================================
 
 Table counselors {
@@ -435,10 +435,10 @@ Table counselors {
   type varchar(20) [not null, note: 'doctor | ai_bot']
   profile_image_url text
 
-  // 약사 정보 (type=doctor)
+  // 의사 정보 (type=doctor)
   hospital_name varchar(255)
   specialty varchar(100) [note: '내과, 가정의학과 등']
-  license_number varchar(100) [unique, note: '약사 면허번호']
+  license_number varchar(100) [unique, note: '의사 면허번호']
 
   // AI 챗봇 정보 (type=ai_bot)
   ai_model varchar(100) [note: 'gpt-4, claude-3 등']
@@ -457,7 +457,7 @@ Table counselors {
     specialty
   }
 
-  Note: '약사 및 AI 챗봇 정보'
+  Note: '의사 및 AI 챗봇 정보'
 }
 
 Table chat_rooms {
@@ -494,7 +494,7 @@ Table chat_messages {
   room_id bigint [ref: > chat_rooms.id, not null]
 
   // 발신자
-  sender_id bigint [ref: > users.id, not null, note: 'user 또는 counselor(약사) ID']
+  sender_id bigint [ref: > users.id, not null, note: 'user 또는 counselor(의사) ID']
   sender_type varchar(20) [not null, note: 'user | counselor']
 
   // 메시지 내용
@@ -508,7 +508,7 @@ Table chat_messages {
   is_read boolean [default: false]
   read_at timestamp
 
-  // AI 응답 메타데이터(sender_type=counselor, counselor.type=ai_bot)
+  // AI 응답 메타데이터 (sender_type=counselor, counselor.type=ai_bot)
   ai_model varchar(100)
   ai_response_time_ms int
 
@@ -563,11 +563,11 @@ Table notifications {
     related_entity_type
   }
 
-  Note: '사용자 알림 (feat.카카오톡)'
+  Note: '사용자 알림 (웹/카카오톡)'
 }
 
 // ========================================
-// 대응도 리포트
+// 순응도 리포트
 // ========================================
 
 Table adherence_reports {
@@ -581,15 +581,15 @@ Table adherence_reports {
 
   // 통계
   total_doses int [not null, note: '총 복용 횟수']
-  completed_doses int [not null, note: '완료된 복용']
+  completed_doses int [not null, note: '완료한 복용']
   missed_doses int [not null, note: '놓친 복용']
-  adherence_rate decimal(5,2) [note: '대응도 % (completed/total)']
+  adherence_rate decimal(5,2) [note: '순응도 % (completed/total)']
 
   // 약물별 상세
-  medication_breakdown json [note: '약물별 대응도 배열']
+  medication_breakdown json [note: '약물별 순응도 배열']
 
   // 주간 트렌드
-  weekly_trend json [note: '주별 대응도 그래프 데이터']
+  weekly_trend json [note: '주별 순응도 그래프 데이터']
 
   // PDF 생성
   pdf_url text [note: 'S3 저장 경로']
@@ -603,7 +603,7 @@ Table adherence_reports {
     (user_id, start_date, end_date)
   }
 
-  Note: '복약 대응도 리포트 (PDF 다운로드)'
+  Note: '복약 순응도 리포트 (PDF 다운로드)'
 }
 
 // ========================================
@@ -640,10 +640,10 @@ Table audit_logs {
 }
 
 // ========================================
-// Enum 참고 (PostgreSQL ENUM 또는 CHECK 제약조건 사용 가능)
+// Enum 참고 (PostgreSQL ENUM 타입 대신 CHECK 제약조건 사용 가능)
 // ========================================
 
-// user.role: 'senior' | 'caregiver'
+// user.role: 'senior' | 'guardian'
 // family_members.member_role: 'parent' | 'child' | 'guardian'
 // family_members.invitation_status: 'pending' | 'accepted' | 'declined'
 // medication_logs.status: 'pending' | 'completed' | 'missed' | 'skipped'
@@ -655,4 +655,3 @@ Table audit_logs {
 // chat_messages.message_type: 'text' | 'image' | 'file'
 // notifications.type: 'medication_reminder' | 'missed_dose' | 'family_alert' | 'diet_warning' | 'chat_message'
 // notifications.sent_via: 'web' | 'kakao_alimtalk' | 'push'
-
