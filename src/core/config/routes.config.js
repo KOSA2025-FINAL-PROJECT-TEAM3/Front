@@ -5,7 +5,7 @@ export const ROUTE_PATHS = {
   kakaoCallback: '/auth/kakao/callback',
   roleSelection: '/role-selection',
   seniorDashboard: '/dashboard',
-  caregiverDashboard: '/caregiver',
+  guardianDashboard: '/guardian',
   medication: '/medication',
   search: '/search',
   counsel: '/counsel',
@@ -18,13 +18,15 @@ export const ROUTE_PATHS = {
   family: '/family',
   familyInvite: '/family/invite',
   familyMemberDetail: '/family/member/:id',
+  chatList: '/chat',
+  chatConversation: '/chat/:roomId',
 }
 
 export const ROUTE_META = {
   protected: [
     ROUTE_PATHS.roleSelection,
     ROUTE_PATHS.seniorDashboard,
-    ROUTE_PATHS.caregiverDashboard,
+    ROUTE_PATHS.guardianDashboard,
     ROUTE_PATHS.medication,
     ROUTE_PATHS.search,
     ROUTE_PATHS.counsel,
@@ -36,6 +38,8 @@ export const ROUTE_META = {
     ROUTE_PATHS.settingsNotifications,
     ROUTE_PATHS.family,
     ROUTE_PATHS.familyInvite,
+    ROUTE_PATHS.chatList,
+    ROUTE_PATHS.chatConversation,
   ],
 }
 
