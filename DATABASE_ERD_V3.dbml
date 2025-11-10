@@ -168,7 +168,7 @@ Table family_members {
   user_id bigint [ref: > users.id, not null]
   
   // 가족 내 역할
-  member_role varchar(20) [not null, note: 'parent | child | caregiver']
+  member_role varchar(20) [not null, note: 'parent | child | guardian']
   nickname varchar(50) [note: '가족 내 별칭']
   
   // 권한 (세분화)
