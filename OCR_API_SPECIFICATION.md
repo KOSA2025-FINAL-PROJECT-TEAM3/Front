@@ -697,7 +697,7 @@ const handleRecognize = async () => {
 ### 3. Zustand Store 연동 (선택사항)
 
 ```javascript
-// src/features/ocr/store/ocrStore.js
+// src/stores/ocrStore.js
 import { create } from 'zustand'
 import { ocrApiClient } from '@/core/services/api/ocrApiClient'
 
