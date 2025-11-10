@@ -1,27 +1,28 @@
-/* eslint-disable react-refresh/only-export-components */
-import { useEffect } from 'react'
-import { useFamilyStore } from '@/stores/familyStore'
+import { useEffect, useMemo } from 'react'
+import { useFamilyStore } from '@features/family/store/familyStore'
+import { FamilyContext } from './familyContextObject'
 
-/**
- * FamilyProvider
- * - Zustand store 초기화용 래퍼 (Context 대신 store 직접 사용)
- */
 export const FamilyProvider = ({ children }) => {
   const initialize = useFamilyStore((state) => state.initialize)
+  const isInitialized = useFamilyStore((state) => state.initialized)
+  const group = useFamilyStore((state) => state.familyGroup)
+  const members = useFamilyStore((state) => state.members)
 
   useEffect(() => {
-    initialize()
-  }, [initialize])
+    if (!isInitialized) {
+      initialize()
+    }
+  }, [initialize, isInitialized])
 
-  return children
-}
+  const value = useMemo(
+    () => ({
+      group,
+      members,
+    }),
+    [group, members],
+  )
 
-/**
- * useFamilyContext (legacy helper)
- * - 기존 코드 호환용으로 Zustand store를 그대로 반환
- */
-export const useFamilyContext = () => {
-  return useFamilyStore()
+  return <FamilyContext.Provider value={value}>{children}</FamilyContext.Provider>
 }
 
 export default FamilyProvider

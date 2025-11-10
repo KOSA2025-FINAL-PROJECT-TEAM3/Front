@@ -4,7 +4,7 @@ import MedicationForm from '../components/MedicationForm.jsx'
 import MedicationList from '../components/MedicationList.jsx'
 import MedicationDetailModal from '../components/MedicationDetailModal.jsx'
 import InventoryTracker from '../components/InventoryTracker.jsx'
-import { useMedicationStore } from '@/stores/medicationStore'
+import { useMedicationStore } from '@features/medication/store/medicationStore'
 import styles from './MedicationManagement.module.scss'
 
 export const MedicationManagementPage = () => {
@@ -88,4 +88,3 @@ export const MedicationManagementPage = () => {
 }
 
 export default MedicationManagementPage
-

@@ -5,8 +5,8 @@
 
 import { useEffect, useMemo } from 'react'
 import { MainLayout } from '@/shared/components/layout/MainLayout'
-import { MedicationCard } from './MedicationCard'
-import { useFamilyStore } from '@/stores/familyStore'
+import { MedicationCard } from '../components/MedicationCard'
+import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@/features/family/hooks/useFamilyMemberDetail'
 import styles from './SeniorDashboard.module.scss'
 
@@ -86,4 +86,3 @@ export const SeniorDashboard = () => {
 }
 
 export default SeniorDashboard
-

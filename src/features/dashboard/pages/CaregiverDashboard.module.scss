@@ -1,0 +1,103 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.memberList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.memberItem {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.memberMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.relation {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.detailButton {
+  border: none;
+  background: #1d4ed8;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.detailButton:hover {
+  background: #1e40af;
+}
+
+.medList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.medRow {
+  display: grid;
+  grid-template-columns: 120px 1fr 100px;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.medTime {
+  color: #475569;
+}
+
+.medName {
+  font-weight: 500;
+}
+
+.medStatus {
+  text-align: right;
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.loadingRow,
+.emptyRow {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.stateMessage {
+  padding: 24px;
+  text-align: center;
+  color: #475569;
+}

@@ -1,4 +1,4 @@
-import { useFamilyStore } from '@/stores/familyStore'
+import { useFamilyStore } from '@features/family/store/familyStore'
 
 const defaultSelector = (state) => state
 

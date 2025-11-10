@@ -24,7 +24,7 @@
 ### 기술 스택
 - **Framework**: React 19 (JSX only, NO TypeScript)
 - **번들러**: Vite
-- **상태 관리**: Context API + React Query
+- **상태 관리**: ~~Context API + React Query~~ → Zustand + React Query (전역 상태는 각 feature의 `store/` 디렉터리에서 정의된 Zustand 훅으로 관리하고, 서버 상태는 React Query가 담당)
 - **스타일링**: SCSS Modules
 - **실시간 동기화**: Hocuspocus + Y.js
 - **폼 관리**: React Hook Form
@@ -42,7 +42,7 @@
 | 토큰 | 값 | Tailwind key |
 |------|-----|--------------|
 | Primary | `#2563eb` | `theme.colors.primary` |
-| Guardian Accent | `#a5b4fc` | `theme.colors.guardian` |
+| Caregiver Accent | `#a5b4fc` | `theme.colors.caregiver` |
 | Senior Accent | `#f9a8d4` | `theme.colors.senior` |
 | Warning | `#f97316` | `theme.colors.warning` |
 | Danger | `#ef4444` | `theme.colors.danger` |

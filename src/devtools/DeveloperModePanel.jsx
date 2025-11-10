@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { DEFAULT_FAMILY_GROUP, DEFAULT_FAMILY_MEMBERS } from '@/data/mockFamily'
 import styles from './DeveloperModePanel.module.scss'
 
@@ -130,7 +130,7 @@ export const DeveloperModePanel = () => {
               <button
                 type="button"
                 className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.guardianDashboard)}
+                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.caregiverDashboard)}
               >
                 보호자 대시보드
               </button>

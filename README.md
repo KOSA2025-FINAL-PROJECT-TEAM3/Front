@@ -48,32 +48,32 @@ npm run lint
 
 ```
 src/
+├── core/
+│   ├── config/          # routes.config.js, constants.js 등
+│   ├── services/        # API 클라이언트, 실시간 서비스
+│   └── utils/           # 공용 유틸 (validation, formatting,…)
+├── features/            # 기능 단위 모듈(auth, family, medication, …)
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── store/
+│   │       └── authStore.js
+│   ├── family/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── store/
+│   │       └── familyStore.js
+│   ├── medication/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── store/
+│   │       └── medicationStore.js
+│   └── ...              # diet, disease, search, settings 등
 ├── shared/
 │   └── components/      # 재사용 UI (ui/, layout/, editor/)
-├── pages/               # 페이지 컴포넌트
-│   └── errors/          # 에러 페이지 (404, 500)
-├── hooks/               # Custom Hooks (공통)
-│   ├── useAuth.js       # 인증 관리
-│   ├── useDebounce.js   # 디바운싱
-│   ├── useLocalStorage.js # 로컬 스토리지
-│   └── useFetch.js      # API 호출
-├── stores/              # Zustand 저장소
-│   ├── authStore.js     # 인증 상태 관리
-│   ├── familyStore.js   # 가족 관리 상태
-│   └── medicationStore.js # 약 목록/CRUD
-├── core/
-│   └── api/
-│       └── axiosConfig.js # Axios 인스턴스 & 인터셉터
-├── utils/               # 유틸리티 함수
-│   ├── validation.js    # 데이터 검증
-│   ├── formatting.js    # 데이터 형식 변환
-│   ├── stringUtils.js   # 문자열 처리
-│   └── errorHandler.js  # 에러 처리
-├── config/
-│   └── constants.js     # 전역 상수
-├── devtools/            # 개발 모드 도구
-│   └── DeveloperModePanel.jsx
-├── features/            # Feature 모듈 (auth, family, editor 등)
+├── hooks/               # 공용 Custom Hooks (useDebounce, useFetch,…)
+├── pages/               # 공통 페이지 (errors 등)
+├── devtools/            # 개발 모드 도구 (DeveloperModePanel 등)
 ├── styles/              # 전역 스타일 (tailwind.css + base.scss)
 ├── App.jsx              # 메인 앱 컴포넌트
 └── main.jsx             # 엔트리 포인트
@@ -95,7 +95,9 @@ src/
 - **useFetch**: API 호출 처리 (로딩, 에러, 데이터)
 
 ### Zustand Store
-- **authStore**: 사용자 인증 정보 관리
+- `src/features/auth/store/authStore.js`: 사용자 인증 정보
+- `src/features/family/store/familyStore.js`: 가족 구성원/초대 상태
+- `src/features/medication/store/medicationStore.js`: 복약 목록 및 CRUD 상태
 
 ### 공용 컴포넌트
 - **Button**: 다양한 스타일의 버튼 (primary, secondary, danger, ghost)

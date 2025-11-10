@@ -19,7 +19,7 @@ export const RoleSelection = () => {
       if (role === 'senior') {
         navigate(ROUTE_PATHS.seniorDashboard)
       } else if (role === 'guardian') {
-        navigate(ROUTE_PATHS.guardianDashboard)
+        navigate(ROUTE_PATHS.caregiverDashboard)
       }
     } catch (err) {
       console.error('역할 선택 실패:', err)
