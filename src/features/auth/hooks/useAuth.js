@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const defaultSelector = (state) => state
 

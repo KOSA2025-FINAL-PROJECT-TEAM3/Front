@@ -17,11 +17,11 @@ export default defineConfig({
       '@components': path.resolve(rootDir, './src/shared/components'),
       '@devtools': path.resolve(rootDir, './src/devtools'),
       '@hooks': path.resolve(rootDir, './src/hooks'),
-      '@utils': path.resolve(rootDir, './src/utils'),
-      '@stores': path.resolve(rootDir, './src/stores'),
       '@pages': path.resolve(rootDir, './src/pages'),
       '@styles': path.resolve(rootDir, './src/styles'),
+      '@utils': path.resolve(rootDir, './src/core/utils'),
       '@config': path.resolve(rootDir, './src/core/config'),
+      '@core': path.resolve(rootDir, './src/core'),
     },
   },
   server: {

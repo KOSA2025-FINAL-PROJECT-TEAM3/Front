@@ -109,6 +109,8 @@ frontend/
 │   │   │   ├── hooks/
 │   │   │   │   ├── useAuth.js
 │   │   │   │   └── useLogin.js
+│   │   │   ├── store/
+│   │   │   │   └── authStore.js
 │   │   │   ├── context/
 │   │   │   │   └── AuthContext.jsx
 │   │   │   └── pages/
@@ -158,6 +160,9 @@ frontend/
 │   │   │   │   ├── usePillSearch.js
 │   │   │   │   └── useAdherenceReport.js
 │   │   │   │
+│   │   │   ├── store/
+│   │   │   │   └── medicationStore.js
+│   │   │   │
 │   │   │   ├── services/
 │   │   │   │   ├── medicationService.js
 │   │   │   │   ├── ocrExtractionService.js
@@ -180,6 +185,8 @@ frontend/
 │   │   │   ├── hooks/
 │   │   │   │   ├── useFamily.js
 │   │   │   │   └── useFamilySync.js
+│   │   │   ├── store/
+│   │   │   │   └── familyStore.js
 │   │   │   ├── services/
 │   │   │   │   └── familyService.js
 │   │   │   └── pages/

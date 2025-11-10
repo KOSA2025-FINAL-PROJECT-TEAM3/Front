@@ -5,7 +5,7 @@ export const ROUTE_PATHS = {
   kakaoCallback: '/auth/kakao/callback',
   roleSelection: '/role-selection',
   seniorDashboard: '/dashboard',
-  guardianDashboard: '/guardian',
+  caregiverDashboard: '/caregiver',
   medication: '/medication',
   search: '/search',
   counsel: '/counsel',
@@ -24,7 +24,7 @@ export const ROUTE_META = {
   protected: [
     ROUTE_PATHS.roleSelection,
     ROUTE_PATHS.seniorDashboard,
-    ROUTE_PATHS.guardianDashboard,
+    ROUTE_PATHS.caregiverDashboard,
     ROUTE_PATHS.medication,
     ROUTE_PATHS.search,
     ROUTE_PATHS.counsel,

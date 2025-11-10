@@ -5,8 +5,6 @@ import OCRResultPreview from '../components/OCRResultPreview.jsx'
 import styles from './PrescriptionScan.module.scss'
 import { ocrApiClient } from '@/core/services/api/ocrApiClient'
 
-const RECOGNITION_DELAY_MS = 1200
-
 const stripExtension = (fileName = '') => fileName.replace(/\.[^/.]+$/, '')
 
 const buildMockResult = (fileName) => {
@@ -54,7 +52,7 @@ export const PrescriptionScanPage = () => {
       fd.append('file', file)
       const data = await ocrApiClient.recognize(fd)
       setResult({ text: data.text, insights: data.insights })
-    } catch (e) {
+    } catch {
       setResult(buildMockResult(file.name))
     } finally {
       setIsProcessing(false)

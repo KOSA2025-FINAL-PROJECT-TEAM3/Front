@@ -1,5 +1,5 @@
 import ApiClient from './ApiClient'
-import { MOCK_SYMPTOMS } from '@/features/search/data/mockSymptoms'
+import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@/features/search/data/mockSymptoms'
 
 class SearchApiClient extends ApiClient {
   constructor() {
@@ -14,8 +14,24 @@ class SearchApiClient extends ApiClient {
     }
     return this.get('/symptoms', undefined, { mockResponse })
   }
+
+  getSymptomDetail(symptomName) {
+    const name = (symptomName || '').trim()
+    const mockResponse = () => {
+      if (!name) return null
+      return (
+        MOCK_SYMPTOM_DETAILS[name] || {
+          name,
+          description: '등록된 상세 정보가 없습니다.',
+          possibleCauses: [],
+          severity: '정보 없음',
+          recommendedActions: [],
+        }
+      )
+    }
+    return this.get(`/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+  }
 }
 
 export const searchApiClient = new SearchApiClient()
 export { SearchApiClient }
-

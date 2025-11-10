@@ -6,7 +6,7 @@
  * /signup → Signup (회원가입)
  * /role-selection → RoleSelection (역할 선택) - PrivateRoute 보호
  * /dashboard → SeniorDashboard (시니어 대시보드) - PrivateRoute 보호
- * /guardian → GuardianDashboard (보호자 대시보드) - PrivateRoute 보호
+ * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
@@ -16,8 +16,8 @@ import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from '@features/auth/pages/Login'
 import { Signup } from '@features/auth/pages/Signup'
 import { RoleSelection } from '@features/auth/pages/RoleSelection'
-import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
-import { GuardianDashboard } from './pages/Dashboard/GuardianDashboard'
+import { SeniorDashboard } from '@features/dashboard/pages/SeniorDashboard'
+import { CaregiverDashboard } from '@features/dashboard/pages/CaregiverDashboard'
 import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
@@ -57,8 +57,8 @@ function App() {
             element={<PrivateRoute element={<SeniorDashboard />} />}
           />
           <Route
-            path={ROUTE_PATHS.guardianDashboard}
-            element={<PrivateRoute element={<GuardianDashboard />} />}
+            path={ROUTE_PATHS.caregiverDashboard}
+            element={<PrivateRoute element={<CaregiverDashboard />} />}
           />
 
           {/* 메뉴바의 다른 페이지들 (스텁) - PrivateRoute 보호 */}
