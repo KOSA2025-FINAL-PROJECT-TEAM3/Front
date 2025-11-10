@@ -119,3 +119,4 @@ junit.xml
 *.temp
 *.bak
 *.orig
+BACKEND_INITIALIZATION_GUIDE.md
