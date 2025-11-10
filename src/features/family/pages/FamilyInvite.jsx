@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+﻿import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import { useMemo, useState } from 'react'
 import Modal from '@shared/components/ui/Modal'
 import InviteMemberForm from '../components/InviteMemberForm.jsx'
@@ -30,15 +31,15 @@ export const FamilyInvitePage = () => {
       alert('초대 링크가 복사되었습니다.')
     } catch (err) {
       console.warn('초대 링크 복사 실패:', err)
-      alert('복사에 실패했습니다. 직접 선택하여 복사해주세요.')
+      alert('복사에 실패했습니다. 직접 선택하여 복사해 주세요.')
     }
   }
 
   return (
     <Modal
       title="가족 초대"
-      description="이름, 이메일을 입력하거나 초대 링크를 복사해 가족을 초대하세요."
-      onClose={() => navigate('/family', { replace: true })}
+      description="이름, 이메일을 입력하고 초대 링크를 복사해 가족을 초대하세요."
+      onClose={() => navigate(ROUTE_PATHS.family, { replace: true })}
     >
       <InviteMemberForm onSubmit={handleSubmit} loading={submitting} />
       <div className={styles.linkSection}>

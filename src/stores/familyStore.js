@@ -8,7 +8,7 @@ import {
   DEFAULT_FAMILY_GROUP,
   DEFAULT_FAMILY_MEMBERS,
 } from '@/data/mockFamily'
-import { FamilyMockService } from '@/features/family/services/familyService'
+import { familyApiClient } from '@/core/services/api/familyApiClient'
 
 const initialState = {
   familyGroup: DEFAULT_FAMILY_GROUP,
@@ -40,7 +40,7 @@ export const useFamilyStore = create((set, get) => ({
 
   loadFamily: async () =>
     withLoading(set, async () => {
-      const data = await FamilyMockService.getFamily()
+      const data = await familyApiClient.getSummary()
       set({
         familyGroup: data?.group || DEFAULT_FAMILY_GROUP,
         members: data?.members || DEFAULT_FAMILY_MEMBERS,
@@ -51,7 +51,8 @@ export const useFamilyStore = create((set, get) => ({
 
   inviteMember: async (payload) =>
     withLoading(set, async () => {
-      const member = await FamilyMockService.inviteMember(payload)
+      const res = await familyApiClient.inviteMember(payload)
+      const member = res?.member
       set((state) => ({
         members: [...state.members, member],
         error: null,
@@ -61,7 +62,7 @@ export const useFamilyStore = create((set, get) => ({
 
   removeMember: async (memberId) =>
     withLoading(set, async () => {
-      await FamilyMockService.removeMember(memberId)
+      await familyApiClient.removeMember(memberId)
       set((state) => ({
         members: state.members.filter((member) => member.id !== memberId),
         error: null,

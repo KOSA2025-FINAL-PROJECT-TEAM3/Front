@@ -1,21 +1,21 @@
 /**
  * MedicationCard Component
- * - 약 복용 일정 카드
+ * - 복용 카드 컴포넌트
  */
 
 import styles from './MedicationCard.module.scss'
 
 /**
- * 약 복용 카드 컴포넌트
- * @param {Object} schedule - 약 복용 일정
+ * 복용 카드 컴포넌트
+ * @param {Object} schedule - 복용 일정
  * @param {number} schedule.id - 카드 ID
  * @param {string} schedule.time - 복용 시간
- * @param {string} schedule.timeLabel - 시간 레이블 (아침, 점심, 저녁)
+ * @param {string} schedule.timeLabel - 시간 라벨(아침, 점심, 저녁 등)
  * @param {Array} schedule.medications - 약 목록
  * @param {string} schedule.status - 상태 (completed, pending, scheduled)
- * @param {string} schedule.statusLabel - 상태 레이블
+ * @param {string} schedule.statusLabel - 상태 라벨
  * @param {boolean} schedule.isActive - 활성 여부
- * @returns {JSX.Element} 약 복용 카드
+ * @returns {JSX.Element} 복용 카드
  */
 export const MedicationCard = ({ schedule }) => {
   const getStatusColor = () => {
@@ -52,7 +52,7 @@ export const MedicationCard = ({ schedule }) => {
         />
       </div>
 
-      {/* 중앙: 약 정보 */}
+      {/* 중앙: 정보 */}
       <div className={styles.medicationInfo}>
         <div className={styles.timeSection}>
           <span className={styles.time}>{schedule.time}</span>
@@ -96,3 +96,4 @@ export const MedicationCard = ({ schedule }) => {
 }
 
 export default MedicationCard
+

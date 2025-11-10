@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import MedicationForm from '../components/MedicationForm.jsx'
 import MedicationList from '../components/MedicationList.jsx'
@@ -11,16 +11,24 @@ export const MedicationManagementPage = () => {
   const {
     medications,
     loading,
+    fetchMedications,
     addMedication,
     removeMedication,
     toggleStatus,
     updateMedication,
   } = useMedicationStore()
+
   const [selectedMedicationId, setSelectedMedicationId] = useState(null)
   const selectedMedication = useMemo(
     () => medications.find((med) => med.id === selectedMedicationId) || null,
     [medications, selectedMedicationId],
   )
+
+  // 초기 로드 시 목록 가져오기 (mock/real 자동 전환)
+  useEffect(() => {
+    if (!medications?.length) fetchMedications?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleAdd = async (payload) => {
     await addMedication(payload)
@@ -50,7 +58,7 @@ export const MedicationManagementPage = () => {
       <div className={styles.page}>
         <header className={styles.header}>
           <h1>약 관리</h1>
-          <p>복용 중인 약을 등록하고 간편하게 상태를 관리하세요.</p>
+          <p>약을 등록하고 복용 일정을 관리하세요.</p>
         </header>
 
         <InventoryTracker medications={medications} />
@@ -80,3 +88,4 @@ export const MedicationManagementPage = () => {
 }
 
 export default MedicationManagementPage
+
