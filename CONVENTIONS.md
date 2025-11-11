@@ -1,6 +1,6 @@
-# SilverCare Frontend 컨벤션 가이드
+# AMA...Pill Frontend 컨벤션 가이드
 
-이 문서는 SilverCare 프론트엔드 프로젝트의 개발 표준을 정의합니다.
+이 문서는 AMA...Pill 프론트엔드 프로젝트의 개발 표준을 정의합니다.
 
 ## 📋 목차
 

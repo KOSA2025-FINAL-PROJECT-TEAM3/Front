@@ -1,4 +1,4 @@
-// AMA...Pill (실버케어) Database Schema
+// AMA...Pill (AMA...Pill) Database Schema
 // dbdiagram.io용 DBML
 // 카카오 OAuth 인증 포함
 
@@ -9,7 +9,7 @@ Project AMA_Pill {
 
     ## 주요 기능
     - 카카오 OAuth 소셜 로그인
-    - 가족 네트워크 (Senior/Guardian 역할)
+    - 가족 네트워크 (Senior/Caregiver 역할)
     - 약 관리 및 복약 알림
     - 약-음식 상호작용 경고
     - 의사/AI 챗봇 상담
@@ -33,7 +33,7 @@ Table users {
   profile_image_url text
 
   // 역할
-  role varchar(20) [not null, default: 'senior', note: 'senior | guardian']
+  role varchar(20) [not null, default: 'senior', note: 'senior | caregiver']
 
   // 카카오 OAuth
   kakao_id varchar(100) [unique, note: 'Kakao OAuth user ID']
@@ -131,7 +131,7 @@ Table family_members {
   user_id bigint [ref: > users.id, not null]
 
   // 가족 내 역할
-  member_role varchar(20) [not null, note: 'parent | child | guardian']
+  member_role varchar(20) [not null, note: 'parent | child | caregiver']
   nickname varchar(50) [note: '가족 내 별칭']
 
   // 권한
@@ -643,8 +643,8 @@ Table audit_logs {
 // Enum 참고 (PostgreSQL ENUM 타입 대신 CHECK 제약조건 사용 가능)
 // ========================================
 
-// user.role: 'senior' | 'guardian'
-// family_members.member_role: 'parent' | 'child' | 'guardian'
+// user.role: 'senior' | 'caregiver'
+// family_members.member_role: 'parent' | 'child' | 'caregiver'
 // family_members.invitation_status: 'pending' | 'accepted' | 'declined'
 // medication_logs.status: 'pending' | 'completed' | 'missed' | 'skipped'
 // drug_food_interactions.severity: '높음' | '중간' | '낮음'

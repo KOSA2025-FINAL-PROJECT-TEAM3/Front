@@ -1,6 +1,6 @@
 # OCR API 명세서 (Stage 4)
 
-> SilverCare OCR 기능 Backend API 정의서
+> AMA...Pill OCR 기능 Backend API 정의서
 >
 > **버전**: 1.0
 > **작성일**: 2025-11-10
@@ -833,5 +833,5 @@ try {
 ---
 
 **최종 수정일**: 2025-11-10
-**작성자**: SilverCare 개발팀
+**작성자**: AMA...Pill 개발팀
 **문의**: [issues.md](./issues.md) 참조

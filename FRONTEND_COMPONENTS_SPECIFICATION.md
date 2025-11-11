@@ -1,6 +1,6 @@
-# 실버케어 프론트엔드 컴포넌트 정의서
+# AMA...Pill 프론트엔드 컴포넌트 정의서
 
-> Frontend Components Specification for SilverCare Platform
+> Frontend Components Specification for AMA...Pill Platform
 >
 > React 19 + Vite + JSX Architecture
 
@@ -1680,5 +1680,5 @@ export class FamilySyncService {
 
 **작성일**: 2025-11-07
 **버전**: 1.0
-**작성자**: 실버케어 개발팀
+**작성자**: AMA...Pill 개발팀
 **상태**: 초안 완성

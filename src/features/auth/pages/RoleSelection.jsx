@@ -18,7 +18,7 @@ export const RoleSelection = () => {
       await selectRole(role)
       if (role === 'senior') {
         navigate(ROUTE_PATHS.seniorDashboard)
-      } else if (role === 'guardian') {
+      } else if (role === 'caregiver') {
         navigate(ROUTE_PATHS.caregiverDashboard)
       }
     } catch (err) {
@@ -45,7 +45,7 @@ export const RoleSelection = () => {
               <span className={styles.roleDescription}>내 복약 일정 관리</span>
             </button>
 
-            <button className={styles.roleButton} onClick={() => handleSelectRole('guardian')}>
+            <button className={styles.roleButton} onClick={() => handleSelectRole('caregiver')}>
               <span className={styles.roleIcon}>👪</span>
               <span className={styles.roleName}>보호자(자녀)</span>
               <span className={styles.roleDescription}>가족 복약 모니터링</span>

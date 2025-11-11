@@ -1,4 +1,4 @@
-# SilverCare Project Structure (AOP + SOLID Principles)
+# AMA...Pill Project Structure (AOP + SOLID Principles)
 
 ## 📐 Architecture Overview
 
@@ -23,7 +23,7 @@ This project follows **AOP (Aspect-Oriented Programming)** and **SOLID principle
 ## 🗂️ Project Root Structure
 
 ```
-silvercare/
+amapill/
 ├── frontend/                    # React Web Application
 ├── backend/                     # Spring Boot Application
 ├── docs/                        # Documentation
@@ -305,9 +305,9 @@ frontend/
 backend/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/silvercare/
+│   │   ├── java/com/amapill/
 │   │   │   │
-│   │   │   ├── SilverCareApplication.java    # Main entry point
+│   │   │   ├── AMA...PillApplication.java    # Main entry point
 │   │   │   │
 │   │   │   ├── domain/                       # Domain layer (SRP, DIP)
 │   │   │   │   ├── model/                    # Domain entities
@@ -591,7 +591,7 @@ backend/
 │   │               └── NanumGothic.ttf
 │   │
 │   └── test/
-│       └── java/com/silvercare/
+│       └── java/com/amapill/
 │           ├── unit/                         # Unit tests
 │           │   ├── service/
 │           │   ├── usecase/
@@ -829,7 +829,7 @@ export const withPerformanceMonitor = (Component) => {
 @Component
 public class LoggingAspect {
 
-    @Before("execution(* com.silvercare..controller.*.*(..))")
+    @Before("execution(* com.amapill..controller.*.*(..))")
     public void logBefore(JoinPoint joinPoint) {
         log.info("Method: {}, Args: {}",
             joinPoint.getSignature().getName(),
@@ -837,7 +837,7 @@ public class LoggingAspect {
     }
 
     @AfterReturning(
-        pointcut = "execution(* com.silvercare..controller.*.*(..))",
+        pointcut = "execution(* com.amapill..controller.*.*(..))",
         returning = "result"
     )
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
@@ -851,7 +851,7 @@ public class LoggingAspect {
 @Component
 public class PerformanceAspect {
 
-    @Around("execution(* com.silvercare..service.*.*(..))")
+    @Around("execution(* com.amapill..service.*.*(..))")
     public Object measureExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
 
@@ -890,7 +890,7 @@ public class TransactionAspect {
 @Component
 public class SecurityAspect {
 
-    @Before("@annotation(com.silvercare.security.annotation.RequireAuth)")
+    @Before("@annotation(com.amapill.security.annotation.RequireAuth)")
     public void checkAuthentication(JoinPoint joinPoint) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
@@ -1008,4 +1008,4 @@ public class SecurityAspect {
 
 **Version**: 1.0
 **Last Updated**: 2025-11-05
-**Author**: SilverCare Development Team
+**Author**: AMA...Pill Development Team

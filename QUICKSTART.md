@@ -60,21 +60,21 @@ Dev Mode가 필요한 이유와 절차는 아래 “🔑 Developer Mode (Fronten
 
 ```bash
 # Docker 컨테이너에서 스키마 실행
-docker exec -i silvercare-mysql mysql -u root -psilvercare_root_2025 silvercare < database-schema-mysql.sql
+docker exec -i amapill-mysql mysql -u root -pamapill_root_2025 amapill < database-schema-mysql.sql
 
 # 또는 MySQL 클라이언트로 직접 연결
-mysql -h localhost -P 3306 -u silvercare_app -psilvercare_pass_2025 silvercare < database-schema-mysql.sql
+mysql -h localhost -P 3306 -u amapill_app -pamapill_pass_2025 amapill < database-schema-mysql.sql
 ```
 
 ### PostgreSQL (실시간 동기화 DB)
 
 ```bash
 # Docker 컨테이너에서 스키마 실행
-docker exec -i silvercare-postgresql psql -U silvercare_sync_app -d silvercare_sync -f /docker-entrypoint-initdb.d/01-schema.sql
+docker exec -i amapill-postgresql psql -U amapill_sync_app -d amapill_sync -f /docker-entrypoint-initdb.d/01-schema.sql
 
 # 또는 psql 클라이언트로 직접 연결
-psql -h localhost -p 5432 -U silvercare_sync_app -d silvercare_sync -f database-schema-postgresql.sql
-# 비밀번호: silvercare_sync_pass_2025
+psql -h localhost -p 5432 -U amapill_sync_app -d amapill_sync -f database-schema-postgresql.sql
+# 비밀번호: amapill_sync_pass_2025
 ```
 
 ---
@@ -101,13 +101,13 @@ curl http://localhost:8761/eureka/apps
 
 ```bash
 # MySQL
-docker exec -it silvercare-mysql mysql -u silvercare_app -psilvercare_pass_2025 -e "USE silvercare; SHOW TABLES;"
+docker exec -it amapill-mysql mysql -u amapill_app -pamapill_pass_2025 -e "USE amapill; SHOW TABLES;"
 
 # PostgreSQL
-docker exec -it silvercare-postgresql psql -U silvercare_sync_app -d silvercare_sync -c "\dt"
+docker exec -it amapill-postgresql psql -U amapill_sync_app -d amapill_sync -c "\dt"
 
 # Redis
-docker exec -it silvercare-redis redis-cli ping
+docker exec -it amapill-redis redis-cli ping
 ```
 
 ---
@@ -195,7 +195,7 @@ Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거�
 
 ### 사용 방법
 - **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Guardian Dashboard, Family Management)
+- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Caregiver Dashboard, Family Management)
 - **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
 - **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
 
@@ -229,7 +229,7 @@ Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거�
 curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@silvercare.com",
+    "email": "test@amapill.com",
     "password": "password123",
     "name": "테스트 사용자",
     "role": "senior"
@@ -242,7 +242,7 @@ curl -X POST http://localhost:8080/api/auth/register \
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@silvercare.com",
+    "email": "test@amapill.com",
     "password": "password123"
   }'
 ```
