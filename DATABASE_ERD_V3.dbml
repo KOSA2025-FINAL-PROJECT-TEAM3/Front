@@ -7,7 +7,7 @@
 // 테이블 수: 26개 (모든 기능 포함)
 
 Project AMA...Pill_V3 {
-  database_type: 'PostgreSQL'
+  database_type: 'MySQL'
   Note: '''
     # AMA...Pill - 가족 돌봄 중심 약 관리 플랫폼
 
@@ -25,6 +25,12 @@ Project AMA...Pill_V3 {
     - Kakao OAuth (primary)
     - JWT token (Access 15분, Refresh 7일)
     - Multi-device support
+
+    ## Database
+    - MySQL 8.0+ (InnoDB, UTF8MB4)
+    - JSON 타입 지원 (네이티브)
+    - Spatial 타입 지원 (약국 위치)
+    - FULLTEXT INDEX (한글 검색)
 
     ## Frontend Pages Support
     - 34 pages from FRONTEND_COMPONENTS_SPECIFICATION.md
