@@ -2,7 +2,8 @@
 
 > AMA...Pill 프로젝트에 최적화된 데이터베이스 선택
 >
-> **결론**: **PostgreSQL 추천** ⭐
+> **최초 분석**: PostgreSQL 추천 ⭐
+> **최종 결정**: **MySQL 8.0+ 선택** ✅ (팀 경험 및 초기 개발 속도 우선)
 
 ---
 
@@ -451,3 +452,70 @@ FROM adherence_reports;
 
 **작성일**: 2025-11-10
 **권장**: PostgreSQL 16 + PostGIS 3.4
+
+---
+
+## 🎯 최종 결정 (2025-11-10)
+
+### ✅ MySQL 8.0+ 선택
+
+**결정 사유**:
+
+1. **팀 숙련도 우선**
+   - 팀 멤버들의 MySQL 경험이 더 풍부
+   - 초기 개발 속도를 우선시
+   - 러닝 커브 최소화
+
+2. **MySQL 8.0+ JSON 지원 충분**
+   - JSON 타입 네이티브 지원
+   - JSON 함수 및 인덱싱 가능
+   - 프로젝트 초기 단계에서는 성능 차이 미미
+
+3. **GIS 대안 가능**
+   - MySQL Spatial 타입으로 약국 위치 검색 구현 가능
+   - `ST_Distance_Sphere()` 함수로 거리 계산
+   - 초기 요구사항 충족 가능
+
+4. **마이그레이션 유연성**
+   - 향후 성능 이슈 발생 시 PostgreSQL로 마이그레이션 가능
+   - DBML 기반 스키마로 DB 변경 용이
+
+### 구현 방침
+
+**DB 설정**:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/amapill?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+```
+
+**JSON 필드 매핑**:
+```java
+@Column(columnDefinition = "JSON")
+private String warnings; // JPA에서 String으로 받아서 Jackson으로 변환
+```
+
+**Spatial 타입 매핑**:
+```java
+@Column(columnDefinition = "POINT")
+private Point location; // org.locationtech.jts.geom.Point
+```
+
+### 향후 고려사항
+
+- **모니터링**: JSON 쿼리 성능 모니터링
+- **인덱싱**: 자주 조회되는 JSON 필드에 Generated Column + Index 활용
+- **스케일링**: 트래픽 증가 시 PostgreSQL 마이그레이션 검토
+
+---
+
+**최종 결정일**: 2025-11-10  
+**선택**: MySQL 8.0+ (팀 경험 및 초기 개발 속도 우선)  
+**향후**: 성능 요구사항에 따라 PostgreSQL 마이그레이션 검토
