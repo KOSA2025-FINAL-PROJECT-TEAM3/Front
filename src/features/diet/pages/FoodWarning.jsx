@@ -1,7 +1,7 @@
 import MainLayout from '@shared/components/layout/MainLayout'
 import FoodConflictWarning from '../components/FoodConflictWarning.jsx'
 import FoodAlternativeList from '../components/FoodAlternativeList.jsx'
-import { MOCK_FOOD_CONFLICT, MOCK_ALTERNATIVES } from '../data/mockFoodWarnings'
+import { MOCK_FOOD_CONFLICT, MOCK_ALTERNATIVES } from '@/data/mockFoodWarnings'
 import styles from './FoodWarning.module.scss'
 
 export const FoodWarningPage = () => {

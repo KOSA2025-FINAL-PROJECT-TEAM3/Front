@@ -3,16 +3,17 @@
  * - 어르신용 개인 복용 일정 대시보드 (목데이터 기반)
  */
 
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { MainLayout } from '@shared/components/layout/MainLayout'
 import { MedicationCard } from '../components/MedicationCard'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
+import { FamilyMockService } from '@features/family/services/familyService' // Import FamilyMockService
 import styles from './SeniorDashboard.module.scss'
 
 const mapStatus = (label = '') => {
   if (label.includes('완료')) return { code: 'completed', label }
-  if (label.includes('미복')) return { code: 'pending', label: '미복용' }
+  if (label.includes('미복용') || label.includes('대기 중')) return { code: 'pending', label }
   if (label.includes('예정')) return { code: 'scheduled', label }
   return { code: 'scheduled', label }
 }
@@ -41,7 +42,7 @@ export const SeniorDashboard = () => {
     () => members.find((m) => m.role === 'SENIOR')?.id || null,
     [members],
   )
-  const { data } = useFamilyMemberDetail(targetMemberId)
+  const { data, refetch } = useFamilyMemberDetail(targetMemberId) // Get refetch function
 
   const scheduleList = useMemo(() => {
     const meds = data?.medications || []
@@ -60,6 +61,26 @@ export const SeniorDashboard = () => {
     })
   }, [data])
 
+  const handleTakeMedication = useCallback(
+    async (medicationId) => {
+      if (!targetMemberId) return
+
+      const medicationIndex = medicationId - 1 // Convert to 0-based index
+      try {
+        await FamilyMockService.updateMedicationStatus(
+          targetMemberId,
+          medicationIndex,
+          '복용 완료', // New status label
+        )
+        refetch() // Re-fetch data to update UI
+      } catch (error) {
+        console.error('Failed to update medication status:', error)
+        alert('약 복용 상태 업데이트에 실패했습니다.')
+      }
+    },
+    [targetMemberId, refetch],
+  )
+
   const todayDate = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -77,7 +98,11 @@ export const SeniorDashboard = () => {
 
         <div className={styles.medicationList}>
           {scheduleList.map((schedule) => (
-            <MedicationCard key={schedule.id} schedule={schedule} />
+            <MedicationCard
+              key={schedule.id}
+              schedule={schedule}
+              onTakeMedication={handleTakeMedication}
+            />
           ))}
         </div>
       </div>

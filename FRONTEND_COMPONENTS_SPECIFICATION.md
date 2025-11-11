@@ -529,8 +529,12 @@ DietLogPage
     │       ├── Card
     │       ├── Badge (식사 구분)
     │       └── ButtonGroup
+    │           ├── Button (수정)
+    │           └── Button (삭제)
     └── BottomNavigation
 ```
+
+> (Dev Note: Mock implementation uses `localStorage` with the key `amapill_diet_logs` to persist data.)
 
 #### 22. 음식 충돌 경고 (`/diet/warning`)
 ```
@@ -715,6 +719,23 @@ DiseaseRestrictionsPage
     │       ├── Reason
     │       └── SeverityBadge
     └── BottomNavigation
+```
+
+#### 28. 질병 상세 정보 (`/disease/:id`)
+```
+DiseaseDetailPage
+└── MainLayout
+    ├── Header
+    ├── DiseaseInfoCard
+    │   ├── Card
+    │   ├── DiseaseName
+    │   └── RegisteredDate
+    ├── NotesCard
+    │   ├── Card
+    │   └── NotesText
+    ├── RestrictionsList
+    │   └── Badge[]
+    └── Button (목록으로)
 ```
 
 ---
@@ -1138,36 +1159,41 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => useContext(AuthContext);
 ```
 
-#### FamilyContext
+#### FamilyContext + Zustand Store
 ```javascript
 // src/features/family/context/FamilyContext.jsx
-const FamilyContext = createContext();
+import { useEffect, useMemo } from 'react'
+import { useFamilyStore } from '@features/family/store/familyStore'
+import { FamilyContext } from './familyContextObject'
 
 export const FamilyProvider = ({ children }) => {
-  const [familyGroup, setFamilyGroup] = useState(null);
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const initialize = useFamilyStore((state) => state.initialize)
+  const initialized = useFamilyStore((state) => state.initialized)
+  const group = useFamilyStore((state) => state.familyGroup)
+  const members = useFamilyStore((state) => state.members)
 
-  const fetchFamilyGroup = async () => { /* ... */ };
-  const inviteMember = async (email, role) => { /* ... */ };
-  const removeMember = async (memberId) => { /* ... */ };
+  useEffect(() => {
+    if (!initialized) {
+      initialize()
+    }
+  }, [initialized, initialize])
 
-  return (
-    <FamilyContext.Provider value={{
-      familyGroup,
+  const value = useMemo(
+    () => ({
+      group,
       members,
-      loading,
-      fetchFamilyGroup,
-      inviteMember,
-      removeMember
-    }}>
-      {children}
-    </FamilyContext.Provider>
-  );
-};
+    }),
+    [group, members],
+  )
 
-export const useFamily = () => useContext(FamilyContext);
+  return <FamilyContext.Provider value={value}>{children}</FamilyContext.Provider>
+}
+
+// 훅은 단순히 Zustand store selector를 래핑
+export const useFamily = (selector) => useFamilyStore(selector ?? ((state) => state))
 ```
+
+> Dev Mode에서는 `DeveloperModePanel`이 `resetFamilyMockData()`를 호출해 `FamilyMockService` seed를 재설정합니다. 덕분에 API가 없어도 가족 관리 UI를 반복적으로 테스트할 수 있습니다.
 
 ---
 

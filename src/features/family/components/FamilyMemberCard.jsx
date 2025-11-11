@@ -5,7 +5,13 @@ const roleLabels = {
   CAREGIVER: '보호자(자녀)',
 }
 
-export const FamilyMemberCard = ({ member, onDetail, onRemove, isOnline }) => {
+export const FamilyMemberCard = ({
+  member,
+  onDetail,
+  onRemove,
+  isOnline,
+  isRemoving,
+}) => {
   if (!member) return null
   const initials = member.name?.[0] ?? 'U'
   const joinedDate = new Date(member.joinedAt).toLocaleDateString('ko-KR')
@@ -30,8 +36,14 @@ export const FamilyMemberCard = ({ member, onDetail, onRemove, isOnline }) => {
         <button type="button" className={styles.detailButton} onClick={() => onDetail?.(member.id)}>
           상세
         </button>
-        <button type="button" className={styles.removeButton} onClick={() => onRemove?.(member.id)}>
-          제거
+        <button
+          type="button"
+          className={styles.removeButton}
+          onClick={() => onRemove?.(member.id)}
+          disabled={isRemoving}
+          aria-busy={isRemoving}
+        >
+          {isRemoving ? '제거 중...' : '제거'}
         </button>
       </div>
     </div>

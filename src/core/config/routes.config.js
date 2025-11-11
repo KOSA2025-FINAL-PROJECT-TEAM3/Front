@@ -10,11 +10,15 @@ export const ROUTE_PATHS = {
   search: '/search',
   counsel: '/counsel',
   disease: '/disease',
+  diseaseDetail: '/disease/:diseaseId', // New route
   dietWarning: '/diet/warning',
+  dietLog: '/diet/log', // New route
   ocrScan: '/ocr/scan',
   settings: '/settings',
   settingsProfile: '/settings/profile',
   settingsNotifications: '/settings/notifications',
+  privacyPolicy: '/settings/privacy',
+  termsOfService: '/settings/terms',
   family: '/family',
   familyInvite: '/family/invite',
   familyMemberDetail: '/family/member/:id',
@@ -31,7 +35,9 @@ export const ROUTE_META = {
     ROUTE_PATHS.search,
     ROUTE_PATHS.counsel,
     ROUTE_PATHS.disease,
+    ROUTE_PATHS.diseaseDetail, // Add to protected routes
     ROUTE_PATHS.dietWarning,
+    ROUTE_PATHS.dietLog, // Add to protected routes
     ROUTE_PATHS.ocrScan,
     ROUTE_PATHS.settings,
     ROUTE_PATHS.settingsProfile,

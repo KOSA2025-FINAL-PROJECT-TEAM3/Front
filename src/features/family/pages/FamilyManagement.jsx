@@ -1,4 +1,5 @@
 ﻿import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
@@ -8,6 +9,7 @@ import styles from './FamilyManagement.module.scss'
 
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
+  const [removingMemberId, setRemovingMemberId] = useState(null)
   const {
     familyGroup,
     members,
@@ -19,15 +21,34 @@ export const FamilyManagementPage = () => {
     onlineUsers,
     connectionStatus,
     onlineMemberIds,
+    syncEvents,
   } = useFamilySync()
 
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
 
+  const handleRemoveMember = async (memberId) => {
+    if (!memberId) return
+    const target = members.find((member) => member.id === memberId)
+    const confirmationMessage = target
+      ? `${target.name}님을 가족 목록에서 제거하시겠어요?`
+      : '이 구성원을 제거하시겠어요?'
+    if (!window.confirm(confirmationMessage)) return
+    setRemovingMemberId(memberId)
+    try {
+      await removeMember(memberId)
+    } catch (error) {
+      alert('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
+      console.warn('[FamilyManagement] removeMember failed', error)
+    } finally {
+      setRemovingMemberId(null)
+    }
+  }
+
   return (
     <MainLayout>
-      <div className={styles.page}>
+      <div className={styles.page} role="region" aria-busy={loading}>
         <header className={styles.header}>
           <h1>가족 관리</h1>
           <button
@@ -40,9 +61,13 @@ export const FamilyManagementPage = () => {
         </header>
 
         {loading ? (
-          <p className={styles.loading}>가족 정보를 불러오는 중입니다...</p>
+          <p className={styles.loading} role="status" aria-live="polite">
+            가족 정보를 불러오는 중입니다...
+          </p>
         ) : error ? (
-          <p className={styles.error}>가족 정보를 불러오지 못했습니다. {error.message}</p>
+          <p className={styles.error} role="alert">
+            가족 정보를 불러오지 못했습니다. {error.message}
+          </p>
         ) : (
           <>
             <div className={styles.syncMeta}>
@@ -63,12 +88,29 @@ export const FamilyManagementPage = () => {
                 </span>
               )}
             </div>
+            {syncEvents?.length > 0 && (
+              <ul className={styles.syncTimeline} role="log" aria-live="polite">
+                {syncEvents.map((event) => (
+                  <li key={event.id}>
+                    <span className={styles.timelineTime}>
+                      {event.timestamp.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className={styles.timelineLabel}>
+                      {event.type === 'status' && `상태: ${event.status}`}
+                      {event.type === 'members' && `구성원 ${event.count}명 동기화`}
+                      {!['status', 'members'].includes(event.type) && '변경 사항 수신'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
             <FamilyGroupCard group={familyGroup} memberCount={members.length} />
             <FamilyMemberList
               members={members}
               onDetail={handleDetail}
-              onRemove={removeMember}
+              onRemove={handleRemoveMember}
               onlineMemberIds={onlineMemberIds}
+              removingMemberId={removingMemberId}
             />
           </>
         )}

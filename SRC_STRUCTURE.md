@@ -58,6 +58,7 @@ frontend/
 │   ├── main.jsx                         # Application entry point
 │   ├── App.jsx                          # Root component
 │   │
+│   ├── data/                            # Shared mock data & fixtures
 │   ├── core/                            # Core utilities (DI principle)
 │   │   ├── config/
 │   │   │   ├── api.config.js           # API base URL, timeout
@@ -296,6 +297,10 @@ frontend/
 ├── .prettierrc
 └── jsconfig.json
 ```
+
+### `src/data`
+- 기능별 화면에서 재사용하는 목업/시드 데이터를 보관합니다.
+- 실제 API가 준비되기 전에 화면을 개발·테스트하거나 스토리북/플레이그라운드에서 일관된 더미 응답을 제공할 때 활용합니다.
 
 ---
 

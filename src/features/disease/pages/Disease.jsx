@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import styles from './Disease.module.scss'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
@@ -37,24 +38,26 @@ export const DiseasePage = () => {
         {!loading && (
           <ul className={styles.list}>
             {items.map((d) => (
-              <li key={d.id} className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.name}>{d.name}</h2>
-                  <span className={styles.date}>{d.updatedAt}</span>
-                </div>
-                {d.notes && <p className={styles.notes}>{d.notes}</p>}
-                <div className={styles.restrictions}>
-                  {d.restrictions?.length ? (
-                    d.restrictions.map((r, i) => (
-                      <span key={i} className={styles.badge}>
-                        {r}
-                      </span>
-                    ))
-                  ) : (
-                    <span className={styles.empty}>등록된 주의사항이 없습니다.</span>
-                  )}
-                </div>
-              </li>
+              <Link to={`/disease/${d.id}`} key={d.id} className={styles.cardLink}>
+                <li className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <h2 className={styles.name}>{d.name}</h2>
+                    <span className={styles.date}>{d.updatedAt}</span>
+                  </div>
+                  {d.notes && <p className={styles.notes}>{d.notes}</p>}
+                  <div className={styles.restrictions}>
+                    {d.restrictions?.length ? (
+                      d.restrictions.map((r, i) => (
+                        <span key={i} className={styles.badge}>
+                          {r}
+                        </span>
+                      ))
+                    ) : (
+                      <span className={styles.empty}>등록된 주의사항이 없습니다.</span>
+                    )}
+                  </div>
+                </li>
+              </Link>
             ))}
           </ul>
         )}

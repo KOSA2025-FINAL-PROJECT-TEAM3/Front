@@ -1,0 +1,88 @@
+.mealCard {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 8px;
+}
+
+.mealType {
+  font-weight: 600;
+  color: #2563eb;
+  font-size: 14px;
+}
+
+.date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.foodName {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+}
+
+.calories {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f97316;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+.editButton,
+.deleteButton {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.editButton {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border-color: #bae6fd;
+
+  &:hover {
+    background-color: #e0f2fe;
+  }
+}
+
+.deleteButton {
+  background-color: #fff1f2;
+  color: #be123c;
+  border-color: #fecdd3;
+
+  &:hover {
+    background-color: #ffe4e6;
+  }
+}

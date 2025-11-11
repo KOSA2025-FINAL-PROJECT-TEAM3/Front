@@ -1,6 +1,7 @@
 ﻿/**
  * Family Store
- * - 媛議?洹몃９/硫ㅻ쾭 ?곹깭瑜?Zustand濡?愿由? */
+ * - 가족 그룹/멤버 상태를 Zustand로 관리
+ */
 
 import { create } from 'zustand'
 import {

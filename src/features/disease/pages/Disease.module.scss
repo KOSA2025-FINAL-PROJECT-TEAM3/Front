@@ -67,3 +67,13 @@
   color: #6b7280;
 }
 
+.cardLink {
+  text-decoration: none;
+  color: inherit; // Inherit color from parent
+  cursor: pointer;
+
+  &:hover .card {
+    border-color: #2563eb; // Highlight on hover
+  }
+}
+

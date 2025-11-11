@@ -190,13 +190,15 @@ Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거�
 
 ### 동작 방식
 1. `npm run dev`로 프런트 서버를 띄우면 `localStorage`에 Dev Mode 플래그를 심어 임시 토큰/사용자 정보를 저장합니다.
-2. Axios 인터셉터는 Dev Mode가 감지되면 실제 API 호출을 막고 Mock 응답을 반환합니다.
-3. AuthStore + FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
+2. Dev Mode 패널에서 특정 화면으로 이동하면 Dev 프로필/토큰을 저장하고 Mock 데이터를 모두 초기화합니다.
+3. Axios 인터셉터는 Dev Mode가 감지되면 실제 API 호출을 막고 Mock 응답을 반환합니다.
+4. AuthStore + FamilyContext는 Dev Mode 데이터를 이용해 역할·가족 ID 등을 재현합니다.
 
 ### 사용 방법
 - **1)** 브라우저에서 `http://localhost:5173` 접속
-- **2)** 화면 왼쪽 아래 `⚙️ Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Caregiver Dashboard, Family Management)
-- **3)** Dev Mode 해제: Dev Mode 메뉴의 “토큰 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
+- **2)** 화면 왼쪽 아래 `🧪 Dev Mode` 버튼 클릭 → 원하는 경로 선택 (현재 제공: Role Selection, Senior Dashboard, Caregiver Dashboard)
+- **3)** 패널 하단 `목데이터 전부 초기화` 버튼으로 가족/식단 등 Mock 상태를 기본값으로 재설정할 수 있습니다. (바로가기 실행 시에도 자동 초기화)
+- **4)** Dev Mode 해제: Dev Mode 메뉴의 “Dev Mode 초기화” 버튼을 누르거나 `localStorage.clear()` 실행
 - **환경 변수로 비활성화**: `.env`에서 `VITE_ENABLE_DEV_MODE=false`로 설정하면 버튼이 렌더링되지 않습니다.
 
 ### 실제 백엔드 연결로 전환
@@ -211,7 +213,7 @@ Stage 4(실시간 동기화·실제 API 연동) 이후에는 Dev Mode를 제거�
 
 ### Stage 3 참고 (Family Prototype)
 - Family 상태는 `src/features/family/store/familyStore.js`(Zustand)에서 관리하며, Dev Mode에서는 `FamilyMockService`가 localStorage 기반 데이터를 공급합니다.
-- FamilyProvider는 store 초기화만 담당하며, 화면에서는 `useFamily` 훅을 통해 상태를 구독합니다.
+- Dev Mode 패널은 `resetFamilyMockData()`와 식단 목데이터 시드 함수를 호출해 항상 동일한 초기 상태를 보장합니다.
 - Stage 4에서 API/실시간 연동 시 동일한 store 액션(loadFamily/invite/remove)을 실제 엔드포인트로 교체하면 됩니다.
 
 ### Stage 4 실시간 동기화

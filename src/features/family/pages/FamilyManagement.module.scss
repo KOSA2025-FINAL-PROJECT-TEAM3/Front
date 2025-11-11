@@ -77,3 +77,34 @@
   color: #2563eb;
   font-weight: 600;
 }
+
+.syncTimeline {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px dashed #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.syncTimeline li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.timelineTime {
+  font-family: 'Inter', 'Pretendard', sans-serif;
+  font-size: 12px;
+  color: #94a3b8;
+  min-width: 54px;
+}
+
+.timelineLabel {
+  flex: 1;
+}
