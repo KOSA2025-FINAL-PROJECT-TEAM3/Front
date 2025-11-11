@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatRoomCard from '../components/ChatRoomCard'
 import { chatApiClient } from '@/core/services/api/chatApiClient'

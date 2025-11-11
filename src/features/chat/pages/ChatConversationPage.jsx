@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatMessage from '../components/ChatMessage'
