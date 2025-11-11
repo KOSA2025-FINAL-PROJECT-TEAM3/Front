@@ -4,10 +4,10 @@
  */
 
 import { useEffect, useMemo } from 'react'
-import { MainLayout } from '@/shared/components/layout/MainLayout'
+import { MainLayout } from '@shared/components/layout/MainLayout'
 import { MedicationCard } from '../components/MedicationCard'
 import { useFamilyStore } from '@features/family/store/familyStore'
-import { useFamilyMemberDetail } from '@/features/family/hooks/useFamilyMemberDetail'
+import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
 import styles from './SeniorDashboard.module.scss'
 
 const mapStatus = (label = '') => {

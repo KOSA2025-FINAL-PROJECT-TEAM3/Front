@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ROUTE_PATHS } from '@/core/config/routes.config'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './ChatRoomCard.module.scss'
 
 /**
@@ -10,7 +10,7 @@ export const ChatRoomCard = ({ room }) => {
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate(ROUTE_PATHS.CHAT_CONVERSATION.replace(':roomId', room.roomId))
+    navigate(ROUTE_PATHS.chatConversation.replace(':roomId', room.roomId))
   }
 
   const formatTimestamp = (timestamp) => {

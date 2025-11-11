@@ -1,10 +1,7 @@
 import { ROUTE_PATHS } from '@config/routes.config'
+import { navigateTo } from '@core/routing/navigation'
 
-const redirectToLogin = () => {
-  if (typeof window !== 'undefined') {
-    window.location.href = ROUTE_PATHS.login
-  }
-}
+const redirectToLogin = () => navigateTo(ROUTE_PATHS.login, { replace: true })
 
 export const attachErrorInterceptor = (axiosInstance) =>
   axiosInstance.interceptors.response.use(

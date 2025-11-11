@@ -9,15 +9,16 @@
  * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from '@features/auth/pages/Login'
 import { Signup } from '@features/auth/pages/Signup'
 import { RoleSelection } from '@features/auth/pages/RoleSelection'
-import { SeniorDashboard } from './pages/Dashboard/SeniorDashboard'
-import { CaregiverDashboard } from './pages/Dashboard/CaregiverDashboard'
+import { SeniorDashboard } from '@features/dashboard/pages/SeniorDashboard'
+import { CaregiverDashboard } from '@features/dashboard/pages/CaregiverDashboard'
 import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
@@ -34,6 +35,15 @@ import DiseasePage from '@features/disease/pages/Disease'
 import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
 import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
+import { setNavigator } from '@core/routing/navigation'
+
+function NavigationRegistrar() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    setNavigator(navigate)
+  }, [navigate])
+  return null
+}
 
 /**
  * 메인 App 컴포넌트
@@ -43,6 +53,7 @@ function App() {
   return (
     <BrowserRouter>
       <FamilyProvider>
+        <NavigationRegistrar />
         <Routes>
             {/* 공개 페이지: 인증 불필요 */}
             <Route path={ROUTE_PATHS.login} element={<Login />} />

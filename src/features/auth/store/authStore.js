@@ -1,12 +1,12 @@
-/**
+﻿/**
  * Auth Store
- * - 전역 인증 상태 관리 (Zustand + localStorage persist)
- * - Context 없이도 동일 API 제공
+ * - ?꾩뿭 ?몄쬆 ?곹깭 愿由?(Zustand + localStorage persist)
+ * - Context ?놁씠???숈씪 API ?쒓났
  */
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { authApiClient } from '@/core/services/api/authApiClient'
+import { authApiClient } from '@core/services/api/authApiClient'
 import { STORAGE_KEYS } from '@config/constants'
 
 const initialState = {
@@ -44,7 +44,7 @@ const withLoading = async (set, fn) => {
   try {
     return await fn()
   } catch (error) {
-    const message = error?.message || '요청에 실패했습니다'
+    const message = error?.message || '?붿껌???ㅽ뙣?덉뒿?덈떎'
     set({ error: message })
     throw error
   } finally {
@@ -123,7 +123,7 @@ export const useAuthStore = create(
           try {
             await authApiClient.logout(token)
           } catch (error) {
-            console.warn('로그아웃 요청 실패 (무시):', error)
+            console.warn('濡쒓렇?꾩썐 ?붿껌 ?ㅽ뙣 (臾댁떆):', error)
           } finally {
             get().clearAuthState()
           }

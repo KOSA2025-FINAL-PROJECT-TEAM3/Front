@@ -1,7 +1,7 @@
-import axios from 'axios'
+﻿import axios from 'axios'
 import { API_CONFIG } from '@config/api.config'
-import { attachAuthInterceptor } from '@/core/interceptors/authInterceptor'
-import { attachErrorInterceptor } from '@/core/interceptors/errorInterceptor'
+import { attachAuthInterceptor } from '@core/interceptors/authInterceptor'
+import { attachErrorInterceptor } from '@core/interceptors/errorInterceptor'
 
 export const httpClient = axios.create({
   baseURL: API_CONFIG.baseURL,
