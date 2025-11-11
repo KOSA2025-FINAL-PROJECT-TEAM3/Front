@@ -38,4 +38,8 @@
     "tailwindcss": "^3.3.6",
     "vite": "^5.0.0"
   }
+  "optionalDependencies": {
+    "lines-and-columns": "0.0.0"
+  }
 }
+
