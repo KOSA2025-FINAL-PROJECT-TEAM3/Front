@@ -26,8 +26,8 @@
 - **Framework**: React (JavaScript + JSX) ⭐ **React Native 사용 금지**
 - **번들러**: Vite
 - **실시간 동기화**: Hocuspocus + TipTap (가족 간 데이터 공유)
-- **상태 관리**: Context API / Redux (선택)
-- **스타일링**: SCSS / CSS Modules
+- **상태 관리**: Zustand (전역) + React Query (서버 상태)
+- **스타일링**: SCSS Modules + Tailwind CSS
 
 ### Backend
 - **Language**: Java 21 LTS (2029년까지 지원, Virtual Threads, ZGC)

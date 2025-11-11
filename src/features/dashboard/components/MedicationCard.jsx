@@ -17,7 +17,7 @@ import styles from './MedicationCard.module.scss'
  * @param {boolean} schedule.isActive - 활성 여부
  * @returns {JSX.Element} 복용 카드
  */
-export const MedicationCard = ({ schedule }) => {
+export const MedicationCard = ({ schedule, onTakeMedication }) => {
   const getStatusColor = () => {
     switch (schedule.status) {
       case 'completed':
@@ -32,7 +32,9 @@ export const MedicationCard = ({ schedule }) => {
   }
 
   const handleTakeMedication = () => {
-    alert(`${schedule.timeLabel} 약을 복용했습니다!`)
+    if (onTakeMedication) {
+      onTakeMedication(schedule.id)
+    }
   }
 
   return (

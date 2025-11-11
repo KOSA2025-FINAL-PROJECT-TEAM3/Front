@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatMessage from '../components/ChatMessage'
@@ -22,7 +22,7 @@ export const ChatConversationPage = () => {
 
   useEffect(() => {
     loadMessages()
-  }, [roomId])
+  }, [roomId, loadMessages])
 
   useEffect(() => {
     // 새 메시지가 추가되면 스크롤을 맨 아래로
@@ -33,7 +33,7 @@ export const ChatConversationPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     setIsLoading(true)
     setError(null)
 
@@ -57,7 +57,7 @@ export const ChatConversationPage = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [roomId, setIsLoading, setError, setMessages, setCounselor])
 
   const handleSendMessage = async (content) => {
     if (!content.trim() || isSending) return

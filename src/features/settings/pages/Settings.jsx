@@ -39,13 +39,13 @@ const menuDefinitions = [
     id: 'privacy',
     label: '개인정보 처리방침',
     icon: '🔒',
-    path: '/docs/privacy',
+    path: ROUTE_PATHS.privacyPolicy,
   },
   {
     id: 'terms',
     label: '이용약관',
     icon: '📜',
-    path: '/docs/terms',
+    path: ROUTE_PATHS.termsOfService,
   },
 ]
 

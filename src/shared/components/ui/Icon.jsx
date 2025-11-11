@@ -115,6 +115,16 @@ const ICON_PATHS = {
       <path {...baseStroke} d="m18 9 3 3-3 3" />
     </>
   ),
+  list: (
+    <>
+      <path {...baseStroke} d="M8 6h10" />
+      <path {...baseStroke} d="M6 6h.01" />
+      <path {...baseStroke} d="M8 12h10" />
+      <path {...baseStroke} d="M6 12h.01" />
+      <path {...baseStroke} d="M8 18h10" />
+      <path {...baseStroke} d="M6 18h.01" />
+    </>
+  ),
   default: (
     <circle {...baseStroke} cx="12" cy="12" r="8" />
   ),

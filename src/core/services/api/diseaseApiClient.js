@@ -16,6 +16,12 @@ export const diseaseApiClient = {
         MOCK_DISEASES.find((d) => d.id === diseaseId)?.restrictions || [],
     })
   },
+
+  async getDiseaseDetail(diseaseId) {
+    return client.get(`/${diseaseId}`, undefined, {
+      mockResponse: () => MOCK_DISEASES.find((d) => d.id === diseaseId) || null,
+    })
+  },
 }
 
 export default diseaseApiClient

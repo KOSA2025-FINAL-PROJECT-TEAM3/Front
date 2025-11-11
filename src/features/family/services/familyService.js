@@ -1,7 +1,8 @@
 ﻿/**
  * FamilyMockService
- * - Stage 3 ?붽뎄?ы빆: React Query + Mock Provider
- * - Dev Mode/濡쒖뺄 ?섍꼍?먯꽌 媛議??곗씠?곕? localStorage?????議고쉶
+ * - Stage 3 요구사항: React Query + Mock Provider
+ * - Dev Mode/로컬 환경에서 가족 데이터를 localStorage에 저장/조회
+ * - 초기 목(mock) 데이터는 '@/data/mockFamily'에서 가져와 사용합니다.
  */
 
 import { STORAGE_KEYS } from '@config/constants'
@@ -79,6 +80,12 @@ const persistMemberDetails = (details) => {
   )
 }
 
+const cloneDefaultGroup = () => JSON.parse(JSON.stringify(DEFAULT_FAMILY_GROUP))
+const cloneDefaultMembers = () =>
+  DEFAULT_FAMILY_MEMBERS.map((member) => ({ ...member }))
+const cloneDefaultDetails = () =>
+  JSON.parse(JSON.stringify(DEFAULT_MEMBER_DETAILS))
+
 const ensureSeedData = () => {
   const snapshot = readSnapshot()
   const details = readMemberDetails()
@@ -90,11 +97,11 @@ const ensureSeedData = () => {
 }
 
 /**
- * Dev Mode??媛議??쒕퉬??(Mock)
+ * Dev Mode용 가족 서비스 (Mock)
  */
 export const FamilyMockService = {
   /**
-   * 媛議??곗씠??議고쉶
+   * 가족 데이터 조회
    * @returns {Promise<{group: object, members: Array}>}
    */
   async getFamily() {
@@ -102,9 +109,9 @@ export const FamilyMockService = {
   },
 
   /**
-   * 媛議?硫ㅻ쾭 珥덈?
+   * 가족 멤버 초대
    * @param {{name: string, email: string, role: string}} payload
-   * @returns {Promise<object>} ?앹꽦??硫ㅻ쾭
+   * @returns {Promise<object>} 생성된 멤버
    */
   async inviteMember(payload) {
     const { snapshot, details } = ensureSeedData()
@@ -112,7 +119,7 @@ export const FamilyMockService = {
     const trimmedName = payload?.name?.trim()
 
     if (!trimmedName || !payload?.email) {
-      throw new Error('?대쫫怨??대찓?쇱쓣 ?낅젰?댁＜?몄슂.')
+      throw new Error('구성원 이름/이메일이 필요합니다.')
     }
 
     const nextMember = buildNewMember({
@@ -131,7 +138,7 @@ export const FamilyMockService = {
   },
 
   /**
-   * 媛議?硫ㅻ쾭 ??젣
+   * 가족 멤버 삭제
    * @param {string} memberId
    * @returns {Promise<{group: object, members: Array}>}
    */
@@ -152,7 +159,7 @@ export const FamilyMockService = {
   },
 
   /**
-   * 媛議?援ъ꽦???곸꽭 ?뺣낫 議고쉶
+   * 가족 구성원 상세 정보 조회
    * @param {string} memberId
    * @returns {Promise<{member: Object, medications: Array, adherence: number}>}
    */
@@ -168,6 +175,48 @@ export const FamilyMockService = {
       ...detail,
     }
   },
+
+  /**
+   * 약물 복용 상태 업데이트
+   * @param {string} memberId
+   * @param {number} medicationIndex - 약물 인덱스 (0-based)
+   * @param {string} newStatusLabel - 새로운 상태 라벨 (예: '복용 완료', '미복용')
+   * @returns {Promise<object>} 업데이트된 멤버 상세 정보
+   */
+  async updateMedicationStatus(memberId, medicationIndex, newStatusLabel) {
+    const { details } = ensureSeedData()
+    const memberDetail = details[memberId]
+
+    if (!memberDetail || !memberDetail.medications[medicationIndex]) {
+      throw new Error('Member or medication not found')
+    }
+
+    const updatedMedications = [...memberDetail.medications]
+    updatedMedications[medicationIndex] = {
+      ...updatedMedications[medicationIndex],
+      statusLabel: newStatusLabel,
+    }
+
+    const updatedDetails = {
+      ...details,
+      [memberId]: {
+        ...memberDetail,
+        medications: updatedMedications,
+      },
+    }
+
+    persistMemberDetails(updatedDetails)
+    return updatedDetails[memberId]
+  },
+}
+
+export const resetFamilyMockData = () => {
+  const group = cloneDefaultGroup()
+  const members = cloneDefaultMembers()
+  const details = cloneDefaultDetails()
+  persistSnapshot(group, members)
+  persistMemberDetails(details)
+  return { group, members, details }
 }
 
 export default FamilyMockService

@@ -1,0 +1,47 @@
+.page {
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.restrictions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.badge {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+  border-radius: 9999px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.hint {
+  color: #6b7280;
+}
+
+.backLink {
+  display: inline-block;
+  margin-top: 20px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

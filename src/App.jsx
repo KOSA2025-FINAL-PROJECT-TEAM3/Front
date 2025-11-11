@@ -26,12 +26,16 @@ import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
 import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
+import PrivacyPolicyPage from '@features/settings/pages/PrivacyPolicyPage'
+import TermsOfServicePage from '@features/settings/pages/TermsOfServicePage'
 import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
 import FoodWarningPage from '@features/diet/pages/FoodWarning'
+import DietLogPage from '@features/diet/pages/DietLogPage' // Import new page
 import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
 import SymptomSearchPage from '@features/search/pages/SymptomSearch'
 import DoctorCounselPage from '@features/counsel/pages/DoctorCounsel'
 import DiseasePage from '@features/disease/pages/Disease'
+import DiseaseDetailPage from '@features/disease/pages/DiseaseDetailPage' // Import new page
 import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
 import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
@@ -59,6 +63,8 @@ function App() {
             <Route path={ROUTE_PATHS.login} element={<Login />} />
             <Route path={ROUTE_PATHS.signup} element={<Signup />} />
           <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
+          <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
+          <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
 
           {/* 보호된 페이지: 인증 필요 */}
           <Route
@@ -91,9 +97,17 @@ function App() {
             path={ROUTE_PATHS.disease}
             element={<PrivateRoute element={<DiseasePage />} />}
           />
+          <Route // New route for DiseaseDetailPage
+            path={ROUTE_PATHS.diseaseDetail}
+            element={<PrivateRoute element={<DiseaseDetailPage />} />}
+          />
           <Route
             path={ROUTE_PATHS.dietWarning}
             element={<PrivateRoute element={<FoodWarningPage />} />}
+          />
+          <Route // New route for DietLogPage
+            path={ROUTE_PATHS.dietLog}
+            element={<PrivateRoute element={<DietLogPage />} />}
           />
           <Route
             path={ROUTE_PATHS.ocrScan}

@@ -1,0 +1,33 @@
+.page {
+  padding: 24px 48px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+}
+
+.content {
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 8px;
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #374151;
+  }
+}

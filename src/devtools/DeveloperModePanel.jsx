@@ -8,7 +8,8 @@ import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuthStore } from '@features/auth/store/authStore'
-import { DEFAULT_FAMILY_GROUP, DEFAULT_FAMILY_MEMBERS } from '@/data/mockFamily'
+import { resetFamilyMockData } from '@features/family/services/familyService'
+import { MOCK_DIET_LOGS } from '@/data/mockDiet'
 import styles from './DeveloperModePanel.module.scss'
 
 const DEV_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEV_MODE !== 'false'
@@ -28,16 +29,20 @@ const DEV_PROFILES = {
   },
 }
 
-const seedFamilyData = () => {
+const seedDietLogs = () => {
   if (typeof window === 'undefined') return
-  window.localStorage.setItem(
-    STORAGE_KEYS.FAMILY_GROUP,
-    JSON.stringify({ group: DEFAULT_FAMILY_GROUP, members: DEFAULT_FAMILY_MEMBERS }),
-  )
+  window.localStorage.setItem(STORAGE_KEYS.DIET_LOGS, JSON.stringify(MOCK_DIET_LOGS))
+}
+
+const resetAllMockData = () => {
+  resetFamilyMockData()
+  seedDietLogs()
 }
 
 export const DeveloperModePanel = () => {
   const [open, setOpen] = useState(false)
+  const [statusMessage, setStatusMessage] = useState('')
+  const [statusLevel, setStatusLevel] = useState('info')
   const navigate = useNavigate()
   const setAuthData = useAuthStore((state) => state.setAuthData)
   const clearAuthState = useAuthStore((state) => state.clearAuthState)
@@ -54,7 +59,6 @@ export const DeveloperModePanel = () => {
     window.localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userProfile))
     window.localStorage.setItem(STORAGE_KEYS.ROLE, role)
     window.localStorage.setItem(STORAGE_KEYS.DEV_MODE, 'true')
-    seedFamilyData()
     return { token, userProfile }
   }
 
@@ -65,13 +69,21 @@ export const DeveloperModePanel = () => {
     window.localStorage.removeItem(STORAGE_KEYS.ROLE)
     window.localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
     window.localStorage.removeItem(STORAGE_KEYS.FAMILY_GROUP)
+    window.localStorage.removeItem(STORAGE_KEYS.FAMILY_MEMBER_DETAILS)
   }
 
-  const handleShortcut = (role, path) => {
+  const showStatus = (message, level = 'info') => {
+    setStatusMessage(message)
+    setStatusLevel(level)
+  }
+
+  const handleShortcut = async (role, path) => {
     const record = persistDevAuth(role)
     if (record?.userProfile) {
       setAuthData({ user: record.userProfile, token: record.token, role })
     }
+    resetAllMockData()
+    showStatus('Dev 프로필과 목데이터 전체를 초기화했어요.', 'success')
     setOpen(false)
     navigate(path, { replace: true })
   }
@@ -79,8 +91,14 @@ export const DeveloperModePanel = () => {
   const handleClear = () => {
     clearDevAuth()
     clearAuthState()
+    showStatus('Dev Mode 상태가 초기화됐어요.', 'info')
     setOpen(false)
     navigate(ROUTE_PATHS.login, { replace: true })
+  }
+
+  const handleResetMockData = () => {
+    resetAllMockData()
+    showStatus('모든 목데이터를 기본값으로 되돌렸어요.', 'success')
   }
 
   return (
@@ -138,19 +156,10 @@ export const DeveloperModePanel = () => {
             <li>
               <button
                 type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.family)}
+                className={`${styles.shortcutButton} ${styles.secondaryAction}`}
+                onClick={handleResetMockData}
               >
-                가족 관리 (Stage 3)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.medication)}
-              >
-                약 관리 (Stage 4 CRUD)
+                목데이터 전부 초기화
               </button>
             </li>
             <li>
@@ -166,6 +175,11 @@ export const DeveloperModePanel = () => {
               </button>
             </li>
           </ul>
+          {statusMessage && (
+            <p className={`${styles.statusMessage} ${styles[`status-${statusLevel}`]}`}>
+              {statusMessage}
+            </p>
+          )}
         </div>
       )}
     </div>

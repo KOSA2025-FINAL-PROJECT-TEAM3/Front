@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   },
   { id: 'disease', label: '질환', icon: 'disease', path: ROUTE_PATHS.disease },
   { id: 'diet', label: '식이 경고', icon: 'diet', path: ROUTE_PATHS.dietWarning },
+  { id: 'dietLog', label: '식단 기록', icon: 'list', path: ROUTE_PATHS.dietLog },
   { id: 'ocr', label: 'OCR', icon: 'ocr', path: ROUTE_PATHS.ocrScan },
   { id: 'counsel', label: '의사와 상담', icon: 'counsel', path: ROUTE_PATHS.counsel },
   { id: 'settings', label: '설정', icon: 'settings', path: ROUTE_PATHS.settings },

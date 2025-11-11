@@ -4,7 +4,7 @@
  * - Stage 4에서 실제 Hocuspocus 연동 시 교체
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFamily } from './useFamily'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { FamilySyncService } from '../services/familySyncService'
@@ -27,6 +27,21 @@ export const useFamilySync = () => {
   const [connectionStatus, setConnectionStatus] = useState('disabled')
   const [onlineUsers, setOnlineUsers] = useState([])
   const [lastSyncTime, setLastSyncTime] = useState(new Date())
+  const [syncEvents, setSyncEvents] = useState([])
+
+  const pushSyncEvent = useCallback((event) => {
+    setSyncEvents((prev) => {
+      const next = [
+        {
+          id: `${event.type}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          timestamp: new Date(),
+          ...event,
+        },
+        ...prev,
+      ]
+      return next.slice(0, 6)
+    })
+  }, [])
 
   const realtimeEnabled = useMemo(() => {
     const flag = import.meta.env.VITE_ENABLE_REALTIME !== 'false'
@@ -36,7 +51,9 @@ export const useFamilySync = () => {
 
   useEffect(() => {
     if (!realtimeEnabled || !familyGroup?.id || !token || !FamilySyncService.isSupported()) {
-      setConnectionStatus(realtimeEnabled ? 'waiting' : 'disabled')
+      const nextStatus = realtimeEnabled ? 'waiting' : 'disabled'
+      setConnectionStatus(nextStatus)
+      pushSyncEvent({ type: 'status', status: nextStatus })
       return
     }
 
@@ -54,6 +71,7 @@ export const useFamilySync = () => {
         if (status === 'connected') {
           setLastSyncTime(new Date())
         }
+        pushSyncEvent({ type: 'status', status })
       }),
       service.subscribeToOnlineUsers((users) => {
         setOnlineUsers(users || [])
@@ -64,11 +82,14 @@ export const useFamilySync = () => {
       disposers.forEach((dispose) => dispose?.())
       service.disconnect()
     }
-  }, [familyGroup?.id, token, user?.id, realtimeEnabled])
+  }, [familyGroup?.id, token, user?.id, realtimeEnabled, pushSyncEvent])
 
   useEffect(() => {
     setLastSyncTime(new Date())
-  }, [familyGroup, members])
+    if (members?.length) {
+      pushSyncEvent({ type: 'members', count: members.length })
+    }
+  }, [familyGroup, members, pushSyncEvent])
 
   const derivedOnlineIds = useMemo(() => {
     if (onlineUsers?.length) {
@@ -92,6 +113,7 @@ export const useFamilySync = () => {
     isConnected: connectionStatus === 'connected',
     isSyncing: loading || connectionStatus === 'connecting',
     lastSyncTime,
+    syncEvents,
   }
 }
 

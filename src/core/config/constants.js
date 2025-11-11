@@ -127,6 +127,7 @@ export const STORAGE_KEYS = {
   USER_DATA: 'amapill_user',
   FAMILY_GROUP: 'amapill_family',
   FAMILY_MEMBER_DETAILS: 'amapill_family_member_details',
+  DIET_LOGS: 'amapill_diet_logs',
   DEV_MODE: 'amapill_dev_mode',
   ROLE: 'amapill_role',
   KAKAO_STATE: 'amapill_kakao_oauth_state',

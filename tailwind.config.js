@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url'
 import path from 'path'
+import forms from '@tailwindcss/forms'
 
 const srcPath = path.resolve(fileURLToPath(new URL('.', import.meta.url)), './src')
 
@@ -29,5 +30,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [forms],
 }
