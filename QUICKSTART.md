@@ -21,7 +21,7 @@ cp .env.example .env
 ### 2단계: Docker Compose로 전체 스택 실행
 
 ```bash
-# 모든 서비스 시작 (MySQL, PostgreSQL, Redis, Kafka, 9개 마이크로서비스)
+# 모든 서비스 시작 (MySQL, Redis, Kafka, 9개 마이크로서비스)
 docker-compose up -d
 
 # 서비스 상태 확인
@@ -66,14 +66,14 @@ docker exec -i amapill-mysql mysql -u root -pamapill_root_2025 amapill < databas
 mysql -h localhost -P 3306 -u amapill_app -pamapill_pass_2025 amapill < database-schema-mysql.sql
 ```
 
-### PostgreSQL (실시간 동기화 DB)
+### MySQL (메인 DB - 실시간 동기화 포함)
 
 ```bash
 # Docker 컨테이너에서 스키마 실행
-docker exec -i amapill-postgresql psql -U amapill_sync_app -d amapill_sync -f /docker-entrypoint-initdb.d/01-schema.sql
+docker exec -i amapill-mysql mysql -u root -pamapill_root_2025 amapill < database-schema-mysql.sql
 
 # 또는 psql 클라이언트로 직접 연결
-psql -h localhost -p 5432 -U amapill_sync_app -d amapill_sync -f database-schema-postgresql.sql
+mysql -h localhost -P 3306 -u amapill_app -pamapill_pass_2025 amapill < database-schema-mysql.sql
 # 비밀번호: amapill_sync_pass_2025
 ```
 
@@ -103,8 +103,8 @@ curl http://localhost:8761/eureka/apps
 # MySQL
 docker exec -it amapill-mysql mysql -u amapill_app -pamapill_pass_2025 -e "USE amapill; SHOW TABLES;"
 
-# PostgreSQL
-docker exec -it amapill-postgresql psql -U amapill_sync_app -d amapill_sync -c "\dt"
+# MySQL 테이블 확인
+docker exec -it amapill-mysql mysql -u amapill_app -pamapill_pass_2025 -e "USE amapill; SHOW TABLES;"
 
 # Redis
 docker exec -it amapill-redis redis-cli ping
@@ -129,7 +129,7 @@ docker-compose down -v
 ### 데이터베이스만 실행
 
 ```bash
-docker-compose up -d mysql postgresql redis
+docker-compose up -d mysql redis
 ```
 
 ### Kafka만 실행
