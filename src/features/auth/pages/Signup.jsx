@@ -151,7 +151,7 @@ export const Signup = () => {
                 <span className={styles.radioButton}>어르신(부모)</span>
               </label>
               <label className={styles.radioLabel}>
-                <input type="radio" value="guardian" {...register('role')} disabled={loading} />
+                <input type="radio" value="caregiver" {...register('role')} disabled={loading} />
                 <span className={styles.radioButton}>보호자(자녀)</span>
               </label>
             </div>

@@ -1,6 +1,6 @@
 # PostgreSQL vs MySQL 선택 가이드
 
-> 실버케어 프로젝트에 최적화된 데이터베이스 선택
+> AMA...Pill 프로젝트에 최적화된 데이터베이스 선택
 >
 > **결론**: **PostgreSQL 추천** ⭐
 
@@ -265,7 +265,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 ## 🎯 프로젝트별 권장
 
-### ✅ PostgreSQL 추천 (실버케어)
+### ✅ PostgreSQL 추천 (AMA...Pill)
 
 **이유**:
 1. **JSON 필드 9개** → jsonb 인덱싱 필수
@@ -289,7 +289,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 - 단순한 쿼리 위주
 - 팀이 MySQL 경험 많음
 
-**실버케어에는 부적합**:
+**AMA...Pill에는 부적합**:
 - JSON 많음 (9개 필드)
 - GIS 필요 (약국 검색)
 - 복잡한 쿼리 많음
@@ -307,7 +307,7 @@ services:
   postgres:
     image: postgis/postgis:16-3.4  # PostGIS 포함
     environment:
-      POSTGRES_DB: silvercare
+      POSTGRES_DB: amapill
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: secure_password
     ports:
@@ -328,7 +328,7 @@ services:
 # application.yml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/silvercare
+    url: jdbc:postgresql://localhost:5432/amapill
     username: admin
     password: secure_password
     driver-class-name: org.postgresql.Driver

@@ -1,6 +1,6 @@
-# SilverCare Frontend
+# AMA...Pill Frontend
 
-SilverCare는 노인 부모와 성인 자식을 위한 약 관리 플랫폼입니다. 이 리포지토리는 SilverCare의 React 19 기반 프론트엔드 입니다.
+AMA...Pill는 노인 부모와 성인 자식을 위한 약 관리 플랫폼입니다. 이 리포지토리는 AMA...Pill의 React 19 기반 프론트엔드 입니다.
 
 ## 📋 개요
 
@@ -167,8 +167,8 @@ bugfix/#15-auth-error-seohee
 
 ## 🔗 연관 리포지토리
 
-- [SilverCare Backend](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - Spring Boot 백엔드
-- [SilverCare .github](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github) - 문서 및 설계
+- [AMA...Pill Backend](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - Spring Boot 백엔드
+- [AMA...Pill .github](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github) - 문서 및 설계
 
 ## 📧 문의
 

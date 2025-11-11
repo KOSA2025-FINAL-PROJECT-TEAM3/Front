@@ -27,7 +27,7 @@ This document compares the newly created `DATABASE_ERD.dbml` against the project
 
 **Key Features:**
 - Kakao OAuth fields: `kakao_id`, `kakao_email`, `kakao_connected_at`
-- Role-based access: `senior` | `guardian`
+- Role-based access: `senior` | `caregiver`
 - Token security: SHA-256 hashing, device tracking, revocation support
 
 ---
@@ -42,7 +42,7 @@ This document compares the newly created `DATABASE_ERD.dbml` against the project
 - Real-time sync: `sync_document_id` for Hocuspocus
 - Invitation workflow: `pending` → `accepted` → `declined`
 - Granular permissions: `can_edit_medications`, `can_view_health_data`, `can_receive_alerts`
-- Supports multi-role: `parent` | `child` | `guardian`
+- Supports multi-role: `parent` | `child` | `caregiver`
 
 ---
 

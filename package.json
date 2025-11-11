@@ -1,9 +1,9 @@
 {
-  "name": "silvercare-front",
+  "name": "amapill-front",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "SilverCare Frontend - Family Medication Management Platform",
+  "description": "AMA...Pill Frontend - Family Medication Management Platform",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
