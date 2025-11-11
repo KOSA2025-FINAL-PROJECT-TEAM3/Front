@@ -186,14 +186,11 @@ frontend/
 │   │   │
 │   │   ├── chat/
 │   │   │   ├── components/
-│   │   │   │   ├── ChatRoomList.jsx
 │   │   │   │   ├── ChatRoomCard.jsx
 │   │   │   │   ├── ChatMessage.jsx
 │   │   │   │   └── ChatInput.jsx
-│   │   │   ├── hooks/
-│   │   │   │   └── useChat.js
 │   │   │   └── pages/
-│   │   │       ├── PharmacistChatListPage.jsx
+│   │   │       ├── DoctorChatListPage.jsx
 │   │   │       └── ChatConversationPage.jsx
 │   │   │
 │   │   ├── report/
@@ -722,40 +719,38 @@ DiseaseRestrictionsPage
 
 ---
 
-### 8. 약사 채팅 (Pharmacist Chat)
+### 8. 의사/AI 챗봇 상담 (Doctor/AI Chat)
 
-#### 09. 약사 채팅 목록 (`/chat/pharmacist`)
+#### 09. 의사 채팅 목록 (`/chat`)
 ```
-PharmacistChatListPage
+DoctorChatListPage
 └── MainLayout (BottomNav: 홈 활성화)
     ├── Header
     │   └── Button (+ 새 상담)
-    ├── ChatRoomList
-    │   └── ChatRoomCard[]
-    │       ├── Card
-    │       ├── PharmacistAvatar
-    │       ├── InfoSection
-    │       │   ├── PharmacistName
-    │       │   ├── LastMessage
-    │       │   └── Timestamp
-    │       └── UnreadBadge
+    ├── ChatRoomCard[]
+    │   ├── Card
+    │   ├── CounselorAvatar
+    │   ├── InfoSection
+    │   │   ├── CounselorName (의사/AI봇)
+    │   │   ├── LastMessage
+    │   │   └── Timestamp
+    │   └── UnreadBadge
     └── BottomNavigation
 ```
 
-#### 10. 약사 1:1 대화 (`/chat/:roomId`)
+#### 10. 의사/AI 1:1 대화 (`/chat/:roomId`)
 ```
 ChatConversationPage (No Bottom Nav)
 └── MainLayout
     ├── ChatHeader
     │   ├── BackButton
-    │   ├── PharmacistInfo
+    │   ├── CounselorInfo (의사/AI봇)
     │   └── MenuButton
-    ├── ChatMessageList
-    │   └── ChatMessage[]
-    │       ├── Avatar (상대방)
-    │       ├── MessageBubble
-    │       └── Timestamp
-    ├── ChatInput
+    ├── ChatMessage[] (컴포넌트 반복)
+    │   ├── Avatar (상대방)
+    │   ├── MessageBubble
+    │   └── Timestamp
+    ├── ChatInput (컴포넌트)
     │   ├── TextArea
     │   ├── AttachButton
     │   └── SendButton
@@ -1386,7 +1381,7 @@ export const routes = {
   DISEASE_RESTRICTIONS: '/diseases/:id/restrictions',
 
   // Chat
-  PHARMACIST_CHAT_LIST: '/chat/pharmacist',
+  CHAT_LIST: '/chat',
   CHAT_CONVERSATION: '/chat/:roomId',
 
   // Report
