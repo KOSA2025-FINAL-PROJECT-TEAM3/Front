@@ -12,7 +12,7 @@ export default {
     extend: {
       colors: {
         primary: '#2563eb',
-        guardian: '#a5b4fc',
+        caregiver: '#a5b4fc',
         senior: '#f9a8d4',
         warning: '#f97316',
         danger: '#ef4444',

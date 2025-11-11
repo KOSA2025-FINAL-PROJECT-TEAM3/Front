@@ -1,4 +1,4 @@
-// SilverCare Database Schema - Version C
+// AMA...Pill Database Schema - Version C
 // Complete ERD designed from PROJECT_SPECIFICATION.md + FRONTEND_COMPONENTS_SPECIFICATION.md
 // dbdiagram.io용 DBML
 //
@@ -6,10 +6,10 @@
 // 목적: 3-way comparison용 완전한 데이터베이스 설계
 // 테이블 수: 26개 (모든 기능 포함)
 
-Project SilverCare_V3 {
+Project AMA...Pill_V3 {
   database_type: 'PostgreSQL'
   Note: '''
-    # 실버케어 - 가족 돌봄 중심 약 관리 플랫폼
+    # AMA...Pill - 가족 돌봄 중심 약 관리 플랫폼
 
     ## Core Features (PROJECT_SPECIFICATION.md)
     ✅ 가족 돌봄 네트워크 (실시간 Hocuspocus 동기화)
@@ -168,7 +168,7 @@ Table family_members {
   user_id bigint [ref: > users.id, not null]
   
   // 가족 내 역할
-  member_role varchar(20) [not null, note: 'parent | child | guardian']
+  member_role varchar(20) [not null, note: 'parent | child | caregiver']
   nickname varchar(50) [note: '가족 내 별칭']
   
   // 권한 (세분화)

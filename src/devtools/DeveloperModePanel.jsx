@@ -21,9 +21,9 @@ const DEV_PROFILES = {
     role: USER_ROLES.SENIOR,
   },
   [USER_ROLES.CAREGIVER]: {
-    id: 'dev-guardian',
+    id: 'dev-caregiver',
     name: '홍보호자',
-    email: 'guardian@amapill.dev',
+    email: 'caregiver@amapill.dev',
     role: USER_ROLES.CAREGIVER,
   },
 }
