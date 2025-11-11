@@ -3,7 +3,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import OCRControlPanel from '../components/OCRControlPanel.jsx'
 import OCRResultPreview from '../components/OCRResultPreview.jsx'
 import styles from './PrescriptionScan.module.scss'
-import { ocrApiClient } from '@/core/services/api/ocrApiClient'
+import { ocrApiClient } from '@core/services/api/ocrApiClient'
 
 const stripExtension = (fileName = '') => fileName.replace(/\.[^/.]+$/, '')
 

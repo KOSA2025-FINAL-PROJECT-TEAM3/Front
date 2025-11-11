@@ -1,6 +1,6 @@
 ﻿import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
-import MainLayout from '@/shared/components/layout/MainLayout'
+import MainLayout from '@shared/components/layout/MainLayout'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'

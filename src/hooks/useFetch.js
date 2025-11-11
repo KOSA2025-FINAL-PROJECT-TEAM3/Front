@@ -1,18 +1,14 @@
-/**
+﻿/**
  * useFetch Hook
- * - API 호출을 간편하게 처리하는 커스텀 훅
- * - 로딩, 에러, 데이터 상태 관리
- */
+ * - API ?몄텧??媛꾪렪?섍쾶 泥섎━?섎뒗 而ㅼ뒪? ?? * - 濡쒕뵫, ?먮윭, ?곗씠???곹깭 愿由? */
 
 import { useState, useEffect, useCallback } from 'react'
-import httpClient from '@/core/services/api/httpClient'
+import httpClient from '@core/services/api/httpClient'
 
 /**
- * API 호출을 처리하는 커스텀 훅
- * @param {string} url - API 엔드포인트
- * @param {Object} options - 옵션 (method, body, headers 등)
- * @param {boolean} skip - 자동 실행 건너뛰기
- * @returns {Object} 데이터, 로딩 상태, 에러, 수동 호출 함수
+ * API ?몄텧??泥섎━?섎뒗 而ㅼ뒪? ?? * @param {string} url - API ?붾뱶?ъ씤?? * @param {Object} options - ?듭뀡 (method, body, headers ??
+ * @param {boolean} skip - ?먮룞 ?ㅽ뻾 嫄대꼫?곌린
+ * @returns {Object} ?곗씠?? 濡쒕뵫 ?곹깭, ?먮윭, ?섎룞 ?몄텧 ?⑥닔
  */
 export const useFetch = (url, options = {}, skip = false) => {
   const [data, setData] = useState(null)
@@ -20,7 +16,7 @@ export const useFetch = (url, options = {}, skip = false) => {
   const [error, setError] = useState(null)
 
   /**
-   * API 호출 실행
+   * API ?몄텧 ?ㅽ뻾
    */
   const fetchData = useCallback(async (customOptions = {}) => {
     setLoading(true)
@@ -42,9 +38,9 @@ export const useFetch = (url, options = {}, skip = false) => {
       setData(payload)
       return payload
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || '요청 실패'
+      const errorMessage = err.response?.data?.message || err.message || '?붿껌 ?ㅽ뙣'
       setError(errorMessage)
-      console.error(`API 호출 실패: ${url}`, err)
+      console.error(`API ?몄텧 ?ㅽ뙣: ${url}`, err)
       throw err
     } finally {
       setLoading(false)
@@ -52,8 +48,7 @@ export const useFetch = (url, options = {}, skip = false) => {
   }, [url, options])
 
   /**
-   * 컴포넌트 마운트 시 자동으로 데이터 가져오기
-   */
+   * 而댄룷?뚰듃 留덉슫?????먮룞?쇰줈 ?곗씠??媛?몄삤湲?   */
   useEffect(() => {
     if (!skip) {
       fetchData()
@@ -61,7 +56,7 @@ export const useFetch = (url, options = {}, skip = false) => {
   }, [url, skip, fetchData])
 
   /**
-   * 데이터 수동으로 새로고침
+   * ?곗씠???섎룞?쇰줈 ?덈줈怨좎묠
    */
   const refetch = useCallback(() => {
     return fetchData()

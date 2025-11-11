@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import styles from './SymptomSearch.module.scss'
-import { searchApiClient } from '@/core/services/api/searchApiClient'
+import { searchApiClient } from '@core/services/api/searchApiClient'
 
 export const SymptomSearchPage = () => {
   const [query, setQuery] = useState('')
@@ -48,7 +48,7 @@ export const SymptomSearchPage = () => {
       if (selectionRef.current === symptom) {
         setDetail({
           name: symptom,
-          description: '상세 정보를 불러오지 못했습니다.',
+          description: '자세한 정보를 불러오지 못했습니다.',
           possibleCauses: [],
           recommendedActions: [],
         })
@@ -89,7 +89,7 @@ export const SymptomSearchPage = () => {
             className={styles.input}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="예: 두통, 기침, 메스꺼움"
+            placeholder="예) 두통, 기침, 메스꺼움"
           />
 
           <div className={styles.hint}>입력하면 바로 결과가 표시됩니다.</div>
@@ -136,7 +136,9 @@ export const SymptomSearchPage = () => {
                 )}
               </div>
 
-              {detailLoading && <p className={styles.empty}>상세 정보를 불러오는 중입니다...</p>}
+              {detailLoading && (
+                <p className={styles.empty}>자세한 정보를 불러오는 중입니다...</p>
+              )}
 
               {!detailLoading && detail && (
                 <div className={styles.detailBody}>
@@ -176,3 +178,4 @@ export const SymptomSearchPage = () => {
 }
 
 export default SymptomSearchPage
+

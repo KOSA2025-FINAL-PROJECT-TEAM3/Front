@@ -2,7 +2,7 @@ import ApiClient from './ApiClient'
 import {
   MOCK_FOOD_CONFLICT,
   MOCK_ALTERNATIVES,
-} from '@/features/diet/data/mockFoodWarnings'
+} from '@features/diet/data/mockFoodWarnings'
 
 class DietApiClient extends ApiClient {
   constructor() {

@@ -1,5 +1,5 @@
 import ApiClient from './ApiClient'
-import { MOCK_MEDICATIONS } from '@/features/medication/data/mockMedications'
+import { MOCK_MEDICATIONS } from '@features/medication/data/mockMedications'
 
 class MedicationApiClient extends ApiClient {
   constructor() {

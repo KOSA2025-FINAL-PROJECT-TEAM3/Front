@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import styles from './Disease.module.scss'
-import { diseaseApiClient } from '@/core/services/api/diseaseApiClient'
+import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 
 export const DiseasePage = () => {
   const [items, setItems] = useState([])
@@ -29,10 +29,10 @@ export const DiseasePage = () => {
       <div className={styles.page}>
         <header className={styles.header}>
           <h1>질환</h1>
-          <p>등록된 질환과 주의사항을 확인하세요. (Mock)</p>
+          <p>등록된 질환과 주의사항을 확인하세요 (Mock)</p>
         </header>
 
-        {loading && <div className={styles.hint}>불러오는 중...</div>}
+        {loading && <div className={styles.hint}>불러오는 중입니다...</div>}
 
         {!loading && (
           <ul className={styles.list}>

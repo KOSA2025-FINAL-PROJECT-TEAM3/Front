@@ -1,4 +1,4 @@
-import { ApiClient } from './ApiClient'
+﻿import { ApiClient } from './ApiClient'
 import { MOCK_DISEASES } from '@/data/mockDiseases'
 
 const client = new ApiClient({ basePath: '/api/disease' })
@@ -19,4 +19,3 @@ export const diseaseApiClient = {
 }
 
 export default diseaseApiClient
-

@@ -1,5 +1,5 @@
 import ApiClient from './ApiClient'
-import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@/features/search/data/mockSymptoms'
+import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@features/search/data/mockSymptoms'
 
 class SearchApiClient extends ApiClient {
   constructor() {

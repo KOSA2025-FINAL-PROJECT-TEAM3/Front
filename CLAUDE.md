@@ -1,3 +1,4 @@
+<!-- encoding: utf-8 -->
 # Project Overview
 
 **"Is it time to take medicine?"** - Family-centered medication management platform for elderly parents & adult children remote care.

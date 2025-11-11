@@ -1,13 +1,13 @@
-import { useEffect, useState, useRef } from 'react'
+﻿import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatMessage from '../components/ChatMessage'
 import ChatInput from '../components/ChatInput'
-import { chatApiClient } from '@/core/services/api/chatApiClient'
+import { chatApiClient } from '@core/services/api/chatApiClient'
 import styles from './ChatConversationPage.module.scss'
 
 /**
- * ChatConversationPage - 1:1 채팅 대화 페이지
+ * ChatConversationPage - 1:1 梨꾪똿 ????섏씠吏
  */
 export const ChatConversationPage = () => {
   const { roomId } = useParams()
@@ -25,8 +25,7 @@ export const ChatConversationPage = () => {
   }, [roomId])
 
   useEffect(() => {
-    // 새 메시지가 추가되면 스크롤을 맨 아래로
-    scrollToBottom()
+    // ??硫붿떆吏媛 異붽??섎㈃ ?ㅽ겕濡ㅼ쓣 留??꾨옒濡?    scrollToBottom()
   }, [messages])
 
   const scrollToBottom = () => {
@@ -41,19 +40,18 @@ export const ChatConversationPage = () => {
       const response = await chatApiClient.getMessages(roomId)
       setMessages(response.messages || [])
 
-      // 채팅방 정보도 가져오기 (임시로 첫 메시지의 발신자 정보 사용)
+      // 梨꾪똿諛??뺣낫??媛?몄삤湲?(?꾩떆濡?泥?硫붿떆吏??諛쒖떊???뺣낫 ?ъ슜)
       const counselorMessage = response.messages?.find((m) => m.senderType === 'counselor')
       if (counselorMessage) {
         setCounselor({
           id: counselorMessage.senderId,
-          name: '김의사', // TODO: 실제 API에서 가져오기
-          profileImage: 'https://via.placeholder.com/100',
+          name: '源?섏궗', // TODO: ?ㅼ젣 API?먯꽌 媛?몄삤湲?          profileImage: 'https://via.placeholder.com/100',
           type: 'doctor',
         })
       }
     } catch (err) {
-      console.error('메시지 로드 실패:', err)
-      setError('메시지를 불러오는데 실패했습니다.')
+      console.error('硫붿떆吏 濡쒕뱶 ?ㅽ뙣:', err)
+      setError('硫붿떆吏瑜?遺덈윭?ㅻ뒗???ㅽ뙣?덉뒿?덈떎.')
     } finally {
       setIsLoading(false)
     }
@@ -68,11 +66,11 @@ export const ChatConversationPage = () => {
       const newMessage = await chatApiClient.sendMessage(roomId, content)
       setMessages([...messages, newMessage])
 
-      // WebSocket이 연결되면 여기서 실시간으로 전송
-      // TODO: WebSocket 연동 후 구현
+      // WebSocket???곌껐?섎㈃ ?ш린???ㅼ떆媛꾩쑝濡??꾩넚
+      // TODO: WebSocket ?곕룞 ??援ы쁽
     } catch (err) {
-      console.error('메시지 전송 실패:', err)
-      alert('메시지 전송에 실패했습니다.')
+      console.error('硫붿떆吏 ?꾩넚 ?ㅽ뙣:', err)
+      alert('硫붿떆吏 ?꾩넚???ㅽ뙣?덉뒿?덈떎.')
     } finally {
       setIsSending(false)
     }
@@ -87,8 +85,8 @@ export const ChatConversationPage = () => {
       <MainLayout>
         <div className={styles.error}>
           <p>{error}</p>
-          <button onClick={loadMessages}>다시 시도</button>
-          <button onClick={handleBack}>목록으로</button>
+          <button onClick={loadMessages}>?ㅼ떆 ?쒕룄</button>
+          <button onClick={handleBack}>紐⑸줉?쇰줈</button>
         </div>
       </MainLayout>
     )
@@ -97,7 +95,7 @@ export const ChatConversationPage = () => {
   return (
     <MainLayout showBottomNav={false}>
       <div className={styles.page}>
-        {/* 채팅 헤더 */}
+        {/* 梨꾪똿 ?ㅻ뜑 */}
         <header className={styles.header}>
           <button className={styles.backButton} onClick={handleBack}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -117,29 +115,29 @@ export const ChatConversationPage = () => {
               <div className={styles.info}>
                 <h2 className={styles.name}>{counselor.name}</h2>
                 {counselor.type === 'ai_bot' && (
-                  <span className={styles.badge}>AI 챗봇</span>
+                  <span className={styles.badge}>AI 梨쀫큸</span>
                 )}
               </div>
             </div>
           )}
 
           <div className={styles.actions}>
-            {/* TODO: 메뉴 버튼 추가 */}
+            {/* TODO: 硫붾돱 踰꾪듉 異붽? */}
           </div>
         </header>
 
-        {/* 메시지 리스트 */}
+        {/* 硫붿떆吏 由ъ뒪??*/}
         <div className={styles.messageList}>
           {isLoading && (
             <div className={styles.loading}>
-              <p>메시지를 불러오는 중...</p>
+              <p>硫붿떆吏瑜?遺덈윭?ㅻ뒗 以?..</p>
             </div>
           )}
 
           {!isLoading && messages.length === 0 && (
             <div className={styles.empty}>
-              <p>아직 메시지가 없습니다.</p>
-              <p className={styles.hint}>첫 메시지를 보내보세요!</p>
+              <p>?꾩쭅 硫붿떆吏媛 ?놁뒿?덈떎.</p>
+              <p className={styles.hint}>泥?硫붿떆吏瑜?蹂대궡蹂댁꽭??</p>
             </div>
           )}
 
@@ -158,12 +156,12 @@ export const ChatConversationPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 입력창 */}
+        {/* ?낅젰李?*/}
         <ChatInput onSend={handleSendMessage} disabled={isSending} />
 
-        {/* WebSocket 미연동 알림 */}
+        {/* WebSocket 誘몄뿰???뚮┝ */}
         <div className={styles.notice}>
-          <p>⚠️ WebSocket 연동 전: 실시간 메시지는 Mock 데이터로 표시됩니다.</p>
+          <p>?좑툘 WebSocket ?곕룞 ?? ?ㅼ떆媛?硫붿떆吏??Mock ?곗씠?곕줈 ?쒖떆?⑸땲??</p>
         </div>
       </div>
     </MainLayout>

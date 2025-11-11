@@ -1,14 +1,13 @@
-/**
+﻿/**
  * Family Store
- * - 가족 그룹/멤버 상태를 Zustand로 관리
- */
+ * - 媛議?洹몃９/硫ㅻ쾭 ?곹깭瑜?Zustand濡?愿由? */
 
 import { create } from 'zustand'
 import {
   DEFAULT_FAMILY_GROUP,
   DEFAULT_FAMILY_MEMBERS,
 } from '@/data/mockFamily'
-import { familyApiClient } from '@/core/services/api/familyApiClient'
+import { familyApiClient } from '@core/services/api/familyApiClient'
 
 const initialState = {
   familyGroup: DEFAULT_FAMILY_GROUP,

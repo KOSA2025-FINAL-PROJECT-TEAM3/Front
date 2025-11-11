@@ -1,7 +1,7 @@
-/**
+﻿/**
  * FamilyMockService
- * - Stage 3 요구사항: React Query + Mock Provider
- * - Dev Mode/로컬 환경에서 가족 데이터를 localStorage에 저장/조회
+ * - Stage 3 ?붽뎄?ы빆: React Query + Mock Provider
+ * - Dev Mode/濡쒖뺄 ?섍꼍?먯꽌 媛議??곗씠?곕? localStorage?????議고쉶
  */
 
 import { STORAGE_KEYS } from '@config/constants'
@@ -90,11 +90,11 @@ const ensureSeedData = () => {
 }
 
 /**
- * Dev Mode용 가족 서비스 (Mock)
+ * Dev Mode??媛議??쒕퉬??(Mock)
  */
 export const FamilyMockService = {
   /**
-   * 가족 데이터 조회
+   * 媛議??곗씠??議고쉶
    * @returns {Promise<{group: object, members: Array}>}
    */
   async getFamily() {
@@ -102,9 +102,9 @@ export const FamilyMockService = {
   },
 
   /**
-   * 가족 멤버 초대
+   * 媛議?硫ㅻ쾭 珥덈?
    * @param {{name: string, email: string, role: string}} payload
-   * @returns {Promise<object>} 생성된 멤버
+   * @returns {Promise<object>} ?앹꽦??硫ㅻ쾭
    */
   async inviteMember(payload) {
     const { snapshot, details } = ensureSeedData()
@@ -112,7 +112,7 @@ export const FamilyMockService = {
     const trimmedName = payload?.name?.trim()
 
     if (!trimmedName || !payload?.email) {
-      throw new Error('이름과 이메일을 입력해주세요.')
+      throw new Error('?대쫫怨??대찓?쇱쓣 ?낅젰?댁＜?몄슂.')
     }
 
     const nextMember = buildNewMember({
@@ -131,7 +131,7 @@ export const FamilyMockService = {
   },
 
   /**
-   * 가족 멤버 삭제
+   * 媛議?硫ㅻ쾭 ??젣
    * @param {string} memberId
    * @returns {Promise<{group: object, members: Array}>}
    */
@@ -152,7 +152,7 @@ export const FamilyMockService = {
   },
 
   /**
-   * 가족 구성원 상세 정보 조회
+   * 媛議?援ъ꽦???곸꽭 ?뺣낫 議고쉶
    * @param {string} memberId
    * @returns {Promise<{member: Object, medications: Array, adherence: number}>}
    */

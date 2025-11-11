@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatRoomCard from '../components/ChatRoomCard'
-import { chatApiClient } from '@/core/services/api/chatApiClient'
+import { chatApiClient } from '@core/services/api/chatApiClient'
 import styles from './DoctorChatListPage.module.scss'
 
 /**
- * DoctorChatListPage - 의사/AI 챗봇 상담 목록 페이지
+ * DoctorChatListPage - ?섏궗/AI 梨쀫큸 ?곷떞 紐⑸줉 ?섏씠吏
  */
 export const DoctorChatListPage = () => {
   const [rooms, setRooms] = useState([])
@@ -24,8 +24,8 @@ export const DoctorChatListPage = () => {
       const response = await chatApiClient.getRooms()
       setRooms(response.rooms || [])
     } catch (err) {
-      console.error('채팅방 목록 로드 실패:', err)
-      setError('채팅방 목록을 불러오는데 실패했습니다.')
+      console.error('梨꾪똿諛?紐⑸줉 濡쒕뱶 ?ㅽ뙣:', err)
+      setError('梨꾪똿諛?紐⑸줉??遺덈윭?ㅻ뒗???ㅽ뙣?덉뒿?덈떎.')
     } finally {
       setIsLoading(false)
     }
@@ -33,13 +33,13 @@ export const DoctorChatListPage = () => {
 
   const handleCreateNewChat = async () => {
     try {
-      // TODO: 의사/AI 챗봇 선택 모달 구현 필요
-      // 지금은 임시로 새 채팅방 생성
+      // TODO: ?섏궗/AI 梨쀫큸 ?좏깮 紐⑤떖 援ы쁽 ?꾩슂
+      // 吏湲덉? ?꾩떆濡???梨꾪똿諛??앹꽦
       const newRoom = await chatApiClient.createRoom('doctor_ai_001')
       setRooms([newRoom, ...rooms])
     } catch (err) {
-      console.error('채팅방 생성 실패:', err)
-      alert('채팅방 생성에 실패했습니다.')
+      console.error('梨꾪똿諛??앹꽦 ?ㅽ뙣:', err)
+      alert('梨꾪똿諛??앹꽦???ㅽ뙣?덉뒿?덈떎.')
     }
   }
 
@@ -47,31 +47,31 @@ export const DoctorChatListPage = () => {
     <MainLayout>
       <div className={styles.page}>
         <header className={styles.header}>
-          <h1>의사 상담</h1>
+          <h1>?섏궗 ?곷떞</h1>
           <button className={styles.newChatButton} onClick={handleCreateNewChat}>
-            + 새 상담
+            + ???곷떞
           </button>
         </header>
 
         {isLoading && (
           <div className={styles.loading}>
-            <p>채팅방 목록을 불러오는 중...</p>
+            <p>梨꾪똿諛?紐⑸줉??遺덈윭?ㅻ뒗 以?..</p>
           </div>
         )}
 
         {error && (
           <div className={styles.error}>
             <p>{error}</p>
-            <button onClick={loadRooms}>다시 시도</button>
+            <button onClick={loadRooms}>?ㅼ떆 ?쒕룄</button>
           </div>
         )}
 
         {!isLoading && !error && rooms.length === 0 && (
           <div className={styles.empty}>
-            <p>아직 상담 내역이 없습니다.</p>
-            <p className={styles.hint}>의사 또는 AI 챗봇에게 궁금한 점을 물어보세요!</p>
+            <p>?꾩쭅 ?곷떞 ?댁뿭???놁뒿?덈떎.</p>
+            <p className={styles.hint}>?섏궗 ?먮뒗 AI 梨쀫큸?먭쾶 沅곴툑???먯쓣 臾쇱뼱蹂댁꽭??</p>
             <button className={styles.startButton} onClick={handleCreateNewChat}>
-              첫 상담 시작하기
+              泥??곷떞 ?쒖옉?섍린
             </button>
           </div>
         )}
@@ -85,9 +85,9 @@ export const DoctorChatListPage = () => {
         )}
 
         <div className={styles.notice}>
-          <p>💡 <strong>Stage 4 Preview</strong></p>
-          <p>실시간 채팅은 WebSocket 연동 후 활성화됩니다.</p>
-          <p>의사 상담 및 AI 챗봇 기능은 추후 구현 예정입니다.</p>
+          <p>?뮕 <strong>Stage 4 Preview</strong></p>
+          <p>?ㅼ떆媛?梨꾪똿? WebSocket ?곕룞 ???쒖꽦?붾맗?덈떎.</p>
+          <p>?섏궗 ?곷떞 諛?AI 梨쀫큸 湲곕뒫? 異뷀썑 援ы쁽 ?덉젙?낅땲??</p>
         </div>
       </div>
     </MainLayout>
