@@ -33,7 +33,7 @@ npm run lint         # ESLint 실행
 1. **[docs/CLAUDE.md](./docs/CLAUDE.md)** - AI Agent 전용 개발 가이드 (프로젝트 개요, 규칙, Do's and Don'ts)
 2. **[docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md)** - Git & 코드 컨벤션 (브랜치, 커밋, 네이밍)
 3. **[docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md)** - 소스 코드 구조 및 아키텍처
-4. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md]([./docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md))** - 34개 화면 컴포넌트 명세
+4. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34개 화면 컴포넌트 명세
 5. **[docs/CHAT_API_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CHAT_API_SPECIFICATION.md)** - WebSocket 실시간 통신 API
 6. **[docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md)** - OCR 처방전 인식 API
 7. **[docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md)** - 전체 요구사항 명세
