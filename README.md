@@ -44,6 +44,44 @@ npm run preview
 npm run lint
 ```
 
+## 📚 Documentation
+
+프로젝트와 관련된 모든 문서는 아래 링크에서 확인할 수 있습니다.
+
+### 🤖 AI Agent 가이드
+> Claude Code와 MCP 에이전트를 위한 컨텍스트 문서
+
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code 전용 개발 가이드 (프로젝트 개요, 기술 스택, 개발 단계, 규칙)
+- **[CONVENTIONS.md](./CONVENTIONS.md)** - Git 워크플로우 및 코드 컨벤션 (브랜치 전략, 커밋 규칙, 네이밍 컨벤션)
+- **[QUICKSTART.md](./QUICKSTART.md)** - 5분 안에 프로젝트 시작하기 (초기 설정, 환경 구성)
+
+### 🏗️ 아키텍처 & 설계
+> 프론트엔드 구조와 컴포넌트 명세
+
+- **[SRC_STRUCTURE.md](./SRC_STRUCTURE.md)** - 소스 코드 디렉토리 구조 및 모듈 구성
+- **[FRONTEND_COMPONENTS_SPECIFICATION.md](./FRONTEND_COMPONENTS_SPECIFICATION.md)** - 컴포넌트 명세 (34개 화면, props, 라우팅)
+- **[PROJECT_SPECIFICATION.md](./PROJECT_SPECIFICATION.md)** - 프로젝트 요구사항 및 기능 명세
+
+### 🔌 API 명세
+> 백엔드 통신 인터페이스
+
+- **[CHAT_API_SPECIFICATION.md](./CHAT_API_SPECIFICATION.md)** - WebSocket 채팅/실시간 통신 API
+- **[OCR_API_SPECIFICATION.md](./OCR_API_SPECIFICATION.md)** - OCR 처방전 인식 API
+
+### 🔗 외부 문서
+> .github 저장소에 있는 추가 문서
+
+- **[.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/tree/dev)** - 프로젝트 전체 문서
+  - `WIREFRAME_SCREENS.md` - 와이어프레임 (10개 주요 화면)
+  - `FIGMA_GUIDE.md` - Figma 플러그인 설치 가이드
+  - `DB스킬.md` - 데이터베이스 스키마 및 ERD
+  - `SECURITY_GUIDELINES.md` - 보안 가이드라인 (KISA 기준)
+
+### 📝 기타
+- **[issues.md](./issues.md)** - 현재 이슈 및 할 일 목록
+
+---
+
 ## 📁 프로젝트 구조
 
 ```

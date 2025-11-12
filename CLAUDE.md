@@ -1,11 +1,46 @@
 <!-- encoding: utf-8 -->
-# Project Overview
+# CLAUDE.md - AI Agent Development Guide
+
+> **Purpose**: This file provides context for Claude Code and other MCP agents to assist with development.
+> **Target**: AI assistants helping with code generation, debugging, and architecture decisions.
+
+## 📋 Table of Contents
+
+1. [Quick Reference](#-quick-reference) - Essential project info
+2. [Project Overview](#-project-overview) - Features & goals
+3. [Tech Stack](#tech-stack) - Technologies used
+4. [Project Structure](#project-structure) - Directory layout
+5. [Key Commands](#key-commands) - Common tasks
+6. [Code Style](#code-style) - Naming & patterns
+7. [Development Guidelines](#development-guidelines) - Git workflow & stages
+8. [Environment Variables](#environment-variables) - Required config
+9. [Related Documentation](#-related-documentation) - Links to all docs
+10. [Do Not](#do-not) - Things to avoid
+
+---
+
+## 📌 Quick Reference
+
+| Category | Key Information |
+|----------|----------------|
+| **Project** | AMA...Pill - Family medication management platform |
+| **Team** | 3 developers |
+| **Timeline** | Nov 5 - Dec 31, 2025 (~7 weeks) |
+| **Main Features** | Family care network, drug-food alerts, OCR prescription, pill search |
+| **Dev Server** | `npm run dev` → http://localhost:5173 |
+
+---
+
+## 🎯 Project Overview
 
 **"Is it time to take medicine?"** - Family-centered medication management platform for elderly parents & adult children remote care.
 
-- **Team**: 3 developers
-- **Period**: Nov 5 - Dec 31, 2025 (~7 weeks dev)
-- **Key Features**: Family care network, drug-food interaction alerts, OCR prescription auto-registration, pill reverse search, compliance reports
+### Key Features
+1. **Family Care Network** - Real-time sync between seniors and caregivers
+2. **Drug-Food Interaction Alerts** - Safety warnings for medication + food combinations
+3. **OCR Prescription Registration** - Automatic medication entry via image recognition
+4. **Pill Reverse Search** - Identify pills by shape/color
+5. **Compliance Reports** - Medication adherence tracking
 
 ## Tech Stack
 - Framework: React 19
@@ -133,13 +168,26 @@ Required (`.env` file):
 - `VITE_WS_BASE_URL`: WebSocket server (ws://localhost:8080/ws)
 - `VITE_KAKAO_CLIENT_ID`: Kakao OAuth client ID
 
-## References
-- [CONVENTIONS.md](./CONVENTIONS.md) - Git & code conventions (detailed)
-- [.github repo](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github) - Full project docs
-  - QUICKSTART.md - Dev setup
-  - SRC_STRUCTURE.md - Architecture
-  - FRONTEND_COMPONENTS_SPECIFICATION.md - 34 screens
-  - MVP_DTO_SPECIFICATION.md - API endpoints
+## 📚 Related Documentation
+
+### Local Files (This Repository)
+- **[README.md](./README.md)** - User-facing project overview
+- **[CONVENTIONS.md](./CONVENTIONS.md)** - Git workflow & code style (detailed)
+- **[QUICKSTART.md](./QUICKSTART.md)** - Quick setup guide
+- **[SRC_STRUCTURE.md](./SRC_STRUCTURE.md)** - Directory structure & architecture
+- **[FRONTEND_COMPONENTS_SPECIFICATION.md](./FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34 screens, props, routing
+- **[PROJECT_SPECIFICATION.md](./PROJECT_SPECIFICATION.md)** - Full requirements
+- **[CHAT_API_SPECIFICATION.md](./CHAT_API_SPECIFICATION.md)** - WebSocket API
+- **[OCR_API_SPECIFICATION.md](./OCR_API_SPECIFICATION.md)** - OCR API
+
+### External Links
+- **[.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/tree/dev)** - Organization-wide docs
+  - `WIREFRAME_SCREENS.md` - UI wireframes (10 screens)
+  - `FIGMA_GUIDE.md` - Figma plugin setup
+  - `DB스킬.md` - Database schema & ERD
+  - `SECURITY_GUIDELINES.md` - Security standards (KISA)
+  - `MVP_DTO_SPECIFICATION.md` - API endpoints & DTOs
+- **[Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back)** - Spring Boot backend
 
 ## Do Not
 - ❌ Use React Native (web-only)
