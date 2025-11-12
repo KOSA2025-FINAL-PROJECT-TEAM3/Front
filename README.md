@@ -31,12 +31,12 @@ npm run lint         # ESLint 실행
 프론트엔드 개발 시 아래 문서를 **순서대로** 참조하세요:
 
 1. **[docs/CLAUDE.md](./docs/CLAUDE.md)** - AI Agent 전용 개발 가이드 (프로젝트 개요, 규칙, Do's and Don'ts)
-2. **[docs/CONVENTIONS.md](./docs/CONVENTIONS.md)** - Git & 코드 컨벤션 (브랜치, 커밋, 네이밍)
-3. **[docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md)** - 소스 코드 구조 및 아키텍처
-4. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md](./docs/FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34개 화면 컴포넌트 명세
-5. **[docs/CHAT_API_SPECIFICATION.md](./docs/CHAT_API_SPECIFICATION.md)** - WebSocket 실시간 통신 API
+2. **[docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md)** - Git & 코드 컨벤션 (브랜치, 커밋, 네이밍)
+3. **[docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md)** - 소스 코드 구조 및 아키텍처
+4. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md]([./docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md))** - 34개 화면 컴포넌트 명세
+5. **[docs/CHAT_API_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CHAT_API_SPECIFICATION.md)** - WebSocket 실시간 통신 API
 6. **[docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md)** - OCR 처방전 인식 API
-7. **[docs/PROJECT_SPECIFICATION.md](./docs/PROJECT_SPECIFICATION.md)** - 전체 요구사항 명세
+7. **[docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md)** - 전체 요구사항 명세
 
 ### 외부 문서 참조 (.github 저장소)
 프로젝트 전체 문서는 [.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/tree/dev)에서 확인:
@@ -48,7 +48,7 @@ npm run lint         # ESLint 실행
 - **백엔드 연동**
   - [`MVP_DTO_SPECIFICATION.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/MVP_DTO_SPECIFICATION.md) - API 엔드포인트 & DTO 명세
   - [`DB스킬.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/DB스킬.md) - 데이터베이스 스키마 & ERD
-  - [Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - Spring Boot 백엔드 코드
+  - [Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/spring-boot) - Spring Boot 백엔드 코드
 
 - **보안 & 표준**
   - [`SECURITY_GUIDELINES.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/SECURITY_GUIDELINES.md) - KISA 보안 가이드라인
@@ -137,7 +137,7 @@ npm run dev
 └── QUICKSTART.md            # 빠른 시작 가이드
 ```
 
-상세 구조는 **[docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md)** 참조
+상세 구조는 **[docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md)** 참조
 
 ---
 
@@ -172,7 +172,7 @@ emoji Type: description (50자 이내)
 
 **예시**: `✨ Feat: Add Kakao OAuth login`
 
-상세 규칙은 **[docs/CONVENTIONS.md](./docs/CONVENTIONS.md)** 참조
+상세 규칙은 **[docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md)** 참조
 
 ---
 
@@ -252,7 +252,7 @@ const handlesubmit=(e)=>{var data={name:e.target.name.value}}
 
 ## 🔗 연관 리포지토리
 
-- [**Backend (Spring Boot)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - API 서버
+- [**Backend (Spring Boot)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/spring-boot) - API 서버
 - [**.github (Organization Docs)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github) - 프로젝트 전체 문서 및 설계
 
 ---
@@ -263,10 +263,10 @@ const handlesubmit=(e)=>{var data={name:e.target.name.value}}
 |------|------|
 | [QUICKSTART.md](./QUICKSTART.md) | 5분 안에 프로젝트 시작하기 |
 | [docs/CLAUDE.md](./docs/CLAUDE.md) | AI Agent 개발 가이드 |
-| [docs/CONVENTIONS.md](./docs/CONVENTIONS.md) | Git & 코드 컨벤션 |
-| [docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md) | 소스 코드 구조 |
+| [docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md) | Git & 코드 컨벤션 |
+| [docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md) | 소스 코드 구조 |
 | [docs/FRONTEND_COMPONENTS_SPECIFICATION.md](./docs/FRONTEND_COMPONENTS_SPECIFICATION.md) | 컴포넌트 명세 (34 screens) |
-| [docs/PROJECT_SPECIFICATION.md](./docs/PROJECT_SPECIFICATION.md) | 프로젝트 요구사항 |
+| [docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md) | 프로젝트 요구사항 |
 | [docs/CHAT_API_SPECIFICATION.md](./docs/CHAT_API_SPECIFICATION.md) | WebSocket API |
 | [docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md) | OCR API |
 
