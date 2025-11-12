@@ -265,7 +265,7 @@ const handlesubmit=(e)=>{var data={name:e.target.name.value}}
 | [docs/CLAUDE.md](./docs/CLAUDE.md) | AI Agent 개발 가이드 |
 | [docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md) | Git & 코드 컨벤션 |
 | [docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md) | 소스 코드 구조 |
-| [docs/FRONTEND_COMPONENTS_SPECIFICATION.md](./docs/FRONTEND_COMPONENTS_SPECIFICATION.md) | 컴포넌트 명세 (34 screens) |
+| [docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md) | 컴포넌트 명세 (34 screens) |
 | [docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md) | 프로젝트 요구사항 |
 | [docs/CHAT_API_SPECIFICATION.md](./docs/CHAT_API_SPECIFICATION.md) | WebSocket API |
 | [docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md) | OCR API |
