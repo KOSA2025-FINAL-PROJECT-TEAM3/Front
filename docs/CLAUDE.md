@@ -171,9 +171,9 @@ Required (`.env` file):
 ## 📚 Related Documentation
 
 ### Local Files (This Repository)
-- **[README.md](./README.md)** - User-facing project overview
+- **[README.md](../README.md)** - User-facing project overview (root)
+- **[QUICKSTART.md](../QUICKSTART.md)** - Quick setup guide (root)
 - **[CONVENTIONS.md](./CONVENTIONS.md)** - Git workflow & code style (detailed)
-- **[QUICKSTART.md](./QUICKSTART.md)** - Quick setup guide
 - **[SRC_STRUCTURE.md](./SRC_STRUCTURE.md)** - Directory structure & architecture
 - **[FRONTEND_COMPONENTS_SPECIFICATION.md](./FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34 screens, props, routing
 - **[PROJECT_SPECIFICATION.md](./PROJECT_SPECIFICATION.md)** - Full requirements
@@ -200,4 +200,4 @@ Required (`.env` file):
 
 ---
 
-Last updated: Nov 8, 2025
+Last updated: Nov 12, 2025
