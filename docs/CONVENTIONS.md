@@ -1,16 +1,32 @@
-# AMA...Pill Frontend 컨벤션 가이드
+# CONVENTIONS.md - Git & Code Style Guide
 
-이 문서는 AMA...Pill 프론트엔드 프로젝트의 개발 표준을 정의합니다.
+> **Purpose**: Defines development standards for AMA...Pill frontend project.
+> **For AI Agents**: Use this as reference for commit messages, branch names, and code patterns.
 
-## 📋 목차
+## 📌 Quick Reference
 
-1. [Git 워크플로우](#git-워크플로우)
-2. [커밋 규칙](#커밋-규칙)
-3. [브랜치 명명규칙](#브랜치-명명규칙)
-4. [코드 스타일](#코드-스타일)
-5. [컴포넌트 구조](#컴포넌트-구조)
-6. [상태 관리](#상태-관리)
-7. [API 호출](#api-호출)
+| Topic | Key Rule | Example |
+|-------|----------|---------|
+| **Branch** | `type/#issue-description-dev` | `feature/#10-user-login-junsu` |
+| **Commit** | `emoji Type: description` | `✨ Feat: Add Kakao OAuth login` |
+| **Component** | PascalCase + `.jsx` | `UserProfile.jsx` |
+| **Function** | camelCase | `getUserData()` |
+| **Hook** | `use` prefix | `useAuth()` |
+| **Handler** | `handle` prefix | `handleClick()` |
+| **Boolean** | `is/has` prefix | `isLoading`, `hasError` |
+
+---
+
+## 📋 Table of Contents
+
+1. [Git 워크플로우](#git-워크플로우) - Branch strategy & workflow
+2. [커밋 규칙](#커밋-규칙) - Commit message format
+3. [브랜치 명명규칙](#브랜치-명명규칙) - Branch naming
+4. [코드 스타일](#코드-스타일) - Naming & formatting
+5. [컴포넌트 구조](#컴포넌트-구조) - Component patterns
+6. [상태 관리](#상태-관리) - Zustand & hooks
+7. [API 호출](#api-호출) - API error handling
+8. [PR 규칙](#pr-pull-request-규칙) - Pull request guidelines
 
 ---
 
@@ -387,4 +403,4 @@ Type: brief description
 
 ---
 
-마지막 업데이트: 2025년 11월 8일
+마지막 업데이트: 2025년 11월 12일
