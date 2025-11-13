@@ -98,7 +98,11 @@ export const DeveloperModePanel = () => {
 
   const handleResetMockData = () => {
     resetAllMockData()
+    clearDevAuth()
+    clearAuthState()
     showStatus('모든 목데이터를 기본값으로 되돌렸어요.', 'success')
+    setOpen(false)
+    navigate(ROUTE_PATHS.login, { replace: true })
   }
 
   return (
@@ -126,15 +130,7 @@ export const DeveloperModePanel = () => {
             </button>
           </div>
           <ul className={styles.shortcutList}>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.roleSelection)}
-              >
-                역할 선택 (Stage 2)
-              </button>
-            </li>
+            {/* 역할 선택 및 대시보드 접근 */}
             <li>
               <button
                 type="button"
@@ -153,13 +149,87 @@ export const DeveloperModePanel = () => {
                 보호자 대시보드
               </button>
             </li>
+
+            {/* URL 직입으로만 접근 가능한 페이지들 */}
             <li>
               <button
                 type="button"
-                className={`${styles.shortcutButton} ${styles.secondaryAction}`}
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.medicationEdit.replace(':id', 'test-med-1'))}
+              >
+                약 편집 (/medication/:id/edit)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.notificationDetail.replace(':id', 'test-notif-1'))}
+              >
+                알림 상세 (/notifications/:id)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.CAREGIVER, ROUTE_PATHS.weeklyStats)}
+              >
+                주간 통계 (/reports/weekly)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.pillResult)}
+              >
+                알약 검색 결과 (/pills/result)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.suspectedDisease)}
+              >
+                의심 질환 (/disease/suspected)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.diseaseRestrictions)}
+              >
+                질병별 제약 (/disease/restrictions)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.myMedicationsSettings)}
+              >
+                내 약 관리 (설정, /settings/medications)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
+                onClick={() => handleShortcut(USER_ROLES.SENIOR, ROUTE_PATHS.myDiseasesSettings)}
+              >
+                내 질병 관리 (설정, /settings/diseases)
+              </button>
+            </li>
+            <li>
+              <button
+                type="button"
+                className={styles.shortcutButton}
                 onClick={handleResetMockData}
               >
-                목데이터 전부 초기화
+                목데이터 초기화
               </button>
             </li>
             <li>

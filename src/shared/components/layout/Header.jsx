@@ -4,6 +4,8 @@
  * - 로고, 앱 이름, 사용자 정보, 알림 배지
  */
 
+import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './Header.module.scss'
 
 /**
@@ -14,6 +16,12 @@ import styles from './Header.module.scss'
  * @returns {JSX.Element} 헤더 컴포넌트
  */
 export const Header = ({ userName = '사용자', userRole = '시니어', notificationCount = 0 }) => {
+  const navigate = useNavigate()
+
+  const handleNotificationClick = () => {
+    navigate(ROUTE_PATHS.notifications)
+  }
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
@@ -31,9 +39,14 @@ export const Header = ({ userName = '사용자', userRole = '시니어', notific
           </div>
 
           {notificationCount > 0 && (
-            <div className={styles.notificationBadge}>
+            <button
+              type="button"
+              className={styles.notificationBadge}
+              onClick={handleNotificationClick}
+              aria-label="알림"
+            >
               {notificationCount > 9 ? '9+' : notificationCount}
-            </div>
+            </button>
           )}
         </div>
       </div>

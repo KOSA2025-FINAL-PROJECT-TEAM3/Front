@@ -22,6 +22,8 @@ const NAV_ITEMS = [
       isCaregiver ? ROUTE_PATHS.caregiverDashboard : ROUTE_PATHS.seniorDashboard,
   },
   { id: 'medication', label: '약 관리', icon: 'pill', path: ROUTE_PATHS.medication },
+  { id: 'medicationAdd', label: '약 등록', icon: 'plus', path: ROUTE_PATHS.medicationAdd },
+  { id: 'pillSearch', label: '알약 검색', icon: 'search', path: ROUTE_PATHS.pillSearch },
   { id: 'search', label: '증상 검색', icon: 'search', path: ROUTE_PATHS.search },
   {
     id: 'family',
@@ -35,6 +37,14 @@ const NAV_ITEMS = [
   { id: 'dietLog', label: '식단 기록', icon: 'list', path: ROUTE_PATHS.dietLog },
   { id: 'ocr', label: 'OCR', icon: 'ocr', path: ROUTE_PATHS.ocrScan },
   { id: 'counsel', label: '의사와 상담', icon: 'counsel', path: ROUTE_PATHS.counsel },
+  { id: 'notifications', label: '알림', icon: 'bell', path: ROUTE_PATHS.notifications },
+  {
+    id: 'reports',
+    label: '리포트',
+    icon: 'chart',
+    path: ROUTE_PATHS.adherenceReport,
+    roles: [USER_ROLES.CAREGIVER],
+  },
   { id: 'settings', label: '설정', icon: 'settings', path: ROUTE_PATHS.settings },
 ]
 

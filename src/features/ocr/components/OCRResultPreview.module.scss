@@ -1,18 +1,18 @@
 .preview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  gap: 1.5rem;
 }
 
 .imageFrame {
   min-height: 220px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.3);
+  border-radius: 8px;
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid rgba(226, 232, 240, 0.3);
+  border: 1px solid #e0e0e0;
 }
 
 .imageFrame img {
@@ -22,36 +22,38 @@
 }
 
 .resultPanel {
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.5);
-  padding: 16px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 8px;
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
 }
 
 .resultPanel h3 {
-  margin: 0 0 10px;
-  color: #cbd5f5;
+  margin: 0 0 1rem;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .resultPanel ul {
   margin: 0;
-  padding-left: 18px;
-  color: #e2e8f0;
+  padding-left: 1.25rem;
+  color: #555;
   font-size: 13px;
 }
 
 .resultPanel li + li {
-  margin-top: 4px;
+  margin-top: 0.5rem;
 }
 
 .placeholder {
-  color: #94a3b8;
+  color: #999;
 }
 
 pre {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  color: #e2e8f0;
+  color: #333;
   font-size: 13px;
 }
