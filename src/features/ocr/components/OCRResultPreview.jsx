@@ -1,31 +1,40 @@
 import styles from './OCRResultPreview.module.scss'
 
-export const OCRResultPreview = ({ imageSrc, resultText, insights }) => {
+export const OCRResultPreview = ({ imageSrc, resultText, confidence, error }) => {
   return (
     <div className={styles.preview}>
       <div className={styles.imageFrame}>
         {imageSrc ? (
-          <img src={imageSrc} alt="처방전 미리보기" />
+          <img src={imageSrc} alt="이미지 미리보기" />
         ) : (
-          <p className={styles.placeholder}>이미지를 첨부하면 미리보기를 제공합니다</p>
+          <p className={styles.placeholder}>이미지를 선택하면 미리보기를 제공합니다</p>
         )}
       </div>
       <div className={styles.resultPanel}>
         <h3>인식 결과</h3>
-        {resultText ? (
-          <pre>{resultText}</pre>
-        ) : (
-          <p className={styles.placeholder}>AI 인식 결과가 여기에 표시됩니다.</p>
-        )}
-        {insights && insights.length > 0 && (
+        {error ? (
+          <div className={styles.error}>
+            <p>❌ {error}</p>
+            <p className={styles.hint}>더 선명한 이미지를 사용하거나 조명을 개선해보세요.</p>
+          </div>
+        ) : resultText ? (
           <>
-            <h3>추출된 정보</h3>
-            <ul>
-              {insights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <div className={styles.confidence}>
+              <span>정확도: {confidence}%</span>
+            </div>
+            <pre className={styles.resultText}>{resultText}</pre>
+            <div className={styles.actions}>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(resultText)}
+                className={styles.copyButton}
+              >
+                📋 텍스트 복사
+              </button>
+            </div>
           </>
+        ) : (
+          <p className={styles.placeholder}>텍스트 인식 결과가 여기에 표시됩니다.</p>
         )}
       </div>
     </div>
