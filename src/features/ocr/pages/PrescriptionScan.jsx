@@ -35,6 +35,14 @@ export const PrescriptionScanPage = () => {
     setProgress({ status: '', progress: 0 })
   }
 
+  const handleCameraClick = () => {
+    document.getElementById('camera-input').click()
+  }
+
+  const handleGalleryClick = () => {
+    document.getElementById('gallery-input').click()
+  }
+
   const handleRecognize = useCallback(async () => {
     if (!file) return
     setIsProcessing(true)
@@ -84,6 +92,9 @@ export const PrescriptionScanPage = () => {
   const statusMessage = useMemo(() => {
     if (error) return `오류: ${error}`
     if (isProcessing) {
+      if (progress.status === 'preprocessing image') {
+        return '이미지 전처리 중... (선명도 향상)'
+      }
       if (progress.status === 'loading language traineddata') {
         return `언어 데이터 로딩 중... ${Math.round(progress.progress * 100)}%`
       }
@@ -111,17 +122,42 @@ export const PrescriptionScanPage = () => {
         <section className={styles.workspace}>
           <div className={styles.workspaceCard}>
             <p className={styles.label}>이미지 선택</p>
-            <label className={styles.fileDrop}>
-              <input
-                key={inputKey}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={handleFileChange}
-                className={styles.fileInput}
-              />
-              {file ? <span>{file.name}</span> : <span>📷 카메라로 촬영 또는 갤러리에서 선택</span>}
-            </label>
+
+            {/* 숨겨진 파일 입력 */}
+            <input
+              id="camera-input"
+              key={`camera-${inputKey}`}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+            />
+            <input
+              id="gallery-input"
+              key={`gallery-${inputKey}`}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+            />
+
+            {/* 버튼 영역 */}
+            <div className={styles.buttonGroup}>
+              <button type="button" onClick={handleCameraClick} className={styles.captureButton}>
+                📷 카메라로 촬영
+              </button>
+              <button type="button" onClick={handleGalleryClick} className={styles.uploadButton}>
+                🖼️ 갤러리에서 선택
+              </button>
+            </div>
+
+            {file && (
+              <div className={styles.fileInfo}>
+                <span>선택된 파일: {file.name}</span>
+              </div>
+            )}
+
             <p className={styles.statusNote}>{statusMessage}</p>
             {isProcessing && progress.progress > 0 && (
               <div className={styles.progressBar}>
