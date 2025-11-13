@@ -1,24 +1,45 @@
 .controlPanel {
   display: flex;
-  gap: 12px;
+  gap: 1rem;
 }
 
 .primary,
 .secondary {
   flex: 1;
   border: none;
-  border-radius: 999px;
-  padding: 12px 0;
+  border-radius: 6px;
+  padding: 0.75rem;
   font-weight: 600;
   cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .primary {
-  background: linear-gradient(135deg, #22d3ee, #6366f1);
+  background: #007bff;
   color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #0056b3;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
 }
 
 .secondary {
-  background: rgba(148, 163, 184, 0.3);
-  color: #cbd5f5;
+  background: #e9ecef;
+  color: #333;
+
+  &:hover:not(:disabled) {
+    background: #dee2e6;
+  }
+
+  &:disabled {
+    background: #f0f0f0;
+    color: #999;
+    cursor: not-allowed;
+  }
 }

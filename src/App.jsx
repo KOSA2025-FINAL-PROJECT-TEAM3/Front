@@ -26,18 +26,30 @@ import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
 import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
+import MyMedicationsSettingsPage from '@features/settings/pages/MyMedicationsSettingsPage'
+import MyDiseasesSettingsPage from '@features/settings/pages/MyDiseasesSettingsPage'
 import PrivacyPolicyPage from '@features/settings/pages/PrivacyPolicyPage'
 import TermsOfServicePage from '@features/settings/pages/TermsOfServicePage'
 import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
+import MedicationAddPage from '@features/medication/pages/MedicationAddPage'
+import MedicationEditPage from '@features/medication/pages/MedicationEditPage'
 import FoodWarningPage from '@features/diet/pages/FoodWarning'
-import DietLogPage from '@features/diet/pages/DietLogPage' // Import new page
+import DietLogPage from '@features/diet/pages/DietLogPage'
 import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
 import SymptomSearchPage from '@features/search/pages/SymptomSearch'
+import PillSearchPage from '@features/search/pages/PillSearchPage'
+import PillResultPage from '@features/search/pages/PillResultPage'
 import DoctorCounselPage from '@features/counsel/pages/DoctorCounsel'
 import DiseasePage from '@features/disease/pages/Disease'
-import DiseaseDetailPage from '@features/disease/pages/DiseaseDetailPage' // Import new page
+import DiseaseDetailPage from '@features/disease/pages/DiseaseDetailPage'
+import SuspectedDiseasePage from '@features/disease/pages/SuspectedDiseasePage'
+import DiseaseRestrictionsPage from '@features/disease/pages/DiseaseRestrictionsPage'
 import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
 import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
+import NotificationPage from '@features/notification/pages/NotificationPage'
+import NotificationDetailPage from '@features/notification/pages/NotificationDetailPage'
+import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
+import WeeklyStatsPage from '@features/report/pages/WeeklyStatsPage'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
 import { setNavigator } from '@core/routing/navigation'
 
@@ -80,39 +92,75 @@ function App() {
             element={<PrivateRoute element={<CaregiverDashboard />} />}
           />
 
-          {/* 메뉴바의 다른 페이지들 (스텁) - PrivateRoute 보호 */}
+          {/* 약 관리 */}
           <Route
             path={ROUTE_PATHS.medication}
             element={<PrivateRoute element={<MedicationManagementPage />} />}
           />
           <Route
+            path={ROUTE_PATHS.medicationAdd}
+            element={<PrivateRoute element={<MedicationAddPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.medicationEdit}
+            element={<PrivateRoute element={<MedicationEditPage />} />}
+          />
+
+          {/* 검색 */}
+          <Route
             path={ROUTE_PATHS.search}
             element={<PrivateRoute element={<SymptomSearchPage />} />}
           />
           <Route
-            path={ROUTE_PATHS.counsel}
-            element={<PrivateRoute element={<DoctorCounselPage />} />}
+            path={ROUTE_PATHS.pillSearch}
+            element={<PrivateRoute element={<PillSearchPage />} />}
           />
+          <Route
+            path={ROUTE_PATHS.pillResult}
+            element={<PrivateRoute element={<PillResultPage />} />}
+          />
+
+          {/* 질병 */}
           <Route
             path={ROUTE_PATHS.disease}
             element={<PrivateRoute element={<DiseasePage />} />}
           />
-          <Route // New route for DiseaseDetailPage
+          <Route
             path={ROUTE_PATHS.diseaseDetail}
             element={<PrivateRoute element={<DiseaseDetailPage />} />}
           />
           <Route
+            path={ROUTE_PATHS.suspectedDisease}
+            element={<PrivateRoute element={<SuspectedDiseasePage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.diseaseRestrictions}
+            element={<PrivateRoute element={<DiseaseRestrictionsPage />} />}
+          />
+
+          {/* 식단 */}
+          <Route
             path={ROUTE_PATHS.dietWarning}
             element={<PrivateRoute element={<FoodWarningPage />} />}
           />
-          <Route // New route for DietLogPage
+          <Route
             path={ROUTE_PATHS.dietLog}
             element={<PrivateRoute element={<DietLogPage />} />}
           />
+
+          {/* OCR */}
           <Route
             path={ROUTE_PATHS.ocrScan}
             element={<PrivateRoute element={<PrescriptionScanPage />} />}
           />
+
+          {/* 상담 */}
+          <Route
+            path={ROUTE_PATHS.counsel}
+            element={<PrivateRoute element={<DoctorCounselPage />} />}
+          />
+
+          {/* 설정 */}
           <Route
             path={ROUTE_PATHS.settings}
             element={<PrivateRoute element={<SettingsPage />} />}
@@ -126,6 +174,16 @@ function App() {
             element={<PrivateRoute element={<NotificationSettingsPage />} />}
           />
           <Route
+            path={ROUTE_PATHS.myMedicationsSettings}
+            element={<PrivateRoute element={<MyMedicationsSettingsPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.myDiseasesSettings}
+            element={<PrivateRoute element={<MyDiseasesSettingsPage />} />}
+          />
+
+          {/* 가족 */}
+          <Route
             path={ROUTE_PATHS.family}
             element={<PrivateRoute element={<FamilyManagementPage />} />}
           />
@@ -137,6 +195,8 @@ function App() {
             path={ROUTE_PATHS.familyMemberDetail}
             element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
           />
+
+          {/* 채팅 */}
           <Route
             path={ROUTE_PATHS.chatList}
             element={<PrivateRoute element={<DoctorChatListPage />} />}
@@ -144,6 +204,26 @@ function App() {
           <Route
             path={ROUTE_PATHS.chatConversation}
             element={<PrivateRoute element={<ChatConversationPage />} />}
+          />
+
+          {/* 알림 */}
+          <Route
+            path={ROUTE_PATHS.notifications}
+            element={<PrivateRoute element={<NotificationPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.notificationDetail}
+            element={<PrivateRoute element={<NotificationDetailPage />} />}
+          />
+
+          {/* 리포트 */}
+          <Route
+            path={ROUTE_PATHS.adherenceReport}
+            element={<PrivateRoute element={<AdherenceReportPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.weeklyStats}
+            element={<PrivateRoute element={<WeeklyStatsPage />} />}
           />
 
           {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
