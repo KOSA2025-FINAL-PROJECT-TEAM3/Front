@@ -5,6 +5,7 @@
 
 import { useNavigate, Link } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import styles from './Signup.module.scss'
@@ -32,7 +33,7 @@ export const Signup = () => {
       password: '',
       passwordConfirm: '',
       name: '',
-      role: 'senior',
+      role: USER_ROLES.SENIOR,
     },
   })
 
@@ -147,11 +148,21 @@ export const Signup = () => {
             <span className={styles.label}>역할 선택</span>
             <div className={styles.roleButtons}>
               <label className={styles.radioLabel}>
-                <input type="radio" value="senior" {...register('role')} disabled={loading} />
+                <input
+                  type="radio"
+                  value={USER_ROLES.SENIOR}
+                  {...register('role')}
+                  disabled={loading}
+                />
                 <span className={styles.radioButton}>어르신(부모)</span>
               </label>
               <label className={styles.radioLabel}>
-                <input type="radio" value="caregiver" {...register('role')} disabled={loading} />
+                <input
+                  type="radio"
+                  value={USER_ROLES.CAREGIVER}
+                  {...register('role')}
+                  disabled={loading}
+                />
                 <span className={styles.radioButton}>보호자(자녀)</span>
               </label>
             </div>
