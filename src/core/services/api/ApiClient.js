@@ -21,18 +21,28 @@ const isDevModeEnabled = () =>
 const shouldUseMock = () => USE_MOCK_API || isDevModeEnabled()
 
 export class ApiClient {
-  constructor({ basePath = '' } = {}) {
+  constructor({ basePath = '', baseURL = null } = {}) {
     this.basePath = basePath
+    this.baseURL = baseURL // Service-specific base URL (e.g., http://localhost:8081)
   }
 
   resolvePath(path = '') {
-    if (!path) return this.basePath
+    // If full URL provided, use as-is
     if (path.startsWith('http')) return path
-    const normalizedBase = this.basePath.endsWith('/')
-      ? this.basePath.slice(0, -1)
-      : this.basePath
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`
-    return `${normalizedBase}${normalizedPath}`
+
+    // Build full URL: baseURL + basePath + path
+    const base = this.baseURL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+    const normalizedBase = base.endsWith('/') ? base.slice(0, -1) : base
+
+    const normalizedBasePath = this.basePath
+      ? (this.basePath.startsWith('/') ? this.basePath : `/${this.basePath}`)
+      : ''
+
+    const normalizedPath = path
+      ? (path.startsWith('/') ? path : `/${path}`)
+      : ''
+
+    return `${normalizedBase}${normalizedBasePath}${normalizedPath}`
   }
 
   async request(config, options = {}) {
