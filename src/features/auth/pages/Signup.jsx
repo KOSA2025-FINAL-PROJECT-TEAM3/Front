@@ -43,7 +43,13 @@ export const Signup = () => {
   const handleSignup = async (formData) => {
     try {
       await signup(formData.email, formData.password, formData.name, formData.role)
-      navigate(ROUTE_PATHS.seniorDashboard)
+
+      // 선택한 role에 따라 해당 대시보드로 이동
+      if (formData.role === USER_ROLES.SENIOR) {
+        navigate(ROUTE_PATHS.seniorDashboard)
+      } else {
+        navigate(ROUTE_PATHS.caregiverDashboard)
+      }
     } catch (err) {
       setError('root', {
         type: 'server',
