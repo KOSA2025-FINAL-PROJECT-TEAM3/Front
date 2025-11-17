@@ -32,7 +32,10 @@ const persistDietLogs = (logs) => {
 
 class DietApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/diet' })
+    super({
+      baseURL: import.meta.env.VITE_DIET_API_URL || 'http://localhost:8090',
+      basePath: '/api/diet',
+    })
   }
 
   getFoodWarnings() {

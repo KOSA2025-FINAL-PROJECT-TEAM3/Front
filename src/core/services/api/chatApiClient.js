@@ -11,7 +11,10 @@ import ApiClient from './ApiClient'
  */
 class ChatApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/chat' })
+    super({
+      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8090',
+      basePath: '/api/chat',
+    })
   }
 
   /**

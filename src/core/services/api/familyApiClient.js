@@ -6,7 +6,10 @@ import {
 
 class FamilyApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/family' })
+    super({
+      baseURL: import.meta.env.VITE_FAMILY_API_URL || 'http://localhost:8090',
+      basePath: '/api/family',
+    })
   }
 
   getSummary() {

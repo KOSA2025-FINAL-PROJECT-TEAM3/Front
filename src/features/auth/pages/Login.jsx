@@ -7,6 +7,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
 import styles from './Login.module.scss'
 
@@ -35,7 +36,22 @@ export const Login = () => {
   const handleLogin = async (formData) => {
     try {
       await login(formData.email, formData.password)
-      navigate(ROUTE_PATHS.roleSelection)
+
+      // 로그인 후 role 확인하여 분기 처리
+      const authState = useAuthStore.getState()
+      const userRole = authState.role
+
+      if (!userRole) {
+        // role이 없는 경우 (카카오 OAuth 신규 가입자) → RoleSelection
+        navigate(ROUTE_PATHS.roleSelection)
+      } else {
+        // role이 있는 경우 → 해당 대시보드로 바로 이동
+        if (userRole === 'SENIOR') {
+          navigate(ROUTE_PATHS.seniorDashboard)
+        } else {
+          navigate(ROUTE_PATHS.caregiverDashboard)
+        }
+      }
     } catch (err) {
       setError('root', {
         type: 'server',

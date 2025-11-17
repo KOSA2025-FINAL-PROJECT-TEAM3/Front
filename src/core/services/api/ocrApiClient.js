@@ -2,7 +2,10 @@ import ApiClient from './ApiClient'
 
 class OcrApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/ocr' })
+    super({
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
+      basePath: '/api/ocr',
+    })
   }
 
   recognize(formData) {

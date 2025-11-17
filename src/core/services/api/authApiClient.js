@@ -5,7 +5,10 @@ const maskEmail = (email = '') => email.split('@')[0] || 'user'
 
 class AuthApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/auth' })
+    super({
+      baseURL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:8081',
+      basePath: '/api/auth',
+    })
   }
 
   login(email, password) {

@@ -1,7 +1,10 @@
 ﻿import { ApiClient } from './ApiClient'
 import { MOCK_DISEASES } from '@/data/mockDiseases'
 
-const client = new ApiClient({ basePath: '/api/disease' })
+const client = new ApiClient({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
+  basePath: '/api/disease',
+})
 
 export const diseaseApiClient = {
   async listMyDiseases() {
