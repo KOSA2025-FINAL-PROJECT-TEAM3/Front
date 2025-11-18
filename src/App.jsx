@@ -52,6 +52,9 @@ import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
 import WeeklyStatsPage from '@features/report/pages/WeeklyStatsPage'
 import MorePage from '@pages/more/MorePage'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
+import ErrorBoundary from '@shared/components/ErrorBoundary'
+import ErrorFallback from '@shared/components/ErrorFallback'
+import ToastContainer from '@shared/components/toast/ToastContainer'
 import { setNavigator } from '@core/routing/navigation'
 
 function NavigationRegistrar() {
@@ -68,10 +71,11 @@ function NavigationRegistrar() {
  */
 function App() {
   return (
-    <BrowserRouter>
-      <FamilyProvider>
-        <NavigationRegistrar />
-        <Routes>
+    <ErrorBoundary fallback={<ErrorFallback />}>
+      <BrowserRouter>
+        <FamilyProvider>
+          <NavigationRegistrar />
+          <Routes>
             {/* 공개 페이지: 인증 불필요 */}
             <Route path={ROUTE_PATHS.login} element={<Login />} />
             <Route path={ROUTE_PATHS.signup} element={<Signup />} />
@@ -238,10 +242,12 @@ function App() {
 
           {/* 404: 존재하지 않는 경로 */}
           <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
-        </Routes>
-        <DeveloperModePanel />
-      </FamilyProvider>
-    </BrowserRouter>
+          </Routes>
+          <ToastContainer />
+          <DeveloperModePanel />
+        </FamilyProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

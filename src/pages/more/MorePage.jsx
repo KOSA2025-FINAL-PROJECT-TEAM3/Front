@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MenuGroup } from '@shared/components/ui/MenuGroup'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MorePage.module.scss'
@@ -19,6 +20,7 @@ export const MorePage = () => {
     logout: state.logout,
     user: state.user,
   }))
+  const unreadCount = useNotificationStore((state) => state.unreadCount)
 
   const isCaregiver = role === USER_ROLES.CAREGIVER
 
@@ -40,7 +42,7 @@ export const MorePage = () => {
       icon: '🔔',
       description: '복약 알림 · 가족 알림',
       onClick: () => handleNavigate(ROUTE_PATHS.notifications),
-      badge: 3, // TODO: 실제 알림 개수로 변경
+      badge: unreadCount > 0 ? unreadCount : undefined,
     },
     isCaregiver && {
       id: 'adherenceReport',

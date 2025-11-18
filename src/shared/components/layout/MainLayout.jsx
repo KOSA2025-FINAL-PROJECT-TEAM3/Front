@@ -1,6 +1,7 @@
 /**
  * MainLayout Component
  * - 전체 페이지 레이아웃 (헤더 + 콘텐츠 + 하단 메뉴)
+ * - Header가 자동으로 사용자 정보와 알림을 가져옴
  */
 
 import classNames from 'classnames'
@@ -11,30 +12,16 @@ import styles from './MainLayout.module.scss'
 /**
  * 메인 레이아웃 컴포넌트
  * @param {React.ReactNode} children - 메인 콘텐츠
- * @param {string} userName - 사용자 이름
- * @param {string} userRole - 사용자 역할
- * @param {number} notificationCount - 알림 개수
+ * @param {boolean} showBottomNav - 하단 네비게이션 표시 여부
+ * @param {string} className - 추가 CSS 클래스
  * @returns {JSX.Element} 레이아웃 컴포넌트
  */
-export const MainLayout = ({
-  children,
-  userName = '사용자',
-  userRole = '시니어',
-  notificationCount = 0,
-  showBottomNav = true,
-  className,
-}) => {
+export const MainLayout = ({ children, showBottomNav = true, className }) => {
   return (
     <div className={classNames(styles.layoutContainer, className)}>
-      <Header
-        userName={userName}
-        userRole={userRole}
-        notificationCount={notificationCount}
-      />
+      <Header />
 
-      <main className={styles.mainContent}>
-        {children}
-      </main>
+      <main className={styles.mainContent}>{children}</main>
 
       {showBottomNav && <BottomNavigation />}
     </div>
