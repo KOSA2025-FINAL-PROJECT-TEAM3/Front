@@ -5,6 +5,7 @@
 
 import { useNavigate, Link } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -43,13 +44,13 @@ export const Login = () => {
 
       if (!userRole) {
         // role이 없는 경우 (카카오 OAuth 신규 가입자) → RoleSelection
-        navigate(ROUTE_PATHS.roleSelection)
+        navigate(ROUTE_PATHS.roleSelection, { replace: true })
       } else {
         // role이 있는 경우 → 해당 대시보드로 바로 이동
-        if (userRole === 'SENIOR') {
-          navigate(ROUTE_PATHS.seniorDashboard)
-        } else {
-          navigate(ROUTE_PATHS.caregiverDashboard)
+        if (userRole === USER_ROLES.SENIOR) {
+          navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
+        } else if (userRole === USER_ROLES.CAREGIVER) {
+          navigate(ROUTE_PATHS.caregiverDashboard, { replace: true })
         }
       }
     } catch (err) {

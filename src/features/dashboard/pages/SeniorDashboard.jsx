@@ -4,11 +4,15 @@
  */
 
 import { useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MainLayout } from '@shared/components/layout/MainLayout'
 import { MedicationCard } from '../components/MedicationCard'
+import { QuickActions } from '@shared/components/ui/QuickActions'
+import { FAB } from '@shared/components/ui/FAB'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
-import { FamilyMockService } from '@features/family/services/familyService' // Import FamilyMockService
+import { FamilyMockService } from '@features/family/services/familyService'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './SeniorDashboard.module.scss'
 
 const mapStatus = (label = '') => {
@@ -27,6 +31,7 @@ const parseTime = (timeLabel = '') => {
 }
 
 export const SeniorDashboard = () => {
+  const navigate = useNavigate()
   const { members, initialized, initialize } = useFamilyStore((s) => ({
     members: s.members,
     initialized: s.initialized,
@@ -88,6 +93,19 @@ export const SeniorDashboard = () => {
     weekday: 'long',
   })
 
+  const quickActions = [
+    { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
+    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
+    { icon: '🍽️', label: '식단 경고', path: ROUTE_PATHS.dietWarning },
+    { icon: '📊', label: '복용 리포트', path: ROUTE_PATHS.adherenceReport },
+  ]
+
+  const fabActions = [
+    { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
+    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
+    { icon: '📷', label: '처방전 스캔', path: ROUTE_PATHS.ocrScan },
+  ]
+
   return (
     <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
       <div className={styles.dashboardContent}>
@@ -95,6 +113,8 @@ export const SeniorDashboard = () => {
           <h1 className={styles.pageTitle}>오늘의 복용</h1>
           <p className={styles.dateInfo}>{todayDate}</p>
         </div>
+
+        <QuickActions actions={quickActions} />
 
         <div className={styles.medicationList}>
           {scheduleList.map((schedule) => (
@@ -105,6 +125,8 @@ export const SeniorDashboard = () => {
             />
           ))}
         </div>
+
+        <FAB actions={fabActions} />
       </div>
     </MainLayout>
   )

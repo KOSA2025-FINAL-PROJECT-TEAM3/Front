@@ -7,7 +7,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { STORAGE_KEYS } from '@config/constants'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './KakaoCallback.module.scss'
 
@@ -58,7 +59,21 @@ export const KakaoCallbackPage = () => {
           if (typeof window !== 'undefined') {
             window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
           }
-          navigate(ROUTE_PATHS.roleSelection, { replace: true })
+
+          // role이 있는지 확인하여 적절한 페이지로 이동
+          const authState = useAuthStore.getState()
+          const userRole = authState.role
+
+          if (!userRole) {
+            navigate(ROUTE_PATHS.roleSelection, { replace: true })
+            return
+          }
+
+          if (userRole === USER_ROLES.SENIOR) {
+            navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
+          } else if (userRole === USER_ROLES.CAREGIVER) {
+            navigate(ROUTE_PATHS.caregiverDashboard, { replace: true })
+          }
         }
       } catch (err) {
         if (!cancelled) {

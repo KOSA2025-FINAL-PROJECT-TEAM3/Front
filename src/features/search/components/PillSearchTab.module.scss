@@ -1,0 +1,175 @@
+.container {
+  padding: 0;
+}
+
+.searchBox {
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.instruction {
+  margin-bottom: 1rem;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.formGroup {
+  margin-bottom: 1rem;
+
+  &:last-of-type {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+}
+
+.select,
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  font-size: 15px;
+}
+
+.select:focus,
+.input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.resetButton,
+.searchButton {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.resetButton {
+  background: white;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.searchButton {
+  background: #2563eb;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.results {
+  margin-top: 1.5rem;
+}
+
+.resultTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.resultList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pillCard {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.pillImage {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillPlaceholder {
+  font-size: 40px;
+}
+
+.pillInfo {
+  flex: 1;
+}
+
+.pillName {
+  margin: 0 0 0.5rem 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.pillDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pillDetail {
+  font-size: 14px;
+  color: #6b7280;
+
+  strong {
+    color: #374151;
+    margin-right: 0.25rem;
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #9ca3af;
+  font-size: 15px;
+}
