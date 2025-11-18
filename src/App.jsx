@@ -36,8 +36,7 @@ import MedicationEditPage from '@features/medication/pages/MedicationEditPage'
 import FoodWarningPage from '@features/diet/pages/FoodWarning'
 import DietLogPage from '@features/diet/pages/DietLogPage'
 import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
-import SymptomSearchPage from '@features/search/pages/SymptomSearch'
-import PillSearchPage from '@features/search/pages/PillSearchPage'
+import UnifiedSearchPage from '@features/search/pages/UnifiedSearchPage'
 import PillResultPage from '@features/search/pages/PillResultPage'
 import DoctorCounselPage from '@features/counsel/pages/DoctorCounsel'
 import DiseasePage from '@features/disease/pages/Disease'
@@ -114,11 +113,11 @@ function App() {
           {/* 검색 */}
           <Route
             path={ROUTE_PATHS.search}
-            element={<PrivateRoute element={<SymptomSearchPage />} />}
+            element={<PrivateRoute element={<UnifiedSearchPage />} />}
           />
           <Route
             path={ROUTE_PATHS.pillSearch}
-            element={<PrivateRoute element={<PillSearchPage />} />}
+            element={<Navigate to={ROUTE_PATHS.search} replace />}
           />
           <Route
             path={ROUTE_PATHS.pillResult}
