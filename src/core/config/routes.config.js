@@ -36,6 +36,7 @@ export const ROUTE_PATHS = {
   notificationDetail: '/notifications/:id',
   adherenceReport: '/reports/adherence',
   weeklyStats: '/reports/weekly',
+  more: '/more',
 }
 
 export const ROUTE_META = {
@@ -71,6 +72,7 @@ export const ROUTE_META = {
     ROUTE_PATHS.notificationDetail,
     ROUTE_PATHS.adherenceReport,
     ROUTE_PATHS.weeklyStats,
+    ROUTE_PATHS.more,
   ],
 }
 

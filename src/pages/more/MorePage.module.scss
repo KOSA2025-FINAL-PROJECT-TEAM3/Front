@@ -1,0 +1,29 @@
+.page {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

@@ -50,6 +50,7 @@ import NotificationPage from '@features/notification/pages/NotificationPage'
 import NotificationDetailPage from '@features/notification/pages/NotificationDetailPage'
 import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
 import WeeklyStatsPage from '@features/report/pages/WeeklyStatsPage'
+import MorePage from '@pages/more/MorePage'
 import DeveloperModePanel from '@devtools/DeveloperModePanel'
 import { setNavigator } from '@core/routing/navigation'
 
@@ -182,7 +183,13 @@ function App() {
             element={<PrivateRoute element={<MyDiseasesSettingsPage />} />}
           />
 
-          {/* 가족 */}
+          {/* 더보기 */}
+          <Route
+            path={ROUTE_PATHS.more}
+            element={<PrivateRoute element={<MorePage />} />}
+          />
+
+          {/* 가족 */}}
           <Route
             path={ROUTE_PATHS.family}
             element={<PrivateRoute element={<FamilyManagementPage />} />}

@@ -1,6 +1,7 @@
 /**
  * BottomNavigation Component
  * - 하단 네비게이션 메뉴
+ * - 4-5개 핵심 메뉴만 표시
  */
 
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -12,6 +13,7 @@ import styles from './BottomNavigation.module.scss'
 
 const ROLE_ALL = 'ALL'
 
+// 핵심 메뉴만 하단바에 표시 (4-5개)
 const NAV_ITEMS = [
   {
     id: 'home',
@@ -21,31 +23,34 @@ const NAV_ITEMS = [
     getPath: ({ isCaregiver }) =>
       isCaregiver ? ROUTE_PATHS.caregiverDashboard : ROUTE_PATHS.seniorDashboard,
   },
-  { id: 'medication', label: '약 관리', icon: 'pill', path: ROUTE_PATHS.medication },
-  { id: 'medicationAdd', label: '약 등록', icon: 'plus', path: ROUTE_PATHS.medicationAdd },
-  { id: 'pillSearch', label: '알약 검색', icon: 'search', path: ROUTE_PATHS.pillSearch },
-  { id: 'search', label: '증상 검색', icon: 'search', path: ROUTE_PATHS.search },
+  {
+    id: 'medication',
+    label: '약',
+    icon: 'pill',
+    path: ROUTE_PATHS.medication,
+    roles: [ROLE_ALL],
+  },
+  {
+    id: 'search',
+    label: '검색',
+    icon: 'search',
+    path: ROUTE_PATHS.pillSearch,
+    roles: [ROLE_ALL],
+  },
   {
     id: 'family',
     label: '가족',
     icon: 'family',
     path: ROUTE_PATHS.family,
-    roles: [USER_ROLES.CAREGIVER],
+    roles: [USER_ROLES.CAREGIVER], // 보호자만 표시
   },
-  { id: 'disease', label: '질환', icon: 'disease', path: ROUTE_PATHS.disease },
-  { id: 'diet', label: '식이 경고', icon: 'diet', path: ROUTE_PATHS.dietWarning },
-  { id: 'dietLog', label: '식단 기록', icon: 'list', path: ROUTE_PATHS.dietLog },
-  { id: 'ocr', label: 'OCR', icon: 'ocr', path: ROUTE_PATHS.ocrScan },
-  { id: 'counsel', label: '의사와 상담', icon: 'counsel', path: ROUTE_PATHS.counsel },
-  { id: 'notifications', label: '알림', icon: 'bell', path: ROUTE_PATHS.notifications },
   {
-    id: 'reports',
-    label: '리포트',
-    icon: 'chart',
-    path: ROUTE_PATHS.adherenceReport,
-    roles: [USER_ROLES.CAREGIVER],
+    id: 'more',
+    label: '더보기',
+    icon: 'settings',
+    path: ROUTE_PATHS.more,
+    roles: [ROLE_ALL],
   },
-  { id: 'settings', label: '설정', icon: 'settings', path: ROUTE_PATHS.settings },
 ]
 
 const isRoleAllowed = (roles = [ROLE_ALL], role) =>
@@ -54,7 +59,7 @@ const isRoleAllowed = (roles = [ROLE_ALL], role) =>
 export const BottomNavigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout, role } = useAuth((state) => ({ logout: state.logout, role: state.role }))
+  const { role } = useAuth((state) => ({ role: state.role }))
 
   const roleKey =
     role === USER_ROLES.CAREGIVER || role === 'CAREGIVER' || role === 'caregiver'
@@ -67,7 +72,39 @@ export const BottomNavigation = () => {
     path: typeof item.getPath === 'function' ? item.getPath({ isCaregiver }) : item.path,
   }))
 
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+  const isActive = (path) => {
+    // 더보기 메뉴의 경우, 하위 메뉴들도 활성화 표시
+    if (path === ROUTE_PATHS.more) {
+      const moreRelatedPaths = [
+        ROUTE_PATHS.more,
+        ROUTE_PATHS.notifications,
+        ROUTE_PATHS.adherenceReport,
+        ROUTE_PATHS.weeklyStats,
+        ROUTE_PATHS.ocrScan,
+        ROUTE_PATHS.counsel,
+        ROUTE_PATHS.disease,
+        ROUTE_PATHS.dietWarning,
+        ROUTE_PATHS.dietLog,
+        ROUTE_PATHS.settings,
+      ]
+      return moreRelatedPaths.some(
+        (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+      )
+    }
+
+    // 검색 메뉴의 경우, 알약검색/증상검색 모두 활성화
+    if (path === ROUTE_PATHS.pillSearch) {
+      return (
+        location.pathname === ROUTE_PATHS.pillSearch ||
+        location.pathname === ROUTE_PATHS.search ||
+        location.pathname.startsWith(ROUTE_PATHS.pillSearch + '/') ||
+        location.pathname.startsWith(ROUTE_PATHS.search + '/')
+      )
+    }
+
+    return location.pathname === path || location.pathname.startsWith(path + '/')
+  }
+
   const handleNavigate = (path) => navigate(path)
 
   return (
@@ -88,20 +125,6 @@ export const BottomNavigation = () => {
             <span className={styles.navLabel}>{item.label}</span>
           </button>
         ))}
-        <button
-          type="button"
-          className={`${styles.navItem} ${styles.logout}`}
-          onClick={async () => {
-            await logout()
-            navigate(ROUTE_PATHS.login, { replace: true })
-          }}
-          aria-label="로그아웃"
-        >
-          <span className={styles.navIcon}>
-            <Icon name="logout" aria-hidden />
-          </span>
-          <span className={styles.navLabel}>로그아웃</span>
-        </button>
       </div>
     </nav>
   )
