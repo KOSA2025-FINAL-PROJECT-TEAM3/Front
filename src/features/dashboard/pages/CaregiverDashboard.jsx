@@ -4,6 +4,8 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
 import MainLayout from '@shared/components/layout/MainLayout'
+import { QuickActions } from '@shared/components/ui/QuickActions'
+import { FAB } from '@shared/components/ui/FAB'
 import styles from './CaregiverDashboard.module.scss'
 
 /**
@@ -35,6 +37,19 @@ export function CaregiverDashboard() {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
 
+  const quickActions = [
+    { icon: '👥', label: '가족 관리', path: ROUTE_PATHS.family },
+    { icon: '💊', label: '약 관리', path: ROUTE_PATHS.medication },
+    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
+    { icon: '💬', label: '상담', path: ROUTE_PATHS.chatList },
+  ]
+
+  const fabActions = [
+    { icon: '👥', label: '가족 초대', path: ROUTE_PATHS.familyInvite },
+    { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
+    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
+  ]
+
   if (loading && members.length === 0) {
     return (
       <MainLayout userName="보호자" userRole="보호자">
@@ -59,6 +74,8 @@ export function CaregiverDashboard() {
           <p>가족 구성원의 오늘 복약 상태를 빠르게 확인할 수 있습니다.</p>
         </header>
 
+        <QuickActions actions={quickActions} />
+
         <article className={styles.card}>
           <h2>어르신 복약 현황</h2>
           {seniorMembers.length === 0 && <p>등록된 어르신이 없습니다.</p>}
@@ -73,6 +90,8 @@ export function CaregiverDashboard() {
             ))}
           </ul>
         </article>
+
+        <FAB actions={fabActions} />
       </section>
     </MainLayout>
   )
