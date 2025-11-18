@@ -4,7 +4,11 @@
  * @component MedicationAddPage
  */
 
+import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
+import { MedicationForm } from '@features/medication/components/MedicationForm'
+import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MedicationAddPage.module.scss'
 
 /**
@@ -12,11 +16,40 @@ import styles from './MedicationAddPage.module.scss'
  * @returns {JSX.Element}
  */
 export const MedicationAddPage = () => {
+  const navigate = useNavigate()
+  const { addMedication, loading } = useMedicationStore((state) => ({
+    addMedication: state.addMedication,
+    loading: state.loading,
+  }))
+
+  const handleSubmit = async (formData) => {
+    try {
+      await addMedication(formData)
+      // 등록 성공 시 약 관리 페이지로 이동
+      navigate(ROUTE_PATHS.medication, { replace: true })
+    } catch (error) {
+      console.error('약 등록 실패:', error)
+      // 에러는 store에서 이미 처리되므로 여기서는 로그만 출력
+    }
+  }
+
+  const handleCancel = () => {
+    navigate(ROUTE_PATHS.medication)
+  }
+
   return (
     <MainLayout>
       <div className={styles.container}>
         <h1 className={styles.title}>약 등록</h1>
-        <p className={styles.placeholder}>약 등록 페이지 - 구현 예정</p>
+        <div className={styles.formWrapper}>
+          <MedicationForm
+            onSubmit={handleSubmit}
+            onCancel={handleCancel}
+            loading={loading}
+            submitLabel="등록"
+            shouldResetOnSubmit={false}
+          />
+        </div>
       </div>
     </MainLayout>
   )
