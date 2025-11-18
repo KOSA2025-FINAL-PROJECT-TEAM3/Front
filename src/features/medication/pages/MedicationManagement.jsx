@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
-import MedicationForm from '../components/MedicationForm.jsx'
 import MedicationList from '../components/MedicationList.jsx'
 import MedicationDetailModal from '../components/MedicationDetailModal.jsx'
 import InventoryTracker from '../components/InventoryTracker.jsx'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MedicationManagement.module.scss'
 
 export const MedicationManagementPage = () => {
+  const navigate = useNavigate()
   const {
     medications,
     loading,
     fetchMedications,
-    addMedication,
     removeMedication,
     toggleStatus,
     updateMedication,
@@ -30,8 +31,8 @@ export const MedicationManagementPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleAdd = async (payload) => {
-    await addMedication(payload)
+  const handleAddClick = () => {
+    navigate(ROUTE_PATHS.medicationAdd)
   }
 
   const handleSelectMedication = (medication) => {
@@ -57,13 +58,24 @@ export const MedicationManagementPage = () => {
     <MainLayout>
       <div className={styles.page}>
         <header className={styles.header}>
-          <h1>약 관리</h1>
-          <p>약을 등록하고 복용 일정을 관리하세요.</p>
+          <div className={styles.headerContent}>
+            <div>
+              <h1>약 관리</h1>
+              <p>약을 등록하고 복용 일정을 관리하세요.</p>
+            </div>
+            <button
+              type="button"
+              className={styles.addButton}
+              onClick={handleAddClick}
+              aria-label="약 등록"
+            >
+              <span className={styles.addIcon}>+</span>
+              <span className={styles.addLabel}>약 등록</span>
+            </button>
+          </div>
         </header>
 
         <InventoryTracker medications={medications} />
-
-        <MedicationForm onSubmit={handleAdd} loading={loading} />
 
         <MedicationList
           medications={medications}

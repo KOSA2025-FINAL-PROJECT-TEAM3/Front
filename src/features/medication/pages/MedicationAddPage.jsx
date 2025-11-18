@@ -7,7 +7,9 @@
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MedicationForm } from '@features/medication/components/MedicationForm'
+import { BackButton } from '@shared/components/ui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MedicationAddPage.module.scss'
 
@@ -25,11 +27,11 @@ export const MedicationAddPage = () => {
   const handleSubmit = async (formData) => {
     try {
       await addMedication(formData)
-      // 등록 성공 시 약 관리 페이지로 이동
+      toast.success('약이 등록되었습니다')
       navigate(ROUTE_PATHS.medication, { replace: true })
     } catch (error) {
       console.error('약 등록 실패:', error)
-      // 에러는 store에서 이미 처리되므로 여기서는 로그만 출력
+      toast.error('약 등록에 실패했습니다')
     }
   }
 
@@ -40,7 +42,10 @@ export const MedicationAddPage = () => {
   return (
     <MainLayout>
       <div className={styles.container}>
-        <h1 className={styles.title}>약 등록</h1>
+        <div className={styles.headerWithBack}>
+          <BackButton />
+          <h1 className={styles.title}>약 등록</h1>
+        </div>
         <div className={styles.formWrapper}>
           <MedicationForm
             onSubmit={handleSubmit}

@@ -8,7 +8,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MedicationForm } from '@features/medication/components/MedicationForm'
+import { BackButton } from '@shared/components/ui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MedicationEditPage.module.scss'
 
@@ -51,11 +53,11 @@ export const MedicationEditPage = () => {
   const handleSubmit = async (formData) => {
     try {
       await updateMedication(id, formData)
-      // 수정 성공 시 약 관리 페이지로 이동
+      toast.success('약이 수정되었습니다')
       navigate(ROUTE_PATHS.medication, { replace: true })
     } catch (error) {
       console.error('약 수정 실패:', error)
-      // 에러는 store에서 이미 처리되므로 여기서는 로그만 출력
+      toast.error('약 수정에 실패했습니다')
     }
   }
 
@@ -68,7 +70,10 @@ export const MedicationEditPage = () => {
     return (
       <MainLayout>
         <div className={styles.container}>
-          <h1 className={styles.title}>약 편집</h1>
+          <div className={styles.headerWithBack}>
+            <BackButton />
+            <h1 className={styles.title}>약 편집</h1>
+          </div>
           <p className={styles.placeholder}>
             {loading ? '약 정보를 불러오는 중...' : '약 정보를 찾을 수 없습니다.'}
           </p>
@@ -80,7 +85,10 @@ export const MedicationEditPage = () => {
   return (
     <MainLayout>
       <div className={styles.container}>
-        <h1 className={styles.title}>약 편집</h1>
+        <div className={styles.headerWithBack}>
+          <BackButton />
+          <h1 className={styles.title}>약 편집</h1>
+        </div>
         <div className={styles.formWrapper}>
           <MedicationForm
             initialValues={medication}
