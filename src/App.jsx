@@ -192,7 +192,7 @@ function App() {
             element={<PrivateRoute element={<MorePage />} />}
           />
 
-          {/* 가족 */}}
+          {/* 가족 */}
           <Route
             path={ROUTE_PATHS.family}
             element={<PrivateRoute element={<FamilyManagementPage />} />}
