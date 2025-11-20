@@ -4,6 +4,7 @@
  * - 어르신/보호자 선택 후 대시보드로 이동
  */
 
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
@@ -11,7 +12,18 @@ import styles from './RoleSelection.module.scss'
 
 export const RoleSelection = () => {
   const navigate = useNavigate()
-  const { selectRole } = useAuth((state) => ({ selectRole: state.selectRole }))
+  const { selectRole, customerRole } = useAuth((state) => ({
+    selectRole: state.selectRole,
+    customerRole: state.customerRole,
+  }))
+
+  useEffect(() => {
+    if (customerRole === 'senior') {
+      navigate(ROUTE_PATHS.seniorDashboard)
+    } else if (customerRole === 'caregiver') {
+      navigate(ROUTE_PATHS.caregiverDashboard)
+    }
+  }, [customerRole, navigate])
 
   const handleSelectRole = async (role) => {
     try {

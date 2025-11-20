@@ -12,22 +12,32 @@ import { STORAGE_KEYS } from '@config/constants'
 const initialState = {
   isAuthenticated: false,
   user: null,
-  role: null,
   token: null,
+  userRole: null,
+  customerRole: null,
   loading: false,
   error: null,
 }
 
-const persistAuthToStorage = (user, token, role) => {
+const persistAuthToStorage = ({ user, token, customerRole }) => {
   if (typeof window === 'undefined') return
+
   if (token) {
     window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
+  } else {
+    window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
   }
+
   if (user) {
     window.localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user))
+  } else {
+    window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
   }
-  if (role) {
-    window.localStorage.setItem(STORAGE_KEYS.ROLE, role)
+
+  if (customerRole) {
+    window.localStorage.setItem(STORAGE_KEYS.ROLE, customerRole)
+  } else {
+    window.localStorage.removeItem(STORAGE_KEYS.ROLE)
   }
 }
 
@@ -37,6 +47,46 @@ const clearAuthStorage = () => {
   window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
   window.localStorage.removeItem(STORAGE_KEYS.ROLE)
   window.localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
+}
+
+const normalizeAuthPayload = (payload = {}) => {
+  const {
+    user,
+    token,
+    accessToken,
+    role,
+    userRole,
+    customerRole,
+    ...rest
+  } = payload
+
+  const resolvedUser = user ?? rest.userData ?? null
+  const resolvedToken = token ?? accessToken ?? null
+  const resolvedUserRole = userRole ?? resolvedUser?.userRole ?? null
+  const resolvedCustomerRole =
+    customerRole ?? resolvedUser?.customerRole ?? role ?? resolvedUser?.role ?? null
+
+  return {
+    user: resolvedUser,
+    token: resolvedToken,
+    userRole: resolvedUserRole,
+    customerRole: resolvedCustomerRole,
+  }
+}
+
+const normalizeSignupPayload = (args) => {
+  if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
+    return args[0]
+  }
+
+  const [email, password, name, role] = args
+  return {
+    email,
+    password,
+    name,
+    customerRole: role,
+    userRole: 'ROLE_USER',
+  }
 }
 
 const withLoading = async (set, fn) => {
@@ -57,14 +107,18 @@ export const useAuthStore = create(
     (set, get) => ({
       ...initialState,
 
-      setAuthData: ({ user, token, role }) => {
-        persistAuthToStorage(user, token, role)
-        set({
-          user,
-          token,
-          role: role || user?.role || null,
-          isAuthenticated: Boolean(user && token),
-        })
+      setAuthData: (payload = {}) => {
+        const normalized = normalizeAuthPayload(payload)
+        persistAuthToStorage(normalized)
+
+        set((state) => ({
+          ...state,
+          user: normalized.user,
+          token: normalized.token,
+          userRole: normalized.userRole,
+          customerRole: normalized.customerRole,
+          isAuthenticated: Boolean(normalized.user && normalized.token),
+        }))
       },
 
       clearAuthState: () => {
@@ -77,32 +131,19 @@ export const useAuthStore = create(
       login: async (email, password) =>
         withLoading(set, async () => {
           const response = await authApiClient.login(email, password)
-          const role = response.role || response.user?.role || null
-          get().setAuthData({
-            user: response.user,
-            token: response.accessToken,
-            role,
-          })
+          get().setAuthData(response)
         }),
 
-      signup: async (email, password, name, role) =>
+      signup: async (...args) =>
         withLoading(set, async () => {
-          const response = await authApiClient.signup(email, password, name, role)
-          get().setAuthData({
-            user: response.user,
-            token: response.accessToken,
-            role,
-          })
+          const response = await authApiClient.signup(normalizeSignupPayload(args))
+          get().setAuthData(response)
         }),
 
       kakaoLogin: async (authorizationCode) =>
         withLoading(set, async () => {
           const response = await authApiClient.kakaoLogin(authorizationCode)
-          get().setAuthData({
-            user: response.user,
-            token: response.accessToken,
-            role: response.role || response.user?.role || null,
-          })
+          get().setAuthData(response)
         }),
 
       selectRole: async (selectedRole) =>
@@ -111,9 +152,9 @@ export const useAuthStore = create(
           await authApiClient.selectRole(token, selectedRole)
           const user = get().user
           get().setAuthData({
-            user: user ? { ...user, role: selectedRole } : null,
+            user: user ? { ...user, customerRole: selectedRole } : null,
             token,
-            role: selectedRole,
+            customerRole: selectedRole,
           })
         }),
 
@@ -134,7 +175,8 @@ export const useAuthStore = create(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        role: state.role,
+        userRole: state.userRole,
+        customerRole: state.customerRole,
         isAuthenticated: state.isAuthenticated,
       }),
     },

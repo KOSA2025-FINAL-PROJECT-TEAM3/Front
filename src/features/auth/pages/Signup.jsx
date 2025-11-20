@@ -8,7 +8,16 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import styles from './Signup.module.scss'
+
+const DEFAULT_USER_ROLE = 'ROLE_USER'
+
+const roleDestinationMap = {
+  [USER_ROLES.SENIOR]: ROUTE_PATHS.seniorDashboard,
+  [USER_ROLES.CAREGIVER]: ROUTE_PATHS.caregiverDashboard,
+}
 
 export const Signup = () => {
   const navigate = useNavigate()
@@ -33,7 +42,7 @@ export const Signup = () => {
       password: '',
       passwordConfirm: '',
       name: '',
-      role: USER_ROLES.SENIOR,
+      customerRole: USER_ROLES.SENIOR,
     },
   })
 
@@ -42,14 +51,26 @@ export const Signup = () => {
 
   const handleSignup = async (formData) => {
     try {
-      await signup(formData.email, formData.password, formData.name, formData.role)
+      await signup({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        userRole: DEFAULT_USER_ROLE,
+        customerRole: formData.customerRole,
+      })
 
-      // 선택한 role에 따라 해당 대시보드로 이동
-      if (formData.role === USER_ROLES.SENIOR) {
-        navigate(ROUTE_PATHS.seniorDashboard)
-      } else {
-        navigate(ROUTE_PATHS.caregiverDashboard)
+      const authState = useAuthStore.getState()
+      const resolvedRole =
+        normalizeCustomerRole(authState.customerRole) ||
+        normalizeCustomerRole(authState.user?.customerRole) ||
+        normalizeCustomerRole(formData.customerRole)
+
+      if (!resolvedRole) {
+        navigate(ROUTE_PATHS.roleSelection)
+        return
       }
+
+      navigate(roleDestinationMap[resolvedRole] || ROUTE_PATHS.roleSelection)
     } catch (err) {
       setError('root', {
         type: 'server',
@@ -157,7 +178,7 @@ export const Signup = () => {
                 <input
                   type="radio"
                   value={USER_ROLES.SENIOR}
-                  {...register('role')}
+                  {...register('customerRole')}
                   disabled={loading}
                 />
                 <span className={styles.radioButton}>어르신(부모)</span>
@@ -166,7 +187,7 @@ export const Signup = () => {
                 <input
                   type="radio"
                   value={USER_ROLES.CAREGIVER}
-                  {...register('role')}
+                  {...register('customerRole')}
                   disabled={loading}
                 />
                 <span className={styles.radioButton}>보호자(자녀)</span>

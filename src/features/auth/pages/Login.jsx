@@ -9,8 +9,29 @@ import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
 import styles from './Login.module.scss'
+
+const roleDestinationMap = {
+  [USER_ROLES.SENIOR]: ROUTE_PATHS.seniorDashboard,
+  [USER_ROLES.CAREGIVER]: ROUTE_PATHS.caregiverDashboard,
+}
+
+const navigateAfterAuthentication = (navigate) => {
+  const authState = useAuthStore.getState()
+  const resolvedRole =
+    normalizeCustomerRole(authState.customerRole) ||
+    normalizeCustomerRole(authState.user?.customerRole)
+
+  if (!resolvedRole) {
+    navigate(ROUTE_PATHS.roleSelection, { replace: true })
+    return
+  }
+
+  const destination = roleDestinationMap[resolvedRole] || ROUTE_PATHS.roleSelection
+  navigate(destination, { replace: true })
+}
 
 export const Login = () => {
   const navigate = useNavigate()
@@ -37,22 +58,7 @@ export const Login = () => {
   const handleLogin = async (formData) => {
     try {
       await login(formData.email, formData.password)
-
-      // 로그인 후 role 확인하여 분기 처리
-      const authState = useAuthStore.getState()
-      const userRole = authState.role
-
-      if (!userRole) {
-        // role이 없는 경우 (카카오 OAuth 신규 가입자) → RoleSelection
-        navigate(ROUTE_PATHS.roleSelection, { replace: true })
-      } else {
-        // role이 있는 경우 → 해당 대시보드로 바로 이동
-        if (userRole === USER_ROLES.SENIOR) {
-          navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
-        } else if (userRole === USER_ROLES.CAREGIVER) {
-          navigate(ROUTE_PATHS.caregiverDashboard, { replace: true })
-        }
-      }
+      navigateAfterAuthentication(navigate)
     } catch (err) {
       setError('root', {
         type: 'server',

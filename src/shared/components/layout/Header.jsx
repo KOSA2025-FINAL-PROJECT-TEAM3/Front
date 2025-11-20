@@ -8,8 +8,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
-import { USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { getCustomerRoleLabel } from '@features/auth/utils/roleUtils'
 import styles from './Header.module.scss'
 
 /**
@@ -18,7 +18,10 @@ import styles from './Header.module.scss'
  */
 export const Header = () => {
   const navigate = useNavigate()
-  const { user, role } = useAuth((state) => ({ user: state.user, role: state.role }))
+  const { user, customerRole } = useAuth((state) => ({
+    user: state.user,
+    customerRole: state.customerRole,
+  }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
 
   const handleNotificationClick = () => {
@@ -29,8 +32,7 @@ export const Header = () => {
   const userName = user?.name || user?.email?.split('@')[0] || '사용자'
 
   // 역할 라벨
-  const roleLabel =
-    role === USER_ROLES.CAREGIVER ? '보호자' : role === USER_ROLES.SENIOR ? '어르신' : '사용자'
+  const roleLabel = getCustomerRoleLabel(customerRole)
 
   return (
     <header className={styles.header}>

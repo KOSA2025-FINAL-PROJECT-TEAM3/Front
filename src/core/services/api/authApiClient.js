@@ -18,27 +18,57 @@ class AuthApiClient extends ApiClient {
         id: 'auth-mock-user',
         email,
         name: maskEmail(email),
+        userRole: 'ROLE_USER',
+        customerRole: null,
       },
       accessToken: buildMockToken('accessToken'),
-      role: null,
+      userRole: 'ROLE_USER',
+      customerRole: null,
     })
 
     return this.post('/login', payload, undefined, { mockResponse })
   }
 
-  signup(email, password, name, role) {
-    const payload = { email, password, name, role }
+  signup(payloadOrEmail, password, name, role) {
+    const payload =
+      typeof payloadOrEmail === 'object' && payloadOrEmail !== null
+        ? payloadOrEmail
+        : {
+            email: payloadOrEmail,
+            password,
+            name,
+            customerRole: role,
+          }
+    const {
+      email,
+      password: userPassword,
+      name: displayName,
+      userRole = 'ROLE_USER',
+      customerRole,
+    } = payload
+
+    const requestPayload = {
+      email,
+      password: userPassword,
+      name: displayName,
+      userRole,
+      customerRole,
+    }
+
     const mockResponse = () => ({
       user: {
         id: 'auth-mock-user',
         email,
-        name,
-        role,
+        name: displayName,
+        userRole,
+        customerRole,
       },
       accessToken: buildMockToken('accessToken'),
+      userRole,
+      customerRole,
     })
 
-    return this.post('/signup', payload, undefined, { mockResponse })
+    return this.post('/signup', requestPayload, undefined, { mockResponse })
   }
 
   kakaoLogin(authorizationCode) {
@@ -48,9 +78,12 @@ class AuthApiClient extends ApiClient {
         id: 'kakao-user',
         email: 'user@kakao.com',
         name: '카카오 사용자',
+        userRole: 'ROLE_USER',
+        customerRole: null,
       },
       accessToken: buildMockToken('accessToken'),
-      role: null,
+      userRole: 'ROLE_USER',
+      customerRole: null,
     })
 
     return this.post('/kakao-login', payload, undefined, { mockResponse })
@@ -65,7 +98,7 @@ class AuthApiClient extends ApiClient {
     }
     const mockResponse = () => ({
       success: true,
-      role,
+      customerRole: role,
     })
 
     return this.post('/select-role', payload, config, { mockResponse })

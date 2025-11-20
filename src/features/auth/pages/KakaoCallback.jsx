@@ -4,11 +4,12 @@
  * - code/state 파라미터를 Auth Store kakaoLogin에 전달
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './KakaoCallback.module.scss'
 
@@ -19,7 +20,12 @@ export const KakaoCallbackPage = () => {
   const [status, setStatus] = useState('카카오 로그인 처리 중입니다...')
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const processedRef = useRef(false)
+
+  // 1. Login Trigger Effect (Runs once)
   useEffect(() => {
+    if (processedRef.current) return
+
     const code = searchParams.get('code')
     const receivedState = searchParams.get('state')
     const kakaoError = searchParams.get('error')
@@ -50,45 +56,47 @@ export const KakaoCallbackPage = () => {
       return
     }
 
-    let cancelled = false
+    // Mark as processed to prevent double-invocation
+    processedRef.current = true
 
     const runLogin = async () => {
       try {
         await kakaoLogin(code)
-        if (!cancelled) {
-          if (typeof window !== 'undefined') {
-            window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
-          }
-
-          // role이 있는지 확인하여 적절한 페이지로 이동
-          const authState = useAuthStore.getState()
-          const userRole = authState.role
-
-          if (!userRole) {
-            navigate(ROUTE_PATHS.roleSelection, { replace: true })
-            return
-          }
-
-          if (userRole === USER_ROLES.SENIOR) {
-            navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
-          } else if (userRole === USER_ROLES.CAREGIVER) {
-            navigate(ROUTE_PATHS.caregiverDashboard, { replace: true })
-          }
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
         }
       } catch (err) {
-        if (!cancelled) {
-          setStatus('카카오 로그인 과정에서 오류가 발생했습니다.')
-          setErrorMessage(err.message || '잠시 후 다시 시도해 주세요.')
-        }
+        setStatus('카카오 로그인 과정에서 오류가 발생했습니다.')
+        setErrorMessage(err.message || '잠시 후 다시 시도해 주세요.')
+        // Reset processed ref on error to allow retry if needed (though code is likely invalid now)
       }
     }
 
     runLogin()
+  }, [kakaoLogin, searchParams])
 
-    return () => {
-      cancelled = true
+  // 2. Navigation Effect (Reacts to auth state changes)
+  const { isAuthenticated, customerRole, user } = useAuth((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    customerRole: state.customerRole,
+    user: state.user,
+  }))
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const role =
+        normalizeCustomerRole(customerRole) ||
+        normalizeCustomerRole(user?.customerRole)
+
+      if (!role) {
+        navigate(ROUTE_PATHS.roleSelection, { replace: true })
+      } else if (role === USER_ROLES.SENIOR) {
+        navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
+      } else if (role === USER_ROLES.CAREGIVER) {
+        navigate(ROUTE_PATHS.caregiverDashboard, { replace: true })
+      }
     }
-  }, [kakaoLogin, navigate, searchParams])
+  }, [isAuthenticated, customerRole, user, navigate])
 
   return (
     <div className={styles.container}>

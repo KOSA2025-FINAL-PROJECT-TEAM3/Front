@@ -14,18 +14,22 @@ import styles from './DeveloperModePanel.module.scss'
 
 const DEV_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEV_MODE !== 'false'
 
+const DEFAULT_USER_ROLE = 'ROLE_USER'
+
 const DEV_PROFILES = {
   [USER_ROLES.SENIOR]: {
     id: 'dev-senior',
     name: '김어르신',
     email: 'senior@amapill.dev',
-    role: USER_ROLES.SENIOR,
+    customerRole: USER_ROLES.SENIOR,
+    userRole: DEFAULT_USER_ROLE,
   },
   [USER_ROLES.CAREGIVER]: {
     id: 'dev-caregiver',
     name: '홍보호자',
     email: 'caregiver@amapill.dev',
-    role: USER_ROLES.CAREGIVER,
+    customerRole: USER_ROLES.CAREGIVER,
+    userRole: DEFAULT_USER_ROLE,
   },
 }
 
@@ -49,15 +53,15 @@ export const DeveloperModePanel = () => {
 
   if (!DEV_MODE_ENABLED) return null
 
-  const persistDevAuth = (role) => {
+  const persistDevAuth = (customerRole) => {
     if (typeof window === 'undefined') return null
     const now = Date.now()
-    const userProfile = DEV_PROFILES[role] || DEV_PROFILES[USER_ROLES.SENIOR]
+    const userProfile = DEV_PROFILES[customerRole] || DEV_PROFILES[USER_ROLES.SENIOR]
 
     const token = `dev-token-${now}`
     window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
     window.localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userProfile))
-    window.localStorage.setItem(STORAGE_KEYS.ROLE, role)
+    window.localStorage.setItem(STORAGE_KEYS.ROLE, userProfile.customerRole)
     window.localStorage.setItem(STORAGE_KEYS.DEV_MODE, 'true')
     return { token, userProfile }
   }
@@ -77,10 +81,15 @@ export const DeveloperModePanel = () => {
     setStatusLevel(level)
   }
 
-  const handleShortcut = async (role, path) => {
-    const record = persistDevAuth(role)
+  const handleShortcut = async (customerRole, path) => {
+    const record = persistDevAuth(customerRole)
     if (record?.userProfile) {
-      setAuthData({ user: record.userProfile, token: record.token, role })
+      setAuthData({
+        user: record.userProfile,
+        token: record.token,
+        userRole: record.userProfile.userRole,
+        customerRole: record.userProfile.customerRole,
+      })
     }
     resetAllMockData()
     showStatus('Dev 프로필과 목데이터 전체를 초기화했어요.', 'success')

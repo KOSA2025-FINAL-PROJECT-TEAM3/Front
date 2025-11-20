@@ -9,6 +9,7 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
 import { Icon } from '@shared/components/ui/Icon'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import styles from './BottomNavigation.module.scss'
 
 const ROLE_ALL = 'ALL'
@@ -59,12 +60,9 @@ const isRoleAllowed = (roles = [ROLE_ALL], role) =>
 export const BottomNavigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const { role } = useAuth((state) => ({ role: state.role }))
+  const { customerRole } = useAuth((state) => ({ customerRole: state.customerRole }))
 
-  const roleKey =
-    role === USER_ROLES.CAREGIVER || role === 'CAREGIVER' || role === 'caregiver'
-      ? USER_ROLES.CAREGIVER
-      : USER_ROLES.SENIOR
+  const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
 
   const menuItems = NAV_ITEMS.filter((item) => isRoleAllowed(item.roles, roleKey)).map((item) => ({

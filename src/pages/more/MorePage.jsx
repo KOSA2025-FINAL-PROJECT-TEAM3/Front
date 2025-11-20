@@ -9,20 +9,19 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { MenuGroup } from '@shared/components/ui/MenuGroup'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
-import { USER_ROLES } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { isCaregiverRole } from '@features/auth/utils/roleUtils'
 import styles from './MorePage.module.scss'
 
 export const MorePage = () => {
   const navigate = useNavigate()
-  const { role, logout, user } = useAuth((state) => ({
-    role: state.role,
+  const { customerRole, logout } = useAuth((state) => ({
+    customerRole: state.customerRole,
     logout: state.logout,
-    user: state.user,
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
 
-  const isCaregiver = role === USER_ROLES.CAREGIVER
+  const isCaregiver = isCaregiverRole(customerRole)
 
   const handleNavigate = (path) => {
     if (!path) return
