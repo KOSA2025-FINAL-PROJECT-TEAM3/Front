@@ -74,6 +74,7 @@ export const DeveloperModePanel = () => {
     window.localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
     window.localStorage.removeItem(STORAGE_KEYS.FAMILY_GROUP)
     window.localStorage.removeItem(STORAGE_KEYS.FAMILY_MEMBER_DETAILS)
+    window.localStorage.removeItem('amapill-auth-storage')
   }
 
   const showStatus = (message, level = 'info') => {
@@ -238,7 +239,7 @@ export const DeveloperModePanel = () => {
                 className={styles.shortcutButton}
                 onClick={handleResetMockData}
               >
-                목데이터 초기화
+                목데이터 및 로그인 정보 초기화
               </button>
             </li>
             <li>

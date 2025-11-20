@@ -19,6 +19,12 @@ const queryClient = new QueryClient({
   },
 })
 
+// Auto-remove DEV_MODE when VITE_USE_MOCK_API=false
+if (import.meta.env.VITE_USE_MOCK_API !== 'true') {
+  localStorage.removeItem('amapill_dev_mode')
+  console.log('✅ DEV_MODE 자동 비활성화 (실제 API 모드)')
+}
+
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
