@@ -7,7 +7,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { useAuthStore } from '@features/auth/store/authStore'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { ROUTE_PATHS } from '@config/routes.config'
