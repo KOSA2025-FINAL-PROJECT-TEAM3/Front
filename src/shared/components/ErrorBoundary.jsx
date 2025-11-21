@@ -12,7 +12,7 @@ class ErrorBoundary extends Component {
     this.state = { hasError: false, error: null, errorInfo: null }
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true }
   }
 
@@ -24,7 +24,7 @@ class ErrorBoundary extends Component {
     // logErrorToService(error, errorInfo)
   }
 
-  handleReset = () => {
+  handleReset() {
     this.setState({ hasError: false, error: null, errorInfo: null })
   }
 

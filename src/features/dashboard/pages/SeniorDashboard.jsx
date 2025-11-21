@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useMemo, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { MainLayout } from '@shared/components/layout/MainLayout'
 import { MedicationCard } from '../components/MedicationCard'
 import { QuickActions } from '@shared/components/ui/QuickActions'
@@ -31,7 +30,6 @@ const parseTime = (timeLabel = '') => {
 }
 
 export const SeniorDashboard = () => {
-  const navigate = useNavigate()
   const { members, initialized, initialize } = useFamilyStore((s) => ({
     members: s.members,
     initialized: s.initialized,

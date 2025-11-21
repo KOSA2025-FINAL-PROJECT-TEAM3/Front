@@ -1,4 +1,5 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 const buildMockToken = (prefix) => `${prefix}_${Date.now()}`
 const maskEmail = (email = '') => email.split('@')[0] || 'user'
@@ -6,25 +7,36 @@ const maskEmail = (email = '') => email.split('@')[0] || 'user'
 class AuthApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_AUTH_API_URL || 'http://localhost:8081',
+      baseURL: envConfig.AUTH_API_URL,
       basePath: '/api/auth',
     })
   }
 
   login(email, password) {
     const payload = { email, password }
-    const mockResponse = () => ({
-      user: {
-        id: 'auth-mock-user',
-        email,
-        name: maskEmail(email),
+    const mockResponse = () => {
+      // Mock: Retrieve stored customerRole from localStorage
+      // In production, backend should return the user's role
+      const storedUserData = typeof window !== 'undefined'
+        ? window.localStorage.getItem('amapill-user-data')
+        : null
+      const storedRole = storedUserData
+        ? JSON.parse(storedUserData).customerRole || null
+        : null
+
+      return {
+        user: {
+          id: 'auth-mock-user',
+          email,
+          name: maskEmail(email),
+          userRole: 'ROLE_USER',
+          customerRole: storedRole,
+        },
+        accessToken: buildMockToken('accessToken'),
         userRole: 'ROLE_USER',
-        customerRole: null,
-      },
-      accessToken: buildMockToken('accessToken'),
-      userRole: 'ROLE_USER',
-      customerRole: null,
-    })
+        customerRole: storedRole,
+      }
+    }
 
     return this.post('/login', payload, undefined, { mockResponse })
   }
