@@ -144,7 +144,7 @@ export const getEnvironmentConfig = () => {
     API_BASE_URL: getApiBaseURL(),
 
     // Microservice-specific URLs
-    AUTH_API_URL: getServiceURL('VITE_AUTH_API_URL', 8081),
+    AUTH_API_URL: getServiceURL('VITE_AUTH_API_URL', 80),
     MEDICATION_API_URL: getServiceURL('VITE_MEDICATION_API_URL', 8082),
     FAMILY_API_URL: getServiceURL('VITE_FAMILY_API_URL', 8082),
     DIET_API_URL: getServiceURL('VITE_DIET_API_URL', 8082),
