@@ -11,7 +11,7 @@ import { FAB } from '@shared/components/ui/FAB'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
 import { FamilyMockService } from '@features/family/services/familyService'
-import { ROUTE_PATHS } from '@config/routes.config'
+import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/data/mockUiConstants'
 import styles from './SeniorDashboard.module.scss'
 
 const mapStatus = (label = '') => {
@@ -91,19 +91,6 @@ export const SeniorDashboard = () => {
     weekday: 'long',
   })
 
-  const quickActions = [
-    { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
-    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
-    { icon: '🍽️', label: '식단 경고', path: ROUTE_PATHS.dietWarning },
-    { icon: '📊', label: '복용 리포트', path: ROUTE_PATHS.adherenceReport },
-  ]
-
-  const fabActions = [
-    { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
-    { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
-    { icon: '📷', label: '처방전 스캔', path: ROUTE_PATHS.ocrScan },
-  ]
-
   return (
     <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
       <div className={styles.dashboardContent}>
@@ -112,7 +99,7 @@ export const SeniorDashboard = () => {
           <p className={styles.dateInfo}>{todayDate}</p>
         </div>
 
-        <QuickActions actions={quickActions} />
+        <QuickActions actions={SENIOR_QUICK_ACTIONS} />
 
         <div className={styles.medicationList}>
           {scheduleList.map((schedule) => (
@@ -124,7 +111,7 @@ export const SeniorDashboard = () => {
           ))}
         </div>
 
-        <FAB actions={fabActions} />
+        <FAB actions={SENIOR_FAB_ACTIONS} />
       </div>
     </MainLayout>
   )

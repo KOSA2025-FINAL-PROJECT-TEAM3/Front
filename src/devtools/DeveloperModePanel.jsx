@@ -1,4 +1,4 @@
-﻿/**
+/**
  * DeveloperModePanel
  * - 개발 모드 진입/바로가기 패널 (UI는 SCSS 모듈)
  */
@@ -10,28 +10,10 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { resetFamilyMockData } from '@features/family/services/familyService'
 import { MOCK_DIET_LOGS } from '@/data/mockDiet'
+import { DEV_PROFILES } from '@/data/mockUiConstants'
 import styles from './DeveloperModePanel.module.scss'
 
 const DEV_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEV_MODE !== 'false'
-
-const DEFAULT_USER_ROLE = 'ROLE_USER'
-
-const DEV_PROFILES = {
-  [USER_ROLES.SENIOR]: {
-    id: 'dev-senior',
-    name: '김어르신',
-    email: 'senior@amapill.dev',
-    customerRole: USER_ROLES.SENIOR,
-    userRole: DEFAULT_USER_ROLE,
-  },
-  [USER_ROLES.CAREGIVER]: {
-    id: 'dev-caregiver',
-    name: '홍보호자',
-    email: 'caregiver@amapill.dev',
-    customerRole: USER_ROLES.CAREGIVER,
-    userRole: DEFAULT_USER_ROLE,
-  },
-}
 
 const seedDietLogs = () => {
   if (typeof window === 'undefined') return

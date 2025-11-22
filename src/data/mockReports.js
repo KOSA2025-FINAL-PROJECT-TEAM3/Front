@@ -4,6 +4,29 @@
  * @description 복약 순응도 리포트 및 주간 통계용 Mock 데이터
  */
 
+// 복약 순응도 페이지용 요약 데이터
+export const MOCK_ADHERENCE_PAGE_DATA = {
+  overall: 87,
+  thisWeek: 92,
+  lastWeek: 85,
+  thisMonth: 87,
+  streak: 14,
+  totalDays: 90,
+  completedDays: 78,
+  missedDays: 12,
+}
+
+// 최근 복약 히스토리
+export const MOCK_RECENT_HISTORY = [
+  { date: '2025-01-18', status: 'completed', count: 3, total: 3 },
+  { date: '2025-01-17', status: 'completed', count: 3, total: 3 },
+  { date: '2025-01-16', status: 'partial', count: 2, total: 3 },
+  { date: '2025-01-15', status: 'completed', count: 3, total: 3 },
+  { date: '2025-01-14', status: 'missed', count: 1, total: 3 },
+  { date: '2025-01-13', status: 'completed', count: 3, total: 3 },
+  { date: '2025-01-12', status: 'completed', count: 3, total: 3 },
+]
+
 export const MOCK_ADHERENCE_REPORT = {
   id: 'report-adherence-1',
   period: '2025-11-12',
