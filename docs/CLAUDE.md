@@ -1,189 +1,247 @@
-<!-- encoding: utf-8 -->
 # CLAUDE.md - AI Agent Development Guide
 
-> **Purpose**: This file provides context for Claude Code and other MCP agents to assist with development.
-> **Target**: AI assistants helping with code generation, debugging, and architecture decisions.
+> **Purpose**: Claude Code 및 MCP Agent를 위한 개발 컨텍스트 제공
+> **Target**: AI 코드 생성, 디버깅, 아키텍처 결정 지원
 
-## 📋 Table of Contents
+## 📋 목차
 
-1. [Quick Reference](#-quick-reference) - Essential project info
-2. [Project Overview](#-project-overview) - Features & goals
-3. [Tech Stack](#tech-stack) - Technologies used
-4. [Project Structure](#project-structure) - Directory layout
-5. [Key Commands](#key-commands) - Common tasks
-6. [Code Style](#code-style) - Naming & patterns
-7. [Development Guidelines](#development-guidelines) - Git workflow & stages
-8. [Environment Variables](#environment-variables) - Required config
-9. [Related Documentation](#-related-documentation) - Links to all docs
-10. [Do Not](#do-not) - Things to avoid
+1. [Quick Reference](#-quick-reference)
+2. [Project Overview](#-project-overview)
+3. [Tech Stack](#tech-stack)
+4. [Project Structure](#project-structure)
+5. [Key Commands](#key-commands)
+6. [Code Style](#code-style)
+7. [Development Guidelines](#development-guidelines)
+8. [Environment Variables](#environment-variables)
+9. [Related Documentation](#-related-documentation)
+10. [Do Not](#do-not)
 
 ---
 
 ## 📌 Quick Reference
 
-| Category | Key Information |
-|----------|----------------|
-| **Project** | AMA...Pill - Family medication management platform |
-| **Team** | 3 developers |
-| **Timeline** | Nov 5 - Dec 31, 2025 (~7 weeks) |
-| **Main Features** | Family care network, drug-food alerts, OCR prescription, pill search |
-| **Dev Server** | `npm run dev` → http://localhost:5173 |
+| 항목 | 내용 |
+|------|------|
+| **프로젝트** | AMA...Pill - 가족 중심 약 관리 플랫폼 |
+| **팀** | 3명 개발자 |
+| **타임라인** | 2025년 11월 ~ 12월 |
+| **주요 기능** | 가족 케어 네트워크, 약-음식 경고, OCR 처방전, 알약 검색 |
+| **개발 서버** | `npm run dev` → http://localhost:5173 |
 
 ---
 
 ## 🎯 Project Overview
 
-**"Is it time to take medicine?"** - Family-centered medication management platform for elderly parents & adult children remote care.
+**"약 먹을 시간이에요?"** - 노인 부모와 성인 자녀를 위한 가족 중심 약 관리 플랫폼
 
-### Key Features
-1. **Family Care Network** - Real-time sync between seniors and caregivers
-2. **Drug-Food Interaction Alerts** - Safety warnings for medication + food combinations
-3. **OCR Prescription Registration** - Automatic medication entry via image recognition
-4. **Pill Reverse Search** - Identify pills by shape/color
-5. **Compliance Reports** - Medication adherence tracking
+### 주요 기능
+1. **가족 케어 네트워크** - 시니어와 보호자 간 실시간 동기화
+2. **약-음식 상호작용 경고** - 복용 중인 약과 음식 조합 안전 경고
+3. **OCR 처방전 등록** - 이미지 인식을 통한 자동 약 정보 입력
+4. **알약 역검색** - 모양/색상으로 약 식별
+5. **복약 순응도 리포트** - 복약 이행률 추적 및 통계
 
 ## Tech Stack
-- Framework: React 19
-- Build Tool: Vite 5.0+
-- Language: JavaScript (ES modules)
-- State Management: Zustand (global), React Hooks (local)
-- HTTP Client: Axios with Interceptors
-- Styling: CSS Modules + Tailwind CSS
-- Routing: React Router
-- Real-time: WebSocket (Hocuspocus + TipTap for collaborative editing)
+
+| 분류 | 기술 |
+|------|------|
+| **Framework** | React 19 |
+| **Build Tool** | Vite 5.0+ |
+| **Language** | JavaScript (ES Modules) |
+| **State Management** | Zustand (전역), React Hooks (로컬) |
+| **HTTP Client** | Axios with Interceptors |
+| **Styling** | Tailwind CSS + SCSS Modules |
+| **Routing** | React Router DOM |
+| **Real-time** | Hocuspocus + Y.js |
+| **Form** | React Hook Form + Zod |
 
 ## Project Structure
 
 ```
 src/
-├── App.jsx                          # Main routing (40 routes defined)
-├── main.jsx                         # Entry point
-├── index.jsx                        # React render target
-├── core/                            # Core infrastructure
-│   ├── config/                      # Configuration
-│   │   ├── constants.js             # Enums, roles, statuses, storage keys
-│   │   ├── routes.config.js         # Route definitions (39 paths)
-│   │   └── api.config.js            # API base URL
-│   ├── services/                    # API clients (10 clients)
-│   │   └── api/
-│   │       ├── ApiClient.js         # Base class with mock support
-│   │       ├── authApiClient.js     # Login/signup/Kakao OAuth
-│   │       ├── medicationApiClient.js
-│   │       ├── familyApiClient.js
-│   │       ├── chatApiClient.js
-│   │       ├── dietApiClient.js
-│   │       ├── diseaseApiClient.js
-│   │       ├── searchApiClient.js
-│   │       ├── ocrApiClient.js
-│   │       ├── counselApiClient.js
-│   │       └── httpClient.js        # Axios wrapper
-│   ├── interceptors/                # HTTP interceptors
-│   │   ├── authInterceptor.js       # Bearer token injection
-│   │   └── errorInterceptor.js      # Error handling
+├── App.jsx                          # 메인 라우팅 (40+ 라우트)
+├── main.jsx                         # 엔트리 포인트
+│
+├── core/                            # 핵심 인프라
+│   ├── config/
+│   │   ├── constants.js             # Enum, 역할, 상태, 스토리지 키
+│   │   ├── routes.config.js         # 라우트 경로 정의
+│   │   ├── api.config.js            # API 기본 URL
+│   │   └── environment.config.js    # 환경변수 설정
+│   │
+│   ├── services/api/                # API 클라이언트 (12개)
+│   │   ├── ApiClient.js             # 추상 클래스 (Mock 지원)
+│   │   ├── httpClient.js            # Axios 래퍼
+│   │   ├── authApiClient.js         # 로그인/회원가입/Kakao OAuth
+│   │   ├── medicationApiClient.js
+│   │   ├── familyApiClient.js
+│   │   ├── chatApiClient.js
+│   │   ├── dietApiClient.js
+│   │   ├── diseaseApiClient.js
+│   │   ├── searchApiClient.js
+│   │   ├── ocrApiClient.js
+│   │   ├── counselApiClient.js
+│   │   ├── reportApiClient.js
+│   │   └── notificationApiClient.js
+│   │
+│   ├── interceptors/
+│   │   ├── authInterceptor.js       # Bearer 토큰 주입
+│   │   └── errorInterceptor.js      # 전역 에러 처리
+│   │
 │   ├── routing/
-│   │   ├── PrivateRoute.jsx         # Auth-required routes
-│   │   └── navigation.js            # Programmatic navigation
-│   └── utils/                       # Utility functions
-│       ├── formatting.js            # Date/number/string formatting
-│       ├── validation.js            # Zod schemas
-│       ├── errorHandler.js          # Error parsing
-│       ├── stringUtils.js           # String operations
-│       └── index.js
-├── features/                        # Feature modules (13 domains)
-│   ├── auth/                        # Authentication
+│   │   ├── PrivateRoute.jsx         # 인증 필요 라우트 보호
+│   │   └── navigation.js            # 프로그래매틱 네비게이션
+│   │
+│   └── utils/
+│       ├── formatting.js            # 날짜/숫자/문자열 포매팅
+│       ├── validation.js            # Zod 스키마
+│       ├── errorHandler.js          # 에러 파싱
+│       └── stringUtils.js           # 문자열 유틸리티
+│
+├── features/                        # 기능 모듈 (13개 도메인)
+│   ├── auth/                        # 인증
 │   │   ├── pages/                   # Login, Signup, RoleSelection, KakaoCallback
 │   │   ├── components/              # KakaoLoginButton
 │   │   ├── hooks/                   # useAuth
-│   │   └── store/                   # authStore (Zustand)
-│   ├── dashboard/                   # Role-specific dashboards
+│   │   ├── store/                   # authStore (Zustand)
+│   │   └── utils/                   # roleUtils
+│   │
+│   ├── dashboard/                   # 역할별 대시보드
 │   │   ├── pages/                   # SeniorDashboard, CaregiverDashboard
 │   │   └── components/              # MedicationCard, FamilyMemberCard
-│   ├── medication/                  # Drug management
+│   │
+│   ├── medication/                  # 약 관리
 │   │   ├── pages/                   # Management, Add, Edit
 │   │   ├── components/              # Form, List, DetailModal, InventoryTracker
 │   │   └── store/                   # medicationStore
-│   ├── family/                      # Family group management
+│   │
+│   ├── family/                      # 가족 관리
 │   │   ├── pages/                   # Management, Invite, MemberDetail
 │   │   ├── components/              # List, Card, Profile, InviteForm, AdherenceChart
 │   │   ├── hooks/                   # useFamily, useFamilyMemberDetail, useFamilySync
 │   │   ├── services/                # familyService, familySyncService
-│   │   ├── context/                 # FamilyContext (Provider wrapper)
+│   │   ├── context/                 # FamilyContext (Provider)
 │   │   └── store/                   # familyStore
-│   ├── diet/                        # Dietary tracking
+│   │
+│   ├── diet/                        # 식단 관리
 │   │   ├── pages/                   # DietLogPage, FoodWarning
 │   │   └── components/              # MealInputForm, MealHistory, FoodConflictWarning
-│   ├── search/                      # Pill search
-│   │   └── pages/                   # SymptomSearch, PillSearchPage, PillResultPage
-│   ├── disease/                     # Condition management
+│   │
+│   ├── disease/                     # 질병 관리
 │   │   └── pages/                   # Disease, DetailPage, SuspectedDiseasePage
-│   ├── ocr/                         # Prescription scanning
+│   │
+│   ├── search/                      # 검색
+│   │   ├── pages/                   # SymptomSearch, PillSearchPage, PillResultPage
+│   │   └── components/
+│   │
+│   ├── ocr/                         # 처방전 스캔
 │   │   ├── pages/                   # PrescriptionScan
 │   │   └── components/              # OCRControlPanel, OCRResultPreview
-│   ├── chat/                        # Doctor consultations
+│   │
+│   ├── chat/                        # 채팅
 │   │   ├── pages/                   # DoctorChatListPage, ChatConversationPage
 │   │   └── components/              # ChatMessage, ChatInput, ChatRoomCard
-│   ├── counsel/                     # Medical consultation
-│   ├── notification/                # In-app alerts
-│   ├── report/                      # Analytics (AdherenceReportPage, WeeklyStatsPage)
-│   ├── settings/                    # User preferences
-│   │   ├── pages/                   # Settings, ProfileEdit, NotificationSettings, etc.
-│   │   └── components/              # SettingsMenu, ProfileSection
-│   └── index.js
-├── shared/                          # Reusable components
+│   │
+│   ├── counsel/                     # 상담
+│   │   └── pages/                   # DoctorCounsel
+│   │
+│   ├── notification/                # 알림
+│   │   ├── pages/                   # NotificationList
+│   │   └── store/                   # notificationStore
+│   │
+│   ├── report/                      # 리포트
+│   │   └── pages/                   # AdherenceReportPage, WeeklyStatsPage
+│   │
+│   └── settings/                    # 설정
+│       ├── pages/                   # Settings, ProfileEdit, NotificationSettings
+│       └── components/              # SettingsMenu, ProfileSection
+│
+├── shared/                          # 공유 컴포넌트
 │   └── components/
+│       ├── ErrorBoundary.jsx        # 에러 경계
+│       ├── ErrorFallback.jsx        # 에러 폴백 UI
 │       ├── layout/
-│       │   ├── MainLayout.jsx       # App-wide layout
-│       │   ├── Header.jsx           # Top navigation
-│       │   └── BottomNavigation.jsx # Mobile nav (4 items)
-│       └── ui/                      # Base UI components
-│           ├── Button.jsx           # Styled button (variants, sizes)
-│           ├── Card.jsx             # Container component
-│           ├── Input.jsx            # Form input
-│           ├── Modal.jsx            # Dialog wrapper
-│           └── Icon.jsx             # SVG icon system
-├── hooks/                           # Global custom hooks
-│   ├── useDebounce.js
-│   ├── useFetch.js                  # Data fetching with error handling
-│   └── useLocalStorage.js
-├── pages/                           # Top-level error pages
-│   └── errors/                      # NotFound, ServerError
-├── data/                            # Mock data (11 files, ~1K lines)
+│       │   ├── MainLayout.jsx       # 앱 레이아웃
+│       │   ├── Header.jsx           # 상단 네비게이션
+│       │   └── BottomNavigation.jsx # 하단 네비게이션 (4개 탭)
+│       ├── ui/                      # 기본 UI 컴포넌트
+│       │   ├── Button.jsx           # 버튼 (variants, sizes)
+│       │   ├── Card.jsx             # 카드 컨테이너
+│       │   ├── Input.jsx            # 폼 입력
+│       │   ├── Modal.jsx            # 모달 다이얼로그
+│       │   ├── Icon.jsx             # SVG 아이콘
+│       │   ├── BackButton.jsx       # 뒤로가기 버튼
+│       │   ├── FAB.jsx              # Floating Action Button
+│       │   ├── MenuGroup.jsx        # 메뉴 그룹
+│       │   ├── QuickActions.jsx     # 빠른 액션
+│       │   └── Tabs.jsx             # 탭 컴포넌트
+│       └── toast/                   # 토스트 알림
+│           ├── Toast.jsx
+│           ├── ToastContainer.jsx
+│           └── toastStore.js
+│
+├── hooks/                           # 전역 커스텀 훅
+│   ├── useDebounce.js               # 디바운스 (검색 지연)
+│   ├── useFetch.js                  # 데이터 페칭
+│   └── useLocalStorage.js           # localStorage 동기화
+│
+├── pages/                           # 공통 페이지
+│   ├── errors/                      # NotFound, ServerError
+│   └── more/                        # MorePage
+│
+├── data/                            # Mock 데이터 (13개 파일)
 │   ├── mockMedications.js
 │   ├── mockFamily.js
 │   ├── mockDiet.js
 │   ├── mockDiseases.js
-│   └── ... (7 more mock files)
-├── assets/                          # Static images/icons
-└── styles/                          # Global styles
+│   ├── mockSymptoms.js
+│   ├── mockNotifications.js
+│   ├── mockFoodWarnings.js
+│   ├── mockChats.js
+│   ├── mockChat.js
+│   ├── mockPillDetails.js
+│   ├── mockReports.js
+│   ├── mockSearchResults.js
+│   └── mockOcr.js
+│
+├── devtools/                        # 개발자 도구
+│   ├── DeveloperModePanel.jsx
+│   └── editor/components/
+│
+├── assets/                          # 정적 자원
+└── styles/                          # 전역 스타일
     ├── base.scss
     └── tailwind.css
 ```
 
 ## Key Commands
-- `npm install` - Install dependencies (first-time only)
-- `npm run dev` - Start development server (http://localhost:5173)
-- `npm run build` - Production build
-- `npm run preview` - Preview build locally
-- `npm run lint` - Run ESLint
+
+```bash
+npm install          # 의존성 설치
+npm run dev          # 개발 서버 (http://localhost:5173)
+npm run build        # 프로덕션 빌드
+npm run preview      # 빌드 미리보기
+npm run lint         # ESLint 실행
+```
 
 ## Code Style
-- Use ES modules (import/export)
-- All new components must be function components with Hooks
-- Prefer arrow functions for component definitions
-- Use descriptive variable names (no single letters except loops)
-- Add JSDoc comments for all exported functions and components
 
-### Naming Convention
-- **Components**: PascalCase (`UserProfile.jsx`)
-- **Functions/Variables**: camelCase (`getUserData`, `userName`)
-- **Constants**: UPPER_SNAKE_CASE (`API_BASE_URL`)
-- **Custom Hooks**: `use` prefix (`useAuth`)
-- **Event Handlers**: `handle` prefix (`handleClick`)
-- **Booleans**: `is/has` prefix (`isLoading`, `hasError`)
+### 네이밍 컨벤션
 
-### Code Examples
+| 대상 | 규칙 | 예시 |
+|------|------|------|
+| **컴포넌트 파일** | PascalCase + `.jsx` | `UserProfile.jsx` |
+| **함수/변수** | camelCase | `getUserData`, `userName` |
+| **상수** | UPPER_SNAKE_CASE | `API_BASE_URL` |
+| **Custom Hook** | `use` 접두사 | `useAuth()` |
+| **이벤트 핸들러** | `handle` 접두사 | `handleClick()` |
+| **Boolean** | `is/has` 접두사 | `isLoading`, `hasError` |
+| **스토어** | camelCase + `Store` | `authStore.js` |
+| **서비스** | camelCase + `Service` | `familyService.js` |
 
-**✅ Good JavaScript**:
+### 코드 예시
+
+**JavaScript**:
 ```javascript
 const handleSubmit = (event) => {
   event.preventDefault()
@@ -195,7 +253,7 @@ const handleSubmit = (event) => {
 }
 ```
 
-**✅ Good JSX**:
+**JSX**:
 ```jsx
 export const UserProfile = ({ user, isLoading }) => {
   if (isLoading) {
@@ -213,304 +271,156 @@ export const UserProfile = ({ user, isLoading }) => {
 }
 ```
 
-**✅ Good Comments**:
-```javascript
-/**
- * Fetch user data by ID
- * @param {string} userId - User ID
- * @returns {Promise<Object>} User info
- * @throws {Error} If user not found
- */
-export const getUserData = async (userId) => {
-  const response = await apiClient.get(`/users/${userId}`)
-  return response.data
-}
-```
-
 ## Development Guidelines
 
 ### Git Workflow
-- **Branch strategy**: main (production) ← develop (integration) ← feature/* (dev)
-- **Branch naming**: `feature/#10-description-developer` or `bugfix/#15-description-developer`
-- **Commit format**: `emoji Type: description` (max 50 chars)
-  - ✨ Feat: New feature
-  - 🐛 Fix: Bug fix
-  - 📝 Docs: Documentation
-  - ♻️ Refactor: Code refactor
-  - 🧪 Test: Tests
 
-### Development Stages & Implementation Status
+- **브랜치 전략**: `main` ← `develop` ← `feature/#이슈-설명-개발자`
+- **브랜치 네이밍**: `feature/#10-user-login-junsu` 또는 `bugfix/#15-auth-error-seohee`
+- **커밋 규칙**: `emoji Type: description` (50자 이내)
+  - ✨ Feat: 새로운 기능
+  - 🐛 Fix: 버그 수정
+  - 📝 Docs: 문서 업데이트
+  - ♻️ Refactor: 코드 리팩토링
+  - 🧪 Test: 테스트 코드
 
-#### ✅ Stage 1: Project Setup (COMPLETE)
-- ✅ React 19 + Vite + Tailwind CSS setup
-- ✅ React Router (40 routes defined)
-- ✅ Zustand stores (auth, medication, family)
-- ✅ Axios with interceptors (auth + error handling)
-- ✅ MainLayout, Header, BottomNavigation
-- ✅ UI components (Button, Card, Input, Modal, Icon)
-- ✅ Path aliases (@features, @shared, @utils, @config, @core)
+### 구현 현황
 
-#### ✅ Stage 2: Authentication (COMPLETE)
-- ✅ Login/Signup pages with form validation
-- ✅ Kakao OAuth integration (KakaoCallback page)
-- ✅ Role selection (SENIOR/CAREGIVER)
-- ✅ Auth store with localStorage persistence
-- ✅ JWT token management via interceptors
-- ✅ PrivateRoute component for protected routes
+#### 완료
+- React 19 + Vite + Tailwind CSS 설정
+- React Router (40+ 라우트)
+- Zustand stores (auth, medication, family)
+- Axios with interceptors
+- MainLayout, Header, BottomNavigation
+- UI 컴포넌트 (Button, Card, Input, Modal, Icon, FAB, Tabs 등)
+- 인증 (Login, Signup, RoleSelection, KakaoCallback)
+- 대시보드 (SeniorDashboard, CaregiverDashboard)
+- 약 관리 UI (CRUD)
+- 가족 관리 UI (목록, 초대, 상세)
+- 설정 페이지
 
-#### ✅ Stage 3: Dashboard (COMPLETE)
-- ✅ SeniorDashboard (medication schedule view)
-- ✅ CaregiverDashboard (family oversight)
-- ✅ MedicationCard, FamilyMemberCard components
-- ✅ Mock data integration
-
-#### 🔄 Stage 4: Core Features (IN PROGRESS)
-
-**✅ Medication Management (COMPLETE - UI)**
-- ✅ CRUD operations (Add, Edit, Delete, List)
-- ✅ MedicationDetailModal
-- ✅ Inventory tracking UI
-- ⏳ Real API integration pending
-
-**✅ Family Management (COMPLETE - UI)**
-- ✅ Family member list/detail pages
-- ✅ Invite member form
-- ✅ FamilyContext + familyStore
-- ✅ useFamilySync hook (skeleton)
-- ⏳ Real-time sync pending WebSocket
-
-**🔄 Diet & Food Warnings (PARTIAL)**
-- ✅ Meal logging UI (DietLogPage)
-- ✅ Food conflict warning display
-- ⏳ Backend integration pending
-
-**🔄 Disease Management (PARTIAL)**
-- ✅ Disease list/detail pages
-- ✅ Suspected disease page
-- ⏳ API integration pending
-
-**🔄 Search Features (PARTIAL)**
-- ✅ Symptom search UI
-- ✅ Pill search by appearance UI
-- ✅ Results display page
-- ⏳ Real search API pending
-
-**🔄 Chat & Consultation (PARTIAL)**
-- ✅ Chat list and conversation pages
-- ✅ Mock messages display
-- ⏳ WebSocket integration pending
-- ⏳ Doctor consultation booking pending
-
-**🔄 OCR Prescription (WIREFRAME)**
-- ✅ PrescriptionScan page UI
-- ⏳ Camera integration pending
-- ⏳ OCR API integration pending
-
-**✅ Settings (COMPLETE - UI)**
-- ✅ Profile edit
-- ✅ Notification settings
-- ✅ My medications/diseases settings
-- ✅ Privacy policy & terms pages
-
-**🔄 Reports & Analytics (PARTIAL)**
-- ✅ Adherence report page UI
-- ✅ Weekly stats page UI
-- ⏳ Real data calculation pending
+#### 진행 중
+- 실제 API 연동
+- WebSocket 실시간 동기화
+- OCR 처방전 스캔
 
 ## Environment Variables
-Required (`.env` file):
-- `VITE_API_BASE_URL`: API server (default: http://localhost:8080)
-- `VITE_WS_BASE_URL`: WebSocket server (default: ws://localhost:8080/ws)
-- `VITE_KAKAO_CLIENT_ID`: Kakao OAuth client ID
-- `VITE_USE_MOCK_API`: Toggle mock/real API (true/false)
-- `VITE_DEBUG`: Enable debug mode (true/false)
-- `VITE_NOTIFICATION_TIMEOUT`: Alert duration in ms (default: 5000)
-- `VITE_ITEMS_PER_PAGE`: Pagination limit (default: 10)
-- `VITE_MAX_FILE_SIZE`: Max upload size in bytes (default: 5242880 = 5MB)
 
-## Mock API Architecture
+`.env` 파일 필수 설정:
 
-All API clients inherit from `ApiClient` base class supporting dual-mode operation:
-
-### How It Works
-```javascript
-// ApiClient.js - Base class pattern
-class ApiClient {
-  async request(endpoint, options) {
-    if (import.meta.env.VITE_USE_MOCK_API === 'true') {
-      return this.mockResponse()  // Return mock data
-    }
-    return httpClient.request(endpoint, options)  // Real API call
-  }
-}
-```
-
-### Toggle Mock Mode
 ```bash
-# .env file
-VITE_USE_MOCK_API=true   # Use mock data (no backend needed)
-VITE_USE_MOCK_API=false  # Use real API (requires backend)
+VITE_API_BASE_URL=http://localhost:8080     # API 서버 주소
+VITE_WS_BASE_URL=ws://localhost:8080/ws     # WebSocket 서버 주소
+VITE_KAKAO_CLIENT_ID=your_kakao_client_id   # 카카오 OAuth 클라이언트 ID
+VITE_USE_MOCK_API=true                       # Mock/Real API 토글
+VITE_DEBUG=false                             # 디버그 모드
+VITE_NOTIFICATION_TIMEOUT=5000              # 알림 지속 시간 (ms)
+VITE_ITEMS_PER_PAGE=10                       # 페이지네이션 기본값
+VITE_MAX_FILE_SIZE=5242880                   # 최대 파일 크기 (5MB)
 ```
 
-### 10 API Clients
+### Mock API 토글
 
-| Client | Endpoints | Mock Data | Real API |
-|--------|-----------|-----------|----------|
-| **authApiClient** | `/auth/login`, `/auth/signup`, `/auth/kakao-login`, `/auth/select-role`, `/auth/logout` | ✅ | ✅ |
-| **medicationApiClient** | `/medications` (GET/POST/PATCH/DELETE) | ✅ `mockMedications.js` | ⏳ |
-| **familyApiClient** | `/family`, `/family/members`, `/family/invite` | ✅ `mockFamily.js` | ⏳ |
-| **dietApiClient** | `/diet/meals`, `/diet/warnings` | ✅ `mockDiet.js` | ⏳ |
-| **diseaseApiClient** | `/diseases`, `/diseases/{id}` | ✅ `mockDiseases.js` | ⏳ |
-| **searchApiClient** | `/search/pills`, `/search/symptoms` | ✅ `mockSearchResults.js` | ⏳ |
-| **ocrApiClient** | `/ocr/prescription` (POST image) | ✅ | ⏳ |
-| **chatApiClient** | `/chat/rooms`, `/chat/messages` | ✅ `mockChats.js` | ⏳ |
-| **counselApiClient** | `/counsel/doctors`, `/counsel/book` | ✅ | ⏳ |
-| **notificationApiClient** | `/notifications` | ✅ `mockNotifications.js` | ⏳ |
-
-### Mock Data Location
-```
-src/data/
-├── mockMedications.js      # Sample medication entries
-├── mockFamily.js           # Family group + members (120 lines)
-├── mockDiet.js             # Meal logs + food warnings
-├── mockDiseases.js         # Disease database
-├── mockSymptoms.js         # Symptom search data (52 lines)
-├── mockNotifications.js    # Alert messages (55 lines)
-├── mockFoodWarnings.js     # Drug-food interactions (32 lines)
-├── mockChats.js            # Chat messages (154 lines)
-├── mockPillDetails.js      # Pill appearance data (185 lines)
-├── mockReports.js          # Adherence statistics (112 lines)
-└── mockSearchResults.js    # Search results (243 lines)
+```bash
+VITE_USE_MOCK_API=true   # Mock 데이터 사용 (백엔드 없이 개발)
+VITE_USE_MOCK_API=false  # 실제 API 사용 (백엔드 필요)
 ```
 
-### State Management
+## 상태 관리
 
-**Zustand Stores** (3 global stores):
+### Zustand Stores
+
 ```javascript
-// src/features/auth/store/authStore.js
+// authStore.js - 인증 상태
 useAuthStore
   - State: user, token, isAuthenticated, role
   - Actions: login(), signup(), logout(), selectRole()
-  - Persist: localStorage (STORAGE_KEYS.AUTH_TOKEN)
+  - Persist: localStorage
 
-// src/features/medication/store/medicationStore.js
+// medicationStore.js - 약 상태
 useMedicationStore
   - State: medications[], isLoading, error
   - Actions: fetchMedications(), addMedication(), updateMedication(), deleteMedication()
 
-// src/features/family/store/familyStore.js
+// familyStore.js - 가족 상태
 useFamilyStore
-  - State: familyGroup, members[], invitations[]
+  - State: familyGroup, members[], invitations[], initialized
   - Actions: initialize(), addMember(), inviteMember(), updateMember()
 ```
 
-**React Context**:
+### Context API
+
 ```javascript
-// src/features/family/context/FamilyContext.jsx
+// FamilyContext.jsx - 가족 데이터 제공
 FamilyProvider
-  - Wraps entire app in App.jsx
-  - Provides family data to all routes
-  - Auto-fetches on mount
+  - App.jsx에서 전체 앱 래핑
+  - 모든 라우트에 가족 데이터 제공
+  - 마운트 시 자동 fetch
 ```
-
-### Custom Hooks
-
-**Global Hooks** (`src/hooks/`):
-- `useFetch(url, options)` - Generic data fetching with loading/error states
-- `useDebounce(value, delay)` - Debounce search inputs (default 300ms)
-- `useLocalStorage(key, initialValue)` - Sync state with localStorage
-
-**Feature-Specific Hooks**:
-- `useAuth()` - Auth state selector from authStore
-- `useFamily()` - Family operations (add/invite/remove members)
-- `useFamilyMemberDetail(memberId)` - Single member data
-- `useFamilySync()` - Real-time WebSocket sync (skeleton)
 
 ## 📚 Related Documentation
 
-### Local Files (This Repository)
-- **[README.md](../README.md)** - User-facing project overview (root)
-- **[QUICKSTART.md](../QUICKSTART.md)** - Quick setup guide (root)
-- **[CONVENTIONS.md](./CONVENTIONS.md)** - Git workflow & code style (detailed)
-- **[SRC_STRUCTURE.md](./SRC_STRUCTURE.md)** - Directory structure & architecture
-- **[FRONTEND_COMPONENTS_SPECIFICATION.md](./FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34 screens, props, routing
-- **[PROJECT_SPECIFICATION.md](./PROJECT_SPECIFICATION.md)** - Full requirements
+### 로컬 문서
+- **[README.md](../README.md)** - 프로젝트 개요
+- **[QUICKSTART.md](../QUICKSTART.md)** - 빠른 시작 가이드
+- **[SRC_STRUCTURE.md](./SRC_STRUCTURE.md)** - 디렉토리 구조
+- **[FRONTEND_COMPONENTS_SPECIFICATION.md](./FRONTEND_COMPONENTS_SPECIFICATION.md)** - 컴포넌트 명세
 - **[CHAT_API_SPECIFICATION.md](./CHAT_API_SPECIFICATION.md)** - WebSocket API
 - **[OCR_API_SPECIFICATION.md](./OCR_API_SPECIFICATION.md)** - OCR API
 
-### External Links
-- **[.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/tree/dev)** - Organization-wide docs
-  - `WIREFRAME_SCREENS.md` - UI wireframes (10 screens)
-  - `FIGMA_GUIDE.md` - Figma plugin setup
-  - `DB스킬.md` - Database schema & ERD
-  - `SECURITY_GUIDELINES.md` - Security standards (KISA)
-  - `MVP_DTO_SPECIFICATION.md` - API endpoints & DTOs
-- **[Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back)** - Spring Boot backend
+### 외부 링크
+- **[Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back)** - Spring Boot 백엔드
+- **[.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github)** - 조직 전체 문서
 
 ## Do Not
 
-### Security & Best Practices
-- ❌ **DO NOT** commit `.env` file to git (use `.env.template` instead)
-- ❌ **DO NOT** hardcode API keys or secrets in code
-- ❌ **DO NOT** skip input validation (use Zod schemas in `validation.js`)
-- ❌ **DO NOT** trust API responses without validation
-- ❌ **DO NOT** expose sensitive user data in error messages
+### 보안 & 모범 사례
+- ❌ `.env` 파일을 git에 커밋하지 마세요 (`.env.template` 사용)
+- ❌ API 키나 비밀값을 코드에 하드코딩하지 마세요
+- ❌ 입력 검증을 건너뛰지 마세요 (`validation.js`의 Zod 스키마 사용)
+- ❌ 에러 메시지에 민감한 사용자 데이터를 노출하지 마세요
 
-### Architecture & Patterns
-- ❌ **DO NOT** use React Native (this is web-only)
-- ❌ **DO NOT** override existing library patterns without team discussion
-- ❌ **DO NOT** use Context API for global state (use Zustand stores instead)
-- ❌ **DO NOT** create new API clients without extending `ApiClient` base class
-- ❌ **DO NOT** bypass mock API architecture (support both mock/real modes)
+### 아키텍처 & 패턴
+- ❌ React Native를 사용하지 마세요 (웹 전용 프로젝트)
+- ❌ 전역 상태에 Context API를 사용하지 마세요 (Zustand 사용)
+- ❌ `ApiClient` 추상 클래스를 상속하지 않고 새 API 클라이언트를 만들지 마세요
+- ❌ Mock API 아키텍처를 우회하지 마세요
 
-### Code Quality
-- ❌ **DO NOT** create components without proper JSDoc comments
-- ❌ **DO NOT** use implicit `any` types or loose type checking
-- ❌ **DO NOT** use `var` (use `const`/`let` only)
-- ❌ **DO NOT** mutate state directly (use Zustand `set()` method)
-- ❌ **DO NOT** use inline styles (use Tailwind classes or SCSS modules)
+### 코드 품질
+- ❌ `var`를 사용하지 마세요 (`const`/`let` 사용)
+- ❌ 상태를 직접 변경하지 마세요 (Zustand `set()` 사용)
+- ❌ 인라인 스타일을 사용하지 마세요 (Tailwind 또는 SCSS 모듈 사용)
 
-### File Organization
-- ❌ **DO NOT** create files outside feature directories unless truly global
-- ❌ **DO NOT** mix feature-specific code in `/shared` directory
-- ❌ **DO NOT** create duplicate utility functions (check `/core/utils` first)
-- ❌ **DO NOT** bypass path aliases (use `@features`, `@shared`, etc.)
+### 파일 구조
+- ❌ 진정으로 전역적인 경우가 아니면 feature 디렉토리 외부에 파일을 만들지 마세요
+- ❌ feature 특화 코드를 `/shared` 디렉토리에 넣지 마세요
+- ❌ 중복 유틸리티 함수를 만들지 마세요 (`/core/utils` 먼저 확인)
 
-### Git Workflow
-- ❌ **DO NOT** commit directly to `main` or `develop` branches
-- ❌ **DO NOT** skip emoji in commit messages (follow convention)
-- ❌ **DO NOT** create branches without issue number (`feature/#10-description-developer`)
-- ❌ **DO NOT** push without running `npm run lint` first
+### Git 워크플로우
+- ❌ `main` 또는 `develop` 브랜치에 직접 커밋하지 마세요
+- ❌ 커밋 메시지에서 이모지를 생략하지 마세요
+- ❌ 이슈 번호 없이 브랜치를 만들지 마세요
+- ❌ `npm run lint` 실행 없이 푸시하지 마세요
 
-## Key Development Tips for AI Assistants
+## AI 개발 팁
 
-### When Adding New Features
-1. ✅ Check if similar component exists in `/shared/components/ui`
-2. ✅ Use existing API client patterns (extend `ApiClient`)
-3. ✅ Add mock data to `/src/data/mock*.js` for testing
-4. ✅ Follow naming conventions (PascalCase for components, camelCase for functions)
-5. ✅ Add JSDoc comments for all exported functions
+### 새 기능 추가 시
+1. `/shared/components/ui`에 유사한 컴포넌트가 있는지 확인
+2. 기존 API 클라이언트 패턴 사용 (`ApiClient` 상속)
+3. `/src/data/mock*.js`에 테스트용 Mock 데이터 추가
+4. 네이밍 컨벤션 준수
 
-### When Debugging
-1. ✅ Check browser console for React errors
-2. ✅ Verify `VITE_USE_MOCK_API` env variable setting
-3. ✅ Check if auth token exists in localStorage (`STORAGE_KEYS.AUTH_TOKEN`)
-4. ✅ Review Zustand DevTools for state changes
-5. ✅ Check `src/core/interceptors/errorInterceptor.js` for API errors
+### 디버깅 시
+1. 브라우저 콘솔에서 React 에러 확인
+2. `VITE_USE_MOCK_API` 환경변수 설정 확인
+3. localStorage에 auth 토큰 존재 여부 확인
+4. `src/core/interceptors/errorInterceptor.js`에서 API 에러 확인
 
-### When Integrating Real APIs
-1. ✅ Update API client `request()` method to call real endpoint
-2. ✅ Keep mock response for fallback testing
-3. ✅ Update DTO validation schemas in `validation.js`
-4. ✅ Test error handling for 401/403/500 responses
-5. ✅ Update environment variables in `.env.template`
-
-### File References
-When suggesting code changes, reference files using this format:
-- `src/features/auth/pages/Login.jsx:42` - Login component, line 42
-- `src/core/services/api/authApiClient.js:15` - Auth client, line 15
-- `src/shared/components/ui/Button.jsx` - Button component
+### 파일 참조 형식
+코드 변경 제안 시 다음 형식 사용:
+- `src/features/auth/pages/Login.jsx:42` - Login 컴포넌트, 42번째 줄
+- `src/core/services/api/authApiClient.js:15` - Auth 클라이언트, 15번째 줄
 
 ---
 
-**Last Updated**: 2025-11-14 (Auto-generated from codebase analysis)
+**Last Updated**: 2025-11-22

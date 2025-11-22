@@ -1,12 +1,12 @@
 # AMA...Pill Frontend
 
-> **"Is it time to take medicine?"** - 노인 부모와 성인 자식을 위한 가족 중심 약 관리 플랫폼
+> **"약 먹을 시간이에요?"** - 노인 부모와 성인 자녀를 위한 가족 중심 약 관리 플랫폼
 
 React 19 기반 프론트엔드 애플리케이션입니다.
 
 ---
 
-## 🤖 AI Agent Quick Reference
+## AI Agent Quick Reference
 
 > Claude Code, Cursor, Windsurf 등 MCP Agent를 위한 핵심 정보
 
@@ -31,31 +31,20 @@ npm run lint         # ESLint 실행
 프론트엔드 개발 시 아래 문서를 **순서대로** 참조하세요:
 
 1. **[docs/CLAUDE.md](./docs/CLAUDE.md)** - AI Agent 전용 개발 가이드 (프로젝트 개요, 규칙, Do's and Don'ts)
-2. **[docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md)** - Git & 코드 컨벤션 (브랜치, 커밋, 네이밍)
-3. **[docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md)** - 소스 코드 구조 및 아키텍처
-4. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md)** - 34개 화면 컴포넌트 명세
-5. **[docs/CHAT_API_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CHAT_API_SPECIFICATION.md)** - WebSocket 실시간 통신 API
-6. **[docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md)** - OCR 처방전 인식 API
-7. **[docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md)** - 전체 요구사항 명세
+2. **[docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md)** - 소스 코드 구조 및 아키텍처
+3. **[docs/FRONTEND_COMPONENTS_SPECIFICATION.md](./docs/FRONTEND_COMPONENTS_SPECIFICATION.md)** - 화면 컴포넌트 명세
+4. **[docs/CHAT_API_SPECIFICATION.md](./docs/CHAT_API_SPECIFICATION.md)** - WebSocket 실시간 통신 API
+5. **[docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md)** - OCR 처방전 인식 API
 
 ### 외부 문서 참조 (.github 저장소)
 프로젝트 전체 문서는 [.github Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/tree/dev)에서 확인:
 
-- **UI/UX 설계**
-  - [`WIREFRAME_SCREENS.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/WIREFRAME_SCREENS.md) - 10개 주요 화면 와이어프레임
-  - [`FIGMA_GUIDE.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/FIGMA_GUIDE.md) - Figma 플러그인 설치 가이드
-
 - **백엔드 연동**
-  - [`MVP_DTO_SPECIFICATION.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/MVP_DTO_SPECIFICATION.md) - API 엔드포인트 & DTO 명세
-  - [`DB스킬.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/DB스킬.md) - 데이터베이스 스키마 & ERD
-  - [Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/spring-boot) - Spring Boot 백엔드 코드
-
-- **보안 & 표준**
-  - [`SECURITY_GUIDELINES.md`](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/SECURITY_GUIDELINES.md) - KISA 보안 가이드라인
+  - [Backend Repository](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - Spring Boot 백엔드 코드
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. 설치
 ```bash
@@ -71,6 +60,7 @@ cp .env.template .env
 - `VITE_API_BASE_URL`: API 서버 주소 (기본: http://localhost:8080)
 - `VITE_WS_BASE_URL`: WebSocket 서버 주소 (기본: ws://localhost:8080/ws)
 - `VITE_KAKAO_CLIENT_ID`: 카카오 OAuth 클라이언트 ID
+- `VITE_USE_MOCK_API`: Mock 모드 토글 (true/false)
 
 ### 3. 개발 서버 실행
 ```bash
@@ -82,7 +72,7 @@ npm run dev
 
 ---
 
-## 📋 프로젝트 개요
+## 프로젝트 개요
 
 ### 주요 기능
 1. **가족 케어 네트워크** - 노인과 보호자 간 실시간 약 복용 현황 동기화
@@ -99,49 +89,60 @@ npm run dev
 | **언어** | JavaScript (ES Modules) |
 | **상태 관리** | Zustand (전역), React Hooks (로컬) |
 | **HTTP 클라이언트** | Axios (Interceptor 적용) |
-| **스타일링** | Tailwind CSS + CSS Modules |
-| **라우팅** | React Router |
-| **실시간 통신** | WebSocket (Hocuspocus + TipTap) |
+| **스타일링** | Tailwind CSS + SCSS Modules |
+| **라우팅** | React Router DOM |
+| **실시간 통신** | Hocuspocus + Y.js |
+| **폼 관리** | React Hook Form + Zod |
 
 ---
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```
 /
 ├── src/
 │   ├── core/                # 핵심 설정
-│   │   ├── config/          # routes.config.js, constants.js
-│   │   ├── services/        # API 클라이언트, WebSocket 서비스
+│   │   ├── config/          # routes.config.js, constants.js, api.config.js
+│   │   ├── services/api/    # API 클라이언트 (12개)
+│   │   ├── interceptors/    # HTTP 인터셉터 (auth, error)
+│   │   ├── routing/         # PrivateRoute, navigation
 │   │   └── utils/           # 공용 유틸리티 (validation, formatting)
-│   ├── features/            # 기능 단위 모듈
+│   ├── features/            # 기능 단위 모듈 (13개)
 │   │   ├── auth/            # 인증 (Kakao OAuth)
+│   │   ├── dashboard/       # 대시보드 (Senior/Caregiver)
+│   │   ├── medication/      # 약 관리
 │   │   ├── family/          # 가족 관리
-│   │   ├── medication/      # 복약 관리
 │   │   ├── diet/            # 식단 관리
 │   │   ├── disease/         # 질병 관리
-│   │   ├── search/          # 약 검색
+│   │   ├── search/          # 약/증상 검색
+│   │   ├── ocr/             # OCR 처방전 스캔
+│   │   ├── chat/            # 채팅
+│   │   ├── counsel/         # 상담
+│   │   ├── notification/    # 알림
+│   │   ├── report/          # 리포트
 │   │   └── settings/        # 설정
 │   ├── shared/              # 공용 컴포넌트
 │   │   └── components/
-│   │       ├── ui/          # Button, Input, Card, Modal
-│   │       ├── layout/      # Header, Sidebar, MainLayout
-│   │       └── editor/      # TipTap 에디터
+│   │       ├── ui/          # Button, Input, Card, Modal, Icon, FAB, Tabs
+│   │       ├── layout/      # Header, MainLayout, BottomNavigation
+│   │       └── toast/       # Toast 알림
 │   ├── hooks/               # 공용 Custom Hooks
 │   ├── pages/               # 공통 페이지 (에러 페이지 등)
+│   ├── data/                # Mock 데이터 (13개 파일)
+│   ├── devtools/            # 개발자 도구
 │   ├── styles/              # 전역 스타일 (Tailwind, SCSS)
-│   ├── App.jsx              # 루트 컴포넌트
+│   ├── App.jsx              # 루트 컴포넌트 (40+ 라우트)
 │   └── main.jsx             # 엔트리 포인트
 ├── docs/                    # 프로젝트 문서
 ├── README.md                # 이 파일
 └── QUICKSTART.md            # 빠른 시작 가이드
 ```
 
-상세 구조는 **[docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md)** 참조
+상세 구조는 **[docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md)** 참조
 
 ---
 
-## 🎨 개발 가이드
+## 개발 가이드
 
 ### Git 워크플로우
 
@@ -172,8 +173,6 @@ emoji Type: description (50자 이내)
 
 **예시**: `✨ Feat: Add Kakao OAuth login`
 
-상세 규칙은 **[docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md)** 참조
-
 ---
 
 ### 코딩 컨벤션
@@ -189,31 +188,12 @@ emoji Type: description (50자 이내)
 | **Boolean** | `is/has` 접두사 | `isLoading`, `hasError` |
 | **폴더명** | lowercase | `components`, `hooks` |
 
-#### 코드 예시
-
-**✅ Good**:
-```javascript
-const handleSubmit = (event) => {
-  event.preventDefault()
-  const userData = {
-    name: event.target.name.value,
-    email: event.target.email.value,
-  }
-  submitForm(userData)
-}
-```
-
-**❌ Bad**:
-```javascript
-const handlesubmit=(e)=>{var data={name:e.target.name.value}}
-```
-
 ---
 
 ### 스타일링 가이드
 
 - **Tailwind CSS**: 레이아웃, 여백, 색상 등 공통 스타일
-- **CSS Modules**: 컴포넌트별 상세 스타일 (`.module.scss`)
+- **SCSS Modules**: 컴포넌트별 상세 스타일 (`.module.scss`)
 - **Design System**: `tailwind.config.js`에 색상/폰트 토큰 정의
 
 ```scss
@@ -229,7 +209,7 @@ const handlesubmit=(e)=>{var data={name:e.target.name.value}}
 
 ---
 
-## 🔧 주요 기능
+## 주요 기능
 
 ### Custom Hooks
 - **`useAuth()`**: 사용자 인증 상태 관리
@@ -245,37 +225,37 @@ const handlesubmit=(e)=>{var data={name:e.target.name.value}}
 ### 공용 컴포넌트
 - **`<Button>`**: primary, secondary, danger, ghost 스타일
 - **`<Input>`**: 텍스트 입력 (에러/라벨/힌트 지원)
-- **`<Card>`**: 콘텐츠 컨테이너 (Header, Body, Footer)
+- **`<Card>`**: 콘텐츠 컨테이너
 - **`<Modal>`**: 모달 다이얼로그
+- **`<FAB>`**: Floating Action Button
+- **`<Tabs>`**: 탭 컴포넌트
 
 ---
 
-## 🔗 연관 리포지토리
+## 연관 리포지토리
 
-- [**Backend (Spring Boot)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/spring-boot) - API 서버
+- [**Backend (Spring Boot)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/Back) - API 서버
 - [**.github (Organization Docs)**](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github) - 프로젝트 전체 문서 및 설계
 
 ---
 
-## 📚 추가 문서
+## 추가 문서
 
 | 문서 | 설명 |
 |------|------|
 | [QUICKSTART.md](./QUICKSTART.md) | 5분 안에 프로젝트 시작하기 |
 | [docs/CLAUDE.md](./docs/CLAUDE.md) | AI Agent 개발 가이드 |
-| [docs/CONVENTIONS.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/CONVENTIONS.md) | Git & 코드 컨벤션 |
-| [docs/SRC_STRUCTURE.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/SRC_STRUCTURE.md) | 소스 코드 구조 |
-| [docs/FRONTEND_COMPONENTS_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/FRONTEND_COMPONENTS_SPECIFICATION.md) | 컴포넌트 명세 (34 screens) |
-| [docs/PROJECT_SPECIFICATION.md](https://github.com/KOSA2025-FINAL-PROJECT-TEAM3/.github/blob/dev/documents/PROJECT_SPECIFICATION.md) | 프로젝트 요구사항 |
+| [docs/SRC_STRUCTURE.md](./docs/SRC_STRUCTURE.md) | 소스 코드 구조 |
+| [docs/FRONTEND_COMPONENTS_SPECIFICATION.md](./docs/FRONTEND_COMPONENTS_SPECIFICATION.md) | 컴포넌트 명세 |
 | [docs/CHAT_API_SPECIFICATION.md](./docs/CHAT_API_SPECIFICATION.md) | WebSocket API |
 | [docs/OCR_API_SPECIFICATION.md](./docs/OCR_API_SPECIFICATION.md) | OCR API |
 
 ---
 
-## 📧 Contact
+## Contact
 
 팀3 개발자에게 연락주세요.
 
 ---
 
-**Last Updated**: 2025-11-12
+**Last Updated**: 2025-11-22
