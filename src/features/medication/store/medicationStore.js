@@ -59,11 +59,15 @@ export const useMedicationStore = create((set, get) => ({
     withLoading(set, async () => {
       const target = get().medications.find((med) => med.id === medId)
       if (!target) return
-      const nextStatus = target.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE'
-      const updated = await medicationApiClient.update(medId, { status: nextStatus })
+
+      // Toggle active status (boolean)
+      const nextActive = !target.active
+      const updated = await medicationApiClient.update(medId, { active: nextActive })
+
+      // 로컬 상태 즉시 업데이트
       set((state) => ({
         medications: state.medications.map((med) =>
-          med.id === medId ? { ...med, ...updated } : med,
+          med.id === medId ? { ...med, ...updated, active: nextActive } : med,
         ),
       }))
     }),
