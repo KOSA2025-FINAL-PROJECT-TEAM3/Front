@@ -23,10 +23,20 @@ export const MedicationForm = ({
   shouldResetOnSubmit = true,
 }) => {
   const mergedInitial = useMemo(
-    () => ({
-      ...initialForm,
-      ...(initialValues || {}),
-    }),
+    () => {
+      const merged = {
+        ...initialForm,
+        ...(initialValues || {}),
+      }
+      // 시간 형식 정규화 (HH:mm:ss -> HH:mm)
+      if (merged.schedules) {
+        merged.schedules = merged.schedules.map((s) => ({
+          ...s,
+          time: s.time ? s.time.substring(0, 5) : '',
+        }))
+      }
+      return merged
+    },
     [initialValues],
   )
 
@@ -43,15 +53,20 @@ export const MedicationForm = ({
 
   const handleScheduleChange = (index, field, value) => {
     const newSchedules = [...(form.schedules || [])]
-    if (!newSchedules[index]) newSchedules[index] = { time: '', daysOfWeek: '' }
-    newSchedules[index][field] = value
+    if (!newSchedules[index]) {
+      newSchedules[index] = { time: '', daysOfWeek: '', active: true }
+    }
+    newSchedules[index] = {
+      ...newSchedules[index],
+      [field]: value,
+    }
     setForm((prev) => ({ ...prev, schedules: newSchedules }))
   }
 
   const addSchedule = () => {
     setForm((prev) => ({
       ...prev,
-      schedules: [...(prev.schedules || []), { time: '', daysOfWeek: '' }],
+      schedules: [...(prev.schedules || []), { time: '', daysOfWeek: '', active: true }],
     }))
   }
 
@@ -164,6 +179,7 @@ export const MedicationForm = ({
               value={schedule.time}
               onChange={(e) => handleScheduleChange(index, 'time', e.target.value)}
               required
+              disabled={schedule.isTakenToday}
             >
               <option value="">시간 선택</option>
               {Array.from({ length: 48 }).map((_, i) => {
@@ -199,18 +215,31 @@ export const MedicationForm = ({
 
                     handleScheduleChange(index, 'daysOfWeek', newDays.join(','))
                   }}
+                  disabled={schedule.isTakenToday}
                 >
                   {day}
                 </button>
               ))}
             </div>
 
-            <button type="button" onClick={() => removeSchedule(index)} className={styles.removeButton}>
-              삭제
-            </button>
+            {schedule.isTakenToday ? (
+              <span className={styles.takenBadge}>복용 완료</span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => removeSchedule(index)}
+                className={styles.removeButton}
+              >
+                삭제
+              </button>
+            )}
           </div>
         ))}
-        <button type="button" onClick={addSchedule} className={styles.addButton}>
+        <button
+          type="button"
+          onClick={addSchedule}
+          className={styles.addButton}
+        >
           + 스케줄 추가
         </button>
       </div>
