@@ -105,7 +105,8 @@ export const MedicationDetailModal = ({
             type="button"
             className={styles.deleteButton}
             onClick={() => onRemove?.(medication.id)}
-            disabled={loading}
+            disabled={loading || medication.hasLogsToday}
+            title={medication.hasLogsToday ? '오늘 복용 기록이 있어 삭제할 수 없습니다.' : ''}
           >
             약 삭제
           </button>

@@ -9,15 +9,18 @@ import styles from './MedicationCard.module.scss'
  * 복용 카드 컴포넌트
  * @param {Object} schedule - 복용 일정
  * @param {number} schedule.id - 카드 ID
+ * @param {number} schedule.medicationId - 약 ID
  * @param {string} schedule.time - 복용 시간
  * @param {string} schedule.timeLabel - 시간 라벨(아침, 점심, 저녁 등)
  * @param {Array} schedule.medications - 약 목록
  * @param {string} schedule.status - 상태 (completed, pending, scheduled)
  * @param {string} schedule.statusLabel - 상태 라벨
  * @param {boolean} schedule.isActive - 활성 여부
+ * @param {Function} onTakeMedication - 복용 처리 함수
+ * @param {Function} onCardClick - 카드 클릭 함수 (약 상세/수정)
  * @returns {JSX.Element} 복용 카드
  */
-export const MedicationCard = ({ schedule, onTakeMedication }) => {
+export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
   const getStatusColor = () => {
     switch (schedule.status) {
       case 'completed':
@@ -31,18 +34,34 @@ export const MedicationCard = ({ schedule, onTakeMedication }) => {
     }
   }
 
-  const handleTakeMedication = () => {
-    if (onTakeMedication) {
+  const handleTakeMedication = (e) => {
+    e.stopPropagation() // 카드 클릭 이벤트 전파 방지
+    if (onTakeMedication && schedule.status === 'pending') {
       onTakeMedication(schedule.id)
+    }
+  }
+
+  const handleCheckboxClick = (e) => {
+    e.stopPropagation() // 카드 클릭 이벤트 전파 방지
+    if (schedule.status === 'pending') {
+      handleTakeMedication(e)
+    }
+  }
+
+  const handleCardClick = () => {
+    if (onCardClick && schedule.medicationId) {
+      onCardClick(schedule.medicationId)
     }
   }
 
   return (
     <div
-      className={`${styles.medicationCard} ${
-        schedule.status === 'completed' ? styles.completed : ''
-      } ${schedule.isActive ? styles.active : ''}`}
+      className={`${styles.medicationCard} ${schedule.status === 'completed' ? styles.completed : ''
+        } ${schedule.isActive ? styles.active : ''} ${onCardClick ? styles.clickable : ''}`}
       style={{ borderColor: getStatusColor() }}
+      onClick={handleCardClick}
+      role={onCardClick ? 'button' : undefined}
+      tabIndex={onCardClick ? 0 : undefined}
     >
       {/* 좌측: 체크박스 */}
       <div className={styles.checkboxArea}>
@@ -50,7 +69,9 @@ export const MedicationCard = ({ schedule, onTakeMedication }) => {
           type="checkbox"
           className={styles.checkbox}
           checked={schedule.status === 'completed'}
-          disabled
+          onChange={handleCheckboxClick}
+          disabled={schedule.status !== 'pending'}
+          style={{ cursor: schedule.status === 'pending' ? 'pointer' : 'default' }}
         />
       </div>
 
@@ -98,4 +119,3 @@ export const MedicationCard = ({ schedule, onTakeMedication }) => {
 }
 
 export default MedicationCard
-

@@ -57,7 +57,11 @@ export const MedicationEditPage = () => {
       navigate(ROUTE_PATHS.medication, { replace: true })
     } catch (error) {
       console.error('약 수정 실패:', error)
-      toast.error('약 수정에 실패했습니다')
+      if (error.response?.data?.code === 'MEDICATION_SCHEDULE_002') {
+        toast.error('오늘 복용 기록이 있어 수정할 수 없습니다.')
+      } else {
+        toast.error('약 수정에 실패했습니다')
+      }
     }
   }
 
