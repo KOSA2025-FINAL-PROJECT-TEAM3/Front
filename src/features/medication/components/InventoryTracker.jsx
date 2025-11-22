@@ -16,7 +16,7 @@ const formatDisplayDate = (isoString) => {
 
 export const InventoryTracker = ({ medications = [] }) => {
   const total = medications.length
-  const active = medications.filter((med) => med.status === 'ACTIVE').length
+  const active = medications.filter((med) => med.active).length
   const paused = total - active
 
   const lastUpdatedMed = medications.reduce(

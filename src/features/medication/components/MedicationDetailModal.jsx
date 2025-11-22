@@ -58,8 +58,8 @@ export const MedicationDetailModal = ({
             <p className={styles.subtitle}>{medication.dosage}</p>
           </div>
           <div className={styles.headerActions}>
-            <span className={styles.statusBadge}>
-              {STATUS_LABEL[medication.status] || '상태 미정'}
+            <span className={`${styles.statusBadge} ${medication.active ? styles.active : styles.paused}`}>
+              {medication.active ? '복용 중' : '일시중지'}
             </span>
             <button
               type="button"
@@ -104,7 +104,7 @@ export const MedicationDetailModal = ({
             onClick={() => onToggle?.(medication.id)}
             disabled={loading}
           >
-            {medication.status === 'ACTIVE' ? '일시중지' : '복용 재개'}
+            {medication.active ? '일시중지' : '복용 재개'}
           </button>
           <button
             type="button"

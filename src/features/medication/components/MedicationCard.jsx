@@ -38,19 +38,19 @@ export const MedicationCard = ({ medication, onToggle, onRemove, onSelect }) => 
       <div className={styles.body}>
         <p className={styles.name}>{medication.name}</p>
         <p className={styles.detail}>
-          {medication.dosage} · {medication.schedule}
+          {medication.dosage} · {medication.schedule || '스케줄 없음'}
         </p>
         {medication.instructions && (
           <p className={styles.instructions}>{medication.instructions}</p>
         )}
       </div>
       <div className={styles.actions}>
-        <span className={styles.statusBadge}>
-          {statusLabel[medication.status] || '상태전환'}
+        <span className={`${styles.statusBadge} ${medication.active ? styles.active : styles.paused}`}>
+          {medication.active ? '복용 중' : '일시중지'}
         </span>
         <div className={styles.actionButtons}>
           <button type="button" onClick={handleToggle}>
-            상태 전환
+            {medication.active ? '일시중지' : '복용 재개'}
           </button>
           <button type="button" onClick={handleRemove}>
             삭제
