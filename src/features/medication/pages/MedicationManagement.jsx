@@ -45,6 +45,7 @@ export const MedicationManagementPage = () => {
 
   const handleUpdateMedication = async (medId, patch) => {
     await updateMedication(medId, patch)
+    handleCloseModal()
   }
 
   const handleRemoveMedication = async (medId) => {
