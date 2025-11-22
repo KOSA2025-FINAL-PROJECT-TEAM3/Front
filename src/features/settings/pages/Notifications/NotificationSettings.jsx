@@ -1,11 +1,6 @@
 import MainLayout from '@shared/components/layout/MainLayout'
+import { NOTIFICATION_CHANNELS } from '@/data/mockUiConstants'
 import styles from './NotificationSettings.module.scss'
-
-const channels = [
-  { id: 'push', label: '푸시 알림', description: '앱 푸시로 복약 알림 받기' },
-  { id: 'email', label: '이메일 알림', description: '약 일정 요약 메일' },
-  { id: 'sms', label: 'SMS 알림', description: '긴급 미복약 알림' },
-]
 
 export const NotificationSettingsPage = () => {
   return (
@@ -17,7 +12,7 @@ export const NotificationSettingsPage = () => {
         </header>
 
         <section className={styles.channelList}>
-          {channels.map((channel) => (
+          {NOTIFICATION_CHANNELS.map((channel) => (
             <label key={channel.id} className={styles.channelItem}>
               <div>
                 <p className={styles.label}>{channel.label}</p>

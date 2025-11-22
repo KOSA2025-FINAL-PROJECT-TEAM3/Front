@@ -6,6 +6,7 @@
 
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
+import { MOCK_ADHERENCE_PAGE_DATA, MOCK_RECENT_HISTORY } from '@/data/mockReports'
 import styles from './AdherenceReportPage.module.scss'
 
 /**
@@ -13,27 +14,9 @@ import styles from './AdherenceReportPage.module.scss'
  * @returns {JSX.Element}
  */
 export const AdherenceReportPage = () => {
-  // Mock data - 실제로는 API에서 가져올 데이터
-  const adherenceData = {
-    overall: 87,
-    thisWeek: 92,
-    lastWeek: 85,
-    thisMonth: 87,
-    streak: 14, // 연속 복용일
-    totalDays: 90,
-    completedDays: 78,
-    missedDays: 12,
-  }
-
-  const recentHistory = [
-    { date: '2025-01-18', status: 'completed', count: 3, total: 3 },
-    { date: '2025-01-17', status: 'completed', count: 3, total: 3 },
-    { date: '2025-01-16', status: 'partial', count: 2, total: 3 },
-    { date: '2025-01-15', status: 'completed', count: 3, total: 3 },
-    { date: '2025-01-14', status: 'missed', count: 1, total: 3 },
-    { date: '2025-01-13', status: 'completed', count: 3, total: 3 },
-    { date: '2025-01-12', status: 'completed', count: 3, total: 3 },
-  ]
+  // TODO: API 연동 시 실제 데이터로 교체
+  const adherenceData = MOCK_ADHERENCE_PAGE_DATA
+  const recentHistory = MOCK_RECENT_HISTORY
 
   const getStatusLabel = (status) => {
     switch (status) {

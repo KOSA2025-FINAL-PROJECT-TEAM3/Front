@@ -1,14 +1,10 @@
+import { MEMBER_ROLE_OPTIONS } from '@/data/mockUiConstants'
 import styles from './MemberRoleCard.module.scss'
-
-const ROLE_OPTIONS = [
-  { value: 'SENIOR', label: '시니어', icon: '👴' },
-  { value: 'CAREGIVER', label: '보호자', icon: '👨‍👩‍👧' },
-]
 
 export const MemberRoleSelector = ({ value, onChange, disabled }) => {
   return (
     <div className={styles.roleSelector}>
-      {ROLE_OPTIONS.map((option) => {
+      {MEMBER_ROLE_OPTIONS.map((option) => {
         const active = value === option.value
         return (
           <button
