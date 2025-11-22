@@ -25,6 +25,22 @@
   width: 100%;
 }
 
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+
+  p {
+    margin: 8px 0;
+    font-size: 16px;
+  }
+
+  .emptyHint {
+    font-size: 14px;
+    color: #999;
+  }
+}
+
 /* 모바일 반응형 */
 @media (max-width: 768px) {
   .dashboardContent {

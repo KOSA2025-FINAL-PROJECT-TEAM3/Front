@@ -3,16 +3,16 @@
  * - ErrorBoundary에서 사용하는 에러 화면
  */
 
-import { useNavigate } from 'react-router-dom'
+// import { useNavigate } from 'react-router-dom' // Removed
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './ErrorFallback.module.scss'
 
 export const ErrorFallback = ({ error, resetError }) => {
-  const navigate = useNavigate()
+  // const navigate = useNavigate() // Removed
 
   const handleGoHome = () => {
     if (resetError) resetError()
-    navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
+    window.location.href = ROUTE_PATHS.seniorDashboard // Use window.location
   }
 
   const handleReload = () => {
