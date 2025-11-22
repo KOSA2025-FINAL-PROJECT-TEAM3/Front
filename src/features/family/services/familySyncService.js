@@ -19,6 +19,35 @@ export class FamilySyncService {
     this.onlineUsers = this.doc.getArray('onlineUsers')
     this.changeLog = this.doc.getArray('changeLog')
     this.statusHandlers = new Map()
+    this.errorHandlers = new Map()
+
+    // 에러 이벤트 리스닝 초기화
+    this.setupErrorHandling()
+  }
+
+  setupErrorHandling() {
+    // Hocuspocus Provider 에러 이벤트
+    this.provider.on('connection-error', (error) => {
+      this.notifyError(new Error(`WebSocket 연결 실패: ${error.message}`))
+    })
+
+    this.provider.on('sync-error', (error) => {
+      this.notifyError(new Error(`동기화 에러: ${error.message}`))
+    })
+
+    this.provider.on('error', (error) => {
+      this.notifyError(error)
+    })
+  }
+
+  notifyError(error) {
+    this.errorHandlers.forEach((handler) => {
+      try {
+        handler(error)
+      } catch (e) {
+        console.error('[FamilySyncService] Error in error handler:', e)
+      }
+    })
   }
 
   onStatusChange(handler) {
@@ -28,6 +57,13 @@ export class FamilySyncService {
     return () => {
       this.provider.off('status', wrapped)
       this.statusHandlers.delete(handler)
+    }
+  }
+
+  onError(handler) {
+    this.errorHandlers.set(handler, handler)
+    return () => {
+      this.errorHandlers.delete(handler)
     }
   }
 
@@ -46,10 +82,20 @@ export class FamilySyncService {
   }
 
   disconnect() {
+    // 상태 핸들러 정리
     this.statusHandlers.forEach((wrapped) => {
       this.provider.off('status', wrapped)
     })
     this.statusHandlers.clear()
+
+    // 에러 핸들러 정리
+    this.errorHandlers.clear()
+
+    // Provider 이벤트 리스너 제거
+    this.provider.off('connection-error')
+    this.provider.off('sync-error')
+    this.provider.off('error')
+
     this.provider.disconnect()
     this.doc.destroy()
   }

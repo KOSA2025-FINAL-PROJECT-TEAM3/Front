@@ -1,11 +1,6 @@
 import MedicationForm from './MedicationForm.jsx'
 import styles from './MedicationDetailModal.module.scss'
 
-const STATUS_LABEL = {
-  ACTIVE: '복용 중',
-  PAUSED: '일시중지',
-}
-
 const formatDate = (value) => {
   if (!value) return '정보 없음'
   try {
