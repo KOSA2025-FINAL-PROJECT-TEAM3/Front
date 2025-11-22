@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import styles from './FamilyGroupCard.module.scss'
 
 export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
@@ -21,6 +22,23 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
       </div>
     </section>
   )
+}
+
+FamilyGroupCard.propTypes = {
+  group: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    createdAt: PropTypes.string.isRequired,
+    createdBy: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    }),
+  }).isRequired,
+  memberCount: PropTypes.number,
+}
+
+FamilyGroupCard.defaultProps = {
+  memberCount: 0,
 }
 
 export default FamilyGroupCard

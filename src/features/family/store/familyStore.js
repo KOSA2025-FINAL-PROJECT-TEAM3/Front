@@ -13,10 +13,16 @@ import { familyApiClient } from '@core/services/api/familyApiClient'
 const initialState = {
   familyGroup: DEFAULT_FAMILY_GROUP,
   members: DEFAULT_FAMILY_MEMBERS,
+  invites: { sent: [], received: [] },
   loading: false,
   error: null,
   initialized: false,
 }
+
+const normalizeInvites = (invites = {}) => ({
+  sent: Array.isArray(invites.sent) ? invites.sent : Array.isArray(invites) ? invites : [],
+  received: Array.isArray(invites.received) ? invites.received : [],
+})
 
 const withLoading = async (set, fn) => {
   set({ loading: true, error: null })
@@ -40,10 +46,19 @@ export const useFamilyStore = create((set, get) => ({
 
   loadFamily: async () =>
     withLoading(set, async () => {
-      const data = await familyApiClient.getSummary()
+      const summary = await familyApiClient.getSummary()
+
+      let inviteList = { sent: [], received: [] }
+      try {
+        inviteList = await familyApiClient.getInvites()
+      } catch (inviteError) {
+        console.warn('[familyStore] getInvites failed', inviteError)
+      }
+
       set({
-        familyGroup: data?.group || DEFAULT_FAMILY_GROUP,
-        members: data?.members || DEFAULT_FAMILY_MEMBERS,
+        familyGroup: summary?.group || DEFAULT_FAMILY_GROUP,
+        members: summary?.members || DEFAULT_FAMILY_MEMBERS,
+        invites: normalizeInvites(inviteList),
         error: null,
         initialized: true,
       })
@@ -52,12 +67,14 @@ export const useFamilyStore = create((set, get) => ({
   inviteMember: async (payload) =>
     withLoading(set, async () => {
       const res = await familyApiClient.inviteMember(payload)
-      const member = res?.member
       set((state) => ({
-        members: [...state.members, member],
+        invites: {
+          sent: res ? [res, ...(state.invites?.sent || [])] : state.invites?.sent || [],
+          received: state.invites?.received || [],
+        },
         error: null,
       }))
-      return member
+      return res
     }),
 
   removeMember: async (memberId) =>
@@ -67,6 +84,33 @@ export const useFamilyStore = create((set, get) => ({
         members: state.members.filter((member) => member.id !== memberId),
         error: null,
       }))
+    }),
+
+  loadInvites: async () =>
+    withLoading(set, async () => {
+      const invites = await familyApiClient.getInvites()
+      set((state) => ({
+        invites: normalizeInvites(invites),
+        error: null,
+        initialized: state.initialized,
+      }))
+    }),
+
+  cancelInvite: async (inviteId) =>
+    withLoading(set, async () => {
+      await familyApiClient.cancelInvite(inviteId)
+      set((state) => ({
+        invites: {
+          sent: (state.invites?.sent || []).filter((invite) => invite.id !== inviteId),
+          received: state.invites?.received || [],
+        },
+        error: null,
+      }))
+    }),
+
+  acceptInvite: async (inviteCode) =>
+    withLoading(set, async () => {
+      return familyApiClient.acceptInvite(inviteCode)
     }),
 
   refetchFamily: async () => get().loadFamily(),

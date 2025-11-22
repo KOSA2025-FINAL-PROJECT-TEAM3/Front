@@ -1,4 +1,5 @@
-﻿import styles from './FamilyMemberCard.module.scss'
+﻿import PropTypes from 'prop-types'
+import styles from './FamilyMemberCard.module.scss'
 
 const roleLabels = {
   SENIOR: '어르신(부모)',
@@ -48,6 +49,26 @@ export const FamilyMemberCard = ({
       </div>
     </div>
   )
+}
+
+FamilyMemberCard.propTypes = {
+  member: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    role: PropTypes.oneOf(['SENIOR', 'CAREGIVER']).isRequired,
+    joinedAt: PropTypes.string.isRequired,
+    avatarColor: PropTypes.string,
+  }).isRequired,
+  onDetail: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
+  isOnline: PropTypes.bool,
+  isRemoving: PropTypes.bool,
+}
+
+FamilyMemberCard.defaultProps = {
+  isOnline: false,
+  isRemoving: false,
 }
 
 export default FamilyMemberCard

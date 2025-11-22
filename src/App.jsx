@@ -23,6 +23,7 @@ import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
 import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
+import InviteAcceptPage from '@features/family/pages/InviteAccept'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
 import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
@@ -70,8 +71,8 @@ function NavigationRegistrar() {
  */
 function App() {
   return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
           <Routes>
@@ -245,8 +246,8 @@ function App() {
           <ToastContainer />
           <DeveloperModePanel />
         </FamilyProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </BrowserRouter>
   )
 }
 
