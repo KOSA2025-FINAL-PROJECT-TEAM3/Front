@@ -40,13 +40,24 @@ export const useFamilyStore = create((set, get) => ({
 
   loadFamily: async () =>
     withLoading(set, async () => {
-      const data = await familyApiClient.getSummary()
-      set({
-        familyGroup: data?.group || DEFAULT_FAMILY_GROUP,
-        members: data?.members || DEFAULT_FAMILY_MEMBERS,
-        error: null,
-        initialized: true,
-      })
+      try {
+        const data = await familyApiClient.getSummary()
+        set({
+          familyGroup: data?.group || DEFAULT_FAMILY_GROUP,
+          members: data?.members || DEFAULT_FAMILY_MEMBERS,
+          error: null,
+          initialized: true,
+        })
+      } catch (error) {
+        // Silently fail if not authenticated (e.g., on login page)
+        console.warn('Failed to load family data:', error.message)
+        set({
+          familyGroup: DEFAULT_FAMILY_GROUP,
+          members: DEFAULT_FAMILY_MEMBERS,
+          error: null,
+          initialized: true,
+        })
+      }
     }),
 
   inviteMember: async (payload) =>
