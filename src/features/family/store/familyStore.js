@@ -9,6 +9,7 @@ import {
   DEFAULT_FAMILY_MEMBERS,
 } from '@/data/mockFamily'
 import { familyApiClient } from '@core/services/api/familyApiClient'
+import { STORAGE_KEYS } from '@config/constants'
 
 const initialState = {
   familyGroup: DEFAULT_FAMILY_GROUP,
@@ -40,7 +41,16 @@ export const useFamilyStore = create((set, get) => ({
   ...initialState,
 
   initialize: async ({ force } = {}) => {
+    // 1. 토큰 확인 - 없으면 초기화 스킵 (로그인 전)
+    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    if (!token) {
+      return
+    }
+
+    // 2. 이미 초기화됐으면 스킵 (force true면 재초기화)
     if (get().initialized && !force) return
+
+    // 3. 가족 데이터 로드
     await get().loadFamily()
   },
 
