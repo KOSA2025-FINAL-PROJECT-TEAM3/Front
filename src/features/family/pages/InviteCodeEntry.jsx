@@ -15,7 +15,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { STORAGE_KEYS } from '@config/constants'
-import { familyApiClient } from '@core/services/api/familyApiClient'
+import { inviteApiClient } from '@core/services/api/inviteApiClient'
 import { useInviteStore } from '../stores/inviteStore'
 import { useFamily } from '../hooks/useFamily'
 import { toast } from '@shared/components/toast/toastStore'
@@ -90,12 +90,15 @@ export const InviteCodeEntryPage = () => {
     setErrorMessage('')
 
     try {
-      const response = await familyApiClient.validateInviteCode(code)
+      // 공개 API: /invite/info?code={code}
+      const response = await inviteApiClient.getInviteInfo(code)
 
       const info = {
-        inviteCode: code,
+        inviteCode: response.shortCode || code,
+        groupId: response.groupId,
         groupName: response.groupName || '가족 그룹',
         inviterName: response.inviterName || '알 수 없음',
+        inviterEmail: response.inviterEmail,
         suggestedRole: response.suggestedRole || 'SENIOR',
         expiresAt: response.expiresAt,
       }
@@ -104,7 +107,7 @@ export const InviteCodeEntryPage = () => {
       setInviteSession(info)
       setStatus('validated')
     } catch (error) {
-      console.warn('[InviteCodeEntry] validateInviteCode failed', error)
+      console.warn('[InviteCodeEntry] getInviteInfo failed', error)
       setStatus('error')
 
       if (error?.response?.status === 400) {
