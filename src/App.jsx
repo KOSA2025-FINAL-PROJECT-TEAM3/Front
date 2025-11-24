@@ -45,6 +45,7 @@ import SuspectedDiseasePage from '@features/disease/pages/SuspectedDiseasePage'
 import DiseaseRestrictionsPage from '@features/disease/pages/DiseaseRestrictionsPage'
 import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
 import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
+import FamilyChatConversationPage from '@features/chat/pages/FamilyChatConversationPage'
 import NotificationPage from '@features/notification/pages/NotificationPage'
 import NotificationDetailPage from '@features/notification/pages/NotificationDetailPage'
 import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
@@ -214,6 +215,14 @@ function App() {
           <Route
             path={ROUTE_PATHS.chatConversation}
             element={<PrivateRoute element={<ChatConversationPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.familyChat}
+            element={<PrivateRoute element={<FamilyChatConversationPage />} />}
+          />
+          <Route
+            path={ROUTE_PATHS.familyChatByGroup}
+            element={<PrivateRoute element={<FamilyChatConversationPage />} />}
           />
 
           {/* 알림 */}

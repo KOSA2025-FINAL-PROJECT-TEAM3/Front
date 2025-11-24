@@ -51,13 +51,30 @@ export const FamilyManagementPage = () => {
       <div className={styles.page} role="region" aria-busy={loading}>
         <header className={styles.header}>
           <h1>가족 관리</h1>
-          <button
-            type="button"
-            className={styles.inviteButton}
-            onClick={() => navigate(ROUTE_PATHS.familyInvite)}
-          >
-            + 가족 초대
-          </button>
+          <div>
+            <button
+              type="button"
+              className={styles.inviteButton}
+              onClick={() => navigate(ROUTE_PATHS.familyInvite)}
+            >
+              + 가족 초대
+            </button>
+            <button
+              type="button"
+              className={styles.inviteButton}
+              onClick={() => {
+                if (familyGroup?.id) {
+                  const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
+                  navigate(path)
+                } else {
+                  navigate(ROUTE_PATHS.familyChat)
+                }
+              }}
+              style={{ marginLeft: 8 }}
+            >
+              가족 채팅
+            </button>
+          </div>
         </header>
 
         {loading ? (
