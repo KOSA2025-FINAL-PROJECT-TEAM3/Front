@@ -24,6 +24,15 @@ class FamilyApiClient extends ApiClient {
     return this.post('/invite/accept', { inviteCode })
   }
 
+  /**
+   * 초대 코드 유효성 검증 및 초대 정보 조회
+   * @param {string} inviteCode - 6자리 초대 코드
+   * @returns {Promise<{groupName: string, inviterName: string, suggestedRole: string, expiresAt: string}>}
+   */
+  validateInviteCode(inviteCode) {
+    return this.get(`/invite/validate?code=${encodeURIComponent(inviteCode)}`)
+  }
+
   cancelInvite(inviteId) {
     return this.delete(`/invites/${inviteId}`)
   }

@@ -179,6 +179,9 @@ export const FamilyInvitePage = () => {
         {!linkAvailable && (
           <p className={styles.helper}>아직 생성된 초대 링크가 없습니다. 위 폼으로 새 초대를 만들어 주세요.</p>
         )}
+        <p className={styles.helper}>
+          초대받은 분은 <a href={ROUTE_PATHS.inviteCodeEntry} style={{ color: '#2563eb' }}>초대 코드 입력 페이지</a>에서 코드를 직접 입력할 수 있습니다.
+        </p>
         {latestInvite?.expiresAt && (
           <p className={styles.helper}>
             유효기간: {new Date(latestInvite.expiresAt).toLocaleString('ko-KR')}
@@ -186,6 +189,13 @@ export const FamilyInvitePage = () => {
         )}
         {latestInvite?.inviteeEmail && (
           <p className={styles.helper}>수신자: {latestInvite.inviteeEmail}</p>
+        )}
+        {latestInvite?.shortCode && (
+          <div className={styles.shortCodeSection}>
+            <p className={styles.helper}>초대 코드 (6자리)</p>
+            <span className={styles.shortCode}>{latestInvite.shortCode}</span>
+            <p className={styles.helper}>이 코드를 초대할 분에게 공유하세요.</p>
+          </div>
         )}
       </div>
 

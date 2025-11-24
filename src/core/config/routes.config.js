@@ -40,6 +40,7 @@ export const ROUTE_PATHS = {
   familyMemberDetail: '/family/member/:id',
 
   inviteAccept: '/join',
+  inviteCodeEntry: '/invite/enter',  // 초대 코드 수동 입력 페이지 (공개)
   chatList: '/chat',
 
   // ⭐ roomId 기반 라우트 (정답)
