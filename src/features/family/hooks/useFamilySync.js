@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFamily } from './useFamily'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { toast } from '@shared/components/toast/toastStore'
 import { FamilySyncService } from '../services/familySyncService'
 
 export const useFamilySync = () => {
@@ -75,6 +76,11 @@ export const useFamilySync = () => {
       }),
       service.subscribeToOnlineUsers((users) => {
         setOnlineUsers(users || [])
+      }),
+      service.onError((error) => {
+        console.error('[useFamilySync] Sync error:', error)
+        toast.error(`실시간 동기화 오류: ${error.message}`)
+        pushSyncEvent({ type: 'error', message: error.message })
       }),
     ]
 

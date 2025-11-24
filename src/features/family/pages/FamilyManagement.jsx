@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
+import Modal from '@shared/components/ui/Modal'
+import { toast } from '@shared/components/toast/toastStore'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
@@ -10,6 +12,8 @@ import styles from './FamilyManagement.module.scss'
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   const [removingMemberId, setRemovingMemberId] = useState(null)
+  const [retrying, setRetrying] = useState(false)
+  const [confirmModal, setConfirmModal] = useState(null)
   const {
     familyGroup,
     members,
@@ -22,32 +26,70 @@ export const FamilyManagementPage = () => {
     connectionStatus,
     onlineMemberIds,
     syncEvents,
+    refetchFamily,
   } = useFamilySync()
 
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
 
-  const handleRemoveMember = async (memberId) => {
+  const handleRemoveMember = (memberId) => {
     if (!memberId) return
     const target = members.find((member) => member.id === memberId)
-    const confirmationMessage = target
+    const message = target
       ? `${target.name}님을 가족 목록에서 제거하시겠어요?`
       : '이 구성원을 제거하시겠어요?'
-    if (!window.confirm(confirmationMessage)) return
-    setRemovingMemberId(memberId)
-    try {
-      await removeMember(memberId)
-    } catch (error) {
-      alert('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
-      console.warn('[FamilyManagement] removeMember failed', error)
-    } finally {
-      setRemovingMemberId(null)
-    }
+
+    setConfirmModal({
+      title: '구성원 제거',
+      message,
+      onConfirm: async () => {
+        setRemovingMemberId(memberId)
+        try {
+          await removeMember(memberId)
+          toast.success('구성원이 제거되었습니다.')
+        } catch (error) {
+          toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
+          console.warn('[FamilyManagement] removeMember failed', error)
+        } finally {
+          setRemovingMemberId(null)
+          setConfirmModal(null)
+        }
+      },
+      onCancel: () => setConfirmModal(null),
+    })
   }
 
   return (
     <MainLayout>
+      {confirmModal && (
+        <Modal
+          isOpen={true}
+          title={confirmModal.title}
+          onClose={confirmModal.onCancel}
+          footer={
+            <div className={styles.modalButtons}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={confirmModal.onCancel}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={styles.confirmButton}
+                onClick={confirmModal.onConfirm}
+                disabled={removingMemberId}
+              >
+                {removingMemberId ? '제거 중...' : '확인'}
+              </button>
+            </div>
+          }
+        >
+          <p>{confirmModal.message}</p>
+        </Modal>
+      )}
       <div className={styles.page} role="region" aria-busy={loading}>
         <header className={styles.header}>
           <h1>가족 관리</h1>
@@ -82,9 +124,37 @@ export const FamilyManagementPage = () => {
             가족 정보를 불러오는 중입니다...
           </p>
         ) : error ? (
-          <p className={styles.error} role="alert">
-            가족 정보를 불러오지 못했습니다. {error.message}
-          </p>
+          <div className={styles.error} role="alert">
+            <p>
+              가족 정보를 불러오지 못했습니다. {error?.message || ''}
+            </p>
+            <div className={styles.errorActions}>
+              <button
+                type="button"
+                onClick={async () => {
+                  setRetrying(true)
+                  try {
+                    await refetchFamily()
+                    toast.success('가족 정보를 다시 불러왔습니다.')
+                  } catch (refetchError) {
+                    toast.error('가족 정보 불러오기에 실패했습니다.')
+                    console.warn('[FamilyManagement] refetchFamily failed', refetchError)
+                  } finally {
+                    setRetrying(false)
+                  }
+                }}
+                disabled={retrying}
+              >
+                {retrying ? '다시 시도 중...' : '다시 시도'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(ROUTE_PATHS.login)}
+              >
+                로그인으로 이동
+              </button>
+            </div>
+          </div>
         ) : (
           <>
             <div className={styles.syncMeta}>

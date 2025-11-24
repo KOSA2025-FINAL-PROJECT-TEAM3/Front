@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import styles from './MemberProfileCard.module.scss'
 
 const roleLabels = {
@@ -20,6 +21,17 @@ export const MemberProfileCard = ({ member }) => {
       </div>
     </section>
   )
+}
+
+MemberProfileCard.propTypes = {
+  member: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    role: PropTypes.oneOf(['SENIOR', 'CAREGIVER']).isRequired,
+    joinedAt: PropTypes.string.isRequired,
+    avatarColor: PropTypes.string,
+  }).isRequired,
 }
 
 export default MemberProfileCard

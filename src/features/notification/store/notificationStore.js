@@ -4,16 +4,19 @@
  */
 
 import { create } from 'zustand'
+import { MOCK_NOTIFICATIONS } from '@/data/mockNotifications'
 
-// Mock 데이터 (추후 API 연동)
-const mockNotifications = [
-  { id: 1, title: '복약 알림', message: '아침 약 복용 시간입니다', read: false, createdAt: new Date() },
-  { id: 2, title: '가족 알림', message: '어머니가 약을 복용했습니다', read: false, createdAt: new Date() },
-  { id: 3, title: '식이 경고', message: '자몽 주스 섭취 주의', read: true, createdAt: new Date() },
-]
+// MOCK_NOTIFICATIONS를 store 형식으로 변환
+const initialNotifications = MOCK_NOTIFICATIONS.map((n) => ({
+  id: n.id,
+  title: n.title,
+  message: n.message,
+  read: n.status === 'READ',
+  createdAt: new Date(n.createdAt),
+}))
 
 export const useNotificationStore = create((set, get) => ({
-  notifications: mockNotifications,
+  notifications: initialNotifications,
   loading: false,
   error: null,
 
@@ -28,7 +31,7 @@ export const useNotificationStore = create((set, get) => ({
     try {
       // TODO: API 호출
       // const notifications = await notificationApi.getAll()
-      set({ notifications: mockNotifications, loading: false })
+      set({ notifications: initialNotifications, loading: false })
     } catch (error) {
       set({ error, loading: false })
     }

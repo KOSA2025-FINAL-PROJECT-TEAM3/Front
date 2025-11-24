@@ -1,53 +1,11 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { ProfileSection } from '../components/ProfileSection.jsx'
 import { SettingsMenu } from '../components/SettingsMenu.jsx'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { SETTINGS_MENU_DEFINITIONS } from '@/data/mockUiConstants'
 import styles from './Settings.module.scss'
-
-const menuDefinitions = [
-  {
-    id: 'profile',
-    label: '프로필 편집',
-    icon: '👤',
-    description: '기본 정보 · 연락처 설정',
-    path: ROUTE_PATHS.settingsProfile,
-  },
-  {
-    id: 'notifications',
-    label: '알림 설정',
-    icon: '🔔',
-    description: '푸시 · 이메일 알림 토글',
-    path: ROUTE_PATHS.settingsNotifications,
-  },
-  {
-    id: 'medications',
-    label: '약 관리',
-    icon: '💊',
-    description: '약 목록 · 일정 확인',
-    path: ROUTE_PATHS.medication,
-  },
-  {
-    id: 'diseases',
-    label: '질병 관리',
-    icon: '📋',
-    description: '진단 정보 · 주의 식품',
-    path: ROUTE_PATHS.disease,
-  },
-  {
-    id: 'privacy',
-    label: '개인정보 처리방침',
-    icon: '🔒',
-    path: ROUTE_PATHS.privacyPolicy,
-  },
-  {
-    id: 'terms',
-    label: '이용약관',
-    icon: '📜',
-    path: ROUTE_PATHS.termsOfService,
-  },
-]
 
 export const SettingsPage = () => {
   const navigate = useNavigate()
@@ -59,7 +17,7 @@ export const SettingsPage = () => {
   }
 
   const items = [
-    ...menuDefinitions.map((item) => ({ ...item, onClick: () => handleNavigate(item.path) })),
+    ...SETTINGS_MENU_DEFINITIONS.map((item) => ({ ...item, onClick: () => handleNavigate(item.path) })),
     {
       id: 'logout',
       label: '로그아웃',

@@ -1,0 +1,196 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.row>label {
+  flex: 1;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+input,
+select,
+textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.scheduleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.scheduleRow select {
+  width: 100px;
+}
+
+.daySelector {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.dayButton {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dayButton:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.dayButton.selected {
+  color: white;
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.dayButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.removeButton {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #ef4444;
+  background: none;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  background-color: #fef2f2;
+}
+
+.addButton {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3b82f6;
+  background-color: white;
+  border: 1px dashed #3b82f6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addButton:hover {
+  background-color: #eff6ff;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.actions button {
+  flex: 1;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.actions button[type='submit'] {
+  color: white;
+  background-color: #3b82f6;
+  border: none;
+}
+
+.actions button[type='submit']:hover {
+  background-color: #2563eb;
+}
+
+.actions button[type='submit']:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+}
+
+.secondaryButton {
+  color: #374151;
+  background-color: white;
+  border: 1px solid #d1d5db;
+}
+
+.secondaryButton:hover {
+  background-color: #f9fafb;
+}
+
+.warningMessage {
+  font-size: 13px;
+  color: #d97706;
+  background-color: #fffbeb;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.takenBadge {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+  background-color: #d1fae5;
+  border-radius: 20px;
+  white-space: nowrap;
+}

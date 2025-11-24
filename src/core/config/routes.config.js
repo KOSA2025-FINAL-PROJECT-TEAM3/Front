@@ -39,6 +39,7 @@ export const ROUTE_PATHS = {
   familyInvite: '/family/invite',
   familyMemberDetail: '/family/member/:id',
 
+  inviteAccept: '/join',
   chatList: '/chat',
 
   // ⭐ roomId 기반 라우트 (정답)
@@ -92,6 +93,7 @@ export const ROUTE_META = {
     ROUTE_PATHS.familyInvite,
     ROUTE_PATHS.familyMemberDetail,
 
+    ROUTE_PATHS.inviteAccept,
     ROUTE_PATHS.chatList,
     ROUTE_PATHS.familyChatConversation,
     ROUTE_PATHS.familyChatByGroup,

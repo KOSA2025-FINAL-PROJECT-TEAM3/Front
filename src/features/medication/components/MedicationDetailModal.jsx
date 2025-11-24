@@ -1,11 +1,6 @@
 import MedicationForm from './MedicationForm.jsx'
 import styles from './MedicationDetailModal.module.scss'
 
-const STATUS_LABEL = {
-  ACTIVE: '복용 중',
-  PAUSED: '일시중지',
-}
-
 const formatDate = (value) => {
   if (!value) return '정보 없음'
   try {
@@ -58,8 +53,8 @@ export const MedicationDetailModal = ({
             <p className={styles.subtitle}>{medication.dosage}</p>
           </div>
           <div className={styles.headerActions}>
-            <span className={styles.statusBadge}>
-              {STATUS_LABEL[medication.status] || '상태 미정'}
+            <span className={`${styles.statusBadge} ${medication.active ? styles.active : styles.paused}`}>
+              {medication.active ? '복용 중' : '일시중지'}
             </span>
             <button
               type="button"
@@ -104,13 +99,14 @@ export const MedicationDetailModal = ({
             onClick={() => onToggle?.(medication.id)}
             disabled={loading}
           >
-            {medication.status === 'ACTIVE' ? '일시중지' : '복용 재개'}
+            {medication.active ? '일시중지' : '복용 재개'}
           </button>
           <button
             type="button"
             className={styles.deleteButton}
             onClick={() => onRemove?.(medication.id)}
-            disabled={loading}
+            disabled={loading || medication.hasLogsToday}
+            title={medication.hasLogsToday ? '오늘 복용 기록이 있어 삭제할 수 없습니다.' : ''}
           >
             약 삭제
           </button>

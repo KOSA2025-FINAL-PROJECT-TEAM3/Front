@@ -1,11 +1,6 @@
 import MainLayout from '@shared/components/layout/MainLayout'
+import { PROFILE_EDIT_FIELDS } from '@/data/mockUiConstants'
 import styles from './ProfileEdit.module.scss'
-
-const mockFields = [
-  { id: 'name', label: '이름', type: 'text', placeholder: '홍길동' },
-  { id: 'email', label: '이메일', type: 'email', placeholder: 'hong@example.com', readOnly: true },
-  { id: 'phone', label: '전화번호', type: 'tel', placeholder: '010-0000-0000' },
-]
 
 export const ProfileEditPage = () => {
   return (
@@ -17,7 +12,7 @@ export const ProfileEditPage = () => {
         </header>
 
         <form className={styles.form}>
-          {mockFields.map((field) => (
+          {PROFILE_EDIT_FIELDS.map((field) => (
             <label key={field.id} className={styles.formGroup}>
               <span>{field.label}</span>
               <input

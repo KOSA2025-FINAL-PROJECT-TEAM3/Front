@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import MemberRoleSelector from './MemberRoleSelector.jsx'
@@ -99,6 +100,15 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
       </button>
     </form>
   )
+}
+
+InviteMemberForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+}
+
+InviteMemberForm.defaultProps = {
+  loading: false,
 }
 
 export default InviteMemberForm

@@ -1,19 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import MainLayout from '@shared/components/layout/MainLayout'
-import MedicationList from '../components/MedicationList.jsx'
-import MedicationDetailModal from '../components/MedicationDetailModal.jsx'
-import InventoryTracker from '../components/InventoryTracker.jsx'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { MainLayout } from '@shared/components/layout/MainLayout'
+import { MedicationList } from '../components/MedicationList'
+import { MedicationDetailModal } from '../components/MedicationDetailModal'
+import { InventoryTracker } from '../components/InventoryTracker'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { toast } from '@shared/components/toast/toastStore'
 import styles from './MedicationManagement.module.scss'
 
-export const MedicationManagementPage = () => {
+export const MedicationManagement = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const {
     medications,
     loading,
     fetchMedications,
+    addMedication,
     removeMedication,
     toggleStatus,
     updateMedication,
@@ -27,9 +30,18 @@ export const MedicationManagementPage = () => {
 
   // 초기 로드 시 목록 가져오기 (mock/real 자동 전환)
   useEffect(() => {
-    if (!medications?.length) fetchMedications?.()
+    fetchMedications()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Handle navigation state for opening specific medication
+  useEffect(() => {
+    if (location.state?.selectedMedicationId) {
+      setSelectedMedicationId(location.state.selectedMedicationId)
+      // Clear the state after using it
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
 
   const handleAddClick = () => {
     navigate(ROUTE_PATHS.medicationAdd)
@@ -45,12 +57,23 @@ export const MedicationManagementPage = () => {
 
   const handleUpdateMedication = async (medId, patch) => {
     await updateMedication(medId, patch)
+    handleCloseModal()
   }
 
   const handleRemoveMedication = async (medId) => {
-    await removeMedication(medId)
-    if (selectedMedicationId === medId) {
-      handleCloseModal()
+    try {
+      await removeMedication(medId)
+      if (selectedMedicationId === medId) {
+        handleCloseModal()
+      }
+      toast.success('약이 삭제되었습니다.')
+    } catch (error) {
+      console.error('약 삭제 실패:', error)
+      if (error.response?.data?.code === 'MEDICATION_SCHEDULE_002') {
+        toast.error('오늘 복용 기록이 있어 삭제할 수 없습니다.')
+      } else {
+        toast.error('약 삭제에 실패했습니다.')
+      }
     }
   }
 
@@ -99,4 +122,4 @@ export const MedicationManagementPage = () => {
   )
 }
 
-export default MedicationManagementPage
+export default MedicationManagement
