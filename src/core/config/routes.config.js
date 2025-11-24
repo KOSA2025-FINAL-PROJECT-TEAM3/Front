@@ -44,6 +44,8 @@ export const ROUTE_PATHS = {
   // ⭐ roomId 기반 라우트 (정답)
   familyChat: '/chat/family',
   familyChatConversation: '/chat/family/:roomId',
+  // familyGroupId를 직접 경로로 전달할 때 사용하는 라우트
+  familyChatByGroup: '/chat/family/:familyGroupId',
 
   notifications: '/notifications',
   notificationDetail: '/notifications/:id',
@@ -92,6 +94,7 @@ export const ROUTE_META = {
 
     ROUTE_PATHS.chatList,
     ROUTE_PATHS.familyChatConversation,
+    ROUTE_PATHS.familyChatByGroup,
 
     ROUTE_PATHS.notifications,
     ROUTE_PATHS.notificationDetail,
