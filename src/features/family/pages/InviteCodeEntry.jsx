@@ -3,7 +3,7 @@
  * 초대 코드 수동 입력 페이지 (공개)
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { STORAGE_KEYS } from '@config/constants'
@@ -42,21 +42,6 @@ export const InviteCodeEntryPage = () => {
 
   const isLoggedIn = Boolean(localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN))
 
-  useEffect(() => {
-    if (tokenFromUrl && status === 'idle') {
-      // If token is present, validate the token
-      handleValidateCode(tokenFromUrl)
-    }
-  }, [tokenFromUrl])
-
-  useEffect(() => {
-    if (inviteSession && !inviteInfo && status === 'idle') {
-      setInviteInfo(inviteSession)
-      setInputCode(inviteSession.shortCode || inviteSession.inviteCode || '')
-      setStatus('validated')
-    }
-  }, [inviteSession])
-
   const handleCodeChange = (e) => {
     const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
     setInputCode(value)
@@ -65,7 +50,7 @@ export const InviteCodeEntryPage = () => {
     }
   }
 
-  const handleValidateCode = async (valueToValidate = inputCode) => {
+  const handleValidateCode = useCallback(async (valueToValidate = inputCode) => {
     // long_token (64자) vs short_code (6자) 구분
     const isLongToken = valueToValidate.length > 6
     
@@ -118,7 +103,22 @@ export const InviteCodeEntryPage = () => {
         setErrorMessage('초대 코드 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
       }
     }
-  }
+  }, [inputCode, setInviteSession])
+
+  useEffect(() => {
+    if (tokenFromUrl && status === 'idle') {
+      // If token is present, validate the token
+      handleValidateCode(tokenFromUrl)
+    }
+  }, [handleValidateCode, status, tokenFromUrl])
+
+  useEffect(() => {
+    if (inviteSession && !inviteInfo && status === 'idle') {
+      setInviteInfo(inviteSession)
+      setInputCode(inviteSession.shortCode || inviteSession.inviteCode || '')
+      setStatus('validated')
+    }
+  }, [inviteSession, inviteInfo, status])
 
   const handleAcceptInvite = async () => {
     if (!inviteInfo?.shortCode && !inviteInfo?.inviteCode) return
@@ -325,4 +325,3 @@ export const InviteCodeEntryPage = () => {
 }
 
 export default InviteCodeEntryPage
-

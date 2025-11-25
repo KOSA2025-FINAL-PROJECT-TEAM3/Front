@@ -26,7 +26,7 @@ export default function FamilyJoin() {
     try {
       const result = await inviteService.startInvite(token)
       setCode(result.shortCode || '')
-    } catch (err) {
+    } catch {
       setError('유효하지 않은 초대 링크입니다.')
     }
   }
@@ -127,4 +127,3 @@ export default function FamilyJoin() {
     </div>
   )
 }
-
