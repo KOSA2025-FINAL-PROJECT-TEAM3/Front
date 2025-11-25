@@ -3,20 +3,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import OCRControlPanel from '../components/OCRControlPanel.jsx'
 import OCRResultPreview from '../components/OCRResultPreview.jsx'
 import styles from './PrescriptionScan.module.scss'
-import { ocrApiClient } from '@core/services/api/ocrApiClient'
-
-const stripExtension = (fileName = '') => fileName.replace(/\.[^/.]+$/, '')
-
-const buildMockResult = (fileName) => {
-  const displayName = stripExtension(fileName) || '기본 처방전'
-  return {
-    text: `의품명 ${displayName}\n복용량 1정\n복용 일정: 하루 1회(저녁 식후)\n주의사항: 자몽 주스와 동시 복용 금지`,
-    insights: [
-      `${displayName}를 약 관리에 등록하고 일정을 추적하세요`,
-      '식사 기록 중 자몽/비타민K 식품과의 충돌을 확인하세요',
-    ],
-  }
-}
+import tesseractService from '../services/tesseractService'
 
 export const PrescriptionScanPage = () => {
   const [file, setFile] = useState(null)
@@ -24,6 +11,8 @@ export const PrescriptionScanPage = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [result, setResult] = useState(null)
   const [inputKey, setInputKey] = useState(0)
+  const [progress, setProgress] = useState({ status: '', progress: 0 })
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     return () => {
@@ -42,20 +31,49 @@ export const PrescriptionScanPage = () => {
     setFile(nextFile)
     setPreviewUrl(URL.createObjectURL(nextFile))
     setResult(null)
+    setError(null)
+    setProgress({ status: '', progress: 0 })
+  }
+
+  const handleCameraClick = () => {
+    document.getElementById('camera-input').click()
+  }
+
+  const handleGalleryClick = () => {
+    document.getElementById('gallery-input').click()
   }
 
   const handleRecognize = useCallback(async () => {
     if (!file) return
     setIsProcessing(true)
+    setError(null)
+    setResult(null)
+
     try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const data = await ocrApiClient.recognize(fd)
-      setResult({ text: data.text, insights: data.insights })
-    } catch {
-      setResult(buildMockResult(file.name))
+      // Tesseract.js로 텍스트 인식 (한글, 영어 지원)
+      const { text, confidence } = await tesseractService.recognizeText(
+        file,
+        (progressData) => {
+          setProgress(progressData)
+        }
+      )
+
+      if (!text || text.trim().length === 0) {
+        throw new Error('텍스트를 인식할 수 없습니다. 더 선명한 이미지를 사용해주세요.')
+      }
+
+      // 결과 저장
+      setResult({
+        text,
+        confidence,
+        timestamp: new Date().toISOString(),
+      })
+    } catch (err) {
+      console.error('OCR 처리 오류:', err)
+      setError(err.message || '텍스트 인식에 실패했습니다.')
     } finally {
       setIsProcessing(false)
+      setProgress({ status: 'done', progress: 100 })
     }
   }, [file])
 
@@ -66,15 +84,29 @@ export const PrescriptionScanPage = () => {
     setFile(null)
     setPreviewUrl(null)
     setResult(null)
+    setError(null)
+    setProgress({ status: '', progress: 0 })
     setInputKey((key) => key + 1)
   }, [previewUrl])
 
   const statusMessage = useMemo(() => {
-    if (isProcessing) return 'AI가 처방전을 분석하는 중입니다...'
-    if (file && !result) return '인식 버튼을 눌러 내용을 추출하세요'
-    if (result) return '인식 결과를 확인하고 약 관리에 반영하세요'
-    return '처방전 이미지를 업로드하여 자동으로 내용을 추출합니다'
-  }, [file, isProcessing, result])
+    if (error) return `오류: ${error}`
+    if (isProcessing) {
+      if (progress.status === 'preprocessing image') {
+        return '이미지 전처리 중... (선명도 향상)'
+      }
+      if (progress.status === 'loading language traineddata') {
+        return `언어 데이터 로딩 중... ${Math.round(progress.progress * 100)}%`
+      }
+      if (progress.status === 'recognizing text') {
+        return `텍스트 인식 중... ${Math.round(progress.progress * 100)}%`
+      }
+      return 'AI가 이미지를 분석하는 중입니다...'
+    }
+    if (file && !result) return '인식 버튼을 눌러 텍스트를 추출하세요'
+    if (result) return `인식 완료! (정확도: ${result.confidence}%)`
+    return '카메라로 촬영하거나 갤러리에서 이미지를 선택하세요'
+  }, [file, isProcessing, result, error, progress])
 
   return (
     <MainLayout>
@@ -90,22 +122,61 @@ export const PrescriptionScanPage = () => {
         <section className={styles.workspace}>
           <div className={styles.workspaceCard}>
             <p className={styles.label}>이미지 선택</p>
-            <label className={styles.fileDrop}>
-              <input
-                key={inputKey}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className={styles.fileInput}
-              />
-              {file ? <span>{file.name}</span> : <span>여기로 파일을 끌어오거나 클릭하여 업로드</span>}
-            </label>
+
+            {/* 숨겨진 파일 입력 */}
+            <input
+              id="camera-input"
+              key={`camera-${inputKey}`}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+            />
+            <input
+              id="gallery-input"
+              key={`gallery-${inputKey}`}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+            />
+
+            {/* 버튼 영역 */}
+            <div className={styles.buttonGroup}>
+              <button type="button" onClick={handleCameraClick} className={styles.captureButton}>
+                📷 카메라로 촬영
+              </button>
+              <button type="button" onClick={handleGalleryClick} className={styles.uploadButton}>
+                🖼️ 갤러리에서 선택
+              </button>
+            </div>
+
+            {file && (
+              <div className={styles.fileInfo}>
+                <span>선택된 파일: {file.name}</span>
+              </div>
+            )}
+
             <p className={styles.statusNote}>{statusMessage}</p>
+            {isProcessing && progress.progress > 0 && (
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${progress.progress * 100}%` }}
+                />
+              </div>
+            )}
           </div>
 
           <OCRControlPanel onRecognize={handleRecognize} onReset={handleReset} isProcessing={isProcessing || !file} />
 
-          <OCRResultPreview imageSrc={previewUrl} resultText={result?.text} insights={result?.insights} />
+          <OCRResultPreview
+            imageSrc={previewUrl}
+            resultText={result?.text}
+            confidence={result?.confidence}
+            error={error}
+          />
         </section>
       </div>
     </MainLayout>
