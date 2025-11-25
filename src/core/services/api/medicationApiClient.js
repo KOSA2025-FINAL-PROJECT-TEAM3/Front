@@ -4,7 +4,7 @@ import { MOCK_MEDICATIONS } from '@/data/mockMedications'
 class MedicationApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_MEDICATION_API_URL || 'http://localhost:8090',
+      baseURL: import.meta.env.VITE_MEDICATION_API_URL || 'http://localhost:8082',
       basePath: '/api/medications',
     })
   }

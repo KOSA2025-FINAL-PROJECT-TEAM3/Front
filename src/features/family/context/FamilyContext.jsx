@@ -22,15 +22,20 @@ export const FamilyProvider = ({ children }) => {
   const members = useFamilyStore((state) => state.members)
   const location = useLocation()
 
+  const isTestPage =
+    location.pathname.startsWith('/chat-test') || location.pathname.startsWith('/test-websocket')
+  const location = useLocation()
+
   useEffect(() => {
     const isPublic = PUBLIC_PATHS.has(location.pathname)
     if (isPublic) return
 
     const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-    if (token && !isInitialized) {
+    if (token && !isInitialized && !isTestPage) {
       initialize()
     }
-  }, [initialize, isInitialized, location.pathname])
+  }, [initialize, isInitialized, isTestPage , location.pathname])
+
 
   const value = useMemo(
     () => ({
