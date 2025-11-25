@@ -4,7 +4,7 @@ import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@/data/mockSymptoms'
 class SearchApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_SEARCH_API_URL || 'http://localhost:8090',
+      baseURL: import.meta.env.VITE_SEARCH_API_URL || 'http://localhost:8082',
       basePath: '/api/search',
     })
   }
