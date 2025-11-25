@@ -57,6 +57,7 @@ import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
 import ToastContainer from '@shared/components/toast/ToastContainer'
 import { setNavigator } from '@core/routing/navigation'
+import WsTestPage from '@pages/WsTestPage'
 
 function NavigationRegistrar() {
   const navigate = useNavigate()
@@ -71,6 +72,7 @@ function NavigationRegistrar() {
  * @returns {JSX.Element}
  */
 function App() {
+  
   return (
     <BrowserRouter>
       <ErrorBoundary fallback={<ErrorFallback />}>
@@ -193,6 +195,8 @@ function App() {
             path={ROUTE_PATHS.more}
             element={<PrivateRoute element={<MorePage />} />}
           />
+          
+          
 
           {/* 가족 */}
           <Route
@@ -207,6 +211,7 @@ function App() {
             path={ROUTE_PATHS.familyMemberDetail}
             element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
           />
+          
 
           {/* 채팅 */}
           <Route
@@ -217,20 +222,23 @@ function App() {
             path={ROUTE_PATHS.chatConversation}
             element={<PrivateRoute element={<ChatConversationPage />} />}
           />
+
           <Route
             path={ROUTE_PATHS.familyChat}
             element={<PrivateRoute element={<FamilyChatConversationPage />} />}
           />
+
           <Route
             path={ROUTE_PATHS.familyChatByGroup}
             element={<PrivateRoute element={<FamilyChatConversationPage />} />}
           />
-
+          
           {/* 알림 */}
           <Route
             path={ROUTE_PATHS.notifications}
             element={<PrivateRoute element={<NotificationPage />} />}
           />
+          
           <Route
             path={ROUTE_PATHS.notificationDetail}
             element={<PrivateRoute element={<NotificationDetailPage />} />}
@@ -245,6 +253,8 @@ function App() {
             path={ROUTE_PATHS.weeklyStats}
             element={<PrivateRoute element={<WeeklyStatsPage />} />}
           />
+          
+          <Route path="/ws-test" element={<WsTestPage />} />
 
           {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
           <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.login} replace />} />
