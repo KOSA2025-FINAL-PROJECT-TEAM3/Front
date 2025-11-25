@@ -24,7 +24,6 @@ export const FamilyProvider = ({ children }) => {
 
   const isTestPage =
     location.pathname.startsWith('/chat-test') || location.pathname.startsWith('/test-websocket')
-  const location = useLocation()
 
   useEffect(() => {
     const isPublic = PUBLIC_PATHS.has(location.pathname)
@@ -34,8 +33,7 @@ export const FamilyProvider = ({ children }) => {
     if (token && !isInitialized && !isTestPage) {
       initialize()
     }
-  }, [initialize, isInitialized, isTestPage , location.pathname])
-
+  }, [initialize, isInitialized, isTestPage, location.pathname])
 
   const value = useMemo(
     () => ({
