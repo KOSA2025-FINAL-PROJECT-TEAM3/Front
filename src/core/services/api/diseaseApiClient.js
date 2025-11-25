@@ -2,7 +2,7 @@
 import { MOCK_DISEASES } from '@/data/mockDiseases'
 
 const client = new ApiClient({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082',
   basePath: '/api/disease',
 })
 

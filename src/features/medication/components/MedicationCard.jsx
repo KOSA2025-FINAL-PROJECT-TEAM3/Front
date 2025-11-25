@@ -1,10 +1,5 @@
 import styles from './MedicationCard.module.scss'
 
-const statusLabel = {
-  ACTIVE: '복용 중',
-  PAUSED: '일시중지',
-}
-
 export const MedicationCard = ({ medication, onToggle, onRemove, onSelect }) => {
   const handleSelect = () => {
     onSelect?.(medication)

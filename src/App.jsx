@@ -23,6 +23,7 @@ import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
 import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
+import InviteAcceptPage from '@features/family/pages/InviteAccept'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
 import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
@@ -45,6 +46,7 @@ import SuspectedDiseasePage from '@features/disease/pages/SuspectedDiseasePage'
 import DiseaseRestrictionsPage from '@features/disease/pages/DiseaseRestrictionsPage'
 import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
 import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
+import FamilyChatConversationPage from '@features/chat/pages/FamilyChatConversationPage'
 import NotificationPage from '@features/notification/pages/NotificationPage'
 import NotificationDetailPage from '@features/notification/pages/NotificationDetailPage'
 import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
@@ -55,6 +57,7 @@ import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
 import ToastContainer from '@shared/components/toast/ToastContainer'
 import { setNavigator } from '@core/routing/navigation'
+import WsTestPage from '@pages/WsTestPage'
 
 function NavigationRegistrar() {
   const navigate = useNavigate()
@@ -69,9 +72,10 @@ function NavigationRegistrar() {
  * @returns {JSX.Element}
  */
 function App() {
+  
   return (
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
           <Routes>
@@ -191,6 +195,8 @@ function App() {
             path={ROUTE_PATHS.more}
             element={<PrivateRoute element={<MorePage />} />}
           />
+          
+          
 
           {/* 가족 */}
           <Route
@@ -205,6 +211,7 @@ function App() {
             path={ROUTE_PATHS.familyMemberDetail}
             element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
           />
+          
 
           {/* 채팅 */}
           <Route
@@ -216,11 +223,22 @@ function App() {
             element={<PrivateRoute element={<ChatConversationPage />} />}
           />
 
+          <Route
+            path={ROUTE_PATHS.familyChat}
+            element={<PrivateRoute element={<FamilyChatConversationPage />} />}
+          />
+
+          <Route
+            path={ROUTE_PATHS.familyChatByGroup}
+            element={<PrivateRoute element={<FamilyChatConversationPage />} />}
+          />
+          
           {/* 알림 */}
           <Route
             path={ROUTE_PATHS.notifications}
             element={<PrivateRoute element={<NotificationPage />} />}
           />
+          
           <Route
             path={ROUTE_PATHS.notificationDetail}
             element={<PrivateRoute element={<NotificationDetailPage />} />}
@@ -235,6 +253,8 @@ function App() {
             path={ROUTE_PATHS.weeklyStats}
             element={<PrivateRoute element={<WeeklyStatsPage />} />}
           />
+          
+          <Route path="/ws-test" element={<WsTestPage />} />
 
           {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
           <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.login} replace />} />
@@ -245,8 +265,8 @@ function App() {
           <ToastContainer />
           <DeveloperModePanel />
         </FamilyProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </BrowserRouter>
   )
 }
 

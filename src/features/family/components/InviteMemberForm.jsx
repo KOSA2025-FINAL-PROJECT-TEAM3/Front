@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import MemberRoleSelector from './MemberRoleSelector.jsx'
@@ -24,8 +25,11 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
 
   const handleInvite = async (formData) => {
     try {
-      await onSubmit?.(formData)
-      setSuccessMessage(`${formData.name}님에게 초대장을 전송했습니다.`)
+      const result = await onSubmit?.(formData)
+      // result should contain { shortCode, longToken, expiresAt }
+      setSuccessMessage(
+        `${formData.name}님에게 초대장을 전송했습니다. 초대 코드: ${result?.shortCode || ''}`
+      )
       reset({ name: '', email: '', role: 'SENIOR' })
     } catch (err) {
       setError('root', {
@@ -99,6 +103,15 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
       </button>
     </form>
   )
+}
+
+InviteMemberForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+}
+
+InviteMemberForm.defaultProps = {
+  loading: false,
 }
 
 export default InviteMemberForm

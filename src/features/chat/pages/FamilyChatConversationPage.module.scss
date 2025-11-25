@@ -1,0 +1,7 @@
+.page { display:flex; flex-direction:column; height:100%; }
+.header { display:flex; align-items:center; padding:12px; }
+.backButton { margin-right:12px; }
+.title { font-size:18px; font-weight:600; }
+.messageList { flex:1; overflow:auto; padding:12px; }
+.loading, .empty { padding:16px; text-align:center; color:#666; }
+.error { padding:16px; }

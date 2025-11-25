@@ -4,16 +4,15 @@ import { createMockOcrResponse } from '@/data/mockOcr'
 class OcrApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082',
       basePath: '/api/ocr',
     })
   }
 
-  recognize(formData) {
-    return this.post('/recognize', formData, {
+  scan(formData) {
+    return this.post('/scan', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    }, {
-      mockResponse: () => createMockOcrResponse(formData?.get('file')?.name),
+      timeout: 60000,
     })
   }
 }
