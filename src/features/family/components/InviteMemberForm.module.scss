@@ -1,39 +1,61 @@
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  grid-template-areas:
+    "name email"
+    "role role"
+    "submit submit";
 }
 
 .label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   font-weight: 600;
   color: #1f2937;
+  font-size: 13px;
+
+  &:nth-of-type(1) {
+    grid-area: name;
+  }
+
+  &:nth-of-type(2) {
+    grid-area: email;
+  }
 }
 
 input,
 select {
   border: 1px solid #d1d5db;
   border-radius: 10px;
-  padding: 10px 12px;
-  font-size: 14px;
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  min-width: 0;
 }
 
 .roleSection {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  grid-area: role;
+
+  .label {
+    margin: 0;
+  }
 }
 
 .submit {
+  grid-area: submit;
   background-color: #2563eb;
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 13px;
 }
 
 .submit:disabled {
@@ -44,28 +66,33 @@ select {
 .error {
   color: #dc2626;
   margin: 0;
+  grid-column: 1 / -1;
+  font-size: 12px;
 }
 
 .success {
   color: #15803d;
   margin: 0;
+  grid-column: 1 / -1;
+  font-size: 12px;
 }
 
 .fieldError {
   color: #dc2626;
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 11px;
+  margin-top: 2px;
 }
 
 .optional {
   font-weight: 400;
   color: #6b7280;
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .hint {
   font-weight: 400;
   color: #6b7280;
-  font-size: 12px;
-  margin-top: 2px;
+  font-size: 10px;
+  margin-top: 1px;
+  line-height: 1.2;
 }

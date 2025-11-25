@@ -16,7 +16,11 @@ export const Modal = ({
         <header className={styles.header}>
           <div>
             {title && <h2>{title}</h2>}
-            {description && <p>{description}</p>}
+            {description && (
+              <div className={styles.description}>
+                {typeof description === 'string' ? <p>{description}</p> : description}
+              </div>
+            )}
           </div>
           {onClose && (
             <button

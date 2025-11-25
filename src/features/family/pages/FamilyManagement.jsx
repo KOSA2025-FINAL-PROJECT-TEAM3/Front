@@ -1,5 +1,5 @@
 ﻿import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import Modal from '@shared/components/ui/Modal'
@@ -28,6 +28,13 @@ export const FamilyManagementPage = () => {
     syncEvents,
     refetchFamily,
   } = useFamilySync()
+
+  // 페이지 로드 시 최신 가족 데이터를 불러옴
+  useEffect(() => {
+    refetchFamily?.().catch((error) => {
+      console.warn('[FamilyManagement] Initial refetch failed:', error)
+    })
+  }, [refetchFamily])
 
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))

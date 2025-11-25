@@ -36,11 +36,11 @@ export const ROUTE_PATHS = {
   termsOfService: '/settings/terms',
 
   family: '/family',
-  familyInvite: '/family/invite',
+  familyInvite: '/family/invites',
   familyMemberDetail: '/family/member/:id',
 
-  inviteAccept: '/join',
-  inviteCodeEntry: '/invite/enter',  // 초대 코드 수동 입력 페이지 (공개)
+  inviteAccept: '/invites/start',
+  inviteCodeEntry: '/invites/enter',  // 초대 코드 수동 입력 페이지 (공개)
   chatList: '/chat',
 
   // ⭐ roomId 기반 라우트 (정답)
@@ -94,7 +94,6 @@ export const ROUTE_META = {
     ROUTE_PATHS.familyInvite,
     ROUTE_PATHS.familyMemberDetail,
 
-    ROUTE_PATHS.inviteAccept,
     ROUTE_PATHS.chatList,
     ROUTE_PATHS.familyChatConversation,
     ROUTE_PATHS.familyChatByGroup,
