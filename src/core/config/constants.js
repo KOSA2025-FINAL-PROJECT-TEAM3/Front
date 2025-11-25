@@ -1,29 +1,29 @@
-/**
+﻿/**
  * 공용 상수 정의
- * - 사용자 역할, 알림 타입, 복약 상태 등
+ * - 역할, 알림 유형, 복약 상태 등
  */
 
 // 사용자 역할
 export const USER_ROLES = {
-  SENIOR: 'SENIOR', // 어르신(부모)
-  CAREGIVER: 'CAREGIVER', // 보호자(자녀)
+  SENIOR: 'SENIOR',
+  CAREGIVER: 'CAREGIVER',
 }
 
 // 사용자 역할 라벨
 export const USER_ROLE_LABELS = {
-  [USER_ROLES.SENIOR]: '어르신(부모)',
-  [USER_ROLES.CAREGIVER]: '보호자(자녀)',
+  [USER_ROLES.SENIOR]: '어르신',
+  [USER_ROLES.CAREGIVER]: '보호자',
 }
 
 // 복약 상태
 export const MEDICATION_STATUS = {
-  PENDING: 'PENDING', // 예정
-  COMPLETED: 'COMPLETED', // 복용 완료
-  SKIPPED: 'SKIPPED', // 건너뜀
-  MISSED: 'MISSED', // 미복용
+  PENDING: 'PENDING',
+  COMPLETED: 'COMPLETED',
+  SKIPPED: 'SKIPPED',
+  MISSED: 'MISSED',
 }
 
-// 복약 상태 라벨
+// 복약 상태 라벨 (AGENTS 용어 준수)
 export const MEDICATION_STATUS_LABELS = {
   [MEDICATION_STATUS.PENDING]: '예정',
   [MEDICATION_STATUS.COMPLETED]: '복용 완료',
@@ -31,30 +31,30 @@ export const MEDICATION_STATUS_LABELS = {
   [MEDICATION_STATUS.MISSED]: '미복용',
 }
 
-// 알림 타입
+// 알림 유형
 export const NOTIFICATION_TYPES = {
-  MEDICATION_REMINDER: 'MEDICATION_REMINDER', // 복약 알림
-  DIET_WARNING: 'DIET_WARNING', // 식단 경고
-  FAMILY_ALERT: 'FAMILY_ALERT', // 가족 알림
-  SYSTEM: 'SYSTEM', // 시스템
+  MEDICATION_REMINDER: 'MEDICATION_REMINDER',
+  DIET_WARNING: 'DIET_WARNING',
+  FAMILY_ALERT: 'FAMILY_ALERT',
+  SYSTEM: 'SYSTEM',
 }
 
-// 알림 타입 라벨
+// 알림 유형 라벨
 export const NOTIFICATION_TYPE_LABELS = {
-  [NOTIFICATION_TYPES.MEDICATION_REMINDER]: '복약 알림',
+  [NOTIFICATION_TYPES.MEDICATION_REMINDER]: '복용 알림',
   [NOTIFICATION_TYPES.DIET_WARNING]: '식단 경고',
   [NOTIFICATION_TYPES.FAMILY_ALERT]: '가족 알림',
   [NOTIFICATION_TYPES.SYSTEM]: '시스템',
 }
 
-// 식품 상호작용(충돌) 심각도
+// 상호작용 위험도(충돌 심각도)
 export const CONFLICT_SEVERITY = {
-  HIGH: 'HIGH', // 높음
-  MEDIUM: 'MEDIUM', // 중간
-  LOW: 'LOW', // 낮음
+  HIGH: 'HIGH',
+  MEDIUM: 'MEDIUM',
+  LOW: 'LOW',
 }
 
-// 식품 상호작용 심각도 라벨/색상
+// 상호작용 위험도 라벨/스타일
 export const CONFLICT_SEVERITY_CONFIG = {
   [CONFLICT_SEVERITY.HIGH]: {
     label: '높음',
@@ -73,15 +73,15 @@ export const CONFLICT_SEVERITY_CONFIG = {
   },
 }
 
-// 식사 종류
+// 식사 유형
 export const MEAL_TYPES = {
-  BREAKFAST: 'BREAKFAST', // 아침
-  LUNCH: 'LUNCH', // 점심
-  DINNER: 'DINNER', // 저녁
-  SNACK: 'SNACK', // 간식
+  BREAKFAST: 'BREAKFAST',
+  LUNCH: 'LUNCH',
+  DINNER: 'DINNER',
+  SNACK: 'SNACK',
 }
 
-// 식사 종류 라벨
+// 식사 유형 라벨
 export const MEAL_TYPE_LABELS = {
   [MEAL_TYPES.BREAKFAST]: '아침',
   [MEAL_TYPES.LUNCH]: '점심',
@@ -102,7 +102,7 @@ export const HTTP_STATUS = {
   SERVER_ERROR: 500,
 }
 
-// 페이징/업로드 제한
+// 페이지네이션/업로드 제한
 export const PAGINATION = {
   ITEMS_PER_PAGE: parseInt(import.meta.env.VITE_ITEMS_PER_PAGE || '10', 10),
   MAX_FILE_SIZE: parseInt(import.meta.env.VITE_MAX_FILE_SIZE || '5242880', 10), // 5MB
@@ -132,4 +132,3 @@ export const STORAGE_KEYS = {
   ROLE: 'amapill_role',
   KAKAO_STATE: 'amapill_kakao_oauth_state',
 }
-

@@ -93,7 +93,44 @@ export const useFamilyStore = create((set, get) => ({
 
   inviteMember: async (payload) =>
     withLoading(set, async () => {
-      const res = await familyApiClient.inviteMember(payload)
+      const state = get()
+      const rawGroupId = state.familyGroup?.id
+      
+      console.log('[familyStore] inviteMember - familyGroup:', state.familyGroup)
+      console.log('[familyStore] inviteMember - rawGroupId:', rawGroupId, 'type:', typeof rawGroupId)
+      
+      if (!rawGroupId) {
+        throw new Error('가족 그룹이 없습니다. 먼저 가족 그룹을 생성해주세요.')
+      }
+      
+      // groupId에서 숫자 추출 (예: "family-group-1" -> 1)
+      let groupId
+      if (typeof rawGroupId === 'number') {
+        groupId = rawGroupId
+      } else if (typeof rawGroupId === 'string') {
+        // 문자열에서 마지막 숫자 부분 추출
+        const match = rawGroupId.match(/(\d+)$/)
+        if (match) {
+          groupId = parseInt(match[1], 10)
+        } else {
+          // 전체를 숫자로 변환 시도
+          groupId = parseInt(rawGroupId, 10)
+        }
+      }
+      
+      if (!groupId || isNaN(groupId)) {
+        console.error('[familyStore] Cannot extract numeric groupId from:', rawGroupId)
+        throw new Error(`유효하지 않은 그룹 ID입니다: ${rawGroupId}`)
+      }
+      
+      const fullPayload = {
+        ...payload,
+        groupId
+      }
+      
+      console.log('[familyStore] inviteMember - fullPayload:', fullPayload)
+      
+      const res = await familyApiClient.inviteMember(fullPayload)
       set((state) => ({
         invites: {
           sent: res ? [res, ...(state.invites?.sent || [])] : state.invites?.sent || [],
