@@ -3,15 +3,36 @@ import styles from './ChatMessage.module.scss'
 
 /**
  * ChatMessage - 채팅 메시지 말풍선 컴포넌트
- * @param {Object} message - 메시지 데이터
- * @param {boolean} isMe - 내가 보낸 메시지인지 여부
- * @param {Object} sender - 발신자 정보 (의사/AI 챗봇 정보)
  */
 export const ChatMessage = ({ message, isMe, sender }) => {
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp)
-    return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: true })
+  
+  // ✅ 날짜 포맷팅 함수 (배열과 문자열 모두 처리하도록 수정됨)
+  const formatTime = (dateData) => {
+    if (!dateData) return '';
+
+    let date;
+    
+    // 1. 백엔드가 배열로 줄 때: [2025, 11, 25, 18, 30]
+    if (Array.isArray(dateData)) {
+      const [year, month, day, hour, minute] = dateData;
+      // month는 0부터 시작하므로 -1 필수
+      date = new Date(year, month - 1, day, hour, minute);
+    } 
+    // 2. 문자열로 줄 때: "2025-11-25T18:30:00"
+    else {
+      date = new Date(dateData);
+    }
+
+    // 시간 변환 (오전/오후 HH:MM)
+    return date.toLocaleTimeString('ko-KR', { 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: true 
+    });
   }
+
+  // ✅ 메시지 내 시간 필드 찾기 (createdAt 또는 timestamp 둘 다 지원)
+  const timeDisplay = formatTime(message.createdAt || message.timestamp);
 
   const messageClass = useMemo(() => {
     return `${styles.message} ${isMe ? styles.mine : styles.theirs}`
@@ -26,14 +47,21 @@ export const ChatMessage = ({ message, isMe, sender }) => {
       )}
 
       <div className={styles.content}>
-        {!isMe && sender && (
-          <span className={styles.senderName}>{sender.name}</span>
+        {!isMe && (
+          // sender가 없으면 message.memberNickname 사용 (안전장치 추가)
+          <span className={styles.senderName}>
+            {sender ? sender.name : (message.memberNickname || '알 수 없음')}
+          </span>
         )}
+        
         <div className={styles.bubble}>
           <p className={styles.text}>{message.content}</p>
         </div>
+        
         <div className={styles.meta}>
-          <span className={styles.time}>{formatTime(message.timestamp)}</span>
+          {/* ✅ 수정된 시간 표시 */}
+          <span className={styles.time}>{timeDisplay}</span>
+          
           {isMe && message.isRead && (
             <span className={styles.readStatus}>읽음</span>
           )}
