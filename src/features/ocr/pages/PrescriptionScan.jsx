@@ -3,7 +3,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import OCRControlPanel from '../components/OCRControlPanel.jsx'
 import OCRResultPreview from '../components/OCRResultPreview.jsx'
 import styles from './PrescriptionScan.module.scss'
-import tesseractService from '../services/tesseractService'
+import ocrApiService from '../services/ocrApiService'
 
 export const PrescriptionScanPage = () => {
   const [file, setFile] = useState(null)
@@ -50,27 +50,33 @@ export const PrescriptionScanPage = () => {
     setResult(null)
 
     try {
-      // Tesseract.js로 텍스트 인식 (한글, 영어 지원)
-      const { text, confidence } = await tesseractService.recognizeText(
+      // 백엔드 OCR API 호출 (OpenAI GPT-4o-mini)
+      const ocrResult = await ocrApiService.extractMedication(
         file,
         (progressData) => {
           setProgress(progressData)
         }
       )
 
-      if (!text || text.trim().length === 0) {
-        throw new Error('텍스트를 인식할 수 없습니다. 더 선명한 이미지를 사용해주세요.')
+      if (!ocrResult.medications || ocrResult.medications.length === 0) {
+        throw new Error('약물 정보를 추출할 수 없습니다. 더 선명한 이미지를 사용해주세요.')
       }
 
-      // 결과 저장
+      // 결과 저장 (medications 배열을 텍스트로 변환)
+      const medicationText = ocrResult.medications
+        .map((med, idx) => `${idx + 1}. ${med.name || '알 수 없음'} - ${med.dosage || ''} ${med.frequency || ''}`.trim())
+        .join('\n')
+
       setResult({
-        text,
-        confidence,
+        text: medicationText || ocrResult.rawText,
+        confidence: ocrResult.confidence,
         timestamp: new Date().toISOString(),
+        medications: ocrResult.medications,
+        ocrEngine: ocrResult.ocrEngine,
       })
     } catch (err) {
       console.error('OCR 처리 오류:', err)
-      setError(err.message || '텍스트 인식에 실패했습니다.')
+      setError(err.message || '약물 정보 추출에 실패했습니다.')
     } finally {
       setIsProcessing(false)
       setProgress({ status: 'done', progress: 100 })
@@ -92,18 +98,15 @@ export const PrescriptionScanPage = () => {
   const statusMessage = useMemo(() => {
     if (error) return `오류: ${error}`
     if (isProcessing) {
-      if (progress.status === 'preprocessing image') {
-        return '이미지 전처리 중... (선명도 향상)'
+      if (progress.status === 'uploading') {
+        return '이미지 업로드 중...'
       }
-      if (progress.status === 'loading language traineddata') {
-        return `언어 데이터 로딩 중... ${Math.round(progress.progress * 100)}%`
-      }
-      if (progress.status === 'recognizing text') {
-        return `텍스트 인식 중... ${Math.round(progress.progress * 100)}%`
+      if (progress.status === 'processing') {
+        return 'AI가 약물 정보를 분석하는 중입니다...'
       }
       return 'AI가 이미지를 분석하는 중입니다...'
     }
-    if (file && !result) return '인식 버튼을 눌러 텍스트를 추출하세요'
+    if (file && !result) return '인식 버튼을 눌러 약물 정보를 추출하세요'
     if (result) return `인식 완료! (정확도: ${result.confidence}%)`
     return '카메라로 촬영하거나 갤러리에서 이미지를 선택하세요'
   }, [file, isProcessing, result, error, progress])
