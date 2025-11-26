@@ -12,8 +12,7 @@ class OcrApiClient extends ApiClient {
   scan(formData) {
     return this.post('/scan', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-    }, {
-      mockResponse: () => createMockOcrResponse(formData?.get('file')?.name),
+      timeout: 60000,
     })
   }
 }

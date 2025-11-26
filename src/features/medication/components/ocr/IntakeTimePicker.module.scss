@@ -1,0 +1,211 @@
+.container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.count {
+  color: #00c853;
+  font-weight: 700;
+}
+
+.alarmToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.toggleSwitch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: #00c853;
+    }
+
+    &:checked + .slider::before {
+      transform: translateX(20px);
+    }
+  }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 24px;
+
+  &::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+}
+
+.timeList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.timeSlot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #efefef;
+  }
+}
+
+.slotNumber {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  min-width: 30px;
+}
+
+.timeInputWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeInput {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 100px;
+
+  &:focus {
+    border-color: #00c853;
+  }
+}
+
+.timeLabel {
+  font-size: 14px;
+  color: #666;
+  min-width: 80px;
+}
+
+.removeBtn {
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #999;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #ff5252;
+    color: #ff5252;
+    background: #fff5f5;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.alarmBtn {
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  filter: grayscale(1);
+  opacity: 0.5;
+
+  &.active {
+    filter: grayscale(0);
+    opacity: 1;
+    border-color: #00c853;
+    background: rgba(0, 200, 83, 0.05);
+  }
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.addBtn {
+  width: 100%;
+  padding: 14px;
+  background: #fff;
+  border: 2px dashed #00c853;
+  border-radius: 8px;
+  color: #00c853;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 200, 83, 0.05);
+    border-color: #00a843;
+    color: #00a843;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #ccc;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+}

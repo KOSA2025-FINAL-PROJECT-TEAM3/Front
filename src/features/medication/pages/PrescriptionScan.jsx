@@ -1,14 +1,14 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
-import CameraCapture from '../components/CameraCapture'
+import CameraCapture from '@/features/ocr/components/CameraCapture'
 import {
   PharmacyHeader,
   MedicationCardList,
   IntakeTimePicker,
   DurationPicker,
   RegistrationInfo
-} from '../components'
+} from '../components/ocr'
 import { useOcrRegistration } from '../hooks/useOcrRegistration'
 import styles from './PrescriptionScan.module.scss'
 
