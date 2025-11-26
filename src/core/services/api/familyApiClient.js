@@ -4,7 +4,7 @@ class FamilyApiClient extends ApiClient {
   constructor() {
     super({
       baseURL: import.meta.env.VITE_FAMILY_API_URL || 'http://localhost:8082',
-      basePath: '/family',
+      basePath: '/api/family',
     })
   }
 
