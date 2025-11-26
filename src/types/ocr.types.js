@@ -82,7 +82,8 @@ export function toRegisterFromOCRRequest(formState) {
     startDate: formState.startDate,
     endDate: formState.endDate,
     intakeTimes,
-    medications
+    medications,
+    paymentAmount: formState.paymentAmount || null
   }
 }
 
@@ -95,12 +96,12 @@ export function fromOCRResponse(ocrMedications) {
   return ocrMedications.map((med, index) => ({
     id: `med-${Date.now()}-${index}`,
     name: med.name || '',
-    category: extractCategory(med), // frequency나 다른 필드에서 분류 추출
+    category: med.category || null, // 백엔드 OCR에서 직접 제공
     dosageAmount: parseDosageAmount(med.dosage),
     dailyFrequency: parseFrequency(med.frequency),
     durationDays: parseDuration(med.duration),
     selectedTimes: [true, true, true, true, true], // 기본: 전체 선택
-    imageUrl: null
+    imageUrl: med.imageUrl || null
   }))
 }
 
