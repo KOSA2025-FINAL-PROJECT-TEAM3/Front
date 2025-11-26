@@ -8,7 +8,7 @@ class InviteApiClient extends ApiClient {
   constructor() {
     super({
       baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
-      basePath: '/invites',
+      basePath: '/api/family/public/invites',
     })
   }
 
