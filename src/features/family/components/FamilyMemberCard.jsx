@@ -12,10 +12,17 @@ export const FamilyMemberCard = ({
   onRemove,
   isOnline,
   isRemoving,
+  currentUserId,
+  groupOwnerId,
 }) => {
   if (!member) return null
   const initials = member.name?.[0] ?? 'U'
   const joinedDate = new Date(member.joinedAt).toLocaleDateString('ko-KR')
+
+  const isSelf = member.userId?.toString?.() === currentUserId?.toString?.()
+  const isOwner = groupOwnerId != null && member.userId?.toString?.() === groupOwnerId?.toString?.()
+  const showRemove = !isOwner || !isSelf
+  const removeLabel = isSelf && !isOwner ? '탈퇴' : '제거'
 
   return (
     <div className={styles.card}>
@@ -37,15 +44,17 @@ export const FamilyMemberCard = ({
         <button type="button" className={styles.detailButton} onClick={() => onDetail?.(member.id)}>
           상세
         </button>
-        <button
-          type="button"
-          className={styles.removeButton}
-          onClick={() => onRemove?.(member.id)}
-          disabled={isRemoving}
-          aria-busy={isRemoving}
-        >
-          {isRemoving ? '제거 중...' : '제거'}
-        </button>
+        {showRemove && (
+          <button
+            type="button"
+            className={styles.removeButton}
+            onClick={() => onRemove?.(member.id)}
+            disabled={isRemoving}
+            aria-busy={isRemoving}
+          >
+            {isRemoving ? `${removeLabel} 중...` : removeLabel}
+          </button>
+        )}
       </div>
     </div>
   )
@@ -59,16 +68,21 @@ FamilyMemberCard.propTypes = {
     role: PropTypes.oneOf(['SENIOR', 'CAREGIVER']).isRequired,
     joinedAt: PropTypes.string.isRequired,
     avatarColor: PropTypes.string,
+    userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   }).isRequired,
   onDetail: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   isOnline: PropTypes.bool,
   isRemoving: PropTypes.bool,
+  currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  groupOwnerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 }
 
 FamilyMemberCard.defaultProps = {
   isOnline: false,
   isRemoving: false,
+  currentUserId: null,
+  groupOwnerId: null,
 }
 
 export default FamilyMemberCard
