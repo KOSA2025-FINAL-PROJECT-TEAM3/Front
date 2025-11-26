@@ -4,14 +4,14 @@ import {
   useRef,
   useCallback,
   useLayoutEffect,
-} from "react"; // ⭐ useLayoutEffect 추가됨
+} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "@shared/components/layout/MainLayout";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import styles from "./FamilyChatConversationPage.module.scss";
 
-// SockJS 오류 fix
+// SockJS 오류 방지용
 window.global = window;
 
 let Stomp = null;
@@ -22,10 +22,13 @@ export const FamilyChatConversationPage = () => {
   const { familyGroupId } = useParams();
   const roomId = Number(familyGroupId) || 1;
 
+  // 현재 사용자 ID (나중에 로그인 정보 연동 가능)
+  const currentUserId = 1;
+
   const messageListRef = useRef(null);
   const stompRef = useRef(null);
 
-  // ⭐ 스크롤 계산을 위한 Ref
+  // 스크롤 보정용
   const prevScrollHeightRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
@@ -36,26 +39,26 @@ export const FamilyChatConversationPage = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingPast, setIsLoadingPast] = useState(false);
 
+  // 중복 로딩 방지
   const isFetchingRef = useRef(false);
 
-  // =========================================
-  // ⭐ 메시지 로딩 (서버 DESC → 화면 ASC)
-  // =========================================
+  /**
+   * 서버에서 메시지 조회 (DESC → 화면에서는 ASC 유지)
+   */
   const loadMessages = useCallback(
     async (pageNum) => {
-      if (isFetchingRef.current || !hasMore) return;
+      if (!hasMore) return;
 
       try {
         isFetchingRef.current = true;
 
-        // 과거 메시지 로딩 효과
         if (pageNum > 0) {
           setIsLoadingPast(true);
-          await new Promise((r) => setTimeout(r, 1000));
+          await new Promise((r) => setTimeout(r, 800));
         }
 
         const res = await fetch(
-          `http://localhost:8082/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=30`
+          `http://localhost:8082/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=50`
         );
         const data = await res.json();
 
@@ -64,16 +67,12 @@ export const FamilyChatConversationPage = () => {
           return;
         }
 
-        // DESC → ASC 변환
-        const ascData = [...data].reverse();
-
-        // 메시지 추가 전 현재 높이 저장
         if (messageListRef.current) {
           prevScrollHeightRef.current = messageListRef.current.scrollHeight;
         }
 
-        // prepend 방식
-        setMessages((prev) => [...ascData, ...prev]);
+        // prepend
+        setMessages((prev) => [...data, ...prev]);
       } catch (err) {
         console.error("메시지 로드 실패", err);
       } finally {
@@ -85,34 +84,39 @@ export const FamilyChatConversationPage = () => {
     [roomId, hasMore]
   );
 
-  // =========================================
-  // ⭐ 스크롤 위치 보정 (과거 메시지 로딩 시 필수)
-  // =========================================
+  /**
+   * 과거 메시지 로딩 후 스크롤 보정
+   */
   useLayoutEffect(() => {
-    if (prevScrollHeightRef.current !== null && messageListRef.current) {
+    if (prevScrollHeightRef.current && messageListRef.current) {
       const container = messageListRef.current;
-      const currentScrollHeight = container.scrollHeight;
 
-      container.scrollTop =
-        currentScrollHeight - prevScrollHeightRef.current;
+      const newHeight = container.scrollHeight;
+      const oldHeight = prevScrollHeightRef.current;
+
+      container.scrollTop = newHeight - oldHeight;
 
       prevScrollHeightRef.current = null;
     }
   }, [messages]);
 
-  // 최초 메시지 로딩
+  // 첫 로딩
   useEffect(() => {
     loadMessages(0);
   }, []);
 
-  // =========================================
-  // ⭐ 위로 스크롤하면 과거 메시지 로딩
-  // =========================================
+  /**
+   * 스크롤 상단 도달 → 과거 메시지 로딩
+   */
   const handleScroll = () => {
-    if (!messageListRef.current) return;
-    if (isFetchingRef.current || !hasMore) return;
+    const box = messageListRef.current;
+    if (!box) return;
 
-    if (messageListRef.current.scrollTop < 50) {
+    if (isFetchingRef.current) return;
+    if (!hasMore) return;
+
+    if (box.scrollTop < 50) {
+      isFetchingRef.current = true;
       setPage((prev) => prev + 1);
     }
   };
@@ -129,9 +133,9 @@ export const FamilyChatConversationPage = () => {
     if (page > 0) loadMessages(page);
   }, [page]);
 
-  // =========================================
-  // ⭐ WebSocket 연결
-  // =========================================
+  /**
+   * WebSocket 연결
+   */
   useEffect(() => {
     connectWebSocket();
     return () => disconnectWebSocket();
@@ -147,17 +151,21 @@ export const FamilyChatConversationPage = () => {
 
       const socket = new SockJS("http://localhost:8082/ws");
       const client = Stomp.over(socket);
-      client.debug = () => {};
+      client.debug = () => { };
 
       client.connect(
         {},
         () => {
-          console.log("WS Connected!");
-
           client.subscribe(`/topic/family/${roomId}`, (msg) => {
             const body = JSON.parse(msg.body);
 
-            setMessages((prev) => [...prev, body]);
+            setMessages((prev) => {
+              // 서버 메시지 id 기준 중복 제거
+              if (body.id && prev.some((m) => m.id === body.id)) {
+                return prev;
+              }
+              return [...prev, body];
+            });
 
             setTimeout(() => {
               if (messageListRef.current) {
@@ -167,7 +175,7 @@ export const FamilyChatConversationPage = () => {
             }, 10);
           });
         },
-        (err) => console.error("WS ERROR:", err)
+        (err) => console.error("WebSocket Error:", err)
       );
 
       stompRef.current = client;
@@ -179,18 +187,18 @@ export const FamilyChatConversationPage = () => {
   const disconnectWebSocket = () => {
     try {
       stompRef.current?.disconnect();
-    } catch {}
+    } catch { }
   };
 
-  // =========================================
-  // ⭐ 메시지 전송
-  // =========================================
+  /**
+   * 메시지 전송 (낙관적 UI 포함)
+   */
   const handleSendMessage = async (content) => {
     if (!content.trim() || !stompRef.current) return;
 
     const payload = {
       roomId,
-      familyMemberId: 1,
+      familyMemberId: currentUserId,
       memberNickname: "tester",
       content,
     };
@@ -198,19 +206,20 @@ export const FamilyChatConversationPage = () => {
     setIsSending(true);
 
     try {
+      // 서버에 전송
       stompRef.current.send(
         `/app/family/${roomId}`,
         {},
         JSON.stringify(payload)
       );
 
-      // 즉시 렌더 (낙관적 UI)
+      // 낙관적 렌더
       setMessages((prev) => [
         ...prev,
         {
           ...payload,
+          id: null,
           createdAt: new Date().toISOString(),
-          senderType: "user",
         },
       ]);
 
@@ -227,9 +236,9 @@ export const FamilyChatConversationPage = () => {
     }
   };
 
-  // =========================================
-  // ⭐ 최초 로딩 시 자동 스크롤 하단
-  // =========================================
+  /**
+   * 첫 로딩 시 자동 스크롤 맨 아래
+   */
   useEffect(() => {
     if (!isInitialLoading && page === 0 && messages.length > 0) {
       if (messageListRef.current) {
@@ -268,9 +277,9 @@ export const FamilyChatConversationPage = () => {
 
           {messages.map((m, i) => (
             <ChatMessage
-              key={m.messageId || i}
+              key={m.id || m.messageId || i}
               message={m}
-              isMe={m.senderType === "user"}
+              isMe={m.familyMemberId === currentUserId}
             />
           ))}
         </div>
