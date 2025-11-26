@@ -1,0 +1,307 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 24px;
+  background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.codeInput {
+  padding: 16px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  font-weight: 700;
+  border: 2px solid #d1d5db;
+  border-radius: 12px;
+  text-transform: uppercase;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+  }
+
+  &::placeholder {
+    letter-spacing: 4px;
+    font-weight: 400;
+    color: #9ca3af;
+  }
+}
+
+.submitButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #2563eb;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  color: #dc2626;
+  font-size: 14px;
+  text-align: center;
+  padding: 12px;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+/* 초대 정보 표시 카드 */
+.inviteInfo {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inviteInfo h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  text-align: center;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.infoLabel {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.infoValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* 역할 배지 */
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.roleBadge.senior {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.roleBadge.caregiver {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.roleIcon {
+  font-size: 18px;
+}
+
+.roleSection {
+  text-align: center;
+  padding: 16px 0;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.roleSection p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.expiryWarning {
+  font-size: 12px;
+  color: #f97316;
+  text-align: center;
+}
+
+/* 액션 버튼들 */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.acceptButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background: #16a34a;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.loginButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #ffffff;
+  border: 2px solid #2563eb;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #eff6ff;
+  }
+}
+
+.cancelButton {
+  padding: 12px;
+  font-size: 14px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+
+  &:hover {
+    color: #374151;
+  }
+}
+
+/* 로딩 상태 */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* 성공 메시지 */
+.success {
+  text-align: center;
+  padding: 24px;
+  background: #f0fdf4;
+  border-radius: 12px;
+}
+
+.successIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.success h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #16a34a;
+  margin: 0 0 8px 0;
+}
+
+.success p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}

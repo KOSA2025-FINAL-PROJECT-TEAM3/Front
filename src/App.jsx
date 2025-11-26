@@ -23,7 +23,8 @@ import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
 import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
 import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
-import InviteAcceptPage from '@features/family/pages/InviteAccept'
+import InviteCodeEntryPage from '@features/family/pages/InviteCodeEntry'
+import FamilyJoin from '@features/family/pages/FamilyJoin'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
 import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
@@ -85,6 +86,10 @@ function App() {
           <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
           <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
           <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
+
+          {/* 초대 코드 입력 및 링크 진입 (공개) */}
+          <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
+          <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
 
           {/* 보호된 페이지: 인증 필요 */}
           <Route

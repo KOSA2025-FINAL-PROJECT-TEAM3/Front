@@ -39,7 +39,6 @@ export const SeniorDashboard = () => {
   const navigate = useNavigate()
   const { medications, fetchMedications } = useMedicationStore()
   const [medicationLogs, setMedicationLogs] = useState([])
-  const [loading, setLoading] = useState(false)
 
   const loadMedicationLogs = useCallback(async () => {
     try {
@@ -141,7 +140,6 @@ export const SeniorDashboard = () => {
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')
 
-    setLoading(true)
     try {
       // 오늘 날짜 + 스케줄 시간으로 scheduledTime 생성
       const schedule = todaySchedules.find((s) => s.id === scheduleId)
@@ -189,8 +187,6 @@ export const SeniorDashboard = () => {
       alert('복용 기록 저장에 실패했습니다.')
       // 에러 발생 시 다시 로드하여 원래 상태로 복구
       await loadMedicationLogs()
-    } finally {
-      setLoading(false)
     }
   }
 
