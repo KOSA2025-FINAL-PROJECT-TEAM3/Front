@@ -84,6 +84,31 @@ export const MorePage = () => {
     },
   ]
 
+  // 가족 관리 그룹
+  const familyManagementItems = [
+    {
+      id: 'inviteCodeEntry',
+      label: '초대 코드 입력',
+      icon: '🎫',
+      description: '가족 초대 코드로 그룹 합류',
+      onClick: () => handleNavigate(ROUTE_PATHS.inviteCodeEntry),
+    },
+    isCaregiver && {
+      id: 'family',
+      label: '가족 관리',
+      icon: '👨‍👩‍👧‍👦',
+      description: '가족 구성원 관리',
+      onClick: () => handleNavigate(ROUTE_PATHS.family),
+    },
+    isCaregiver && {
+      id: 'familyInvite',
+      label: '가족 초대',
+      icon: '✉️',
+      description: '새 가족 구성원 초대',
+      onClick: () => handleNavigate(ROUTE_PATHS.familyInvite),
+    },
+  ].filter(Boolean)
+
   // 식단 관리 그룹
   const dietManagementItems = [
     {
@@ -130,6 +155,7 @@ export const MorePage = () => {
 
         <div className={styles.content}>
           <MenuGroup title="알림 및 리포트" items={notificationReportItems} />
+          <MenuGroup title="가족 관리" items={familyManagementItems} />
           <MenuGroup title="건강 관리" items={healthManagementItems} />
           <MenuGroup title="식단 관리" items={dietManagementItems} />
           <MenuGroup title="계정" items={accountItems} />

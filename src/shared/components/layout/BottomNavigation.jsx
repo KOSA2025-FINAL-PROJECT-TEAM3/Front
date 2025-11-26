@@ -32,11 +32,11 @@ const NAV_ITEMS = [
     roles: [ROLE_ALL],
   },
   {
-    id: 'search',
-    label: '검색',
-    icon: 'search',
-    path: ROUTE_PATHS.pillSearch,
-    roles: [ROLE_ALL],
+    id: 'invite-code',
+    label: '초대코드',
+    icon: 'ticket',
+    path: ROUTE_PATHS.inviteCodeEntry,
+    roles: [ROLE_ALL], // 노인, 보호자 모두 접근 가능
   },
   {
     id: 'family',

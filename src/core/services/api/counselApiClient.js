@@ -3,7 +3,7 @@ import ApiClient from './ApiClient'
 class CounselApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082',
       basePath: '/api/counsel',
     })
   }
@@ -17,4 +17,3 @@ class CounselApiClient extends ApiClient {
 
 export const counselApiClient = new CounselApiClient()
 export { CounselApiClient }
-

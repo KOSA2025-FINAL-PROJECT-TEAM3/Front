@@ -16,7 +16,6 @@ export const MedicationManagement = () => {
     medications,
     loading,
     fetchMedications,
-    addMedication,
     removeMedication,
     toggleStatus,
     updateMedication,

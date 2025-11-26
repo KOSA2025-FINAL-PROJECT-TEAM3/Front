@@ -3,8 +3,8 @@ import ApiClient from './ApiClient'
 class FamilyChatApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8090',
-      basePath: '/api/family-chat',
+      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8082',
+      basePath: '/family-chat',
     })
   }
 
