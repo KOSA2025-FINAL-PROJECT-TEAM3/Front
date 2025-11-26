@@ -4,6 +4,8 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import Modal from '@shared/components/ui/Modal'
 import { toast } from '@shared/components/toast/toastStore'
+import { familyApiClient } from '@core/services/api/familyApiClient'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
@@ -11,7 +13,9 @@ import styles from './FamilyManagement.module.scss'
 
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
+  const currentUserId = useAuthStore((state) => state.user?.id)
   const [removingMemberId, setRemovingMemberId] = useState(null)
+  const [dissolving, setDissolving] = useState(false)
   const [retrying, setRetrying] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
   const {
@@ -40,6 +44,22 @@ export const FamilyManagementPage = () => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
 
+  const handleDissolveGroup = () => {
+    if (!familyGroup?.id) {
+      toast.error('해산할 그룹이 없습니다.')
+      return
+    }
+    if (familyGroup?.createdBy?.toString?.() !== currentUserId?.toString?.()) {
+      toast.error('그룹 오너만 해산할 수 있습니다.')
+      return
+    }
+    setConfirmModal({
+      type: 'dissolve',
+      title: '그룹 해산',
+      message: '그룹을 해산하면 모든 구성원이 제거됩니다. 진행하시겠어요?',
+    })
+  }
+
   const handleRemoveMember = (memberId) => {
     if (!memberId) return
     const target = members.find((member) => member.id === memberId)
@@ -48,22 +68,10 @@ export const FamilyManagementPage = () => {
       : '이 구성원을 제거하시겠어요?'
 
     setConfirmModal({
+      type: 'remove',
       title: '구성원 제거',
       message,
-      onConfirm: async () => {
-        setRemovingMemberId(memberId)
-        try {
-          await removeMember(memberId)
-          toast.success('구성원이 제거되었습니다.')
-        } catch (error) {
-          toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
-          console.warn('[FamilyManagement] removeMember failed', error)
-        } finally {
-          setRemovingMemberId(null)
-          setConfirmModal(null)
-        }
-      },
-      onCancel: () => setConfirmModal(null),
+      memberId,
     })
   }
 
@@ -79,17 +87,45 @@ export const FamilyManagementPage = () => {
               <button
                 type="button"
                 className={styles.cancelButton}
-                onClick={confirmModal.onCancel}
+                onClick={() => setConfirmModal(null)}
               >
                 취소
               </button>
               <button
                 type="button"
                 className={styles.confirmButton}
-                onClick={confirmModal.onConfirm}
-                disabled={removingMemberId}
+                onClick={async () => {
+                  if (confirmModal.type === 'remove') {
+                    const memberId = confirmModal.memberId
+                    setRemovingMemberId(memberId)
+                    try {
+                      await removeMember(memberId)
+                      toast.success('구성원이 제거되었습니다.')
+                    } catch (error) {
+                      toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
+                      console.warn('[FamilyManagement] removeMember failed', error)
+                    } finally {
+                      setRemovingMemberId(null)
+                      setConfirmModal(null)
+                    }
+                  } else if (confirmModal.type === 'dissolve') {
+                    setDissolving(true)
+                    try {
+                      await familyApiClient.deleteGroup(familyGroup.id)
+                      toast.success('그룹이 해산되었습니다.')
+                      await refetchFamily?.()
+                    } catch (error) {
+                      toast.error('그룹 해산에 실패했습니다. 다시 시도해 주세요.')
+                      console.warn('[FamilyManagement] dissolve failed', error)
+                    } finally {
+                      setDissolving(false)
+                      setConfirmModal(null)
+                    }
+                  }
+                }}
+                disabled={removingMemberId || dissolving}
               >
-                {removingMemberId ? '제거 중...' : '확인'}
+                {removingMemberId || dissolving ? '진행 중...' : '확인'}
               </button>
             </div>
           }
@@ -108,6 +144,18 @@ export const FamilyManagementPage = () => {
             >
               + 가족 초대
             </button>
+            {familyGroup?.id &&
+              familyGroup?.createdBy?.toString?.() === currentUserId?.toString?.() && (
+                <button
+                  type="button"
+                  className={styles.dangerButton}
+                  onClick={handleDissolveGroup}
+                  style={{ marginLeft: 8 }}
+                  disabled={dissolving}
+                >
+                  {dissolving ? '해산 중...' : '그룹 해산'}
+                </button>
+              )}
             <button
               type="button"
               className={styles.inviteButton}
@@ -205,6 +253,8 @@ export const FamilyManagementPage = () => {
               onRemove={handleRemoveMember}
               onlineMemberIds={onlineMemberIds}
               removingMemberId={removingMemberId}
+              currentUserId={currentUserId}
+              groupOwnerId={familyGroup?.createdBy}
             />
           </>
         )}

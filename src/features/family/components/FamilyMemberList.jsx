@@ -7,6 +7,8 @@ export const FamilyMemberList = ({
   onRemove,
   onlineMemberIds = [],
   removingMemberId,
+  currentUserId,
+  groupOwnerId,
 }) => {
   if (!members.length) {
     return (
@@ -29,6 +31,8 @@ export const FamilyMemberList = ({
             onRemove={onRemove}
             isOnline={onlineMemberIds.includes(member.id)}
             isRemoving={removingMemberId === member.id}
+            currentUserId={currentUserId}
+            groupOwnerId={groupOwnerId}
           />
         ))}
       </div>

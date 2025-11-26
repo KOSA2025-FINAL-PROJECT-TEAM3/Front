@@ -14,25 +14,55 @@ class FamilyApiClient extends ApiClient {
     return this.get('/groups').then((groups) => {
       if (Array.isArray(groups) && groups.length > 0) {
         const firstGroup = groups[0]
-        console.log('[familyApiClient] getSummary - firstGroup:', firstGroup)
-        
-        // 첫 번째 그룹을 기본 그룹으로 반환
-        // 백엔드는 그룹 안에 members 배열을 포함해서 반환함
+        console.log('[familyApiClient] getSummary - raw firstGroup:', firstGroup)
+
+        const normalizeMember = (member) => {
+          const userId =
+            member?.user?.id ??
+            member?.userId ??
+            (typeof member?.id === 'number' ? member.id : null)
+
+          return {
+            id: member?.id?.toString() ?? member?.userId?.toString(),
+            userId,
+            name: member?.user?.name || member?.userName || '이름 없음',
+            email: member?.user?.email || member?.userEmail || '',
+            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            joinedAt: member?.joinedAt || new Date().toISOString(),
+            raw: member,
+          }
+        }
+
+        const members = Array.isArray(firstGroup?.members)
+          ? firstGroup.members.map(normalizeMember)
+          : []
+
+        const normalizedGroup = {
+          id: firstGroup?.id,
+          name: firstGroup?.name,
+          createdBy: firstGroup?.createdBy?.id ?? firstGroup?.createdBy,
+          createdAt: firstGroup?.createdAt,
+        }
+
         return {
-          group: firstGroup,
-          members: firstGroup?.members || []
+          group: normalizedGroup,
+          members,
         }
       }
       // 그룹이 없으면 null 반환
       return {
         group: null,
-        members: []
+        members: [],
       }
     })
   }
 
   createGroup(name) {
     return this.post('/groups', { name })
+  }
+
+  deleteGroup(groupId) {
+    return this.delete(`/groups/${groupId}`)
   }
 
   getInvites() {
