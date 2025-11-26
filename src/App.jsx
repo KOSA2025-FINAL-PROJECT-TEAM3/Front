@@ -75,7 +75,7 @@ function NavigationRegistrar() {
 function App() {
   
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
