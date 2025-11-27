@@ -8,6 +8,8 @@ import DiseaseList from '../components/DiseaseList'
 import DiseaseTrash from '../components/DiseaseTrash'
 import DiseaseForm from '../components/DiseaseForm'
 import Modal from '@shared/components/ui/Modal'
+import { FAB } from '@shared/components/ui/FAB'
+import { Icon } from '@shared/components/ui/Icon'
 import { useDiseases } from '../hooks/useDiseases'
 import styles from './Disease.module.scss'
 
@@ -32,6 +34,19 @@ export const DiseasePage = () => {
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
+
+  const fabActions = [
+    {
+      label: '질병 추가',
+      icon: <Icon name="plus" />,
+      onClick: () => setShowForm(true),
+    },
+    {
+      label: exporting ? '다운로드 중...' : 'PDF 내보내기',
+      icon: <Icon name="download" />,
+      onClick: () => !exporting && userId && handleExportPdf(),
+    },
+  ]
 
   useEffect(() => {
     if (showTrash) {
@@ -175,6 +190,8 @@ export const DiseasePage = () => {
             onEdit={handleEdit}
           />
         )}
+
+        <FAB actions={fabActions} />
 
         <Modal
           isOpen={showForm}
