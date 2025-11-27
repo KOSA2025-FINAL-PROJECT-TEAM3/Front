@@ -25,6 +25,7 @@ export const DiseasePage = () => {
     emptyTrash,
     createDisease,
     updateDisease,
+    restoreDisease,
   } = useDiseases()
   const [showTrash, setShowTrash] = useState(false)
   const [exporting, setExporting] = useState(false)
@@ -96,6 +97,19 @@ export const DiseasePage = () => {
     }
   }
 
+  const handleRestore = async (diseaseId) => {
+    if (!diseaseId) return
+    const confirmed = window.confirm('선택한 질병을 목록으로 복원할까요?')
+    if (!confirmed) return
+    try {
+      await restoreDisease(diseaseId)
+      toast.success('질병이 복원되었습니다.')
+    } catch (error) {
+      console.error('복원 실패', error)
+      toast.error('복원에 실패했습니다.')
+    }
+  }
+
   const handleRefresh = () => {
     refresh()
     if (showTrash) {
@@ -151,7 +165,7 @@ export const DiseasePage = () => {
         {!userId && <div className={styles.hint}>로그인 정보를 확인할 수 없습니다.</div>}
 
         {showTrash ? (
-          <DiseaseTrash items={trash} loading={trashLoading} onEmptyTrash={handleEmptyTrash} />
+          <DiseaseTrash items={trash} loading={trashLoading} onEmptyTrash={handleEmptyTrash} onRestore={handleRestore} />
         ) : (
           <DiseaseList
             diseases={diseases}

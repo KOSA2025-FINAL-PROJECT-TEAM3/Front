@@ -27,6 +27,7 @@ export const useDiseases = (userIdOverride = null) => {
     setUserId,
     createDisease,
     updateDisease,
+    restoreDisease,
   } = useDiseaseStore()
 
   const userId = useMemo(() => {
@@ -60,6 +61,7 @@ export const useDiseases = (userIdOverride = null) => {
     emptyTrash: () => emptyTrash(userId),
     createDisease: (payload) => createDisease(payload),
     updateDisease: (diseaseId, payload) => updateDisease(diseaseId, payload),
+    restoreDisease: (diseaseId) => restoreDisease(diseaseId, userId),
   }
 }
 

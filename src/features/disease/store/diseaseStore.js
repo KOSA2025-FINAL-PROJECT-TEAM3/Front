@@ -72,6 +72,18 @@ export const useDiseaseStore = create((set, get) => ({
     }
   }),
 
+  restoreDisease: withLoading(set, 'loading', async (diseaseId, userIdParam) => {
+    const userId = userIdParam ?? get().userId
+    await diseaseApiClient.restore(diseaseId)
+    // Update state: remove from trash, refresh active list
+    if (userId) {
+      await Promise.all([
+        get().fetchTrash(userId),
+        get().fetchDiseases(userId)
+      ])
+    }
+  }),
+
   emptyTrash: withLoading(set, 'trashLoading', async (userIdParam) => {
     const userId = userIdParam ?? get().userId
     if (!userId) return

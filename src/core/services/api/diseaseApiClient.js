@@ -31,6 +31,10 @@ export const diseaseApiClient = {
     return client.delete(`/${diseaseId}`)
   },
 
+  async restore(diseaseId) {
+    return client.post(`/${diseaseId}/restore`)
+  },
+
   async getTrash(userId) {
     return client.get(`/user/${userId}/trash`, undefined, {
       mockResponse: () => [],
