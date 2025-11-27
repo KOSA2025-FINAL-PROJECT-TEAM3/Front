@@ -12,7 +12,7 @@ const formatDate = (value) => {
   }
 }
 
-export const DiseaseTrash = ({ items = [], loading, onEmptyTrash }) => {
+export const DiseaseTrash = ({ items = [], loading, onEmptyTrash, onRestore }) => {
   return (
     <div className={styles.trash}>
       <div className={styles.header}>
@@ -42,6 +42,11 @@ export const DiseaseTrash = ({ items = [], loading, onEmptyTrash }) => {
               <div className={styles.meta}>
                 <span>삭제 시각: {formatDate(item.deletedAt)}</span>
                 {item.status && <span className={styles.status}>{item.status}</span>}
+              </div>
+              <div className={styles.actions}>
+                <Button size="sm" variant="secondary" onClick={() => onRestore(item.id)}>
+                  복원
+                </Button>
               </div>
             </li>
           ))}

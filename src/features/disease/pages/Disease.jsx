@@ -8,6 +8,8 @@ import DiseaseList from '../components/DiseaseList'
 import DiseaseTrash from '../components/DiseaseTrash'
 import DiseaseForm from '../components/DiseaseForm'
 import Modal from '@shared/components/ui/Modal'
+import { FAB } from '@shared/components/ui/FAB'
+import { Icon } from '@shared/components/ui/Icon'
 import { useDiseases } from '../hooks/useDiseases'
 import styles from './Disease.module.scss'
 
@@ -25,12 +27,26 @@ export const DiseasePage = () => {
     emptyTrash,
     createDisease,
     updateDisease,
+    restoreDisease,
   } = useDiseases()
   const [showTrash, setShowTrash] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
+
+  const fabActions = [
+    {
+      label: '질병 추가',
+      icon: <Icon name="plus" />,
+      onClick: () => setShowForm(true),
+    },
+    {
+      label: exporting ? '다운로드 중...' : 'PDF 내보내기',
+      icon: <Icon name="download" />,
+      onClick: () => !exporting && userId && handleExportPdf(),
+    },
+  ]
 
   useEffect(() => {
     if (showTrash) {
@@ -96,6 +112,19 @@ export const DiseasePage = () => {
     }
   }
 
+  const handleRestore = async (diseaseId) => {
+    if (!diseaseId) return
+    const confirmed = window.confirm('선택한 질병을 목록으로 복원할까요?')
+    if (!confirmed) return
+    try {
+      await restoreDisease(diseaseId)
+      toast.success('질병이 복원되었습니다.')
+    } catch (error) {
+      console.error('복원 실패', error)
+      toast.error('복원에 실패했습니다.')
+    }
+  }
+
   const handleRefresh = () => {
     refresh()
     if (showTrash) {
@@ -151,7 +180,7 @@ export const DiseasePage = () => {
         {!userId && <div className={styles.hint}>로그인 정보를 확인할 수 없습니다.</div>}
 
         {showTrash ? (
-          <DiseaseTrash items={trash} loading={trashLoading} onEmptyTrash={handleEmptyTrash} />
+          <DiseaseTrash items={trash} loading={trashLoading} onEmptyTrash={handleEmptyTrash} onRestore={handleRestore} />
         ) : (
           <DiseaseList
             diseases={diseases}
@@ -161,6 +190,8 @@ export const DiseasePage = () => {
             onEdit={handleEdit}
           />
         )}
+
+        <FAB actions={fabActions} />
 
         <Modal
           isOpen={showForm}
