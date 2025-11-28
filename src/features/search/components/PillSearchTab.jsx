@@ -2,7 +2,7 @@
  * 알약 검색 탭 (약품명 기반 검색)
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { searchApiClient } from '@core/services/api/searchApiClient'
@@ -35,16 +35,35 @@ export const PillSearchTab = () => {
   const [hasSearched, setHasSearched] = useState(false)
   const [registeringId, setRegisteringId] = useState(null)
 
-  const { addMedication, medications } = useMedicationStore((state) => ({
+  const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
     addMedication: state.addMedication,
     medications: state.medications,
+    fetchMedications: state.fetchMedications,
   }))
+
+  useEffect(() => {
+    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    if (!token || medications.length > 0) return
+
+    fetchMedications().catch((err) => {
+      console.error('복용약 목록 조회 실패', err)
+    })
+  }, [fetchMedications, medications.length])
 
   const handleSearch = async (event) => {
     event?.preventDefault?.()
     const keyword = itemName.trim()
     if (!keyword) {
       setError('약품명을 입력해주세요.')
+      setResults([])
+      setHasSearched(false)
+      return
+    }
+
+    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    if (!token) {
+      setError('로그인 후 검색할 수 있습니다.')
+      toast.error('로그인 후 검색할 수 있습니다.')
       setResults([])
       setHasSearched(false)
       return
