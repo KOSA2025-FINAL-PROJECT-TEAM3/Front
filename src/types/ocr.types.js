@@ -121,12 +121,6 @@ export function createDefaultIntakeTimes() {
 
 // === Helper Functions ===
 
-function extractCategory(med) {
-  // OCR 결과에서 분류 추출 시도
-  // 실제로는 frequency나 precautions에서 키워드 매칭 필요
-  return null
-}
-
 function parseDosageAmount(dosageStr) {
   if (!dosageStr) return 1
   const match = dosageStr.match(/(\d+)/)

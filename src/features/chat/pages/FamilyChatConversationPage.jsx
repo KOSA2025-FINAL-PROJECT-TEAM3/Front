@@ -80,52 +80,50 @@ export const FamilyChatConversationPage = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (token) {
-        // (토큰 파싱 로직 유지)
-        try {
-            const payloadPart = token.split('.')[1];
-            const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-            const payload = JSON.parse(jsonPayload);
-            if (payload.userId) setCurrentUserId(Number(payload.userId));
-        } catch(e) {}
-        loadMessages(0);
+    if (!token) return;
+    try {
+      const payloadPart = token.split('.')[1];
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const payload = JSON.parse(jsonPayload);
+      if (payload.userId) setCurrentUserId(Number(payload.userId));
+    } catch (err) {
+      console.error('토큰 파싱 실패', err);
     }
-  }, [token]);
+    loadMessages(0);
+  }, [token, loadMessages]);
   
   // 스크롤 핸들러 유지
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     const box = messageListRef.current;
     if (!box || isFetchingRef.current || !hasMore) return;
     if (box.scrollTop < 50) {
       isFetchingRef.current = true;
       setPage((prev) => prev + 1);
     }
-  };
+  }, [hasMore]);
 
   useEffect(() => {
     const box = messageListRef.current;
     if (!box) return;
     box.addEventListener("scroll", handleScroll);
     return () => box.removeEventListener("scroll", handleScroll);
-  }, [hasMore]);
+  }, [handleScroll]);
 
   useEffect(() => {
     if (page > 0) loadMessages(page);
-  }, [page]);
+  }, [page, loadMessages]);
 
 
   // ============================================================
   // 🔥 [수정됨] WebSocket 연결 로직 (SockJS 제거 -> 순수 WS 적용)
   // ============================================================
-  useEffect(() => {
-    if (token) {
-      connectWebSocket();
-    }
-    return () => disconnectWebSocket();
-  }, [token]);
-
-  const connectWebSocket = async () => {
+  const connectWebSocket = useCallback(async () => {
     try {
       // SockJS는 import 하지 않습니다.
       const stompModule = await import("@stomp/stompjs");
@@ -153,7 +151,7 @@ export const FamilyChatConversationPage = () => {
       });
 
       // ✅ 3. 연결 성공 시 실행될 콜백
-      client.onConnect = (frame) => {
+      client.onConnect = () => {
         console.log("✅ WebSocket Connected (Pure WS)!");
         
         client.subscribe(`/topic/family/${roomId}`, (msg) => {
@@ -191,7 +189,7 @@ export const FamilyChatConversationPage = () => {
     } catch (err) {
       console.error("WS 로드 실패:", err);
     }
-  };
+  }, [roomId, token]);
 
   const disconnectWebSocket = () => {
     if (stompClientRef.current) {
@@ -203,7 +201,7 @@ export const FamilyChatConversationPage = () => {
   // [수정 끝]
   // ============================================================
 
-  const handleSendMessage = async (content) => {
+  const handleSendMessage = useCallback(async (content) => {
     if (!content.trim() || !stompClientRef.current || !stompClientRef.current.connected) return;
 
     const payload = {
@@ -242,7 +240,14 @@ export const FamilyChatConversationPage = () => {
     } finally {
       setIsSending(false);
     }
-  };
+  }, [roomId, currentUserId]);
+
+  useEffect(() => {
+    if (token) {
+      connectWebSocket();
+    }
+    return () => disconnectWebSocket();
+  }, [token, connectWebSocket]);
 
   // ... (나머지 UI 렌더링 코드는 동일)
   useEffect(() => {
