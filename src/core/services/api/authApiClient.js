@@ -10,6 +10,7 @@ class AuthApiClient extends ApiClient {
       baseURL: envConfig.AUTH_API_URL,
       basePath: '/api/auth',
     })
+    console.log("🔥 ApiClient BASE_URL =", this.baseURL, "BASE_PATH =", this.basePath);
   }
 
   login(email, password) {

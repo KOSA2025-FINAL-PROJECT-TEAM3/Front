@@ -1,4 +1,4 @@
-import {
+﻿import {
   useEffect,
   useState,
   useRef,
@@ -11,24 +11,19 @@ import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import styles from "./FamilyChatConversationPage.module.scss";
 
-// SockJS 오류 방지용
-window.global = window;
-
-let Stomp = null;
-let SockJS = null;
+// window.global = window; // 순수 WebSocket 사용 시 이 줄은 굳이 필요 없습니다.
 
 export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
   const { familyGroupId } = useParams();
   const roomId = Number(familyGroupId) || 1;
 
-  // 현재 사용자 ID (나중에 로그인 정보 연동 가능)
-  const currentUserId = 1;
+  const [currentUserId, setCurrentUserId] = useState(1); 
 
   const messageListRef = useRef(null);
-  const stompRef = useRef(null);
+  const stompClientRef = useRef(null); // stompRef 이름을 좀 더 명확하게 변경
 
-  // 스크롤 보정용
+  const token = localStorage.getItem("amapill_token");
   const prevScrollHeightRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
@@ -39,39 +34,31 @@ export const FamilyChatConversationPage = () => {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isLoadingPast, setIsLoadingPast] = useState(false);
 
-  // 중복 로딩 방지
   const isFetchingRef = useRef(false);
 
-  /**
-   * 서버에서 메시지 조회 (DESC → 화면에서는 ASC 유지)
-   */
-  const loadMessages = useCallback(
-    async (pageNum) => {
+  // ... (loadMessages, useLayoutEffect, token parsing 로직은 기존과 동일하므로 유지) ...
+  const loadMessages = useCallback(async (pageNum) => {
+      // (기존 코드 유지)
       if (!hasMore) return;
-
+      if (!token) return;
       try {
         isFetchingRef.current = true;
-
         if (pageNum > 0) {
           setIsLoadingPast(true);
           await new Promise((r) => setTimeout(r, 800));
         }
-
         const res = await fetch(
-          `http://localhost:8082/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=50`
+          `http://localhost:8080/api/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=50`,
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
-
         if (!data || data.length === 0) {
           setHasMore(false);
           return;
         }
-
         if (messageListRef.current) {
           prevScrollHeightRef.current = messageListRef.current.scrollHeight;
         }
-
-        // prepend
         setMessages((prev) => [...data, ...prev]);
       } catch (err) {
         console.error("메시지 로드 실패", err);
@@ -80,41 +67,36 @@ export const FamilyChatConversationPage = () => {
         setIsInitialLoading(false);
         setIsLoadingPast(false);
       }
-    },
-    [roomId, hasMore]
-  );
+    }, [roomId, hasMore, token]);
 
-  /**
-   * 과거 메시지 로딩 후 스크롤 보정
-   */
   useLayoutEffect(() => {
     if (prevScrollHeightRef.current && messageListRef.current) {
       const container = messageListRef.current;
-
       const newHeight = container.scrollHeight;
       const oldHeight = prevScrollHeightRef.current;
-
       container.scrollTop = newHeight - oldHeight;
-
       prevScrollHeightRef.current = null;
     }
   }, [messages]);
 
-  // 첫 로딩
   useEffect(() => {
-    loadMessages(0);
-  }, []);
-
-  /**
-   * 스크롤 상단 도달 → 과거 메시지 로딩
-   */
+    if (token) {
+        // (토큰 파싱 로직 유지)
+        try {
+            const payloadPart = token.split('.')[1];
+            const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const payload = JSON.parse(jsonPayload);
+            if (payload.userId) setCurrentUserId(Number(payload.userId));
+        } catch(e) {}
+        loadMessages(0);
+    }
+  }, [token]);
+  
+  // 스크롤 핸들러 유지
   const handleScroll = () => {
     const box = messageListRef.current;
-    if (!box) return;
-
-    if (isFetchingRef.current) return;
-    if (!hasMore) return;
-
+    if (!box || isFetchingRef.current || !hasMore) return;
     if (box.scrollTop < 50) {
       isFetchingRef.current = true;
       setPage((prev) => prev + 1);
@@ -124,7 +106,6 @@ export const FamilyChatConversationPage = () => {
   useEffect(() => {
     const box = messageListRef.current;
     if (!box) return;
-
     box.addEventListener("scroll", handleScroll);
     return () => box.removeEventListener("scroll", handleScroll);
   }, [hasMore]);
@@ -133,68 +114,97 @@ export const FamilyChatConversationPage = () => {
     if (page > 0) loadMessages(page);
   }, [page]);
 
-  /**
-   * WebSocket 연결
-   */
+
+  // ============================================================
+  // 🔥 [수정됨] WebSocket 연결 로직 (SockJS 제거 -> 순수 WS 적용)
+  // ============================================================
   useEffect(() => {
-    connectWebSocket();
+    if (token) {
+      connectWebSocket();
+    }
     return () => disconnectWebSocket();
-  }, []);
+  }, [token]);
 
   const connectWebSocket = async () => {
     try {
+      // SockJS는 import 하지 않습니다.
       const stompModule = await import("@stomp/stompjs");
-      const sockModule = await import("sockjs-client");
+      const { Client } = stompModule;
 
-      Stomp = stompModule.Stomp;
-      SockJS = sockModule.default;
+      // ✅ 1. Client 객체 생성 (최신 방식)
+      const client = new Client({
+        // ✅ 2. 주소 변경: http:// -> ws:// (Nginx 80포트 -> /ws 경로)
+        brokerURL: "ws://localhost/ws/", 
 
-      const socket = new SockJS("http://localhost:8082/ws");
-      const client = Stomp.over(socket);
-      client.debug = () => { };
-
-      client.connect(
-        {},
-        () => {
-          client.subscribe(`/topic/family/${roomId}`, (msg) => {
-            const body = JSON.parse(msg.body);
-
-            setMessages((prev) => {
-              // 서버 메시지 id 기준 중복 제거
-              if (body.id && prev.some((m) => m.id === body.id)) {
-                return prev;
-              }
-              return [...prev, body];
-            });
-
-            setTimeout(() => {
-              if (messageListRef.current) {
-                messageListRef.current.scrollTop =
-                  messageListRef.current.scrollHeight;
-              }
-            }, 10);
-          });
+        // 필요한 경우 헤더 추가
+        connectHeaders: {
+           Authorization: `Bearer ${token}`, 
         },
-        (err) => console.error("WebSocket Error:", err)
-      );
 
-      stompRef.current = client;
+        // 디버깅용 (배포 시 제거 가능)
+        debug: (str) => {
+          console.log(str);
+        },
+
+        // 자동 재연결 설정 (SockJS보다 끊김 처리가 강력함)
+        reconnectDelay: 5000, 
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+      });
+
+      // ✅ 3. 연결 성공 시 실행될 콜백
+      client.onConnect = (frame) => {
+        console.log("✅ WebSocket Connected (Pure WS)!");
+        
+        client.subscribe(`/topic/family/${roomId}`, (msg) => {
+          const body = JSON.parse(msg.body);
+
+          setMessages((prev) => {
+            if (body.id && prev.some((m) => m.id === body.id)) {
+              return prev;
+            }
+            return [...prev, body];
+          });
+
+          setTimeout(() => {
+            if (messageListRef.current) {
+              messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+            }
+          }, 10);
+        });
+      };
+
+      // 에러 핸들링
+      client.onStompError = (frame) => {
+        console.error("❌ Broker reported error: " + frame.headers["message"]);
+        console.error("Additional details: " + frame.body);
+      };
+      
+      client.onWebSocketError = (event) => {
+          console.error("❌ WebSocket Error", event);
+      }
+
+      // 연결 시작
+      client.activate();
+      stompClientRef.current = client;
+
     } catch (err) {
       console.error("WS 로드 실패:", err);
     }
   };
 
   const disconnectWebSocket = () => {
-    try {
-      stompRef.current?.disconnect();
-    } catch { }
+    if (stompClientRef.current) {
+      stompClientRef.current.deactivate(); // disconnect() 대신 deactivate() 사용
+    }
   };
 
-  /**
-   * 메시지 전송 (낙관적 UI 포함)
-   */
+  // ============================================================
+  // [수정 끝]
+  // ============================================================
+
   const handleSendMessage = async (content) => {
-    if (!content.trim() || !stompRef.current) return;
+    if (!content.trim() || !stompClientRef.current || !stompClientRef.current.connected) return;
 
     const payload = {
       roomId,
@@ -206,14 +216,12 @@ export const FamilyChatConversationPage = () => {
     setIsSending(true);
 
     try {
-      // 서버에 전송
-      stompRef.current.send(
-        `/app/family/${roomId}`,
-        {},
-        JSON.stringify(payload)
-      );
+      // Client 객체에서는 publish()를 사용합니다.
+      stompClientRef.current.publish({
+        destination: `/app/family/${roomId}`,
+        body: JSON.stringify(payload),
+      });
 
-      // 낙관적 렌더
       setMessages((prev) => [
         ...prev,
         {
@@ -236,9 +244,7 @@ export const FamilyChatConversationPage = () => {
     }
   };
 
-  /**
-   * 첫 로딩 시 자동 스크롤 맨 아래
-   */
+  // ... (나머지 UI 렌더링 코드는 동일)
   useEffect(() => {
     if (!isInitialLoading && page === 0 && messages.length > 0) {
       if (messageListRef.current) {
