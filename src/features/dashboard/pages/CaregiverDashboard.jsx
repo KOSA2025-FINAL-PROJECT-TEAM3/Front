@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
@@ -7,6 +7,9 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { QuickActions } from '@shared/components/ui/QuickActions'
 import { FAB } from '@shared/components/ui/FAB'
 import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/data/mockUiConstants'
+import { useAuth } from '@features/auth/hooks/useAuth'
+import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
+import { toast } from '@shared/components/toast/toastStore'
 import styles from './CaregiverDashboard.module.scss'
 
 /**
@@ -22,6 +25,8 @@ export function CaregiverDashboard() {
     initialized: state.initialized,
     initialize: state.initialize,
   }))
+  const { user } = useAuth((state) => ({ user: state.user }))
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (!initialized) {
@@ -37,6 +42,42 @@ export function CaregiverDashboard() {
   const handleViewDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
+
+  const handleExportPdf = async () => {
+    const userId = user?.id || user?.userId
+    if (!userId) {
+      toast.error('사용자 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    setExporting(true)
+    try {
+      const blob = await diseaseApiClient.exportPdf(userId)
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'diseases.pdf'
+      link.click()
+      window.URL.revokeObjectURL(url)
+      toast.success('PDF 다운로드를 시작합니다.')
+    } catch (error) {
+      console.error('PDF 다운로드 실패', error)
+      toast.error('PDF 다운로드에 실패했습니다.')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const fabActions = CAREGIVER_FAB_ACTIONS.map((action) => {
+    if (action.id === 'pdf_export') {
+      return {
+        ...action,
+        label: exporting ? '다운로드 중...' : action.label,
+        onClick: () => !exporting && handleExportPdf(),
+      }
+    }
+    return action
+  })
 
   if (loading && members.length === 0) {
     return (
@@ -79,7 +120,7 @@ export function CaregiverDashboard() {
           </ul>
         </article>
 
-        <FAB actions={CAREGIVER_FAB_ACTIONS} />
+        <FAB actions={fabActions} />
       </section>
     </MainLayout>
   )

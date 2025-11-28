@@ -13,6 +13,9 @@ import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
 import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/data/mockUiConstants'
 import { ROUTE_PATHS } from '@/core/config/routes.config'
+import { useAuth } from '@features/auth/hooks/useAuth'
+import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
+import { toast } from '@shared/components/toast/toastStore'
 import styles from './SeniorDashboard.module.scss'
 
 // 요일 매핑 (JavaScript Date.getDay() → 백엔드 형식)
@@ -39,7 +42,8 @@ export const SeniorDashboard = () => {
   const navigate = useNavigate()
   const { medications, fetchMedications } = useMedicationStore()
   const [medicationLogs, setMedicationLogs] = useState([])
-  const [loading, setLoading] = useState(false)
+  const { user } = useAuth((state) => ({ user: state.user }))
+  const [exporting, setExporting] = useState(false)
 
   const loadMedicationLogs = useCallback(async () => {
     try {
@@ -141,7 +145,6 @@ export const SeniorDashboard = () => {
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')
 
-    setLoading(true)
     try {
       // 오늘 날짜 + 스케줄 시간으로 scheduledTime 생성
       const schedule = todaySchedules.find((s) => s.id === scheduleId)
@@ -189,8 +192,6 @@ export const SeniorDashboard = () => {
       alert('복용 기록 저장에 실패했습니다.')
       // 에러 발생 시 다시 로드하여 원래 상태로 복구
       await loadMedicationLogs()
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -200,6 +201,42 @@ export const SeniorDashboard = () => {
       state: { selectedMedicationId: medicationId },
     })
   }
+
+  const handleExportPdf = async () => {
+    const userId = user?.id || user?.userId
+    if (!userId) {
+      toast.error('사용자 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    setExporting(true)
+    try {
+      const blob = await diseaseApiClient.exportPdf(userId)
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'diseases.pdf'
+      link.click()
+      window.URL.revokeObjectURL(url)
+      toast.success('PDF 다운로드를 시작합니다.')
+    } catch (error) {
+      console.error('PDF 다운로드 실패', error)
+      toast.error('PDF 다운로드에 실패했습니다.')
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const fabActions = SENIOR_FAB_ACTIONS.map((action) => {
+    if (action.id === 'pdf_export') {
+      return {
+        ...action,
+        label: exporting ? '다운로드 중...' : action.label,
+        onClick: () => !exporting && handleExportPdf(),
+      }
+    }
+    return action
+  })
 
   const todayDate = today.date.toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -236,7 +273,7 @@ export const SeniorDashboard = () => {
           )}
         </div>
 
-        <FAB actions={SENIOR_FAB_ACTIONS} />
+        <FAB actions={fabActions} />
       </div>
     </MainLayout>
   )

@@ -1,0 +1,179 @@
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.imageWrapper {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imagePlaceholder {
+  font-size: 32px;
+  user-select: none;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameInput,
+.categoryInput {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &:focus {
+    border-color: #00c853;
+  }
+}
+
+.nameInput {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1a1a1a;
+}
+
+.categoryInput {
+  font-size: 13px;
+  color: #666;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.category {
+  font-size: 13px;
+  color: #666;
+}
+
+.detailBtn {
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #00c853;
+  }
+}
+
+.statsBar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px 8px;
+  margin-bottom: 12px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.statInput {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+
+  &:focus {
+    outline: none;
+    border-color: #00c853;
+  }
+
+  /* 숫자 입력 스피너 제거 */
+  -moz-appearance: textfield;
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.statValue {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.statLabel {
+  color: #666;
+  font-size: 13px;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: #ddd;
+}
+
+.removeBtn {
+  width: 100%;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ff5252;
+  border-radius: 8px;
+  color: #ff5252;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ff5252;
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}

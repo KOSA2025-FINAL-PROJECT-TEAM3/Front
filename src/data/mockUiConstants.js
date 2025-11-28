@@ -19,6 +19,7 @@ export const SENIOR_FAB_ACTIONS = [
   { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
   { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
   { icon: '📷', label: '처방전 스캔', path: ROUTE_PATHS.ocrScan },
+  { id: 'pdf_export', icon: '📄', label: 'PDF 내보내기' },
 ]
 
 // 보호자 대시보드 빠른 액션
@@ -34,6 +35,7 @@ export const CAREGIVER_FAB_ACTIONS = [
   { icon: '👥', label: '가족 초대', path: ROUTE_PATHS.familyInvite },
   { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
   { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
+  { id: 'pdf_export', icon: '📄', label: 'PDF 내보내기' },
 ]
 
 // 설정 메뉴 정의

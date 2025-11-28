@@ -8,6 +8,7 @@ const rootDir = fileURLToPath(new URL('.', import.meta.url))
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/Front/',  // GitHub Pages 배포를 위한 base 경로
   resolve: {
     // 경로 alias 설정으로 import 경로를 간단하게
     alias: {
