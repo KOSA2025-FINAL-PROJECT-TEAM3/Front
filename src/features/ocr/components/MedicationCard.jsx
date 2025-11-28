@@ -16,7 +16,6 @@ const MedicationCard = ({
   onUpdate,
   onRemove,
   editable = true,
-  showDetail = false
 }) => {
   const handleChange = (field, value) => {
     onUpdate(medication.id, { [field]: value })

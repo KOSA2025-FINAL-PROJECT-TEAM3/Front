@@ -1,5 +1,11 @@
 import ApiClient from './ApiClient'
 import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@/data/mockSymptoms'
+import { MOCK_DRUG_SEARCH_RESULTS } from '@/data/mockDrugs'
+
+const medicationSearchClient = new ApiClient({
+  baseURL: import.meta.env.VITE_MEDICATION_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  basePath: '/api/medications',
+})
 
 class SearchApiClient extends ApiClient {
   constructor() {
@@ -33,6 +39,17 @@ class SearchApiClient extends ApiClient {
       )
     }
     return this.get(`/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+  }
+
+  searchDrugs(itemName, options = {}) {
+    const query = (itemName || '').trim()
+    const numOfRows = Number(options?.numOfRows ?? 10) || 10
+    const params = { itemName: query, numOfRows }
+    const mockResponse = () => {
+      if (!query) return []
+      return MOCK_DRUG_SEARCH_RESULTS.slice(0, numOfRows)
+    }
+    return medicationSearchClient.get('/search', { params }, { mockResponse })
   }
 }
 

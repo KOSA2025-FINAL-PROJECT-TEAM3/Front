@@ -1,6 +1,4 @@
 import ApiClient from './ApiClient'
-import { createMockOcrResponse } from '@/data/mockOcr'
-
 class OcrApiClient extends ApiClient {
   constructor() {
     super({
