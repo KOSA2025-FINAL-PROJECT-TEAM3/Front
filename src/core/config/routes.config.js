@@ -8,6 +8,7 @@ export const ROUTE_PATHS = {
   caregiverDashboard: '/caregiver',
 
   medication: '/medication',
+  medicationToday: '/medication/today',
   medicationAdd: '/medication/add',
   medicationEdit: '/medication/:id/edit',
 
@@ -66,6 +67,7 @@ export const ROUTE_META = {
     ROUTE_PATHS.caregiverDashboard,
 
     ROUTE_PATHS.medication,
+    ROUTE_PATHS.medicationToday,
     ROUTE_PATHS.medicationAdd,
     ROUTE_PATHS.medicationEdit,
 

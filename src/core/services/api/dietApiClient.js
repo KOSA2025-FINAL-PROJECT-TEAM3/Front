@@ -100,6 +100,32 @@ class DietApiClient extends ApiClient {
       },
     })
   }
+
+  // New method to analyze food image
+  async analyzeFoodImage(file, mealType, foodName) {
+    const formData = new FormData()
+    if (file) {
+      formData.append('file', file)
+    }
+    formData.append('mealType', mealType)
+    formData.append('foodName', foodName)
+
+    return this.post('/analyze', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }, {
+      mockResponse: () => ({
+        foodName: foodName || 'Mock Food',
+        calories: 500,
+        mealType: mealType,
+        overallLevel: 'GOOD',
+        drugInteractions: [],
+        diseaseInteractions: [],
+        summary: '안전: 현재 복용 중인 약물 및 질병과 특별한 상호작용이 없습니다.',
+      }),
+    })
+  }
 }
 
 export const dietApiClient = new DietApiClient()

@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
 import { MEAL_TYPES, MEAL_TYPE_LABELS } from '@config/constants'
-import styles from './MealInputForm.module.scss'
+import { dietApiClient } from '@core/services/api/dietApiClient'
+import DietCamera from './DietCamera'
+import DietAnalysisModal from './DietAnalysisModal'
+import {
+  Card,
+  CardContent,
+  Button,
+  TextField,
+  Typography,
+  Chip,
+  Box,
+  Stack,
+  CircularProgress
+} from '@mui/material'
 
 export const MealInputForm = ({
   onAddMeal,
@@ -10,7 +23,12 @@ export const MealInputForm = ({
 }) => {
   const [mealType, setMealType] = useState(MEAL_TYPES.BREAKFAST)
   const [foodName, setFoodName] = useState('')
-  const [calories, setCalories] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
+
+  // Analysis state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const isEditing = !!editingMeal
 
@@ -18,14 +36,15 @@ export const MealInputForm = ({
     if (isEditing) {
       setMealType(editingMeal.mealType)
       setFoodName(editingMeal.foodName)
-      setCalories(editingMeal.calories.toString())
+      setImageUrl(editingMeal.imageUrl || '')
     }
   }, [editingMeal, isEditing])
 
   const resetForm = () => {
     setMealType(MEAL_TYPES.BREAKFAST)
     setFoodName('')
-    setCalories('')
+    setImageUrl('')
+    setAnalysisResult(null)
     if (isEditing) {
       onCancelEdit()
     }
@@ -33,11 +52,20 @@ export const MealInputForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!foodName.trim() || !calories.trim()) {
-      alert('음식 이름과 칼로리를 입력해주세요.')
+    if (!foodName.trim()) {
+      alert('음식 이름을 입력해주세요.')
       return
     }
-    const mealData = { mealType, foodName, calories: parseInt(calories, 10) }
+    const mealData = {
+      mealType,
+      foodName,
+      imageUrl,
+      // Include analysis results if available
+      overallLevel: analysisResult?.overallLevel || null,
+      summary: analysisResult?.summary || null,
+      drugInteractions: analysisResult?.drugInteractions ? JSON.stringify(analysisResult.drugInteractions) : null,
+      diseaseInteractions: analysisResult?.diseaseInteractions ? JSON.stringify(analysisResult.diseaseInteractions) : null
+    }
     if (isEditing) {
       onUpdateMeal(editingMeal.id, mealData)
     } else {
@@ -46,69 +74,152 @@ export const MealInputForm = ({
     resetForm()
   }
 
+  const handleImageCapture = async (file, previewUrl) => {
+    if (!file) {
+      setImageUrl('')
+      return
+    }
+
+    setIsLoading(true)
+    setIsModalOpen(true)
+
+    try {
+      // 이미지 분석: 식사구분 + 이미지 (음식 이름은 빈 문자열로 GPT가 인식)
+      const result = await dietApiClient.analyzeFoodImage(file, mealType, '')
+      setAnalysisResult(result)
+      setImageUrl(previewUrl)
+    } catch (error) {
+      console.error('Failed to analyze image:', error)
+      alert('이미지 분석에 실패했습니다.')
+      setIsModalOpen(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleTextAnalysis = async () => {
+    if (!foodName.trim()) {
+      alert('음식 이름을 입력해주세요.')
+      return
+    }
+
+    setIsLoading(true)
+    setIsModalOpen(true)
+
+    try {
+      // 텍스트 분석: 식사구분 + 음식 이름 (이미지 없음)
+      const result = await dietApiClient.analyzeFoodImage(null, mealType, foodName)
+      setAnalysisResult(result)
+    } catch (error) {
+      console.error('Failed to analyze food:', error)
+      alert('음식 분석에 실패했습니다.')
+      setIsModalOpen(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAnalysisSave = (result) => {
+    setFoodName(result.foodName)
+    setMealType(result.mealType)
+    setIsModalOpen(false)
+  }
+
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
-        <label htmlFor="mealType" className={styles.label}>
-          식사 구분
-        </label>
-        <select
-          id="mealType"
-          className={styles.select}
-          value={mealType}
-          onChange={(e) => setMealType(e.target.value)}
-        >
-          {Object.values(MEAL_TYPES).map((type) => (
-            <option key={type} value={type}>
-              {MEAL_TYPE_LABELS[type]}
-            </option>
-          ))}
-        </select>
-      </div>
+    <Card elevation={3} sx={{ borderRadius: 4, mb: 4 }}>
+      <CardContent sx={{ p: 3 }}>
+        <DietCamera onImageCapture={handleImageCapture} />
 
-      <div className={styles.formGroup}>
-        <label htmlFor="foodName" className={styles.label}>
-          음식 이름
-        </label>
-        <input
-          type="text"
-          id="foodName"
-          className={styles.input}
-          value={foodName}
-          onChange={(e) => setFoodName(e.target.value)}
-          placeholder="예: 사과, 계란후라이"
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* Meal Type Selection */}
+          <Box>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+              식사 구분
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {Object.values(MEAL_TYPES).map((type) => (
+                <Chip
+                  key={type}
+                  label={MEAL_TYPE_LABELS[type]}
+                  onClick={() => setMealType(type)}
+                  color={mealType === type ? 'primary' : 'default'}
+                  variant={mealType === type ? 'filled' : 'outlined'}
+                  clickable
+                  sx={{
+                    borderRadius: 2,
+                    px: 1,
+                    py: 0.5,
+                    fontWeight: mealType === type ? 'bold' : 'normal'
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+
+          {/* Food Name Input */}
+          <TextField
+            label={analysisResult ? '인식된 음식 이름' : '음식 이름'}
+            value={foodName}
+            onChange={(e) => setFoodName(e.target.value)}
+            placeholder={analysisResult ? "GPT가 인식한 음식명" : "예: 사과, 계란후라이"}
+            fullWidth
+            variant="outlined"
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiOutlinedInput-root': { borderRadius: 3 }
+            }}
+          />
+
+          {/* Action Buttons */}
+          <Stack direction="row" spacing={2}>
+            {!imageUrl && !analysisResult && (
+              <Button
+                type="button"
+                onClick={handleTextAnalysis}
+                variant="outlined"
+                color="primary"
+                fullWidth
+                size="large"
+                sx={{ borderRadius: 3, py: 1.5 }}
+              >
+                음식 분석하기
+              </Button>
+            )}
+
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              size="large"
+              sx={{ borderRadius: 3, py: 1.5, boxShadow: 2 }}
+            >
+              {isEditing ? '식단 수정 완료' : '식단 추가하기'}
+            </Button>
+
+            {isEditing && (
+              <Button
+                type="button"
+                onClick={resetForm}
+                variant="text"
+                color="inherit"
+                sx={{ borderRadius: 3 }}
+              >
+                취소
+              </Button>
+            )}
+          </Stack>
+        </Box>
+
+        <DietAnalysisModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          analysisResult={analysisResult}
+          onSave={handleAnalysisSave}
+          isLoading={isLoading}
         />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label htmlFor="calories" className={styles.label}>
-          칼로리 (kcal)
-        </label>
-        <input
-          type="number"
-          id="calories"
-          className={styles.input}
-          value={calories}
-          onChange={(e) => setCalories(e.target.value)}
-          placeholder="예: 250"
-        />
-      </div>
-
-      <div className={styles.buttonGroup}>
-        <button type="submit" className={styles.submitButton}>
-          {isEditing ? '식단 수정' : '식단 추가'}
-        </button>
-        {isEditing && (
-          <button
-            type="button"
-            onClick={resetForm}
-            className={styles.cancelButton}
-          >
-            취소
-          </button>
-        )}
-      </div>
-    </form>
+      </CardContent>
+    </Card>
   )
 }
 
