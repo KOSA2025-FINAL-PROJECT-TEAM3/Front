@@ -32,7 +32,6 @@ export const FamilyChatConversationPage = () => {
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
   const memberNickname = useAuthStore((state) => state.user?.name || '익명');
-  const userid = useAuthStore((state) => state.userid);
   const currentUserId = user?.id ? Number(user.id) : user?.userId ? Number(user.userId) : 1;
 
   // =================================================================================
@@ -262,7 +261,7 @@ export const FamilyChatConversationPage = () => {
     } finally {
       setIsSending(false);
     }
-  }, [currentFamilyGroupId, currentUserId, userid, memberNickname]); // [GEMINI-CLI: 2025-11-29] 의존성 변경
+  }, [currentFamilyGroupId, currentUserId, memberNickname]); // [GEMINI-CLI: 2025-11-29] 의존성 변경
 
   useEffect(() => {
     if (token) {
