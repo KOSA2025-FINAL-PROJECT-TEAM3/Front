@@ -206,7 +206,7 @@ export const PillSearchTab = () => {
             {loading ? '검색 중...' : 'AI 검색'}
           </button>
         </form>
-        <p className={styles.hint}>식약처(MFDS) 데이터 기준으로 약품 정보를 검색합니다.</p>
+        <p className={styles.hint}>검색 혹은 AI 검색 버튼을 누르고 잠시 기다려주세요.</p>
         {error && <p className={styles.error}>{error}</p>}
       </section>
 

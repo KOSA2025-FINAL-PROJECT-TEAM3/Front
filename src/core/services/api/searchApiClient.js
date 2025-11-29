@@ -10,7 +10,7 @@ const medicationSearchClient = new ApiClient({
 class SearchApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_SEARCH_API_URL || 'http://localhost:8082',
+      baseURL: import.meta.env.VITE_SEARCH_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:80',
       basePath: '/api/search',
     })
   }
@@ -21,7 +21,7 @@ class SearchApiClient extends ApiClient {
       if (!q) return []
       return MOCK_SYMPTOMS.filter((s) => s.includes(q)).slice(0, 10)
     }
-    return this.get('/symptoms', undefined, { mockResponse })
+    return medicationSearchClient.get('/search/symptoms', undefined, { mockResponse })
   }
 
   getSymptomDetail(symptomName) {
@@ -38,7 +38,21 @@ class SearchApiClient extends ApiClient {
         }
       )
     }
-    return this.get(`/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+    return medicationSearchClient.get(`/search/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+  }
+
+  searchSymptomsWithAI(query) {
+    const name = (query || '').trim()
+    const mockResponse = () => ({
+      name,
+      description: `'${name}' 증상에 대한 AI 생성 요약입니다. 정확한 진단은 의료진과 상담하세요.`,
+      possibleCauses: ['스트레스', '피로', '수면 부족'],
+      recommendedActions: ['충분한 휴식', '수분 섭취', '증상 지속 시 진료 예약'],
+      severity: '중간',
+      aiGenerated: true,
+      aiDisclaimer: 'AI가 생성한 정보로 참고용입니다. 의료진 상담을 우선하세요.',
+    })
+    return medicationSearchClient.get('/search/symptoms/ai', { params: { query: name } }, { mockResponse })
   }
 
   searchDrugs(itemName, options = {}) {
