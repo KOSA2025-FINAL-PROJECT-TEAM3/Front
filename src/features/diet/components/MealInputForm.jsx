@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { MEAL_TYPES, MEAL_TYPE_LABELS } from '@config/constants'
 import { dietApiClient } from '@core/services/api/dietApiClient'
 import DietCamera from './DietCamera'
@@ -21,6 +21,7 @@ export const MealInputForm = ({
   editingMeal,
   onCancelEdit,
 }) => {
+  const dietCameraRef = useRef(null)
   const [mealType, setMealType] = useState(MEAL_TYPES.BREAKFAST)
   const [foodName, setFoodName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
@@ -45,6 +46,10 @@ export const MealInputForm = ({
     setFoodName('')
     setImageUrl('')
     setAnalysisResult(null)
+    // DietCamera 초기화
+    if (dietCameraRef.current) {
+      dietCameraRef.current.clear()
+    }
     if (isEditing) {
       onCancelEdit()
     }
@@ -109,6 +114,7 @@ export const MealInputForm = ({
     try {
       // 텍스트 분석: 식사구분 + 음식 이름 (이미지 없음)
       const result = await dietApiClient.analyzeFoodImage(null, mealType, foodName)
+      console.log('[MealInputForm] Analysis result received:', result)
       setAnalysisResult(result)
     } catch (error) {
       console.error('Failed to analyze food:', error)
@@ -123,12 +129,13 @@ export const MealInputForm = ({
     setFoodName(result.foodName)
     setMealType(result.mealType)
     setIsModalOpen(false)
+    // Note: form will be reset after successful submission in handleSubmit
   }
 
   return (
     <Card elevation={3} sx={{ borderRadius: 4, mb: 4 }}>
       <CardContent sx={{ p: 3 }}>
-        <DietCamera onImageCapture={handleImageCapture} />
+        <DietCamera ref={dietCameraRef} onImageCapture={handleImageCapture} />
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* Meal Type Selection */}
