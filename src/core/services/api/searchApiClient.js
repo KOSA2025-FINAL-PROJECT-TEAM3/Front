@@ -10,7 +10,7 @@ const medicationSearchClient = new ApiClient({
 class SearchApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_SEARCH_API_URL || 'http://localhost:8082',
+      baseURL: import.meta.env.VITE_SEARCH_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:80',
       basePath: '/api/search',
     })
   }
@@ -21,7 +21,7 @@ class SearchApiClient extends ApiClient {
       if (!q) return []
       return MOCK_SYMPTOMS.filter((s) => s.includes(q)).slice(0, 10)
     }
-    return this.get('/symptoms', undefined, { mockResponse })
+    return medicationSearchClient.get('/search/symptoms', undefined, { mockResponse })
   }
 
   getSymptomDetail(symptomName) {
@@ -38,7 +38,7 @@ class SearchApiClient extends ApiClient {
         }
       )
     }
-    return this.get(`/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+    return medicationSearchClient.get(`/search/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
   }
 
   searchSymptomsWithAI(query) {
@@ -52,7 +52,7 @@ class SearchApiClient extends ApiClient {
       aiGenerated: true,
       aiDisclaimer: 'AI가 생성한 정보로 참고용입니다. 의료진 상담을 우선하세요.',
     })
-    return this.get('/symptoms/ai', { params: { query: name } }, { mockResponse })
+    return medicationSearchClient.get('/search/symptoms/ai', { params: { query: name } }, { mockResponse })
   }
 
   searchDrugs(itemName, options = {}) {
