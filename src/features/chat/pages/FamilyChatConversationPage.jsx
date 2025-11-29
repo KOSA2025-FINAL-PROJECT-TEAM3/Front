@@ -11,19 +11,35 @@ import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import styles from "./FamilyChatConversationPage.module.scss";
 
-// window.global = window; // 순수 WebSocket 사용 시 이 줄은 굳이 필요 없습니다.
+import { useAuthStore } from "@/features/auth/store/authStore";
+import { useFamilyStore } from "@features/family/store/familyStore";
 
 export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
+  // [GEMINI-CLI: 2025-11-29] useParams에서 familyGroupId 추출 (기존 유지)
   const { familyGroupId } = useParams();
-  const roomId = Number(familyGroupId) || 1;
 
-  const [currentUserId, setCurrentUserId] = useState(1); 
+  const familyGroup = useFamilyStore((state) => state.familyGroup);
+  
+  // [GEMINI-CLI: 2025-11-29] roomId -> familyGroupId로 변수명 의미 명확화
+  // const roomId = Number(familyGroupId) || 1;
+  const currentFamilyGroupId = Number(familyGroupId) || 1;
+
+  // =================================================================================
+  // 🔥 토큰 및 유저 ID 관리 (Zustand Store 사용)
+  // =================================================================================
+
+  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+  const memberNickname = useAuthStore((state) => state.user?.name || '익명');
+  const userid = useAuthStore((state) => state.userid);
+  const currentUserId = user?.id ? Number(user.id) : user?.userId ? Number(user.userId) : 1;
+
+  // =================================================================================
 
   const messageListRef = useRef(null);
-  const stompClientRef = useRef(null); // stompRef 이름을 좀 더 명확하게 변경
+  const stompClientRef = useRef(null); 
 
-  const token = localStorage.getItem("amapill_token");
   const prevScrollHeightRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
@@ -36,9 +52,7 @@ export const FamilyChatConversationPage = () => {
 
   const isFetchingRef = useRef(false);
 
-  // ... (loadMessages, useLayoutEffect, token parsing 로직은 기존과 동일하므로 유지) ...
   const loadMessages = useCallback(async (pageNum) => {
-      // (기존 코드 유지)
       if (!hasMore) return;
       if (!token) return;
       try {
@@ -47,8 +61,13 @@ export const FamilyChatConversationPage = () => {
           setIsLoadingPast(true);
           await new Promise((r) => setTimeout(r, 800));
         }
+        // [GEMINI-CLI: 2025-11-29] API 경로 수정: roomId -> currentFamilyGroupId
+        // const res = await fetch(
+        //   `http://localhost:8080/api/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=50`,
+        //   { headers: { Authorization: `Bearer ${token}` } }
+        // );
         const res = await fetch(
-          `http://localhost:8080/api/family-chat/rooms/${roomId}/messages?page=${pageNum}&size=50`,
+          `http://localhost:8080/api/family-chat/rooms/${currentFamilyGroupId}/messages?page=${pageNum}&size=50`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         const data = await res.json();
@@ -67,7 +86,7 @@ export const FamilyChatConversationPage = () => {
         setIsInitialLoading(false);
         setIsLoadingPast(false);
       }
-    }, [roomId, hasMore, token]);
+    }, [currentFamilyGroupId, hasMore, token]); // [GEMINI-CLI: 2025-11-29] 의존성 변경: roomId -> currentFamilyGroupId
 
   useLayoutEffect(() => {
     if (prevScrollHeightRef.current && messageListRef.current) {
@@ -79,25 +98,13 @@ export const FamilyChatConversationPage = () => {
     }
   }, [messages]);
 
+  // [GEMINI-CLI: 2025-11-29] Store 토큰 기반 초기 로드 (기존 유지)
   useEffect(() => {
-    if (!token) return;
-    try {
-      const payloadPart = token.split('.')[1];
-      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
-      );
-      const payload = JSON.parse(jsonPayload);
-      if (payload.userId) setCurrentUserId(Number(payload.userId));
-    } catch (err) {
-      console.error('토큰 파싱 실패', err);
+    if (token) {
+      loadMessages(0);
     }
-    loadMessages(0);
-  }, [token, loadMessages]);
-  
+  }, [token, loadMessages]); 
+
   // 스크롤 핸들러 유지
   const handleScroll = useCallback(() => {
     const box = messageListRef.current;
@@ -121,46 +128,56 @@ export const FamilyChatConversationPage = () => {
 
 
   // ============================================================
-  // 🔥 [수정됨] WebSocket 연결 로직 (SockJS 제거 -> 순수 WS 적용)
+  // 🔥 WebSocket 연결 로직 (SockJS 제거 -> 순수 WS 적용)
   // ============================================================
   const connectWebSocket = useCallback(async () => {
+    if (!token) return; 
+
     try {
-      // SockJS는 import 하지 않습니다.
       const stompModule = await import("@stomp/stompjs");
       const { Client } = stompModule;
 
-      // ✅ 1. Client 객체 생성 (최신 방식)
       const client = new Client({
-        // ✅ 2. 주소 변경: http:// -> ws:// (Nginx 80포트 -> /ws 경로)
         brokerURL: "ws://localhost/ws/", 
-
-        // 필요한 경우 헤더 추가
         connectHeaders: {
            Authorization: `Bearer ${token}`, 
         },
-
-        // 디버깅용 (배포 시 제거 가능)
         debug: (str) => {
           console.log(str);
         },
-
-        // 자동 재연결 설정 (SockJS보다 끊김 처리가 강력함)
         reconnectDelay: 5000, 
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
       });
 
-      // ✅ 3. 연결 성공 시 실행될 콜백
       client.onConnect = () => {
         console.log("✅ WebSocket Connected (Pure WS)!");
         
-        client.subscribe(`/topic/family/${roomId}`, (msg) => {
+        // [GEMINI-CLI: 2025-11-29] 구독 경로 수정: roomId -> currentFamilyGroupId
+        // client.subscribe(`/topic/family/${roomId}`, (msg) => {
+        client.subscribe(`/topic/family/${currentFamilyGroupId}`, (msg) => {
           const body = JSON.parse(msg.body);
 
           setMessages((prev) => {
             if (body.id && prev.some((m) => m.id === body.id)) {
               return prev;
             }
+            // [GEMINI-CLI: 2025-11-29] Optimistic UI 중복 방지
+            // ID가 없는(낙관적 업데이트된) 메시지 중 내용과 보낸사람이 같은 것을 찾아 교체
+            const optimisticIndex = prev.findIndex(
+              (m) => !m.id && m.content === body.content && m.familyMemberId === body.familyMemberId
+            );
+
+            if (optimisticIndex !== -1) {
+              const newMessages = [...prev];
+              // [GEMINI-CLI] 서버 메시지로 교체하되, 시간이 없으면 기존(낙관적) 시간 유지
+              newMessages[optimisticIndex] = {
+                ...body,
+                createdAt: body.createdAt || prev[optimisticIndex].createdAt
+              };
+              return newMessages;
+            }
+
             return [...prev, body];
           });
 
@@ -172,7 +189,6 @@ export const FamilyChatConversationPage = () => {
         });
       };
 
-      // 에러 핸들링
       client.onStompError = (frame) => {
         console.error("❌ Broker reported error: " + frame.headers["message"]);
         console.error("Additional details: " + frame.body);
@@ -182,49 +198,55 @@ export const FamilyChatConversationPage = () => {
           console.error("❌ WebSocket Error", event);
       }
 
-      // 연결 시작
       client.activate();
       stompClientRef.current = client;
 
     } catch (err) {
       console.error("WS 로드 실패:", err);
     }
-  }, [roomId, token]);
+  }, [currentFamilyGroupId, token]); // [GEMINI-CLI: 2025-11-29] 의존성 변경
 
   const disconnectWebSocket = () => {
     if (stompClientRef.current) {
-      stompClientRef.current.deactivate(); // disconnect() 대신 deactivate() 사용
+      stompClientRef.current.deactivate(); 
     }
   };
-
-  // ============================================================
-  // [수정 끝]
-  // ============================================================
 
   const handleSendMessage = useCallback(async (content) => {
     if (!content.trim() || !stompClientRef.current || !stompClientRef.current.connected) return;
 
     const payload = {
-      roomId,
+      // [GEMINI-CLI: 2025-11-29] 필드명 변경: roomId -> familyGroupId
+      // roomId,
+      familyGroupId: currentFamilyGroupId,
+      
       familyMemberId: currentUserId,
-      memberNickname: "tester",
+      
+      // [GEMINI-CLI: 2025-11-29] 백엔드 DTO에서 삭제됨 (주석 처리)
+      // memberNickname: memberNickname,
+      
       content,
     };
 
     setIsSending(true);
 
     try {
-      // Client 객체에서는 publish()를 사용합니다.
+      // [GEMINI-CLI: 2025-11-29] 전송 경로 수정: roomId -> currentFamilyGroupId
       stompClientRef.current.publish({
-        destination: `/app/family/${roomId}`,
+        // destination: `/app/family/${roomId}`,
+        destination: `/app/family/${currentFamilyGroupId}`,
         body: JSON.stringify(payload),
       });
 
+      // [GEMINI-CLI: 2025-11-29] 낙관적 업데이트 (Optimistic UI)
+      // 주의: 백엔드 응답에는 닉네임이 포함되어 오지만, 여기서는 로컬에서 바로 뿌리므로 닉네임이 필요할 수 있음.
+      // 임시로 현재 유저의 닉네임을 사용해서 보여줌.
       setMessages((prev) => [
         ...prev,
         {
           ...payload,
-          id: null,
+          id: null, // 임시 ID
+          memberNickname: memberNickname, // 로컬 표시용으로 잠시 사용
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -240,7 +262,7 @@ export const FamilyChatConversationPage = () => {
     } finally {
       setIsSending(false);
     }
-  }, [roomId, currentUserId]);
+  }, [currentFamilyGroupId, currentUserId, userid, memberNickname]); // [GEMINI-CLI: 2025-11-29] 의존성 변경
 
   useEffect(() => {
     if (token) {
@@ -249,7 +271,6 @@ export const FamilyChatConversationPage = () => {
     return () => disconnectWebSocket();
   }, [token, connectWebSocket]);
 
-  // ... (나머지 UI 렌더링 코드는 동일)
   useEffect(() => {
     if (!isInitialLoading && page === 0 && messages.length > 0) {
       if (messageListRef.current) {
@@ -270,7 +291,7 @@ export const FamilyChatConversationPage = () => {
           <button className={styles.backButton} onClick={handleBack}>
             뒤로
           </button>
-          <h2 className={styles.title}>가족채팅</h2>
+          <h2 className={styles.title}>{familyGroup?.name ? `${familyGroup.name} 채팅방` : '가족채팅'}</h2>
         </header>
 
         <div className={styles.messageList} ref={messageListRef}>

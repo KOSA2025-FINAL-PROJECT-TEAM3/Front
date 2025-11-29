@@ -4,38 +4,43 @@ class FamilyChatApiClient extends ApiClient {
   constructor() {
     super({
       baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8080',
-      basePath: '/api/chat',   // ★ 수정됨
+      basePath: '/api/family-chat',
     })
   }
 
-  async getRoomByFamilyGroupId(familyGroupId) {
-    return this.get(`/rooms/by-family/${familyGroupId}`)
+  // async getRoomByFamilyGroupId(familyGroupId) {
+  //   return this.get(`/rooms/by-family/${familyGroupId}`)
+  // }
+
+  async getMessages(familyGroupId, page = 0, size = 50) {
+    return this.get(`/rooms/${familyGroupId}/messages`, { params: { page, size } })
   }
 
-  async getMessages(roomId, page = 0, size = 50) {
-    return this.get(`/rooms/${roomId}/messages`, { params: { page, size } })
+  async postMessage(familyGroupId, payload) {
+    return this.post(`/rooms/${familyGroupId}/messages`, payload)
   }
 
-  async postMessage(roomId, payload) {
-    return this.post(`/rooms/${roomId}/messages`, payload)
-  }
-
+   // [GEMINI-CLI: 2025-11-29] 백엔드 API 삭제로 인한 주석 처리 (가족 생성 시 자동 처리됨)
+  /*
   async createOrUpdateRoom(payload) {
     return this.post('/rooms', payload)
   }
+  */
 
-  async getMembers(roomId) {
-    return this.get(`/rooms/${roomId}/members`)
-  }
+  // async getMembers(familyGroupId) {
+  //   return this.get(`/rooms/${familyGroupId}/members`)
+  // }
 
-  async addMember(roomId, payload) {
-    return this.post(`/rooms/${roomId}/members`, payload)
-  }
+  // async addMember(familyGroupId, payload) {
+  //   return this.post(`/rooms/${familyGroupId}/members`, payload)
+  // }
 
-  async removeMember(roomId, familyMemberId) {
-    return this.delete(`/rooms/${roomId}/members/${familyMemberId}`)
-  }
+  // async removeMember(familyGroupId, familyMemberId) {
+  //   return this.delete(`/rooms/${familyGroupId}/members/${familyMemberId}`)
+  // }
 }
 
 export const familyChatApiClient = new FamilyChatApiClient()
 export default FamilyChatApiClient
+
+
