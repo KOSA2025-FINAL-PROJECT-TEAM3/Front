@@ -30,6 +30,16 @@ export default defineConfig({
     port: 5173,         // 기본 포트
     open: false,        // 자동 브라우저 열기 끄기
     cors: true,         // CORS 허용
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',  // Gateway로 직접 연결
+        changeOrigin: true,
+      },
+      '/ws': {
+        target: 'ws://localhost:8080',    // WebSocket
+        ws: true,
+      }
+    }
   },
   build: {
     target: 'ES2020',
