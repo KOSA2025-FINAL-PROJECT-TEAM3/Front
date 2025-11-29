@@ -3,7 +3,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { MealInputForm } from '../components/MealInputForm'
 import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
-import { Box, TextField, Button, Stack, Typography, Divider } from '@mui/material'
+import { Box, TextField, Stack, Typography, Divider } from '@mui/material'
 import styles from './DietLogPage.module.scss'
 
 export const DietLogPage = () => {
