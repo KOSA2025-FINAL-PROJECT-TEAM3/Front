@@ -12,6 +12,8 @@ export const SymptomSearchTab = () => {
   const [selectedSymptom, setSelectedSymptom] = useState(null)
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [error, setError] = useState('')
   const selectionRef = useRef(null)
 
   useEffect(() => {
@@ -21,6 +23,7 @@ export const SymptomSearchTab = () => {
         setResults([])
         setSelectedSymptom(null)
         setDetail(null)
+        setError('')
         return
       }
       const list = await searchApiClient.suggestSymptoms(query)
@@ -63,6 +66,39 @@ export const SymptomSearchTab = () => {
     }
   }, [])
 
+  const handleManualSearch = useCallback(() => {
+    const keyword = query.trim()
+    if (!keyword) {
+      setError('증상을 입력해주세요.')
+      return
+    }
+    setError('')
+    handleSelectSymptom(keyword)
+  }, [query, handleSelectSymptom])
+
+  const handleAiSearch = useCallback(async () => {
+    const keyword = query.trim()
+    if (!keyword) {
+      setError('증상을 입력해주세요.')
+      return
+    }
+    setError('')
+    setAiLoading(true)
+    setDetailLoading(true)
+    selectionRef.current = keyword
+    try {
+      const info = await searchApiClient.searchSymptomsWithAI(keyword)
+      setSelectedSymptom(info?.name || keyword)
+      setDetail(info)
+    } catch (err) {
+      console.error('증상 AI 검색 실패', err)
+      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+    } finally {
+      setAiLoading(false)
+      setDetailLoading(false)
+    }
+  }, [query])
+
   useEffect(() => {
     if (!results.length) {
       setSelectedSymptom(null)
@@ -89,6 +125,25 @@ export const SymptomSearchTab = () => {
           placeholder="예) 두통, 기침, 메스꺼움"
         />
         <div className={styles.hint}>입력하면 바로 결과가 표시됩니다.</div>
+        <div className={styles.actionRow}>
+          <button
+            type="button"
+            className={styles.searchButton}
+            onClick={handleManualSearch}
+            disabled={!query.trim() || detailLoading || aiLoading}
+          >
+            {detailLoading && !aiLoading ? '검색 중...' : '검색'}
+          </button>
+          <button
+            type="button"
+            className={styles.aiButton}
+            onClick={handleAiSearch}
+            disabled={!query.trim() || aiLoading}
+          >
+            {aiLoading ? 'AI 검색 중...' : 'AI 검색'}
+          </button>
+        </div>
+        {error && <div className={styles.error}>{error}</div>}
       </section>
 
       <section className={styles.results}>
