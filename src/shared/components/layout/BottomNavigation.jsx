@@ -43,7 +43,7 @@ const NAV_ITEMS = [
     label: '가족',
     icon: 'family',
     path: ROUTE_PATHS.family,
-    roles: [USER_ROLES.CAREGIVER], // 보호자만 표시
+    roles: [ROLE_ALL], // 시니어와 보호자 모두 표시
   },
   {
     id: 'more',

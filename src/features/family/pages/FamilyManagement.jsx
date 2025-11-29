@@ -6,14 +6,21 @@ import Modal from '@shared/components/ui/Modal'
 import { toast } from '@shared/components/toast/toastStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useFamilyStore } from '../store/familyStore'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
+import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
 import styles from './FamilyManagement.module.scss'
 
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   const currentUserId = useAuthStore((state) => state.user?.id)
+  const familyGroups = useFamilyStore((state) => state.familyGroups)
+  const selectedGroupId = useFamilyStore((state) => state.selectedGroupId)
+  const getSelectedGroup = useFamilyStore((state) => state.getSelectedGroup)
+
+  const [showGroupModal, setShowGroupModal] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState(null)
   const [dissolving, setDissolving] = useState(false)
   const [retrying, setRetrying] = useState(false)
@@ -39,6 +46,17 @@ export const FamilyManagementPage = () => {
       console.warn('[FamilyManagement] Initial refetch failed:', error)
     })
   }, [refetchFamily])
+
+  // 그룹이 여러 개면 선택 모달 표시
+  useEffect(() => {
+    if (familyGroups.length > 1 && !selectedGroupId) {
+      setShowGroupModal(true)
+    }
+  }, [familyGroups, selectedGroupId])
+
+  // 선택된 그룹의 members 가져오기
+  const selectedGroup = getSelectedGroup()
+  const selectedMembers = selectedGroup?.members || members
 
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
@@ -77,6 +95,18 @@ export const FamilyManagementPage = () => {
 
   return (
     <MainLayout>
+      {/* 그룹 선택 모달 */}
+      {showGroupModal && (
+        <GroupSelectionModal
+          isOpen={showGroupModal}
+          onClose={() => setShowGroupModal(false)}
+          onSelect={(groupId) => {
+            console.log('[FamilyManagement] Group selected:', groupId)
+            toast.success('그룹이 선택되었습니다.')
+          }}
+        />
+      )}
+
       {confirmModal && (
         <Modal
           isOpen={true}
@@ -136,6 +166,16 @@ export const FamilyManagementPage = () => {
       <div className={styles.page} role="region" aria-busy={loading}>
         <header className={styles.header}>
           <h1>가족 관리</h1>
+          {familyGroups.length > 1 && (
+            <button
+              type="button"
+              className={styles.groupSelectButton}
+              onClick={() => setShowGroupModal(true)}
+              style={{ marginRight: 'auto' }}
+            >
+              그룹 변경 ({familyGroups.findIndex((g) => g.id === selectedGroupId) + 1}/{familyGroups.length})
+            </button>
+          )}
           <div>
             <button
               type="button"
@@ -246,9 +286,9 @@ export const FamilyManagementPage = () => {
                 ))}
               </ul>
             )}
-            <FamilyGroupCard group={familyGroup} memberCount={members.length} />
+            <FamilyGroupCard group={selectedGroup || familyGroup} memberCount={selectedMembers.length} />
             <FamilyMemberList
-              members={members}
+              members={selectedMembers}
               onDetail={handleDetail}
               onRemove={handleRemoveMember}
               onlineMemberIds={onlineMemberIds}

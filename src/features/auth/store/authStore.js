@@ -158,6 +158,9 @@ export const useAuthStore = create(
           })
         }),
 
+      // Alias for selectRole (체크리스트 호환성)
+      updateUserRole: async (selectedRole) => get().selectRole(selectedRole),
+
       logout: async () =>
         withLoading(set, async () => {
           const token = get().token

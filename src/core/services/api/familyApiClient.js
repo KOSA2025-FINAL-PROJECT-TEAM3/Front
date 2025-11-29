@@ -9,12 +9,10 @@ class FamilyApiClient extends ApiClient {
   }
 
   getSummary() {
-    // GET /api/family/groups에서 첫 번째 그룹을 기본 그룹으로 사용
-    // 추후 백엔드에 getSummary 엔드포인트가 추가되면 변경 가능
+    // GET /api/family/groups에서 모든 그룹과 멤버 정보 반환
     return this.get('/groups').then((groups) => {
       if (Array.isArray(groups) && groups.length > 0) {
-        const firstGroup = groups[0]
-        console.log('[familyApiClient] getSummary - raw firstGroup:', firstGroup)
+        console.log('[familyApiClient] getSummary - raw groups:', groups)
 
         const normalizeMember = (member) => {
           const userId =
@@ -33,25 +31,28 @@ class FamilyApiClient extends ApiClient {
           }
         }
 
-        const members = Array.isArray(firstGroup?.members)
-          ? firstGroup.members.map(normalizeMember)
-          : []
+        // 모든 그룹을 정규화하고 members 포함
+        const normalizedGroups = groups.map((group) => ({
+          id: group?.id,
+          name: group?.name,
+          createdBy: group?.createdBy?.id ?? group?.createdBy,
+          createdAt: group?.createdAt,
+          members: Array.isArray(group?.members)
+            ? group.members.map(normalizeMember)
+            : [],
+        }))
 
-        const normalizedGroup = {
-          id: firstGroup?.id,
-          name: firstGroup?.name,
-          createdBy: firstGroup?.createdBy?.id ?? firstGroup?.createdBy,
-          createdAt: firstGroup?.createdAt,
-        }
+        // 첫 번째 그룹의 members를 기본값으로 (하위 호환성)
+        const firstGroupMembers = normalizedGroups[0]?.members || []
 
         return {
-          group: normalizedGroup,
-          members,
+          groups: normalizedGroups,  // 모든 그룹 반환
+          members: firstGroupMembers, // 첫 번째 그룹 멤버 (하위 호환성)
         }
       }
-      // 그룹이 없으면 null 반환
+      // 그룹이 없으면 빈 배열 반환
       return {
-        group: null,
+        groups: [],
         members: [],
       }
     })

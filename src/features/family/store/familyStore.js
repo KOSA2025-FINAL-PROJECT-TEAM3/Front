@@ -8,7 +8,8 @@ import { familyApiClient } from '@core/services/api/familyApiClient'
 import { STORAGE_KEYS } from '@config/constants'
 
 const initialState = {
-  familyGroup: null,
+  familyGroups: [],         // 여러 그룹 지원
+  selectedGroupId: null,    // 현재 선택된 그룹 ID
   members: [],
   invites: { sent: [], received: [] },
   loading: false,
@@ -89,7 +90,8 @@ export const useFamilyStore = create((set, get) => ({
       }
 
       const nextState = {
-        familyGroup: summary?.group || null,
+        familyGroups: summary?.groups || [],
+        selectedGroupId: summary?.groups?.[0]?.id || null,  // 첫 번째 그룹 자동 선택
         members: summary?.members || [],
         invites: normalizeInvites(inviteList),
         error: summaryError ? summaryError : null,
@@ -102,9 +104,9 @@ export const useFamilyStore = create((set, get) => ({
   inviteMember: async (payload) =>
     withLoading(set, async () => {
       const state = get()
-      const rawGroupId = state.familyGroup?.id
+      const rawGroupId = state.selectedGroupId
 
-      console.log('[familyStore] inviteMember - familyGroup:', state.familyGroup)
+      console.log('[familyStore] inviteMember - selectedGroupId:', state.selectedGroupId)
       console.log('[familyStore] inviteMember - rawGroupId:', rawGroupId, 'type:', typeof rawGroupId)
 
       if (!rawGroupId) {
@@ -189,13 +191,25 @@ export const useFamilyStore = create((set, get) => ({
   createFamilyGroup: async (name) =>
     withLoading(set, async () => {
       const group = await familyApiClient.createGroup(name)
-      set({
-        familyGroup: group,
+      set((state) => ({
+        familyGroups: [...state.familyGroups, group],
+        selectedGroupId: group.id,
         members: [],
         error: null,
-      })
+      }))
       return group
     }),
+
+  // 그룹 선택
+  selectGroup: (groupId) => {
+    set({ selectedGroupId: groupId })
+  },
+
+  // 선택된 그룹 가져오기
+  getSelectedGroup: () => {
+    const state = get()
+    return state.familyGroups.find((g) => g.id === state.selectedGroupId) || null
+  },
 
   refetchFamily: async () => get().loadFamily(),
 }))
