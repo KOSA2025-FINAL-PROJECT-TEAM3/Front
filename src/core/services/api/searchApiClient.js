@@ -51,6 +51,21 @@ class SearchApiClient extends ApiClient {
     }
     return medicationSearchClient.get('/search', { params }, { mockResponse })
   }
+
+  searchDrugsWithAI(itemName) {
+    const query = (itemName || '').trim()
+    const params = { itemName: query }
+    const mockResponse = () => ({
+      itemName: query,
+      entpName: 'AI 생성 정보',
+      efcyQesitm: 'AI가 생성한 효능효과 정보',
+      useMethodQesitm: 'AI가 생성한 용법용량 정보',
+      atpnQesitm: 'AI가 생성한 주의사항',
+      isAiGenerated: true,
+      aiDisclaimer: '이 정보는 AI가 생성한 것으로 주의를 요합니다. 정확한 정보는 의사 또는 약사와 상담하세요.',
+    })
+    return medicationSearchClient.get('/search/ai', { params }, { mockResponse })
+  }
 }
 
 export const searchApiClient = new SearchApiClient()

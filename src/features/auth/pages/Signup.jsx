@@ -9,6 +9,7 @@ import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useInviteStore } from '@features/family/stores/inviteStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import styles from './Signup.module.scss'
 
@@ -27,6 +28,15 @@ export const Signup = () => {
     error: state.error,
     clearError: state.clearError,
   }))
+  
+  // 초대 세션에서 제안된 역할 가져오기
+  const { getSuggestedRole, isSessionValid } = useInviteStore((state) => ({
+    getSuggestedRole: state.getSuggestedRole,
+    isSessionValid: state.isSessionValid,
+  }))
+  
+  const suggestedRole = isSessionValid() ? getSuggestedRole() : null
+  const isInviteSignup = !!suggestedRole
 
   const {
     register,
@@ -42,7 +52,7 @@ export const Signup = () => {
       password: '',
       passwordConfirm: '',
       name: '',
-      customerRole: USER_ROLES.SENIOR,
+      customerRole: suggestedRole || USER_ROLES.SENIOR,
     },
   })
 
@@ -173,13 +183,18 @@ export const Signup = () => {
 
           <div className={styles.formGroup}>
             <span className={styles.label}>역할 선택</span>
+            {isInviteSignup && (
+              <p className={styles.inviteInfo}>
+                초대 링크를 통해 가입하시면 역할이 자동으로 설정됩니다.
+              </p>
+            )}
             <div className={styles.roleButtons}>
               <label className={styles.radioLabel}>
                 <input
                   type="radio"
                   value={USER_ROLES.SENIOR}
                   {...register('customerRole')}
-                  disabled={loading}
+                  disabled={loading || isInviteSignup}
                 />
                 <span className={styles.radioButton}>어르신(부모)</span>
               </label>
@@ -188,7 +203,7 @@ export const Signup = () => {
                   type="radio"
                   value={USER_ROLES.CAREGIVER}
                   {...register('customerRole')}
-                  disabled={loading}
+                  disabled={loading || isInviteSignup}
                 />
                 <span className={styles.radioButton}>보호자(자녀)</span>
               </label>

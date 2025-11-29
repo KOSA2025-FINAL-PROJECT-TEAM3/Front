@@ -84,6 +84,38 @@ export const PillSearchTab = () => {
     }
   }
 
+  const handleAISearch = async () => {
+    const keyword = itemName.trim()
+    if (!keyword) {
+      setError('약품명을 입력해주세요.')
+      return
+    }
+
+    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    if (!token) {
+      setError('로그인 후 검색할 수 있습니다.')
+      toast.error('로그인 후 검색할 수 있습니다.')
+      return
+    }
+
+    setError('')
+    setLoading(true)
+    setHasSearched(true)
+    try {
+      const result = await searchApiClient.searchDrugsWithAI(keyword)
+      // AI 검색 결과를 배열로 변환
+      setResults(result ? [result] : [])
+      toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
+    } catch (err) {
+      console.error('AI 검색 실패', err)
+      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      setResults([])
+      toast.error('AI 검색에 실패했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const emptyState = useMemo(
     () => hasSearched && !loading && !error && results.length === 0,
     [hasSearched, loading, error, results],
@@ -163,6 +195,15 @@ export const PillSearchTab = () => {
             disabled={loading || !itemName.trim()}
           >
             {loading ? '검색 중...' : '검색'}
+          </button>
+          <button
+            type="button"
+            className={styles.aiSearchButton}
+            onClick={handleAISearch}
+            disabled={loading || !itemName.trim()}
+            title="AI로 약품 정보 검색"
+          >
+            {loading ? '검색 중...' : 'AI 검색'}
           </button>
         </form>
         <p className={styles.hint}>식약처(MFDS) 데이터 기준으로 약품 정보를 검색합니다.</p>
