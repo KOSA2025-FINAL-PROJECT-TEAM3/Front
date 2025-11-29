@@ -75,10 +75,10 @@ export const CONFLICT_SEVERITY_CONFIG = {
 
 // 식사 유형
 export const MEAL_TYPES = {
-  BREAKFAST: 'BREAKFAST',
-  LUNCH: 'LUNCH',
-  DINNER: 'DINNER',
-  SNACK: 'SNACK',
+  BREAKFAST: 'breakfast',
+  LUNCH: 'lunch',
+  DINNER: 'dinner',
+  SNACK: 'snack',
 }
 
 // 식사 유형 라벨
