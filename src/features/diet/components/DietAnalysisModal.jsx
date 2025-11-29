@@ -15,9 +15,7 @@ import {
     CircularProgress,
     IconButton,
     Chip,
-    Stack,
-    Alert,
-    AlertTitle
+    Stack
 } from '@mui/material';
 
 // Fallback icons
@@ -39,7 +37,10 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading 
 
     useEffect(() => {
         if (analysisResult) {
+            console.log('[DietAnalysisModal] analysisResult received:', analysisResult);
             setEditedResult(analysisResult);
+        } else {
+            console.log('[DietAnalysisModal] analysisResult is null/undefined');
         }
     }, [analysisResult]);
 
@@ -68,7 +69,7 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading 
             }}
         >
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-                <Typography variant="h6" fontWeight="bold">음식 분석 결과</Typography>
+                <Typography fontWeight="bold">음식 분석 결과</Typography>
                 <IconButton onClick={onClose} size="small">
                     <CloseIcon />
                 </IconButton>
@@ -82,23 +83,6 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading 
                     </Box>
                 ) : editedResult ? (
                     <Stack spacing={3} sx={{ py: 1 }}>
-                        {/* Overall Safety Level */}
-                        {editedResult.overallLevel && (
-                            <Alert
-                                severity={
-                                    editedResult.overallLevel === 'GOOD' ? 'success' :
-                                        editedResult.overallLevel === 'WARNING' ? 'warning' : 'error'
-                                }
-                                icon={false}
-                                sx={{ borderRadius: 2 }}
-                            >
-                                <AlertTitle sx={{ fontWeight: 'bold' }}>
-                                    {editedResult.overallLevel === 'GOOD' ? '안전' : editedResult.overallLevel === 'WARNING' ? '주의' : '경고'}
-                                </AlertTitle>
-                                {editedResult.summary || '분석 결과가 준비되었습니다.'}
-                            </Alert>
-                        )}
-
                         {/* Food Name */}
                         <TextField
                             label="인식된 음식"

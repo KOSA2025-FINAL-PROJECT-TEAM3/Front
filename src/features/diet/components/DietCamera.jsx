@@ -25,7 +25,7 @@ const CloseIcon = () => (
     </svg>
 );
 
-const DietCamera = ({ onImageCapture }) => {
+const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
     const fileInputRef = useRef(null);
     const [preview, setPreview] = useState(null);
 
@@ -52,6 +52,11 @@ const DietCamera = ({ onImageCapture }) => {
         }
         onImageCapture(null, null);
     };
+
+    // 외부에서 초기화할 수 있도록 ref 노출
+    React.useImperativeHandle(ref, () => ({
+        clear: clearImage
+    }));
 
     return (
         <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -155,6 +160,7 @@ const DietCamera = ({ onImageCapture }) => {
             )}
         </Box>
     );
-};
+});
 
+DietCamera.displayName = 'DietCamera';
 export default DietCamera;
