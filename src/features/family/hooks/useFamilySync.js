@@ -12,14 +12,23 @@ import { FamilySyncService } from '../services/familySyncService'
 
 export const useFamilySync = () => {
   const {
-    familyGroup,
-    members,
+    familyGroups,
+    selectedGroupId,
     inviteMember,
     removeMember,
     refetchFamily,
     loading,
     error,
   } = useFamily()
+  
+  // [Fixed] Derive current familyGroup from store state
+  const familyGroup = useMemo(() => {
+    return familyGroups?.find((g) => g.id === selectedGroupId) || null
+  }, [familyGroups, selectedGroupId])
+
+  // [Fixed] Derive members from the selected family group
+  const members = useMemo(() => familyGroup?.members || [], [familyGroup])
+
   const { user, token } = useAuth((state) => ({
     user: state.user,
     token: state.token,

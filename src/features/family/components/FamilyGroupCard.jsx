@@ -10,6 +10,14 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
     day: 'numeric',
   })
 
+  // [Fixed] createdBy is an ID, find name from members
+  const creator = group.members?.find(
+    (m) =>
+      String(m.id) === String(group.createdBy) ||
+      String(m.userId) === String(group.createdBy),
+  )
+  const creatorName = creator?.name || group.createdBy?.name || '알 수 없음'
+
   return (
     <section className={styles.card}>
       <div className={styles.header}>
@@ -17,7 +25,7 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
         <span className={styles.badge}>{memberCount}명 참여</span>
       </div>
       <div className={styles.meta}>
-        <span>생성자: {group.createdBy?.name}</span>
+        <span>생성자: {creatorName}</span>
         <span>생성일: {createdDate}</span>
       </div>
     </section>
@@ -26,13 +34,18 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
 
 FamilyGroupCard.propTypes = {
   group: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    createdAt: PropTypes.string.isRequired,
-    createdBy: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-    }),
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    createdAt: PropTypes.string,
+    createdBy: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+        name: PropTypes.string,
+      }),
+    ]),
+    members: PropTypes.arrayOf(PropTypes.object),
   }).isRequired,
   memberCount: PropTypes.number,
 }
