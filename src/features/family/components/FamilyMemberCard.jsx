@@ -19,10 +19,20 @@ export const FamilyMemberCard = ({
   const initials = member.name?.[0] ?? 'U'
   const joinedDate = new Date(member.joinedAt).toLocaleDateString('ko-KR')
 
-  const isSelf = member.userId?.toString?.() === currentUserId?.toString?.()
-  const isOwner = groupOwnerId != null && member.userId?.toString?.() === groupOwnerId?.toString?.()
-  const showRemove = !isOwner || !isSelf
-  const removeLabel = isSelf && !isOwner ? '탈퇴' : '제거'
+  const isCardSelf = member.userId?.toString?.() === currentUserId?.toString?.()
+  const isCardGroupOwner =
+    groupOwnerId != null && member.userId?.toString?.() === groupOwnerId?.toString?.()
+  const isViewerGroupOwner =
+    currentUserId != null &&
+    groupOwnerId != null &&
+    currentUserId?.toString?.() === groupOwnerId?.toString?.()
+
+  // 1. 관리자(ViewerOwner)는 본인 제외 다른 사람 제거 가능
+  // 2. 일반 멤버는 본인만 탈퇴 가능 (단, 그룹장이면 탈퇴 불가 -> 해산 이용)
+  const showRemove =
+    (isViewerGroupOwner && !isCardSelf) || (isCardSelf && !isCardGroupOwner)
+
+  const removeLabel = isCardSelf ? '탈퇴' : '제거'
 
   return (
     <div className={styles.card}>

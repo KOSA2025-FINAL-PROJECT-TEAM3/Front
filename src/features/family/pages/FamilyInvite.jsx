@@ -10,7 +10,8 @@ import styles from './FamilyInvite.module.scss'
 export const FamilyInvitePage = () => {
   const navigate = useNavigate()
   const {
-    familyGroup,
+    familyGroups, // Changed
+    selectedGroupId, // Changed
     invites,
     inviteMember,
     loadInvites,
@@ -22,7 +23,8 @@ export const FamilyInvitePage = () => {
     createFamilyGroup,
     loading,
   } = useFamily((state) => ({
-    familyGroup: state.familyGroup,
+    familyGroups: state.familyGroups, // Changed
+    selectedGroupId: state.selectedGroupId, // Changed
     invites: state.invites,
     inviteMember: state.inviteMember,
     loadInvites: state.loadInvites,
@@ -35,13 +37,16 @@ export const FamilyInvitePage = () => {
     loading: state.loading,
   }))
 
+  // [Fixed] Derive familyGroup from familyGroups and selectedGroupId
+  const familyGroup = useMemo(() => {
+    return familyGroups?.find((g) => g.id === selectedGroupId) || null
+  }, [familyGroups, selectedGroupId])
+
   const [submitting, setSubmitting] = useState(false)
   const [latestInvite, setLatestInvite] = useState(null)
   const [cancelingId, setCancelingId] = useState(null)
   const [acceptingId, setAcceptingId] = useState(null)
   const [regenerating, setRegenerating] = useState(false)
-  const [quickGenerating, setQuickGenerating] = useState(false)
-  const [quickCode, setQuickCode] = useState(null)
   const [groupName, setGroupName] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
 
@@ -131,41 +136,7 @@ export const FamilyInvitePage = () => {
     }
   }
 
-  const handleQuickGenerate = async () => {
-    if (!hasGroup) {
-      toast.warning('먼저 가족 그룹을 생성해주세요.')
-      return
-    }
-    const roleInput = prompt('역할을 선택하세요\n1: SENIOR (어르신)\n2: CAREGIVER (보호자)\n\n숫자를 입력하세요 (기본값: 1)')
-    const roleMap = { '1': 'SENIOR', '2': 'CAREGIVER' }
-    const suggestedRole = roleMap[roleInput] || 'SENIOR'
 
-    setQuickGenerating(true)
-    setQuickCode(null)
-
-    try {
-      // 더미 이메일 생성 (검증용)
-      const dummyEmail = `test-${Date.now()}@temp.local`
-      const response = await inviteMember({
-        name: '빠른초대',
-        email: dummyEmail,
-        suggestedRole,
-      })
-
-      if (response?.shortCode || response?.inviteCode) {
-        const code = response.shortCode || response.inviteCode
-        setQuickCode(code)
-        toast.success(`초대 코드가 생성되었습니다: ${code}`)
-      } else {
-        toast.error('초대 코드 생성에 실패했습니다.')
-      }
-    } catch (error) {
-      console.warn('[FamilyInvite] quick generate failed', error)
-      toast.error('초대 코드를 생성하지 못했습니다. 잠시 후 재시도해 주세요.')
-    } finally {
-      setQuickGenerating(false)
-    }
-  }
 
   const handleCancel = async (inviteId) => {
     setCancelingId(inviteId)
@@ -284,45 +255,6 @@ export const FamilyInvitePage = () => {
         </div>
         {!hasGroup && (
           <p className={styles.alert}>아직 생성된 가족 그룹이 없습니다. 그룹을 먼저 만들어주세요.</p>
-        )}
-      </div>
-
-      {/* 빠른 초대 코드 생성 섹션 */}
-      <div className={styles.quickGenerateSection}>
-        <h3>빠른 초대 코드 생성 (테스트용)</h3>
-        <p className={styles.helper}>
-          이메일 없이 6자리 초대 코드만 생성합니다. 코드를 공유하여 가족 그룹에 초대하세요.
-        </p>
-        <button
-          type="button"
-          onClick={handleQuickGenerate}
-          disabled={quickGenerating || !hasGroup}
-          className={styles.quickGenerateButton}
-        >
-          {quickGenerating ? '생성 중...' : '🚀 초대 코드 생성'}
-        </button>
-
-        {quickCode && (
-          <div className={styles.shortCodeSection}>
-            <p className={styles.helper}>생성된 초대 코드 (6자리)</p>
-            <span className={styles.shortCode}>{quickCode}</span>
-            <p className={styles.helper}>이 코드를 초대할 분에게 공유하세요.</p>
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(quickCode)
-                  toast.success('초대 코드가 복사되었습니다.')
-                } catch (err) {
-                  console.warn('코드 복사 실패:', err)
-                  toast.error('복사에 실패했습니다.')
-                }
-              }}
-              className={styles.copyButton}
-            >
-              📋 코드 복사
-            </button>
-          </div>
         )}
       </div>
 

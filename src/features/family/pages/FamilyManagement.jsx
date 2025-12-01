@@ -15,7 +15,8 @@ import styles from './FamilyManagement.module.scss'
 
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
-  const currentUserId = useAuthStore((state) => state.user?.id)
+  // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
+  const currentUserId = useAuthStore((state) => state.user?.id || state.user?.userId)
   const familyGroups = useFamilyStore((state) => state.familyGroups)
   const selectedGroupId = useFamilyStore((state) => state.selectedGroupId)
   const getSelectedGroup = useFamilyStore((state) => state.getSelectedGroup)
@@ -131,6 +132,8 @@ export const FamilyManagementPage = () => {
                     try {
                       await removeMember(memberId)
                       toast.success('구성원이 제거되었습니다.')
+                      await refetchFamily?.() // Add this line to refetch family data
+
                     } catch (error) {
                       toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
                       console.warn('[FamilyManagement] removeMember failed', error)
