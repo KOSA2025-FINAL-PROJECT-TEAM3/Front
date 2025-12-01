@@ -55,7 +55,13 @@ export const ChatMessage = ({ message, isMe, sender }) => {
         )}
         
         <div className={styles.bubble}>
-          <p className={styles.text}>{message.content}</p>
+          {/* [GEMINI-FIX]: 메시지 타입이 'IMAGE'인 경우 이미지를 렌더링 */}
+          {message.type === "IMAGE" ? (
+            <img src={message.content} alt="채팅 이미지" className={styles.chatImage} />
+          ) : (
+            // [GEMINI-FIX]: 그 외의 경우 텍스트 메시지를 렌더링
+            <p className={styles.text}>{message.content}</p>
+          )}
         </div>
         
         <div className={styles.meta}>

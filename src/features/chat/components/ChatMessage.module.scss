@@ -60,10 +60,21 @@
 }
 
 .bubble {
-  padding: 10px 14px;
-  border-radius: 16px;
-  word-wrap: break-word;
-  word-break: break-word;
+  background-color: var(--color-white);
+  padding: 8px 12px;
+  border-radius: 18px;
+  max-width: 100%;
+  word-break: break-word; // 긴 단어가 있어도 줄바꿈 처리
+  white-space: pre-wrap; // 줄바꿈 문자 유지
+}
+
+// [GEMINI-FIX]: 채팅 이미지 스타일 추가
+.chatImage {
+  max-width: 100%; // 말풍선 너비를 넘지 않도록
+  height: auto;
+  display: block; // 이미지 하단 여백 제거
+  border-radius: 8px; // 모서리 둥글게
+  margin: 0; // p 태그의 기본 마진 제거
 }
 
 .text {
