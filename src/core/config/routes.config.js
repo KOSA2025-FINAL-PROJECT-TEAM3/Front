@@ -42,6 +42,7 @@ export const ROUTE_PATHS = {
 
   inviteAccept: '/invites/start',
   inviteCodeEntry: '/invites/enter', // 초대 코드 수동 입력 페이지 (공개)
+  inviteSignup: '/invites/signup', // [NEW] 초대 전용 회원가입
 
   chatList: '/chat',
   chatConversation: '/chat/:roomId',

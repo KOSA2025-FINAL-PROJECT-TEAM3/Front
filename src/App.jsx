@@ -24,6 +24,7 @@ import FamilyManagementPage from '@features/family/pages/FamilyManagement'
 import FamilyInvitePage from '@features/family/pages/FamilyInvite'
 import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
 import InviteCodeEntryPage from '@features/family/pages/InviteCodeEntry'
+import { InviteSignup } from '@features/family/pages/InviteSignup'
 import FamilyJoin from '@features/family/pages/FamilyJoin'
 import SettingsPage from '@features/settings/pages/Settings'
 import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
@@ -90,6 +91,7 @@ function App() {
 
             {/* 초대 코드 입력 및 링크 진입 (공개) */}
             <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
+            <Route path={ROUTE_PATHS.inviteSignup} element={<InviteSignup />} />
             <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
 
             {/* 보호된 페이지: 인증 필요 */}

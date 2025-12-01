@@ -3,7 +3,7 @@
  * - 이메일/비밀번호 로그인, 카카오 로그인, 회원가입 링크
  */
 
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
@@ -18,7 +18,12 @@ const roleDestinationMap = {
   [USER_ROLES.CAREGIVER]: ROUTE_PATHS.caregiverDashboard,
 }
 
-const navigateAfterAuthentication = (navigate) => {
+const navigateAfterAuthentication = (navigate, redirectPath) => {
+  if (redirectPath) {
+    navigate(redirectPath, { replace: true })
+    return
+  }
+
   const authState = useAuthStore.getState()
   const resolvedRole =
     normalizeCustomerRole(authState.customerRole) ||
@@ -35,6 +40,13 @@ const navigateAfterAuthentication = (navigate) => {
 
 export const Login = () => {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectPath = searchParams.get('redirect')
+    ? decodeURIComponent(searchParams.get('redirect'))
+    : null // null로 원복
+
+  console.log('[Login] Initial render - redirectPath:', redirectPath)
+
   const { login, loading, error, clearError } = useAuth((state) => ({
     login: state.login,
     loading: state.loading,
@@ -58,7 +70,7 @@ export const Login = () => {
   const handleLogin = async (formData) => {
     try {
       await login(formData.email, formData.password)
-      navigateAfterAuthentication(navigate)
+      navigateAfterAuthentication(navigate, redirectPath)
     } catch (err) {
       setError('root', {
         type: 'server',

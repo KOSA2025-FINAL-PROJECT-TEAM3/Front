@@ -160,7 +160,9 @@ export const InviteCodeEntryPage = () => {
   }
 
   const handleGoToLogin = () => {
-    navigate(ROUTE_PATHS.login)
+    const currentPath = encodeURIComponent(window.location.pathname + window.location.search)
+    console.log('[InviteCodeEntry] Redirecting to Login with path:', currentPath)
+    navigate(`${ROUTE_PATHS.login}?redirect=${currentPath}`)
   }
 
   const handleReset = () => {
@@ -208,6 +210,7 @@ export const InviteCodeEntryPage = () => {
   if (status === 'validated' && inviteInfo) {
     const role = inviteInfo.suggestedRole || 'SENIOR'
     const expiryText = formatExpiry(inviteInfo.expiresAt)
+    const currentPath = encodeURIComponent(window.location.pathname + window.location.search)
 
     return (
       <div className={styles.page}>
@@ -263,7 +266,10 @@ export const InviteCodeEntryPage = () => {
                 <button
                   type="button"
                   className={styles.acceptButton}
-                  onClick={() => navigate(ROUTE_PATHS.signup)}
+                  onClick={() => {
+                    console.log('[InviteCodeEntry] Navigating to:', ROUTE_PATHS.inviteSignup)
+                    navigate(ROUTE_PATHS.inviteSignup)
+                  }}
                 >
                   회원가입 후 수락
                 </button>
