@@ -263,6 +263,73 @@ export const FamilyChatConversationPage = () => {
     }
   }, [currentFamilyGroupId, currentUserId, memberNickname]); // [GEMINI-CLI: 2025-11-29] 의존성 변경
 
+  // [GEMINI] 이미지 업로드 핸들러 추가
+  const handleImageUpload = async (file) => {
+    if (!file || isSending) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("familyMemberId", currentUserId); 
+
+    setIsSending(true);
+
+    try {
+      // 1. 이미지 업로드 API 호출
+      const res = await fetch(`http://localhost:8080/api/family-chat/rooms/${currentFamilyGroupId}/messages/image`, {
+        method: "POST",
+        headers: { 
+            Authorization: `Bearer ${token}` 
+            // Content-Type은 multipart/form-data 요청 시 브라우저가 자동으로 'Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...' 형태로 설정합니다.
+            // 따라서 이곳에서 Content-Type을 수동으로 설정하면 오히려 문제가 발생할 수 있습니다.
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("이미지 업로드 실패");
+
+      const imageUrl = await res.text(); // 백엔드가 URL을 String으로 반환함
+
+      // 2. 소켓으로 이미지 메시지 전송 (다른 사람들에게 보여주기 위해)
+      if (stompClientRef.current && stompClientRef.current.connected) {
+        const payload = {
+          familyGroupId: currentFamilyGroupId,
+          familyMemberId: currentUserId,
+          content: imageUrl,
+          type: "IMAGE" // 백엔드 Enum과 일치
+        };
+
+        stompClientRef.current.publish({
+          destination: `/app/family/${currentFamilyGroupId}`,
+          body: JSON.stringify(payload),
+        });
+        
+        // 내 화면에 즉시 표시 (낙관적 업데이트)
+        setMessages((prev) => [
+            ...prev,
+            {
+              ...payload,
+              id: null,
+              memberNickname: memberNickname,
+              createdAt: new Date().toISOString(),
+            },
+        ]);
+        
+        setTimeout(() => {
+            if (messageListRef.current) {
+              messageListRef.current.scrollTop =
+                messageListRef.current.scrollHeight;
+            }
+        }, 10);
+      }
+
+    } catch (err) {
+      console.error("이미지 전송 오류", err);
+      alert("이미지 전송에 실패했습니다.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   useEffect(() => {
     if (token) {
       connectWebSocket();
@@ -315,7 +382,7 @@ export const FamilyChatConversationPage = () => {
           ))}
         </div>
 
-        <ChatInput onSend={handleSendMessage} disabled={isSending} />
+        <ChatInput onSend={handleSendMessage} onImageUpload={handleImageUpload} disabled={isSending} />
       </div>
     </MainLayout>
   );
