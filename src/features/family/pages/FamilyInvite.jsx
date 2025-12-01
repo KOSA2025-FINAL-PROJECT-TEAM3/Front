@@ -79,7 +79,10 @@ export const FamilyInvitePage = () => {
 
   const inviteLink = useMemo(() => {
     if (typeof window === 'undefined') return ''
-    const origin = window.location.origin
+    // 개발 환경에서는 명시적으로 localhost:5173 사용
+    const origin = import.meta.env.DEV
+      ? 'http://localhost:5173'
+      : window.location.origin
     if (latestInvite?.longToken) {
       return `${origin}${ROUTE_PATHS.inviteAccept}?token=${latestInvite.longToken}`
     }
