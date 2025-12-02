@@ -14,16 +14,19 @@ import styles from "./FamilyChatConversationPage.module.scss";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useFamilyStore } from "@features/family/store/familyStore";
 
+const AI_LOADING_TEMP_ID = 'ai-loading-temp'; // AI 로딩 메시지 임시 ID
+
 export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
   // [GEMINI-CLI: 2025-11-29] useParams에서 familyGroupId 추출 (기존 유지)
   const { familyGroupId } = useParams();
-
-  const familyGroup = useFamilyStore((state) => state.familyGroup);
   
   // [GEMINI-CLI: 2025-11-29] roomId -> familyGroupId로 변수명 의미 명확화
   // const roomId = Number(familyGroupId) || 1;
   const currentFamilyGroupId = Number(familyGroupId) || 1;
+
+  const familyGroups = useFamilyStore((state) => state.familyGroups);
+  const familyGroup = familyGroups.find(g => g.id === currentFamilyGroupId);
 
   // =================================================================================
   // 🔥 토큰 및 유저 ID 관리 (Zustand Store 사용)
@@ -158,6 +161,19 @@ export const FamilyChatConversationPage = () => {
           const body = JSON.parse(msg.body);
 
           setMessages((prev) => {
+            // [GEMINI-FIX] AI 로딩 메시지 교체 처리
+            if (body.familyMemberId === 0 && body.id) { // AI 봇이 보낸 실제 메시지가 도착했을 때
+              const aiLoadingIndex = prev.findIndex(m => m.id === AI_LOADING_TEMP_ID);
+              if (aiLoadingIndex !== -1) {
+                const newMessages = [...prev];
+                newMessages[aiLoadingIndex] = {
+                  ...body,
+                  createdAt: body.createdAt || prev[aiLoadingIndex].createdAt
+                };
+                return newMessages;
+              }
+            }
+            
             if (body.id && prev.some((m) => m.id === body.id)) {
               return prev;
             }
@@ -297,6 +313,18 @@ export const FamilyChatConversationPage = () => {
                     createdAt: new Date().toISOString(),
                 });
             }
+            // [GEMINI-FIX] AI 명령인 경우, "AI 생각 중..." 메시지를 바로 추가
+            if (content && content.startsWith("/ai ")) {
+              newMsgs.push({
+                id: AI_LOADING_TEMP_ID,
+                familyGroupId: currentFamilyGroupId,
+                familyMemberId: 0, // AI 봇 ID
+                memberNickname: "AI 봇",
+                content: "AI가 답변을 생성 중입니다...",
+                type: "AI_LOADING", // 새로운 타입
+                createdAt: new Date().toISOString(),
+              });
+            }
             return [...prev, ...newMsgs];
         });
         
@@ -353,15 +381,31 @@ export const FamilyChatConversationPage = () => {
       // [GEMINI-CLI: 2025-11-29] 낙관적 업데이트 (Optimistic UI)
       // 주의: 백엔드 응답에는 닉네임이 포함되어 오지만, 여기서는 로컬에서 바로 뿌리므로 닉네임이 필요할 수 있음.
       // 임시로 현재 유저의 닉네임을 사용해서 보여줌.
-      setMessages((prev) => [
-        ...prev,
-        {
-          ...payload,
-          id: null, // 임시 ID
-          memberNickname: memberNickname, // 로컬 표시용으로 잠시 사용
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      setMessages((prev) => {
+        const newMessages = [
+          ...prev,
+          {
+            ...payload,
+            id: null, // 임시 ID
+            memberNickname: memberNickname, // 로컬 표시용으로 잠시 사용
+            createdAt: new Date().toISOString(),
+          },
+        ];
+
+        // [GEMINI-FIX] AI 명령인 경우, "AI 생각 중..." 메시지를 바로 추가
+        if (content.startsWith("/ai ")) {
+          newMessages.push({
+            id: AI_LOADING_TEMP_ID,
+            familyGroupId: currentFamilyGroupId,
+            familyMemberId: 0, // AI 봇 ID
+            memberNickname: "AI 봇",
+            content: "AI가 답변을 생성 중입니다...",
+            type: "AI_LOADING", // 새로운 타입
+            createdAt: new Date().toISOString(),
+          });
+        }
+        return newMessages;
+      });
 
       setTimeout(() => {
         if (messageListRef.current) {

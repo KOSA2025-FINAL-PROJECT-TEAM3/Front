@@ -38,7 +38,6 @@
     cursor: not-allowed;
   }
 
-  // 스크롤바 스타일링 (선택사항)
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -50,6 +49,38 @@
 
   &::-webkit-scrollbar-track {
     background: transparent;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+}
+
+.uploadButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  transition: all 0.2s;
+  border-radius: 50%;
+  margin-bottom: 8px;
+  transform: translateX(1px);
+  &:hover {
+    color: #2563eb;
+    background-color: #f3f4f6;
+  }
+
+  &:disabled {
+    color: #d1d5db;
+    cursor: not-allowed;
   }
 }
 
@@ -90,25 +121,25 @@
   }
 }
 
-// [GEMINI] 파일 미리보기 스타일 추가
 .container {
   display: flex;
   flex-direction: column;
   width: 100%;
-  background: white; // form 배경색과 일치시킴
-  border-top: 1px solid #e5e7eb; // form border를 여기로 이동 고려
+  background: white;
+  border-top: 1px solid #e5e7eb;
 }
 
 .filePreview {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #f0f4f8;
-  padding: 8px 12px;
+  background-color: white;
+  padding: 6px 10px;
   border-radius: 8px;
-  margin: 8px 16px 0 16px; // 좌우 여백 form padding과 맞춤
-  font-size: 0.9rem;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
   color: #333;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05); // 살짝 입체감
 }
 
 .fileInfo {

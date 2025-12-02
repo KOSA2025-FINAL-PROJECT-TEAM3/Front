@@ -89,19 +89,6 @@ export const ChatInput = ({ onSend, disabled = false }) => {
       )}
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        {/* 이미지 업로드 버튼 */}
-        <button
-          type="button"
-          onClick={handleUploadClick}
-          disabled={disabled}
-          className={styles.uploadButton}
-          style={{ marginRight: '8px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          aria-label="이미지 업로드"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill={selectedFile ? "#4A90E2" : "#888"}/>
-          </svg>
-        </button>
         <input
           type="file"
           ref={fileInputRef}
@@ -123,27 +110,42 @@ export const ChatInput = ({ onSend, disabled = false }) => {
           />
         </div>
 
-        <button
-          type="submit"
-          className={styles.sendButton}
-          disabled={disabled || (!message.trim() && !selectedFile)}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        <div className={styles.buttonGroup}>
+          {/* 이미지 업로드 버튼 */}
+          <button
+            type="button"
+            onClick={handleUploadClick}
+            disabled={disabled}
+            className={styles.uploadButton}
+            aria-label="이미지 업로드"
           >
-            <path
-              d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill={selectedFile ? "#4A90E2" : "currentColor"}/>
+            </svg>
+          </button>
+
+          <button
+            type="submit"
+            className={styles.sendButton}
+            disabled={disabled || (!message.trim() && !selectedFile)}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
       </form>
     </div>
   )

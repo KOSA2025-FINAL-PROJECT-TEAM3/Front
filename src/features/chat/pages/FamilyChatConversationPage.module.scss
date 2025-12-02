@@ -18,11 +18,25 @@
   font-weight:600; 
 }
 
-.messageList { 
-  flex:1;               // 남는 공간 모두 사용
-  overflow-y:auto;      // 메시지 영역만 스크롤
+.messageList {
+  flex:1;
+  overflow-y:auto;
   padding:12px;
-  background:#f7f7f7;   // 선택 (더 보기 좋음)
+  background:#f7f7f7;
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 .loading, .empty { 
