@@ -98,7 +98,7 @@ export const InviteSignup = () => {
     } else {
         navigate(ROUTE_PATHS.seniorDashboard, { replace: true })
     }
-
+  }
   const handleFocus = () => {
     if (combinedError) {
       clearErrors('root')
