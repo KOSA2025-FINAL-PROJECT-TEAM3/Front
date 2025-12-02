@@ -1,20 +1,22 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import MemberProfileCard from '../components/MemberProfileCard.jsx'
 import FamilyMedicationList from '../components/FamilyMedicationList.jsx'
-import FamilyAdherenceChart from '../components/FamilyAdherenceChart.jsx'
 import { useFamilyMemberDetail } from '../hooks/useFamilyMemberDetail'
+import MedicationLogsTab from '../components/MedicationLogsTab.jsx'
+import MedicationDetailTab from '../components/MedicationDetailTab.jsx'
 import styles from './FamilyMemberDetail.module.scss'
 
 export const FamilyMemberDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data, isLoading, error } = useFamilyMemberDetail(id)
+  const [activeTab, setActiveTab] = useState('medications')
 
   const member = data?.member
   const medications = data?.medications ?? []
-  const adherence = data?.adherence ?? 0
 
   return (
     <MainLayout>
@@ -42,8 +44,44 @@ export const FamilyMemberDetailPage = () => {
         {member && (
           <>
             <MemberProfileCard member={member} />
-            <FamilyMedicationList medications={medications} />
-            <FamilyAdherenceChart adherence={adherence} />
+
+            <div className={styles.tabContainer}>
+              <div className={styles.tabs}>
+                <button
+                  type="button"
+                  className={`${styles.tab} ${activeTab === 'medications' ? styles.active : ''}`}
+                  onClick={() => setActiveTab('medications')}
+                >
+                  약 목록
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.tab} ${activeTab === 'logs' ? styles.active : ''}`}
+                  onClick={() => setActiveTab('logs')}
+                >
+                  복약 기록
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.tab} ${activeTab === 'detail' ? styles.active : ''}`}
+                  onClick={() => setActiveTab('detail')}
+                >
+                  상세 정보
+                </button>
+              </div>
+
+              <div className={styles.tabContent}>
+                {activeTab === 'medications' && (
+                  <FamilyMedicationList medications={medications} />
+                )}
+                {activeTab === 'logs' && (
+                  <MedicationLogsTab userId={parseInt(id)} />
+                )}
+                {activeTab === 'detail' && (
+                  <MedicationDetailTab userId={parseInt(id)} medications={medications} />
+                )}
+              </div>
+            </div>
           </>
         )}
       </div>
