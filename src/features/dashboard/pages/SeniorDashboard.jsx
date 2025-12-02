@@ -16,6 +16,7 @@ import { ROUTE_PATHS } from '@/core/config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
+import { format } from 'date-fns'
 import styles from './SeniorDashboard.module.scss'
 
 // 요일 매핑 (JavaScript Date.getDay() → 백엔드 형식)
@@ -47,8 +48,10 @@ export const SeniorDashboard = () => {
 
   const loadMedicationLogs = useCallback(async () => {
     try {
-      const logs = await medicationLogApiClient.list()
-      setMedicationLogs(logs || [])
+      // 오늘 날짜의 로그만 조회
+      const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
+      const response = await medicationLogApiClient.getByDate(today)
+      setMedicationLogs(response || [])
     } catch (error) {
       console.error('Failed to load medication logs:', error)
       setMedicationLogs([])
@@ -64,131 +67,61 @@ export const SeniorDashboard = () => {
   const today = useMemo(() => {
     const now = new Date()
     return {
-      dayOfWeek: DAY_MAP[now.getDay()],
       currentTime: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
       date: now,
       dateString: now.toLocaleDateString('en-CA'), // YYYY-MM-DD (Local Time)
     }
   }, [])
 
-  // 오늘 복용한 스케줄 ID 목록
-  const completedScheduleIds = useMemo(() => {
-    const todayLogs = medicationLogs.filter((log) => {
-      if (!log.completed) return false
-
-      // scheduledTime 기준으로 오늘 날짜 확인 (Local Time)
-      if (!log.scheduledTime) return false
-      const logDate = new Date(log.scheduledTime).toLocaleDateString('en-CA')
-      return logDate === today.dateString
-    })
-
-    console.log('Today logs:', todayLogs)
-
-    const scheduleIds = new Set()
-
-    todayLogs.forEach((log) => {
-      if (log.medicationScheduleId) {
-        const key = `${log.medicationId}-${log.medicationScheduleId}`
-        scheduleIds.add(key)
-      }
-    })
-
-    return scheduleIds
-  }, [medicationLogs, today.dateString])
-
-  // 오늘의 복용 스케줄 생성
+  // 로그 기반으로 오늘의 복용 스케줄 생성
   const todaySchedules = useMemo(() => {
-    const schedules = []
+    return medicationLogs.map((log, index) => {
+      const medication = medications.find((m) => m.id === log.medicationId)
+      const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
+      const isTaken = log.completed
 
-    medications
-      .filter((med) => med.active) // 복용 중인 약만 (일시중지 제외)
-      .forEach((med) => {
-        if (!med.schedules || med.schedules.length === 0) return
-
-        // 각 약의 스케줄을 확인
-        med.schedules
-          .filter((schedule) => {
-            // 스케줄이 활성화되어 있고, 오늘 요일이 포함되어 있는지 확인
-            if (!schedule.active) return false
-            if (!schedule.daysOfWeek) return false
-            const days = schedule.daysOfWeek.split(',').map((d) => d.trim())
-            return days.includes(today.dayOfWeek)
-          })
-          .forEach((schedule) => {
-            const scheduleKey = `${med.id}-${schedule.id}`
-            const isTaken = completedScheduleIds.has(scheduleKey)
-
-            schedules.push({
-              id: scheduleKey,
-              medicationId: med.id,
-              scheduleId: schedule.id,
-              time: schedule.time,
-              timeLabel: getTimeLabel(schedule.time),
-              medications: [
-                {
-                  name: med.name,
-                  dose: med.dosage || '',
-                },
-              ],
-              // 상태 결정: 복용 완료 > 현재 시간 기준
-              status: isTaken ? 'completed' : schedule.time <= today.currentTime ? 'pending' : 'scheduled',
-              statusLabel: isTaken ? '복용 완료' : schedule.time <= today.currentTime ? '복용하기' : '예정',
-              isActive: !isTaken && schedule.time <= today.currentTime,
-            })
-          })
-      })
-
-    // 시간순 정렬
-    return schedules.sort((a, b) => a.time.localeCompare(b.time))
-  }, [medications, today, completedScheduleIds])
+      return {
+        id: `${log.medicationId}-${log.medicationScheduleId}-${log.id || index}`,
+        medicationId: log.medicationId,
+        scheduleId: log.medicationScheduleId,
+        time: scheduleTime,
+        timeLabel: getTimeLabel(scheduleTime),
+        medications: [
+          {
+            name: medication?.name || log.medicationName || '알 수 없는 약',
+            dose: medication?.dosage || '',
+          },
+        ],
+        // 상태 결정: 복용 완료 > 현재 시간 기준
+        status: isTaken ? 'completed' : scheduleTime <= today.currentTime ? 'pending' : 'scheduled',
+        statusLabel: isTaken ? '복용 완료' : scheduleTime <= today.currentTime ? '복용하기' : '예정',
+        isActive: !isTaken && scheduleTime <= today.currentTime,
+      }
+    }).sort((a, b) => a.time.localeCompare(b.time))
+  }, [medicationLogs, medications, today.currentTime])
 
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')
 
     try {
-      // 오늘 날짜 + 스케줄 시간으로 scheduledTime 생성
-      const schedule = todaySchedules.find((s) => s.id === scheduleId)
-      if (!schedule) {
-        throw new Error('Schedule not found')
-      }
-
-      // 시간 형식 확인 (HH:mm)
-      const [hours, minutes] = schedule.time.split(':').map(Number)
-      const scheduledTime = new Date(today.date)
-      scheduledTime.setHours(hours, minutes, 0, 0)
-
-      // 유효한 날짜인지 확인
-      if (isNaN(scheduledTime.getTime())) {
-        throw new Error('Invalid schedule time')
-      }
-
-      // Local ISO String 생성 (YYYY-MM-DDTHH:mm:ss)
-      const offset = scheduledTime.getTimezoneOffset() * 60000
-      const localIsoString = new Date(scheduledTime.getTime() - offset).toISOString().slice(0, 19)
-
       // Optimistic update: 즉시 UI 업데이트
       const optimisticLog = {
         medicationId: parseInt(medicationId),
         medicationScheduleId: parseInt(schedId),
-        scheduledTime: localIsoString,
-        completedTime: new Date().toISOString(),
         completed: true,
+        completedTime: new Date().toISOString(),
       }
       setMedicationLogs((prev) => [...prev, optimisticLog])
 
-      await medicationLogApiClient.create({
-        medicationId: parseInt(medicationId),
-        medicationScheduleId: parseInt(schedId),
-        scheduledTime: localIsoString, // Send Local Time
-        completed: true,
-      })
+      // PATCH /medications/logs/{scheduleId}/complete 호출
+      await medicationLogApiClient.completeMedication(parseInt(schedId))
 
       // 복용 기록 목록 다시 로드 (서버 데이터로 동기화)
       await loadMedicationLogs()
 
       console.log('복용 완료:', scheduleId)
     } catch (error) {
-      console.error('Failed to create medication log:', error)
+      console.error('Failed to complete medication:', error)
       alert('복용 기록 저장에 실패했습니다.')
       // 에러 발생 시 다시 로드하여 원래 상태로 복구
       await loadMedicationLogs()

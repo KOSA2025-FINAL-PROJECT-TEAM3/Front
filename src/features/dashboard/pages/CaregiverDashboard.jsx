@@ -129,10 +129,69 @@ export function CaregiverDashboard() {
 export default CaregiverDashboard
 
 const SeniorMedicationSnapshot = ({ member, onDetail }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [todayLogs, setTodayLogs] = useState([])
+  const [logsLoading, setLogsLoading] = useState(false)
   const { data, isLoading } = useFamilyMemberDetail(member.id)
   const medications = data?.medications ?? []
   const relation =
     member.relation || data?.member?.relation || (member.role === 'SENIOR' ? '어르신' : '보호자')
+
+  // 오늘 복약 일정 조회
+  const loadTodayLogs = async () => {
+    if (isExpanded) {
+      setIsExpanded(false)
+      return
+    }
+
+    setLogsLoading(true)
+    try {
+      const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
+      const response = await medicationLogApiClient.getByDate(today)
+
+      // 해당 member의 logs만 필터링
+      const memberLogs = (response || []).filter(log => {
+        const med = medications.find(m => m.id === log.medicationId)
+        return med && med.userId === member.id
+      })
+
+      setTodayLogs(memberLogs)
+      setIsExpanded(true)
+    } catch (error) {
+      console.error('Failed to load today logs:', error)
+      setTodayLogs([])
+      setIsExpanded(true)
+    } finally {
+      setLogsLoading(false)
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return '#00B300'
+      case 'pending':
+        return '#FF9900'
+      case 'scheduled':
+        return '#CCCCCC'
+      default:
+        return '#999999'
+    }
+  }
+
+  const getStatusLabel = (completed, scheduledTime) => {
+    if (completed) return '복용완료'
+    const scheduled = new Date(scheduledTime)
+    const now = new Date()
+    const diffHours = (now - scheduled) / (1000 * 60 * 60)
+    if (diffHours > 1) return '미복용'
+    if (now > scheduled) return '복용하기'
+    return '예정'
+  }
+
+  const completedToday = todayLogs.filter(log => log.completed).length
+  const missedToday = todayLogs.filter(log => !log.completed && (new Date(log.scheduledTime) < new Date())).length
+  const pendingToday = todayLogs.length - completedToday - missedToday
 
   return (
     <li className={styles.memberItem}>
@@ -141,26 +200,73 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
           <strong>{member.name}</strong>
           <span className={styles.relation}> · {relation}</span>
         </div>
-        <button type="button" onClick={onDetail} className={styles.detailButton}>
-          자세히 보기
-        </button>
+        <div className={styles.actions}>
+          <button
+            type="button"
+            onClick={loadTodayLogs}
+            className={`${styles.expandButton} ${isExpanded ? styles.expanded : ''}`}
+            aria-label="복약 일정 펼치기"
+          >
+            {isExpanded ? '▼' : '▶'}
+          </button>
+          <button type="button" onClick={onDetail} className={styles.detailButton}>
+            자세히 보기
+          </button>
+        </div>
       </div>
 
-      {isLoading ? (
-        <p className={styles.loadingRow}>복약 정보를 불러오는 중...</p>
-      ) : (
-        <ul className={styles.medList}>
-          {medications.map((med, index) => (
-            <li key={`${member.id}-${index}`} className={styles.medRow}>
-              <span className={styles.medTime}>{med.timeLabel}</span>
-              <span className={styles.medName}>{med.name}</span>
-              <span className={styles.medStatus}>{med.statusLabel}</span>
-            </li>
-          ))}
-          {medications.length === 0 && (
-            <li className={styles.emptyRow}>등록된 복약 일정이 없습니다.</li>
+      {/* 아코디언 섹션 - 펼쳐졌을 때만 표시 */}
+      {isExpanded && (
+        <div className={styles.accordion}>
+          {/* 통계 요약 */}
+          <div className={styles.stats}>
+            <span className={styles.stat}>
+              <strong style={{ color: '#00B300' }}>{completedToday}</strong>
+              <small>완료</small>
+            </span>
+            <span className={styles.stat}>
+              <strong style={{ color: '#FF9900' }}>{pendingToday}</strong>
+              <small>예정</small>
+            </span>
+            <span className={styles.stat}>
+              <strong style={{ color: '#FF0000' }}>{missedToday}</strong>
+              <small>미복용</small>
+            </span>
+          </div>
+
+          {/* 로그 리스트 */}
+          {logsLoading ? (
+            <p className={styles.loadingRow}>오늘 복약 일정을 불러오는 중...</p>
+          ) : (
+            <ul className={styles.medList}>
+              {todayLogs.map((log, index) => {
+                const status = getStatusLabel(log.completed, log.scheduledTime)
+                const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+                const med = medications.find(m => m.id === log.medicationId)
+
+                return (
+                  <li
+                    key={`${member.id}-${index}`}
+                    className={styles.medRow}
+                    style={{ borderLeftColor: getStatusColor(log.completed ? 'completed' : 'pending') }}
+                  >
+                    <span className={styles.medTime}>{time}</span>
+                    <span className={styles.medName}>{med?.name || '알 수 없는 약'}</span>
+                    <span className={styles.medStatus} style={{ color: getStatusColor(log.completed ? 'completed' : 'pending') }}>
+                      {status}
+                    </span>
+                  </li>
+                )
+              })}
+              {todayLogs.length === 0 && (
+                <li className={styles.emptyRow}>오늘 복약 일정이 없습니다.</li>
+              )}
+            </ul>
           )}
-        </ul>
+        </div>
       )}
     </li>
   )
