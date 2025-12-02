@@ -1,0 +1,71 @@
+/**
+ * useNotificationStream Hook
+ * - SSE 연결 관리
+ * - 자동 연결/해제
+ * - 토큰 갱신 시 재연결
+ * - Store에 실시간 알림 추가
+ */
+
+import { useEffect } from 'react'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { useNotificationStore } from '@features/notification/store/notificationStore'
+import { notificationApiClient } from '@core/services/api/notificationApiClient'
+import { toast } from '@shared/components/toast/toastStore'
+
+export const useNotificationStream = (onNotification) => {
+  const token = useAuthStore((state) => state.token)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const addRealtimeNotification = useNotificationStore((state) => state.addRealtimeNotification)
+
+  useEffect(() => {
+    // SSE 연결 조건: 인증되었고 토큰이 있어야 함
+    if (!isAuthenticated || !token) {
+      return
+    }
+
+    const handleMessage = (data) => {
+      // Store에 실시간 알림 추가
+      addRealtimeNotification(data)
+
+      if (onNotification) {
+        onNotification(data)
+      }
+
+      // 알림 타입별 처리
+      switch (data.type) {
+        case 'medication.logged':
+          // 약 복용 성공 알림 (성공 토스트)
+          toast.success(data.message || '약을 복용했습니다')
+          break
+
+        case 'medication.missed':
+          // 약 복용 누락 알림 (경고 토스트 - 지속)
+          toast.warning(data.message || '약 복용 시간을 놓쳤습니다', {
+            duration: 0, // 수동 해제 필요
+          })
+          break
+
+        default:
+          // 기타 알림 (정보 토스트)
+          toast.info(data.message || '새로운 알림이 있습니다')
+          break
+      }
+    }
+
+    const handleError = (error) => {
+      console.error('Notification stream error:', error)
+      // 토큰 만료 등의 에러는 auth interceptor가 처리
+    }
+
+    try {
+      notificationApiClient.subscribe(token, handleMessage, handleError)
+    } catch (error) {
+      console.error('Failed to subscribe to notifications:', error)
+    }
+
+    // Cleanup: 언마운트 시 연결 해제
+    return () => {
+      notificationApiClient.disconnect()
+    }
+  }, [isAuthenticated, token, onNotification, addRealtimeNotification])
+}

@@ -60,9 +60,14 @@ import ErrorFallback from '@shared/components/ErrorFallback'
 import ToastContainer from '@shared/components/toast/ToastContainer'
 import { setNavigator } from '@core/routing/navigation'
 import WsTestPage from '@pages/WsTestPage'
+import { useNotificationStream } from '@features/notification/hooks/useNotificationStream'
 
 function NavigationRegistrar() {
   const navigate = useNavigate()
+
+  // 실시간 알림 스트림 초기화
+  useNotificationStream()
+
   useEffect(() => {
     setNavigator(navigate)
   }, [navigate])
