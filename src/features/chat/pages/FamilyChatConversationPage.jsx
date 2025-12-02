@@ -240,7 +240,8 @@ export const FamilyChatConversationPage = () => {
 
       // 2. 소켓으로 이미지 메시지 전송 (다른 사람들에게 보여주기 위해)
       if (stompClientRef.current && stompClientRef.current.connected) {
-        const payload = {
+        // (1) 이미지 메시지 전송
+        const imagePayload = {
           familyGroupId: currentFamilyGroupId,
           familyMemberId: currentUserId,
           content: imageUrl,
@@ -249,19 +250,55 @@ export const FamilyChatConversationPage = () => {
 
         stompClientRef.current.publish({
           destination: `/app/family/${currentFamilyGroupId}`,
-          body: JSON.stringify(payload),
+          body: JSON.stringify(imagePayload),
         });
         
-        // 내 화면에 즉시 표시 (낙관적 업데이트)
-        setMessages((prev) => [
-            ...prev,
-            {
-              ...payload,
+        // (2) 텍스트 메시지 전송 (이미지와 함께 입력된 텍스트가 있다면)
+        let textPayload = null;
+        if (content && content.trim()) {
+            // [GEMINI] AI 명령어인 경우, 백엔드에서 이미지 AI가 별도로 돌기 때문에
+            // 텍스트 전용 AI 중복 실행을 막기 위해 '/ai ' 접두사를 제거하고 일반 텍스트로 보냄
+            let textContent = content;
+            if (textContent.startsWith("/ai ")) {
+                textContent = textContent.substring(4).trim();
+            }
+
+            if (textContent) {
+                textPayload = {
+                    familyGroupId: currentFamilyGroupId,
+                    familyMemberId: currentUserId,
+                    content: textContent,
+                    type: "TEXT"
+                };
+
+                stompClientRef.current.publish({
+                    destination: `/app/family/${currentFamilyGroupId}`,
+                    body: JSON.stringify(textPayload),
+                });
+            }
+        }
+
+        // (3) 내 화면에 즉시 표시 (낙관적 업데이트)
+        setMessages((prev) => {
+            const newMsgs = [];
+            // 이미지 메시지 추가
+            newMsgs.push({
+              ...imagePayload,
               id: null,
               memberNickname: memberNickname,
               createdAt: new Date().toISOString(),
-            },
-        ]);
+            });
+            // 텍스트 메시지 추가 (있다면)
+            if (textPayload) {
+                newMsgs.push({
+                    ...textPayload,
+                    id: null,
+                    memberNickname: memberNickname,
+                    createdAt: new Date().toISOString(),
+                });
+            }
+            return [...prev, ...newMsgs];
+        });
         
         setTimeout(() => {
             if (messageListRef.current) {
@@ -360,7 +397,7 @@ export const FamilyChatConversationPage = () => {
   const handleBack = () => navigate(-1);
 
   return (
-    <MainLayout showBottomNav={false}>
+    <MainLayout showBottomNav={true}>
       <div className={styles.page}>
         <header className={styles.header}>
           <button className={styles.backButton} onClick={handleBack}>
