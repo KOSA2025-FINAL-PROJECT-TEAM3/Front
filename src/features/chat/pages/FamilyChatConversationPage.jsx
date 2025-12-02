@@ -20,12 +20,13 @@ export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
   // [GEMINI-CLI: 2025-11-29] useParams에서 familyGroupId 추출 (기존 유지)
   const { familyGroupId } = useParams();
-
-  const familyGroup = useFamilyStore((state) => state.familyGroup);
   
   // [GEMINI-CLI: 2025-11-29] roomId -> familyGroupId로 변수명 의미 명확화
   // const roomId = Number(familyGroupId) || 1;
   const currentFamilyGroupId = Number(familyGroupId) || 1;
+
+  const familyGroups = useFamilyStore((state) => state.familyGroups);
+  const familyGroup = familyGroups.find(g => g.id === currentFamilyGroupId);
 
   // =================================================================================
   // 🔥 토큰 및 유저 ID 관리 (Zustand Store 사용)
