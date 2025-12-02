@@ -25,6 +25,25 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
     }
   }
 
+  const formatDaysOfWeek = (daysString) => {
+    if (!daysString) return ''
+
+    const dayMap = {
+      'MON': '월',
+      'TUE': '화',
+      'WED': '수',
+      'THU': '목',
+      'FRI': '금',
+      'SAT': '토',
+      'SUN': '일'
+    }
+
+    return daysString
+      .split(',')
+      .map(day => dayMap[day.trim()] || day.trim())
+      .join(', ')
+  }
+
   return (
     <section className={styles.detailTab}>
       <div className={styles.container}>
@@ -74,9 +93,6 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
             <div className={styles.detail}>
               <div className={styles.header}>
                 <h3>{medicationDetail.medicationName}</h3>
-                {medicationDetail.manufacturer && (
-                  <p className={styles.manufacturer}>{medicationDetail.manufacturer}</p>
-                )}
               </div>
 
               {/* 기본 정보 */}
@@ -95,27 +111,54 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
                       <p>{medicationDetail.dosage}</p>
                     </div>
                   )}
-                  {medicationDetail.indication && (
+                  {medicationDetail.timing && (
                     <div className={styles.infoItem}>
-                      <label>효능·효과</label>
-                      <p>{medicationDetail.indication}</p>
+                      <label>복용 시점</label>
+                      <p>{medicationDetail.timing}</p>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* 주의사항 */}
-              {medicationDetail.sideEffects && (
+              {/* 복용 기간 정보 */}
+              {(medicationDetail.startDate || medicationDetail.endDate) && (
                 <div className={styles.section}>
-                  <h4>부작용</h4>
-                  <p className={styles.text}>{medicationDetail.sideEffects}</p>
+                  <h4>복용 기간</h4>
+                  <div className={styles.infoGrid}>
+                    {medicationDetail.startDate && (
+                      <div className={styles.infoItem}>
+                        <label>시작일</label>
+                        <p>{new Date(medicationDetail.startDate).toLocaleDateString('ko-KR')}</p>
+                      </div>
+                    )}
+                    {medicationDetail.endDate && (
+                      <div className={styles.infoItem}>
+                        <label>종료일</label>
+                        <p>{new Date(medicationDetail.endDate).toLocaleDateString('ko-KR')}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {medicationDetail.precautions && (
+              {/* 보유 수량 정보 */}
+              {(medicationDetail.quantity !== undefined || medicationDetail.remaining !== undefined) && (
                 <div className={styles.section}>
-                  <h4>주의사항</h4>
-                  <p className={styles.text}>{medicationDetail.precautions}</p>
+                  <h4>보유 수량</h4>
+                  <div className={styles.infoGrid}>
+                    {medicationDetail.quantity !== undefined && (
+                      <div className={styles.infoItem}>
+                        <label>총 수량</label>
+                        <p>{medicationDetail.quantity}개</p>
+                      </div>
+                    )}
+                    {medicationDetail.remaining !== undefined && (
+                      <div className={styles.infoItem}>
+                        <label>남은 수량</label>
+                        <p>{medicationDetail.remaining}개</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -134,8 +177,8 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
                             <span className={styles.badgeInactive}>비활성</span>
                           )}
                         </div>
-                        {schedule.daysOfWeek && schedule.daysOfWeek.length > 0 && (
-                          <p className={styles.days}>{schedule.daysOfWeek.join(', ')}</p>
+                        {schedule.daysOfWeek && (
+                          <p className={styles.days}>{formatDaysOfWeek(schedule.daysOfWeek)}</p>
                         )}
                         {schedule.completionRate !== undefined && (
                           <div className={styles.completionRate}>

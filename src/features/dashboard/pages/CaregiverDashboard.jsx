@@ -170,6 +170,8 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     switch (status) {
       case 'completed':
         return '#00B300'
+      case 'missed':
+        return '#FF0000'
       case 'pending':
         return '#FF9900'
       case 'scheduled':
@@ -179,19 +181,22 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     }
   }
 
-  const getStatusLabel = (completed, scheduledTime) => {
-    if (completed) return '복용완료'
-    const scheduled = new Date(scheduledTime)
-    const now = new Date()
-    const diffHours = (now - scheduled) / (1000 * 60 * 60)
-    if (diffHours > 1) return '미복용'
-    if (now > scheduled) return '복용하기'
-    return '예정'
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'completed':
+        return '복용완료'
+      case 'missed':
+        return '미복용'
+      case 'pending':
+        return '예정'
+      default:
+        return '미상'
+    }
   }
 
-  const completedToday = todayLogs.filter(log => log.completed).length
-  const missedToday = todayLogs.filter(log => !log.completed && (new Date(log.scheduledTime) < new Date())).length
-  const pendingToday = todayLogs.length - completedToday - missedToday
+  const completedToday = todayLogs.filter(log => log.status === 'completed').length
+  const missedToday = todayLogs.filter(log => log.status === 'missed').length
+  const pendingToday = todayLogs.filter(log => log.status === 'pending').length
 
   return (
     <li className={styles.memberItem}>
@@ -240,7 +245,7 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
           ) : (
             <ul className={styles.medList}>
               {todayLogs.map((log, index) => {
-                const status = getStatusLabel(log.completed, log.scheduledTime)
+                const status = getStatusLabel(log.status)
                 const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
                   hour: '2-digit',
                   minute: '2-digit',
@@ -251,11 +256,11 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
                   <li
                     key={`${member.id}-${index}`}
                     className={styles.medRow}
-                    style={{ borderLeftColor: getStatusColor(log.completed ? 'completed' : 'pending') }}
+                    style={{ borderLeftColor: getStatusColor(log.status) }}
                   >
                     <span className={styles.medTime}>{time}</span>
                     <span className={styles.medName}>{med?.name || '알 수 없는 약'}</span>
-                    <span className={styles.medStatus} style={{ color: getStatusColor(log.completed ? 'completed' : 'pending') }}>
+                    <span className={styles.medStatus} style={{ color: getStatusColor(log.status) }}>
                       {status}
                     </span>
                   </li>
