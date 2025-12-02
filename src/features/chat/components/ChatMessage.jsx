@@ -50,7 +50,7 @@ export const ChatMessage = ({ message, isMe, sender }) => {
         {!isMe && (
           // sender가 없으면 message.memberNickname 사용 (안전장치 추가)
           <span className={styles.senderName}>
-            {sender ? sender.name : (message.memberNickname || '알 수 없음')}
+            {sender ? sender.name : (message.familyMemberId === 0 ? 'AI 봇' : (message.memberNickname || '알 수 없음'))}
           </span>
         )}
         
