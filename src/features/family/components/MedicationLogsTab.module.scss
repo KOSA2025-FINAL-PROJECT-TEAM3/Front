@@ -1,0 +1,152 @@
+.logsTab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  strong {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  small {
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterInput,
+.filterSelect {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background-color: white;
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+.empty {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  padding: 20px;
+  color: #dc2626;
+  background-color: #fee2e2;
+  border-radius: 8px;
+  border: 1px solid #fca5a5;
+}
+
+.logsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  background-color: #f9fafb;
+  gap: 12px;
+}
+
+.logInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.time {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.medicationName {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.logDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.completedTime {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.status {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}

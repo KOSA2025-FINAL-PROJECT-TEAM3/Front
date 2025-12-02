@@ -97,6 +97,36 @@ class FamilyApiClient extends ApiClient {
   removeMember(memberId) {
     return this.delete(`/members/${memberId}`)
   }
+
+  /**
+   * 가족 구성원의 복약 로그 조회
+   * @param {number} userId - 조회 대상 사용자 ID
+   * @param {Object} options - 옵션
+   * @param {string} options.date - 특정 날짜 (YYYY-MM-DD)
+   * @param {string} options.status - 상태 필터 (completed, missed, pending)
+   * @param {number} options.limit - 조회 개수 (default: 30)
+   * @returns {Promise}
+   */
+  getMedicationLogs(userId, options = {}) {
+    const params = new URLSearchParams()
+    if (options.date) params.append('date', options.date)
+    if (options.status) params.append('status', options.status)
+    if (options.limit) params.append('limit', options.limit)
+
+    const query = params.toString()
+    const url = `/members/${userId}/medications/logs${query ? `?${query}` : ''}`
+    return this.get(url)
+  }
+
+  /**
+   * 가족 구성원의 약 세부 정보 조회
+   * @param {number} userId - 조회 대상 사용자 ID
+   * @param {number} medicationId - 약 ID
+   * @returns {Promise}
+   */
+  getMedicationDetail(userId, medicationId) {
+    return this.get(`/members/${userId}/medications/${medicationId}`)
+  }
 }
 
 export const familyApiClient = new FamilyApiClient()
