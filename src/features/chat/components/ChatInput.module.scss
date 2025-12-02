@@ -89,3 +89,55 @@
     transform: rotate(0deg);
   }
 }
+
+// [GEMINI] 파일 미리보기 스타일 추가
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: white; // form 배경색과 일치시킴
+  border-top: 1px solid #e5e7eb; // form border를 여기로 이동 고려
+}
+
+.filePreview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f4f8;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 8px 16px 0 16px; // 좌우 여백 form padding과 맞춤
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.fileIcon {
+  font-size: 1.2rem;
+}
+
+.fileName {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #999;
+  padding: 0 4px;
+
+  &:hover {
+    color: #ff4d4f;
+  }
+}
