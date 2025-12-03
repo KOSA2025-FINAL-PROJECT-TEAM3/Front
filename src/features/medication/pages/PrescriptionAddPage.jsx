@@ -92,22 +92,32 @@ export const PrescriptionAddPage = () => {
     };
 
     const handleSubmit = async () => {
+        console.log('=== PrescriptionAddPage handleSubmit START ===');
+        console.log('prescriptionData:', JSON.stringify(prescriptionData, null, 2));
+
         if (prescriptionData.medications.length === 0) {
+            console.warn('Validation failed: No medications');
             toast.error('최소 1개 이상의 약을 추가해주세요');
             return;
         }
 
         if (prescriptionData.intakeTimes.length === 0) {
+            console.warn('Validation failed: No intake times');
             toast.error('복용 시간을 설정해주세요');
             return;
         }
 
         try {
-            await createPrescription(prescriptionData);
+            console.log('Calling createPrescription with data:', prescriptionData);
+            const result = await createPrescription(prescriptionData);
+            console.log('createPrescription succeeded:', result);
             toast.success('처방전이 등록되었습니다');
             navigate(ROUTE_PATHS.medication, { replace: true });
         } catch (error) {
-            console.error('처방전 등록 실패:', error);
+            console.error('=== createPrescription FAILED ===');
+            console.error('Error object:', error);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
             toast.error('처방전 등록에 실패했습니다');
         }
     };
