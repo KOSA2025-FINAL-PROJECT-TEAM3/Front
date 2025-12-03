@@ -43,66 +43,6 @@ class MedicationApiClient extends ApiClient {
   }
 
   /**
-   * OCR 결과 기반 약물 일괄 등록
-   *
-   * Backend expects: RegisterFromOCRRequest
-   * Backend returns: MedicationBatchRegistrationResponse {
-   *   totalCount, successCount, failureCount,
-   *   successNames[], failureNames[], savedMedications[]
-   * }
-   *
-   * @param {Object} payload - 등록 요청 데이터
-   * @param {Array<Object>} payload.medications - 약물 배열
-   * @param {string} payload.medications[].name - 약품명
-   * @param {string} payload.medications[].dosage - 복용량
-   * @param {string} payload.medications[].frequency - 복용 빈도
-   * @param {string} payload.medications[].duration - 복용 기간
-   * @param {string} payload.medications[].timing - 복용 시점
-   * @param {string} payload.medications[].imageUrl - 약 이미지 URL (MFDS API)
-   * @returns {Promise<MedicationBatchRegistrationResponse>}
-   */
-  registerFromOCR(payload) {
-    return this.post('/register-from-ocr', payload, {
-      timeout: 30000, // 30 seconds for batch registration
-    }, {
-      mockResponse: () => {
-        // Mock response matching backend MedicationBatchRegistrationResponse
-        const successCount = payload.medications.length;
-        const failureCount = 0;
-
-        return {
-          totalCount: payload.medications.length,
-          successCount,
-          failureCount,
-          successNames: payload.medications.map(m => m.name),
-          failureNames: [],
-          savedMedications: payload.medications.map((med, index) => ({
-            id: Date.now() + index,
-            userId: 1,
-            name: med.name,
-            dosage: med.dosage,
-            timing: med.timing,
-            imageUrl: med.imageUrl,
-            active: true,
-            schedules: [
-              {
-                id: Date.now() + index + 1000,
-                time: '07:00',
-                daysOfWeek: '1,2,3,4,5,6,7',
-                active: true,
-                isTakenToday: false,
-              },
-            ],
-            hasLogsToday: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          })),
-        };
-      },
-    });
-  }
-
-  /**
    * 약품명 검색 (MFDS API)
    *
    * @param {string} itemName - 약품명

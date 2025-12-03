@@ -34,8 +34,9 @@ import MyDiseasesSettingsPage from '@features/settings/pages/MyDiseasesSettingsP
 import PrivacyPolicyPage from '@features/settings/pages/PrivacyPolicyPage'
 import TermsOfServicePage from '@features/settings/pages/TermsOfServicePage'
 import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
-import MedicationAddPage from '@features/medication/pages/MedicationAddPage'
 import MedicationEditPage from '@features/medication/pages/MedicationEditPage'
+import PrescriptionAddPage from '@features/medication/pages/PrescriptionAddPage'
+import PrescriptionDetailPage from '@features/medication/pages/PrescriptionDetailPage'
 import TodayMedications from '@features/medication/pages/TodayMedications'
 import FoodWarningPage from '@features/diet/pages/FoodWarning'
 import DietLogPage from '@features/diet/pages/DietLogPage'
@@ -122,9 +123,21 @@ function App() {
               path={ROUTE_PATHS.medicationToday}
               element={<PrivateRoute element={<TodayMedications />} />}
             />
+
+            {/* 처방전 관리 (신규) */}
+            <Route
+              path={ROUTE_PATHS.prescriptionAdd}
+              element={<PrivateRoute element={<PrescriptionAddPage />} />}
+            />
+            <Route
+              path={ROUTE_PATHS.prescriptionDetail}
+              element={<PrivateRoute element={<PrescriptionDetailPage />} />}
+            />
+
+            {/* 기존 라우트 호환성 유지 (리다이렉트) */}
             <Route
               path={ROUTE_PATHS.medicationAdd}
-              element={<PrivateRoute element={<MedicationAddPage />} />}
+              element={<Navigate to={ROUTE_PATHS.prescriptionAdd} replace />}
             />
             <Route
               path={ROUTE_PATHS.medicationEdit}

@@ -9,8 +9,14 @@ export const ROUTE_PATHS = {
 
   medication: '/medication',
   medicationToday: '/medication/today',
-  medicationAdd: '/medication/add',
+  medicationAdd: '/medication/add', // Deprecated - redirect to prescriptionAdd
   medicationEdit: '/medication/:id/edit',
+
+  // Prescription (신규)
+  prescriptions: '/prescriptions',
+  prescriptionAdd: '/prescriptions/add',
+  prescriptionDetail: '/prescriptions/:id',
+  prescriptionEdit: '/prescriptions/:id/edit',
 
   search: '/search',
   pillSearch: '/pills/search',

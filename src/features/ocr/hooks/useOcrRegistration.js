@@ -239,59 +239,19 @@ export function useOcrRegistration() {
       return
     }
 
-    setStep('registering')
-    setIsLoading(true)
-    setError(null)
-
     try {
-      const payload = toRegisterFromOCRRequest(formState)
+      const ocrData = toRegisterFromOCRRequest(formState)
 
-      /**
-       * 요청 페이로드 예시:
-       * {
-       *   pharmacyName: "청독약국",
-       *   hospitalName: null,
-       *   startDate: "2025-11-25",
-       *   endDate: "2025-11-27",
-       *   intakeTimes: ["07:00", "09:00", "12:00", "18:00", "22:00"],
-       *   medications: [
-       *     {
-       *       name: "알마겔정",
-       *       category: "제산제",
-       *       dosageAmount: 1,
-       *       totalIntakes: 18,  // 6회 * 3일
-       *       daysOfWeek: "1,2,3,4,5,6,7",
-       *       intakeTimeIndices: null,  // 전체
-       *       notes: null
-       *     },
-       *     // ... 7개 더
-       *   ]
-       * }
-       */
-
-      const response = await medicationApiClient.registerFromOCR(payload)
-
-      /**
-       * 응답 형식:
-       * MedicationResponse[] - 등록된 약물 배열
-       */
-
-      console.log('등록 완료:', response)
-
-      // 성공 시 약물 목록 페이지로 이동
-      navigate(ROUTE_PATHS.medication, {
+      // 처방전 등록 페이지로 데이터 전달하며 이동
+      navigate(ROUTE_PATHS.prescriptionAdd, {
         state: {
-          registered: true,
-          count: response.length
+          ocrData: ocrData
         }
       })
 
     } catch (err) {
       console.error('Registration Error:', err)
-      setError(err.response?.data?.message || err.message || '등록 중 오류가 발생했습니다.')
-      setStep('edit')
-    } finally {
-      setIsLoading(false)
+      setError(err.message || '등록 준비 중 오류가 발생했습니다.')
     }
   }, [formState, navigate])
 

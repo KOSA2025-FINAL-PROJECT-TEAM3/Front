@@ -1,0 +1,139 @@
+@use '@styles/abstracts/variables' as *;
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: 80px;
+}
+
+.header {
+    margin-bottom: 24px;
+
+    h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 8px;
+        color: #333;
+    }
+
+    .meta {
+        display: flex;
+        gap: 12px;
+        color: #666;
+        font-size: 0.9rem;
+
+        span {
+            display: flex;
+            align-items: center;
+
+            &::after {
+                content: '|';
+                margin-left: 12px;
+                color: #ddd;
+            }
+
+            &:last-child::after {
+                display: none;
+            }
+        }
+    }
+}
+
+.section {
+    background-color: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+
+    h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0 0 20px;
+        color: #333;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+
+    .infoItem {
+        .label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .value {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+    }
+}
+
+.intakeTimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+
+    .timeChip {
+        background-color: #f0f4ff;
+        color: $primary-color;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}
+
+.medicationList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 40px;
+
+    button {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-size: 1rem;
+
+        &.deleteButton {
+            background-color: #fff0f0;
+            color: #ff6b6b;
+            border: 1px solid #ffc9c9;
+
+            &:hover {
+                background-color: #ffe0e0;
+            }
+        }
+
+        &.editButton {
+            background-color: $primary-color;
+            color: white;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+    }
+}
