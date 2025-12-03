@@ -11,7 +11,8 @@ import styles from './PrescriptionAddPage.module.scss';
 export const PrescriptionAddPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { createPrescription, loading } = usePrescriptionStore();
+    const createPrescription = usePrescriptionStore((state) => state.createPrescription);
+    const loading = usePrescriptionStore((state) => state.loading);
 
     // 오늘 날짜와 30일 후 날짜 계산
     const today = new Date().toISOString().split('T')[0];

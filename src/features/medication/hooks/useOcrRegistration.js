@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
-import { medicationApiClient } from '@core/services/api/medicationApiClient'
 import {
   fromOCRResponse,
   createDefaultIntakeTimes,
