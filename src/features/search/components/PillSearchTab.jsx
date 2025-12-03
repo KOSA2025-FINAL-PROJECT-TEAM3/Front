@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import Modal from '@shared/components/ui/Modal'
+import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './PillSearchTab.module.scss'
 
@@ -34,6 +35,9 @@ export const PillSearchTab = () => {
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [registeringId, setRegisteringId] = useState(null)
+  const [warningOpen, setWarningOpen] = useState(false)
+  const [warningContext, setWarningContext] = useState('')
+  const [isAiResult, setIsAiResult] = useState(false)
 
   const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
     addMedication: state.addMedication,
@@ -74,8 +78,29 @@ export const PillSearchTab = () => {
     setHasSearched(true)
     try {
       const list = await searchApiClient.searchDrugs(keyword)
+      setIsAiResult(false)
       setResults(Array.isArray(list) ? list : [])
     } catch (err) {
+      const isTimeout =
+        err?.code === 'ECONNABORTED' ||
+        err?.message?.toLowerCase?.().includes('timeout') ||
+        err?.response?.status === 504
+
+      if (isTimeout) {
+        try {
+          const aiResult = await searchApiClient.searchDrugsWithAI(keyword)
+          const aiWrapped = aiResult ? [{ ...aiResult, aiGenerated: true }] : []
+          setIsAiResult(true)
+          setResults(aiWrapped)
+          setWarningContext('기본 검색이 지연되어 AI 생성 정보를 대신 보여줍니다.')
+          setWarningOpen(true)
+          toast.success('AI 검색 결과를 가져왔습니다. 내용 확인 후 전문가와 상담하세요.')
+          return
+        } catch (fallbackErr) {
+          console.error('약품 검색 타임아웃 후 AI 검색 실패', fallbackErr)
+        }
+      }
+
       console.error('약품 검색 실패', err)
       setError('약품 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
       setResults([])
@@ -99,12 +124,16 @@ export const PillSearchTab = () => {
     }
 
     setError('')
+    setWarningContext('')
+    setWarningOpen(true)
     setLoading(true)
     setHasSearched(true)
     try {
       const result = await searchApiClient.searchDrugsWithAI(keyword)
       // AI 검색 결과를 배열로 변환
-      setResults(result ? [result] : [])
+      const aiWrapped = result ? [{ ...result, aiGenerated: true }] : []
+      setIsAiResult(true)
+      setResults(aiWrapped)
       toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
     } catch (err) {
       console.error('AI 검색 실패', err)
@@ -201,7 +230,7 @@ export const PillSearchTab = () => {
             className={styles.aiSearchButton}
             onClick={handleAISearch}
             disabled={loading || !itemName.trim()}
-            title="AI로 약품 정보 검색"
+            title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
           >
             {loading ? '검색 중...' : 'AI 검색'}
           </button>
@@ -234,7 +263,12 @@ export const PillSearchTab = () => {
                   <div className={styles.resultContent}>
                     <div className={styles.resultHeader}>
                       <h3 className={styles.resultTitle}>{drug.itemName}</h3>
-                      {drug.entpName && <span className={styles.manufacturer}>{drug.entpName}</span>}
+                      <div className={styles.headerChips}>
+                        {(isAiResult || drug.aiGenerated) && (
+                          <span className={styles.aiBadge}>AI 생성</span>
+                        )}
+                        {drug.entpName && <span className={styles.manufacturer}>{drug.entpName}</span>}
+                      </div>
                     </div>
                     {drug.itemSeq && <p className={styles.meta}>품목기준코드: {drug.itemSeq}</p>}
                     {drug.efcyQesitm && (
@@ -273,6 +307,16 @@ export const PillSearchTab = () => {
         title={selected?.itemName}
         description={selected?.entpName ? `제조사: ${selected.entpName}` : undefined}
       >
+        {(isAiResult || selected?.aiGenerated) && (
+          <div className={styles.noticeBox}>
+            <span className={styles.noticeIcon} aria-hidden="true">
+              ⚠️
+            </span>
+            <span>
+              AI 생성 정보는 참고용이며 부정확할 수 있습니다. 약 정보는 반드시 약사와 상담해주세요.
+            </span>
+          </div>
+        )}
         <div className={styles.detailMeta}>
           {selected?.itemSeq && <span>품목코드 {selected.itemSeq}</span>}
           {selected?.openDe && <span>공개일자 {selected.openDe}</span>}
@@ -287,6 +331,12 @@ export const PillSearchTab = () => {
           {renderDetailBlock('보관 방법', selected?.depositMethodQesitm)}
         </div>
       </Modal>
+
+      <AiWarningModal
+        isOpen={warningOpen}
+        onClose={() => setWarningOpen(false)}
+        contextMessage={warningContext || 'AI 생성 결과는 참고용입니다. 약 정보는 반드시 약사와 상담해주세요.'}
+      />
     </div>
   )
 }

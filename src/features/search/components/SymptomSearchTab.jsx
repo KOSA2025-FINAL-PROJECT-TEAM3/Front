@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
+import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 
 export const SymptomSearchTab = () => {
   const [query, setQuery] = useState('')
@@ -13,10 +14,18 @@ export const SymptomSearchTab = () => {
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
-  const [searchLoading, setSearchLoading] = useState(false)
   const [error, setError] = useState('')
   const [isAiSearch, setIsAiSearch] = useState(false)  // AI 검색 플래그
   const selectionRef = useRef(null)
+  const [warningOpen, setWarningOpen] = useState(false)
+  const [warningContext, setWarningContext] = useState('')
+
+  const showWarningModal = (context) => {
+    setWarningContext(
+      context || 'AI 생성 결과는 참고용입니다. 병 증세 진단은 반드시 의사와 상담해주세요.',
+    )
+    setWarningOpen(true)
+  }
 
   const handleSelectSymptom = useCallback(async (symptom) => {
     if (!symptom) {
@@ -49,28 +58,6 @@ export const SymptomSearchTab = () => {
     }
   }, [])
 
-  const handleManualSearch = useCallback(async () => {
-    const keyword = query.trim()
-    if (!keyword) {
-      setError('증상을 입력해주세요.')
-      return
-    }
-    setError('')
-    setSearchLoading(true)
-    try {
-      const list = await searchApiClient.suggestSymptoms(keyword)
-      setResults(list)
-      if (list.length > 0) {
-        await handleSelectSymptom(list[0])
-      }
-    } catch (err) {
-      console.error('증상 검색 실패', err)
-      setError('검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
-    } finally {
-      setSearchLoading(false)
-    }
-  }, [query, handleSelectSymptom])
-
   const handleAiSearch = useCallback(async () => {
     const keyword = query.trim()
     if (!keyword) {
@@ -78,6 +65,7 @@ export const SymptomSearchTab = () => {
       return
     }
     setError('')
+    showWarningModal('AI 생성 증상 정보는 진단이 아니며 정확하지 않을 수 있습니다.')
     setAiLoading(true)
     setDetailLoading(true)
     selectionRef.current = keyword
@@ -87,8 +75,12 @@ export const SymptomSearchTab = () => {
       
       // AI 검색 플래그 활성화 (useEffect에서 초기화되지 않도록)
       setIsAiSearch(true)
-      setSelectedSymptom(info?.name || keyword)
-      setDetail(info)
+      const enriched = {
+        ...info,
+        aiGenerated: info?.aiGenerated ?? true,
+      }
+      setSelectedSymptom(enriched?.name || keyword)
+      setDetail(enriched)
       
       setAiLoading(false)
       setDetailLoading(false)
@@ -131,21 +123,14 @@ export const SymptomSearchTab = () => {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="예) 두통, 기침, 메스꺼움"
         />
-        <div className={styles.hint}>검색 혹은 AI 검색 버튼을 누르고 잠시 기다려주세요.</div>
+        <div className={styles.hint}>AI 검색 또는 구글 버튼을 눌러주세요. AI 정보는 참고용입니다.</div>
         <div className={styles.actionRow}>
-          <button
-            type="button"
-            className={styles.searchButton}
-            onClick={handleManualSearch}
-            disabled={!query.trim() || detailLoading || aiLoading || searchLoading}
-          >
-            {searchLoading ? '검색 중...' : '검색'}
-          </button>
           <button
             type="button"
             className={styles.aiButton}
             onClick={handleAiSearch}
-            disabled={!query.trim() || aiLoading || searchLoading}
+            disabled={!query.trim() || aiLoading}
+            title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
           >
             {aiLoading ? 'AI 검색 중...' : 'AI 검색'}
           </button>
@@ -167,35 +152,12 @@ export const SymptomSearchTab = () => {
         {error && <div className={styles.error}>{error}</div>}
       </section>
 
-      <section className={styles.results}>
-        {results.length > 0 && (
-          <>
-            <h2 className={styles.resultTitle}>추천 증상</h2>
-            <ul className={styles.resultList}>
-              {results.map((symptom) => (
-                <li key={symptom} className={styles.resultItem}>
-                  <button
-                    type="button"
-                    className={`${styles.resultButton} ${
-                      selectedSymptom === symptom ? styles.active : ''
-                    }`}
-                    onClick={() => handleSelectSymptom(symptom)}
-                  >
-                    {symptom}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </section>
-
-      {/* 항상 렌더링되는 결과 영역 */}
+      {/* 결과 영역 */}
       <section className={styles.detailSection}>
         <h2 className={styles.resultTitle}>검색 결과</h2>
         <div className={styles.detailCard}>
           {!selectedSymptom && !detail && (
-            <p className={styles.empty}>검색 또는 AI 검색을 통해 결과를 조회해주세요.</p>
+            <p className={styles.empty}>AI 검색 또는 구글 검색을 통해 결과를 조회해주세요.</p>
           )}
 
           {selectedSymptom && (
@@ -205,8 +167,24 @@ export const SymptomSearchTab = () => {
                   <p className={styles.detailLabel}>선택한 증상</p>
                   <h3 className={styles.detailName}>{selectedSymptom}</h3>
                 </div>
-                {detail?.severity && <span className={styles.badge}>{detail.severity}</span>}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {(isAiSearch || detail?.aiGenerated) && (
+                    <span className={styles.aiBadge}>AI 생성</span>
+                  )}
+                  {detail?.severity && <span className={styles.badge}>{detail.severity}</span>}
+                </div>
               </div>
+
+              {(isAiSearch || detail?.aiGenerated) && (
+                <div className={styles.noticeBox}>
+                  <span className={styles.noticeIcon} aria-hidden="true">
+                    ⚠️
+                  </span>
+                  <span>
+                    AI 생성 정보는 진단이 아니며 부정확할 수 있습니다. 정확한 판단과 치료는 반드시 의료 전문가와 상담하세요.
+                  </span>
+                </div>
+              )}
 
               {detailLoading && (
                 <p className={styles.empty}>자세한 정보를 불러오는 중입니다...</p>
@@ -245,6 +223,12 @@ export const SymptomSearchTab = () => {
           )}
         </div>
       </section>
+
+      <AiWarningModal
+        isOpen={warningOpen}
+        onClose={() => setWarningOpen(false)}
+        contextMessage={warningContext || 'AI 생성 결과는 참고용입니다. 병 증세 진단은 반드시 의사와 상담해주세요.'}
+      />
     </div>
   )
 }

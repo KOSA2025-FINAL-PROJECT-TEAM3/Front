@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { medicationApiClient } from '@core/services/api/medicationApiClient'
 import { toast } from '@shared/components/toast/toastStore'
+import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import styles from './MedicationForm.module.css'
 
 const initialForm = {
@@ -44,6 +45,7 @@ export const MedicationForm = ({
 
   const [form, setForm] = useState(mergedInitial)
   const [searchingAI, setSearchingAI] = useState(false)
+  const [warningOpen, setWarningOpen] = useState(false)
 
   useEffect(() => {
     setForm(mergedInitial)
@@ -85,6 +87,7 @@ export const MedicationForm = ({
       return
     }
 
+    setWarningOpen(true)
     setSearchingAI(true)
     try {
       const result = await medicationApiClient.searchMedicationsWithAI(form.name)
@@ -135,7 +138,7 @@ export const MedicationForm = ({
               onClick={handleAISearch}
               disabled={searchingAI || !form.name}
               className={styles.aiSearchButton}
-              title="AI로 약 정보 검색"
+              title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
             >
               {searchingAI ? '검색 중...' : 'AI 검색'}
             </button>
@@ -315,6 +318,12 @@ export const MedicationForm = ({
           {loading ? '저장 중...' : submitLabel}
         </button>
       </div>
+
+      <AiWarningModal
+        isOpen={warningOpen}
+        onClose={() => setWarningOpen(false)}
+        contextMessage="AI 생성 약 정보는 참고용입니다. 복용 전 반드시 약사와 상담해주세요."
+      />
     </form>
   )
 }

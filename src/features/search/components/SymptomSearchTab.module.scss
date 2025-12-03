@@ -76,6 +76,33 @@
   }
 }
 
+.googleButton {
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 92px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(217, 119, 6, 0.25);
+    background: linear-gradient(135deg, #ea8c00, #c26604);
+  }
+}
+
 .error {
   margin-top: 6px;
   color: #dc2626;
@@ -168,6 +195,35 @@
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 600;
+}
+
+.aiBadge {
+  padding: 6px 12px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #fcd34d;
+}
+
+.noticeBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  margin-bottom: 12px;
+  color: #7f1d1d;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.noticeIcon {
+  font-size: 18px;
+  line-height: 1;
 }
 
 .description {
