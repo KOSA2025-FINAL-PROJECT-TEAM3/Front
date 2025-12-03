@@ -35,6 +35,7 @@ export const PillSearchTab = () => {
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [registeringId, setRegisteringId] = useState(null)
+  const [pendingAiDrug, setPendingAiDrug] = useState(null)
   const [warningOpen, setWarningOpen] = useState(false)
   const [warningContext, setWarningContext] = useState('')
   const [isAiResult, setIsAiResult] = useState(false)
@@ -92,8 +93,6 @@ export const PillSearchTab = () => {
           const aiWrapped = aiResult ? [{ ...aiResult, aiGenerated: true }] : []
           setIsAiResult(true)
           setResults(aiWrapped)
-          setWarningContext('기본 검색이 지연되어 AI 생성 정보를 대신 보여줍니다.')
-          setWarningOpen(true)
           toast.success('AI 검색 결과를 가져왔습니다. 내용 확인 후 전문가와 상담하세요.')
           return
         } catch (fallbackErr) {
@@ -124,8 +123,6 @@ export const PillSearchTab = () => {
     }
 
     setError('')
-    setWarningContext('')
-    setWarningOpen(true)
     setLoading(true)
     setHasSearched(true)
     try {
@@ -151,6 +148,13 @@ export const PillSearchTab = () => {
   )
 
   const handleRegisterMedication = async (drug) => {
+    if (drug?.aiGenerated) {
+      setPendingAiDrug(drug)
+      setWarningContext('AI 생성 정보로 등록하려고 합니다. 전문가 상담을 권장합니다.')
+      setWarningOpen(true)
+      return
+    }
+
     const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (!token) {
       toast.error('로그인 후 복용약을 등록할 수 있습니다.')
@@ -185,6 +189,13 @@ export const PillSearchTab = () => {
     } finally {
       setRegisteringId(null)
     }
+  }
+
+  const confirmAiRegister = async () => {
+    if (!pendingAiDrug) return
+    await handleRegisterMedication({ ...pendingAiDrug, aiGenerated: false })
+    setPendingAiDrug(null)
+    setWarningOpen(false)
   }
 
   const renderDetailBlock = (label, value) => {
@@ -250,6 +261,7 @@ export const PillSearchTab = () => {
                 (med) => (drug.itemSeq && med.itemSeq === drug.itemSeq) || med.name === drug.itemName,
               )
               const isRegistering = registeringId === key
+              const isAiGenerated = isAiResult || !!drug.aiGenerated
 
               return (
                 <article key={`${drug.itemSeq}-${drug.itemName}`} className={styles.resultCard}>
@@ -264,9 +276,7 @@ export const PillSearchTab = () => {
                     <div className={styles.resultHeader}>
                       <h3 className={styles.resultTitle}>{drug.itemName}</h3>
                       <div className={styles.headerChips}>
-                        {(isAiResult || drug.aiGenerated) && (
-                          <span className={styles.aiBadge}>AI 생성</span>
-                        )}
+                        {isAiGenerated && <span className={styles.aiBadge}>AI 생성</span>}
                         {drug.entpName && <span className={styles.manufacturer}>{drug.entpName}</span>}
                       </div>
                     </div>
@@ -280,6 +290,7 @@ export const PillSearchTab = () => {
                         className={styles.addButton}
                         onClick={() => handleRegisterMedication(drug)}
                         disabled={isRegistering || isRegistered}
+                        title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
                       >
                         {isRegistering ? '등록 중...' : isRegistered ? '등록됨' : '내 복용약에 등록'}
                       </button>
@@ -334,8 +345,36 @@ export const PillSearchTab = () => {
 
       <AiWarningModal
         isOpen={warningOpen}
-        onClose={() => setWarningOpen(false)}
+        onClose={() => {
+          setWarningOpen(false)
+          setPendingAiDrug(null)
+        }}
         contextMessage={warningContext || 'AI 생성 결과는 참고용입니다. 약 정보는 반드시 약사와 상담해주세요.'}
+        footer={
+          <div className={styles.confirmActions}>
+            <button
+              type="button"
+              className={styles.detailButton}
+              onClick={() => {
+                setWarningOpen(false)
+                setPendingAiDrug(null)
+              }}
+            >
+              아니요
+            </button>
+            <button
+              type="button"
+              className={styles.addButton}
+              onClick={confirmAiRegister}
+              disabled={
+                pendingAiDrug &&
+                registeringId === (pendingAiDrug.itemSeq || pendingAiDrug.itemName)
+              }
+            >
+              등록할게요
+            </button>
+          </div>
+        }
       />
     </div>
   )

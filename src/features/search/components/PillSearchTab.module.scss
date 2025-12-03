@@ -314,6 +314,13 @@
   line-height: 1;
 }
 
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
 .detailGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

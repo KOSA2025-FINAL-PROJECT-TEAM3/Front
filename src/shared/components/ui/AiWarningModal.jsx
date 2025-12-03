@@ -3,16 +3,18 @@ import styles from './AiWarningModal.module.scss'
 
 const DEFAULT_MESSAGE = 'AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다.'
 
-export const AiWarningModal = ({ isOpen, onClose, contextMessage }) => (
+export const AiWarningModal = ({ isOpen, onClose, contextMessage, footer }) => (
   <Modal
     isOpen={isOpen}
     onClose={onClose}
     title="AI 생성 정보 주의"
     description="AI 검색 결과는 참고용으로만 활용해주세요."
     footer={
-      <button type="button" className={styles.confirmButton} onClick={onClose}>
-        확인했어요
-      </button>
+      footer ?? (
+        <button type="button" className={styles.confirmButton} onClick={onClose}>
+          확인했어요
+        </button>
+      )
     }
   >
     <div className={styles.warningBox}>
