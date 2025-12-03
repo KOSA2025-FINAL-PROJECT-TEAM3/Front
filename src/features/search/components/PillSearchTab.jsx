@@ -75,24 +75,28 @@ export const PillSearchTab = () => {
     }
 
     setError('')
+    setIsAiResult(false)
     setLoading(true)
     setHasSearched(true)
     try {
       const list = await searchApiClient.searchDrugs(keyword)
-      setIsAiResult(false)
       setResults(Array.isArray(list) ? list : [])
     } catch (err) {
       const isTimeout =
         err?.code === 'ECONNABORTED' ||
         err?.message?.toLowerCase?.().includes('timeout') ||
         err?.response?.status === 504
+      const isAuthError = err?.response?.status === 401 || err?.response?.status === 403
+      const shouldFallback = !isAuthError
 
-      if (isTimeout) {
+      if (isTimeout || shouldFallback) {
         try {
           const aiResult = await searchApiClient.searchDrugsWithAI(keyword)
           const aiWrapped = aiResult ? [{ ...aiResult, aiGenerated: true }] : []
           setIsAiResult(true)
           setResults(aiWrapped)
+          setWarningContext('기본 검색 실패로 AI 생성 정보를 대신 보여줍니다.')
+          setWarningOpen(true)
           toast.success('AI 검색 결과를 가져왔습니다. 내용 확인 후 전문가와 상담하세요.')
           return
         } catch (fallbackErr) {
