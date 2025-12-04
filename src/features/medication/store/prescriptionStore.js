@@ -36,8 +36,31 @@ export const usePrescriptionStore = create((set, get) => ({
     createPrescription: async (prescriptionData) => {
         set({ loading: true, error: null });
         try {
-            console.log('Creating prescription with data:', prescriptionData);
-            const newPrescription = await prescriptionApiClient.createPrescription(prescriptionData);
+            console.log('Creating prescription with raw data:', prescriptionData);
+
+            // 데이터 형식 변환
+            const formattedData = {
+                pharmacyName: prescriptionData.pharmacyName || '',
+                hospitalName: prescriptionData.hospitalName || '',
+                startDate: prescriptionData.startDate, // yyyy-MM-dd 형식
+                endDate: prescriptionData.endDate,     // yyyy-MM-dd 형식
+                intakeTimes: prescriptionData.intakeTimes, // HH:mm 형식 배열
+                paymentAmount: prescriptionData.paymentAmount || null,
+                notes: prescriptionData.notes || '',
+                medications: (prescriptionData.medications || []).map(med => ({
+                    name: med.name,
+                    category: med.category || null,
+                    dosageAmount: med.dosageAmount || 1,
+                    totalIntakes: med.totalIntakes || null,
+                    daysOfWeek: med.daysOfWeek || null,
+                    intakeTimeIndices: med.intakeTimeIndices || null,
+                    notes: med.notes || '',
+                    imageUrl: med.imageUrl || null
+                }))
+            };
+
+            console.log('Creating prescription with formatted data:', formattedData);
+            const newPrescription = await prescriptionApiClient.createPrescription(formattedData);
             console.log('Prescription created successfully:', newPrescription);
             set(state => ({
                 prescriptions: [newPrescription, ...state.prescriptions],
@@ -57,9 +80,38 @@ export const usePrescriptionStore = create((set, get) => ({
     updatePrescription: async (id, prescriptionData) => {
         set({ loading: true, error: null });
         try {
-            const updated = await prescriptionApiClient.updatePrescription(id, prescriptionData);
+            // 데이터 형식 변환 (createPrescription과 동일)
+            const formattedData = {
+                pharmacyName: prescriptionData.pharmacyName || '',
+                hospitalName: prescriptionData.hospitalName || '',
+                startDate: prescriptionData.startDate,
+                endDate: prescriptionData.endDate,
+                intakeTimes: prescriptionData.intakeTimes,
+                paymentAmount: prescriptionData.paymentAmount || null,
+                notes: prescriptionData.notes || '',
+                medications: (prescriptionData.medications || []).map(med => ({
+                    name: med.name,
+                    category: med.category || null,
+                    dosageAmount: med.dosageAmount || 1,
+                    totalIntakes: med.totalIntakes || null,
+                    daysOfWeek: med.daysOfWeek || null,
+                    intakeTimeIndices: med.intakeTimeIndices || null,
+                    notes: med.notes || '',
+                    imageUrl: med.imageUrl || null
+                }))
+            };
+
+            const updated = await prescriptionApiClient.updatePrescription(id, formattedData);
+
+            // 목록 표시용 객체로 변환 (medicationCount 추가)
+            // PrescriptionDetailResponse에는 medicationCount가 없으므로 medications 배열 길이로 계산
+            const listUpdate = {
+                ...updated,
+                medicationCount: updated.medications ? updated.medications.length : 0
+            };
+
             set(state => ({
-                prescriptions: state.prescriptions.map(p => p.id === id ? updated : p),
+                prescriptions: state.prescriptions.map(p => p.id === id ? listUpdate : p),
                 currentPrescription: state.currentPrescription?.id === id ? updated : state.currentPrescription,
                 loading: false
             }));

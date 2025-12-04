@@ -33,8 +33,31 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, 
     return (
         <div className={styles.card}>
             <div className={styles.content}>
-                <h3>{medication.name}</h3>
-                <p className={styles.category}>{medication.category || '분류 없음'}</p>
+                <div className={styles.header}>
+                    <div className={styles.imageWrapper}>
+                        {medication.imageUrl ? (
+                            <img
+                                src={medication.imageUrl}
+                                alt={medication.name}
+                                className={styles.image}
+                                onError={(e) => {
+                                    e.target.style.display = 'none';
+                                    e.target.nextSibling.style.display = 'flex';
+                                }}
+                            />
+                        ) : null}
+                        <div
+                            className={styles.placeholder}
+                            style={{ display: medication.imageUrl ? 'none' : 'flex' }}
+                        >
+                            💊
+                        </div>
+                    </div>
+                    <div className={styles.titleInfo}>
+                        <h3>{medication.name}</h3>
+                        <p className={styles.category}>{medication.category || '분류 없음'}</p>
+                    </div>
+                </div>
 
                 <div className={styles.details}>
                     <div className={styles.detailItem}>
