@@ -43,16 +43,11 @@ class SearchApiClient extends ApiClient {
 
   searchSymptomsWithAI(query) {
     const name = (query || '').trim()
-    const mockResponse = () => ({
-      name,
-      description: `'${name}' 증상에 대한 AI 생성 요약입니다. 정확한 진단은 의료진과 상담하세요.`,
-      possibleCauses: ['스트레스', '피로', '수면 부족'],
-      recommendedActions: ['충분한 휴식', '수분 섭취', '증상 지속 시 진료 예약'],
-      severity: '중간',
-      aiGenerated: true,
-      aiDisclaimer: 'AI가 생성한 정보로 참고용입니다. 의료진 상담을 우선하세요.',
-    })
-    return medicationSearchClient.get('/search/symptoms/ai', { params: { query: name } }, { mockResponse })
+    return medicationSearchClient.get(
+      '/search/symptoms/ai',
+      { params: { query: name } },
+      { useMock: false },
+    )
   }
 
   searchDrugs(itemName, options = {}) {

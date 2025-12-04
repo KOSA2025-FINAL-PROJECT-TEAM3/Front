@@ -172,6 +172,13 @@
   gap: 4px;
 }
 
+.headerChips {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .resultTitle {
   margin: 0;
   font-size: 17px;
@@ -190,6 +197,19 @@
   border-radius: 999px;
   padding: 4px 10px;
   width: fit-content;
+}
+
+.aiBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-weight: 700;
 }
 
 .meta {
@@ -273,6 +293,32 @@
     padding: 6px 10px;
     border: 1px solid #e5e7eb;
   }
+}
+
+.noticeBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  margin-bottom: 12px;
+  color: #7f1d1d;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.noticeIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .detailGrid {

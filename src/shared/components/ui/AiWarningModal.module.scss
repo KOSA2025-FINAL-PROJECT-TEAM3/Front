@@ -1,0 +1,53 @@
+.warningBox {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fef2f2;
+  border: 1px solid #ef4444;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.texts {
+  display: grid;
+  gap: 6px;
+}
+
+.headline {
+  margin: 0;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.message {
+  margin: 0;
+  color: #7f1d1d;
+  line-height: 1.4;
+}
+
+.context {
+  margin: 2px 0 0;
+  color: #991b1b;
+  font-size: 13px;
+}
+
+.confirmButton {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(185, 28, 28, 0.25);
+  }
+}
