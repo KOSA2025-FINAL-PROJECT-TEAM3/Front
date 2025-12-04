@@ -118,6 +118,15 @@ class FamilyApiClient extends ApiClient {
   }
 
   /**
+   * 가족 구성원의 약 목록 조회
+   * @param {number} userId - 조회 대상 사용자 ID
+   * @returns {Promise}
+   */
+  getMemberMedications(userId) {
+    return this.get(`/members/${userId}/medications`)
+  }
+
+  /**
    * 가족 구성원의 복약 로그 조회
    * @param {number} userId - 조회 대상 사용자 ID
    * @param {Object} options - 옵션

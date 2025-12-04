@@ -1,15 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useFamilyStore } from '../store/familyStore'
+import { familyApiClient } from '@core/services/api/familyApiClient'
 
 /**
- * 가족 구성원 상세 (프론트 로컬 스토어 기반)
- * 백엔드에서 별도 상세 API가 없으므로, 이미 로드된 members 배열에서 찾아 반환한다.
+ * 가족 구성원 상세 정보 및 약 목록 조회
  */
 export const useFamilyMemberDetail = (memberId) => {
   const members = useFamilyStore((state) => state.members || [])
 
   return useQuery({
-    queryKey: ['family', 'member', memberId, members],
+    queryKey: ['family', 'member', memberId],
     enabled: Boolean(memberId),
     staleTime: 60 * 1000,
     queryFn: async () => {
@@ -20,10 +20,19 @@ export const useFamilyMemberDetail = (memberId) => {
         throw new Error('구성원을 찾을 수 없습니다.')
       }
 
-      // 상세 데이터(복약/순응도)는 아직 목 기반이므로 비워둔다.
+      // 가족 구성원의 약 목록 조회
+      let medications = []
+      try {
+        if (target.userId) {
+          medications = await familyApiClient.getMemberMedications(target.userId)
+        }
+      } catch (error) {
+        console.error('약 목록 조회 실패:', error)
+      }
+
       return {
         member: target,
-        medications: [],
+        medications: medications || [],
         adherence: 0,
       }
     },
