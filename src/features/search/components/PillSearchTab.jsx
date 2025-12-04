@@ -3,9 +3,12 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
 import { searchApiClient } from '@core/services/api/searchApiClient'
+import { ROUTE_PATHS } from '@config/routes.config'
 import Modal from '@shared/components/ui/Modal'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './PillSearchTab.module.scss'
@@ -27,6 +30,7 @@ const summarize = (text = '', limit = 140) => {
 }
 
 export const PillSearchTab = () => {
+  const navigate = useNavigate()
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -34,11 +38,18 @@ export const PillSearchTab = () => {
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [registeringId, setRegisteringId] = useState(null)
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
+  const [selectedDrug, setSelectedDrug] = useState(null)
 
   const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
     addMedication: state.addMedication,
     medications: state.medications,
     fetchMedications: state.fetchMedications,
+  }))
+
+  const { prescriptions, fetchPrescriptions } = usePrescriptionStore((state) => ({
+    prescriptions: state.prescriptions,
+    fetchPrescriptions: state.fetchPrescriptions,
   }))
 
   useEffect(() => {
@@ -124,38 +135,36 @@ export const PillSearchTab = () => {
   const handleRegisterMedication = async (drug) => {
     const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (!token) {
-      toast.error('로그인 후 복용약을 등록할 수 있습니다.')
+      toast.error('로그인 후 약을 등록할 수 있습니다.')
       return
     }
 
-    const key = drug.itemSeq || drug.itemName
-    if (!key) return
+    // 처방전 선택 모달 표시
+    setSelectedDrug(drug)
+    setShowPrescriptionModal(true)
 
-    const alreadyExists = medications.some(
-      (med) => (drug.itemSeq && med.itemSeq === drug.itemSeq) || med.name === drug.itemName,
-    )
-    if (alreadyExists) {
-      toast.success('이미 복용약에 등록된 약입니다.')
-      return
-    }
-
-    setRegisteringId(key)
+    // 처방전 목록 로드
     try {
-      const payload = {
-        name: drug.itemName || '',
-        ingredient: drug.entpName || '',
-        dosage: normalizeText(drug.useMethodQesitm)?.split('\n')?.[0] || '',
-        notes: normalizeText(drug.efcyQesitm),
-        active: true,
-      }
-      await addMedication(payload)
-      toast.success('내 복용약에 등록했습니다.')
+      await fetchPrescriptions()
     } catch (err) {
-      console.error('복용약 등록 실패', err)
-      toast.error('복용약 등록에 실패했습니다. 잠시 후 다시 시도해주세요.')
-    } finally {
-      setRegisteringId(null)
+      console.error('처방전 목록 조회 실패', err)
     }
+  }
+
+  const handleAddToPrescription = (prescriptionId) => {
+    // 처방전 상세 페이지로 이동하면서 약 정보 전달
+    navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', prescriptionId), {
+      state: { addDrug: selectedDrug }
+    })
+    setShowPrescriptionModal(false)
+  }
+
+  const handleCreateNewPrescription = () => {
+    // 새 처방전 등록 페이지로 이동하면서 약 정보 전달
+    navigate(ROUTE_PATHS.prescriptionAdd, {
+      state: { addDrug: selectedDrug }
+    })
+    setShowPrescriptionModal(false)
   }
 
   const renderDetailBlock = (label, value) => {
@@ -245,9 +254,9 @@ export const PillSearchTab = () => {
                         type="button"
                         className={styles.addButton}
                         onClick={() => handleRegisterMedication(drug)}
-                        disabled={isRegistering || isRegistered}
+                        disabled={isRegistering}
                       >
-                        {isRegistering ? '등록 중...' : isRegistered ? '등록됨' : '내 복용약에 등록'}
+                        {isRegistering ? '처리 중...' : '처방전에 추가'}
                       </button>
                       <button
                         type="button"
@@ -285,6 +294,41 @@ export const PillSearchTab = () => {
           {renderDetailBlock('약/음식 주의', selected?.intrcQesitm)}
           {renderDetailBlock('부작용', selected?.seQesitm)}
           {renderDetailBlock('보관 방법', selected?.depositMethodQesitm)}
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showPrescriptionModal}
+        onClose={() => setShowPrescriptionModal(false)}
+        title="처방전 선택"
+        description={selectedDrug ? `${selectedDrug.itemName}을(를) 추가할 처방전을 선택하세요` : undefined}
+      >
+        <div className={styles.prescriptionList}>
+          {prescriptions.length === 0 && (
+            <p className={styles.emptyMessage}>등록된 처방전이 없습니다.</p>
+          )}
+          {prescriptions.map((prescription) => (
+            <button
+              key={prescription.id}
+              className={styles.prescriptionItem}
+              onClick={() => handleAddToPrescription(prescription.id)}
+            >
+              <div className={styles.prescriptionInfo}>
+                <h4>{prescription.pharmacyName || '약국명 미입력'}</h4>
+                <p>{prescription.hospitalName || '병원명 미입력'}</p>
+                <span className={styles.period}>
+                  {prescription.startDate} ~ {prescription.endDate}
+                </span>
+              </div>
+              <span className={styles.arrow}>→</span>
+            </button>
+          ))}
+          <button
+            className={styles.newPrescriptionButton}
+            onClick={handleCreateNewPrescription}
+          >
+            + 새 처방전 만들기
+          </button>
         </div>
       </Modal>
     </div>
