@@ -1,12 +1,14 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
+import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient'
 import {
   fromOCRResponse,
   createDefaultIntakeTimes,
   toRegisterFromOCRRequest
 } from '@/types/ocr.types'
 import { ROUTE_PATHS } from '@core/config/routes.config'
+import { toast } from '@shared/components/toast/toastStore'
 
 /**
  * OCR 스캔 및 약물 등록 커스텀 훅
@@ -238,19 +240,32 @@ export function useOcrRegistration() {
       return
     }
 
+    setStep('registering')
+    setIsLoading(true)
+    setError(null)
+
     try {
+      // OCR 데이터를 처방전 등록 형식으로 변환
       const ocrData = toRegisterFromOCRRequest(formState)
 
-      // 처방전 등록 페이지로 데이터 전달하며 이동
-      navigate(ROUTE_PATHS.prescriptionAdd, {
-        state: {
-          ocrData: ocrData
-        }
-      })
+      console.log('📤 OCR 등록 시작:', ocrData)
+
+      // 백엔드 API 직접 호출
+      const result = await prescriptionApiClient.createPrescription(ocrData)
+
+      console.log('✅ OCR 등록 성공:', result)
+      toast.success('처방전이 등록되었습니다')
+
+      // 약 관리 페이지로 이동
+      navigate(ROUTE_PATHS.medication, { replace: true })
 
     } catch (err) {
-      console.error('Registration Error:', err)
-      setError(err.message || '등록 준비 중 오류가 발생했습니다.')
+      console.error('❌ OCR 등록 실패:', err)
+      setError(err.message || '등록 중 오류가 발생했습니다.')
+      toast.error('처방전 등록에 실패했습니다')
+      setStep('edit') // 편집 화면으로 되돌림
+    } finally {
+      setIsLoading(false)
     }
   }, [formState, navigate])
 
