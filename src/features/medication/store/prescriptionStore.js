@@ -44,7 +44,10 @@ export const usePrescriptionStore = create((set, get) => ({
                 hospitalName: prescriptionData.hospitalName || '',
                 startDate: prescriptionData.startDate, // yyyy-MM-dd 형식
                 endDate: prescriptionData.endDate,     // yyyy-MM-dd 형식
-                intakeTimes: prescriptionData.intakeTimes, // HH:mm 형식 배열
+                intakeTimes: (prescriptionData.intakeTimes || []).map(time => {
+                    // HH:mm 형식을 HH:mm:ss 형식으로 변환
+                    return time.length === 5 ? time + ':00' : time;
+                }),
                 paymentAmount: prescriptionData.paymentAmount || null,
                 notes: prescriptionData.notes || '',
                 medications: (prescriptionData.medications || []).map(med => ({
@@ -86,7 +89,10 @@ export const usePrescriptionStore = create((set, get) => ({
                 hospitalName: prescriptionData.hospitalName || '',
                 startDate: prescriptionData.startDate,
                 endDate: prescriptionData.endDate,
-                intakeTimes: prescriptionData.intakeTimes,
+                intakeTimes: (prescriptionData.intakeTimes || []).map(time => {
+                    // HH:mm 형식을 HH:mm:ss 형식으로 변환
+                    return time.length === 5 ? time + ':00' : time;
+                }),
                 paymentAmount: prescriptionData.paymentAmount || null,
                 notes: prescriptionData.notes || '',
                 medications: (prescriptionData.medications || []).map(med => ({

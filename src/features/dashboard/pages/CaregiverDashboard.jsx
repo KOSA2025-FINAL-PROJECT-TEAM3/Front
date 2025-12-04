@@ -4,6 +4,7 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
 import MainLayout from '@shared/components/layout/MainLayout'
+import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
 import { QuickActions } from '@shared/components/ui/QuickActions'
 import { FAB } from '@shared/components/ui/FAB'
 import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/data/mockUiConstants'
@@ -105,6 +106,8 @@ export function CaregiverDashboard() {
         </header>
 
         <QuickActions actions={CAREGIVER_QUICK_ACTIONS} />
+
+        <MyMedicationSchedule title="내 복용 일정" showEmptyState={false} className={styles.mySchedule} />
 
         <article className={styles.card}>
           <h2>어르신 복약 현황</h2>
