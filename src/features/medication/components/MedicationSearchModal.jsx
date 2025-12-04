@@ -1,19 +1,26 @@
-import { useState } from 'react';
-import { medicationApiClient } from '@core/services/api/medicationApiClient';
+import { useState, useEffect } from 'react';
+import { searchApiClient } from '@core/services/api/searchApiClient';
 import { toast } from '@shared/components/toast/toastStore';
 import styles from './MedicationSearchModal.module.scss';
 
-export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
+export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose, initialMedication = null }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [selectedMedication, setSelectedMedication] = useState(null);
+    const [selectedMedication, setSelectedMedication] = useState(initialMedication);
     const [medicationDetails, setMedicationDetails] = useState({
         dosageAmount: 1,
-        intakeTimeIndices: [], // intakeTimes의 인덱스
+        intakeTimeIndices: intakeTimes ? intakeTimes.map((_, i) => i) : [], // intakeTimes가 없으면 빈 배열
         daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
         notes: ''
     });
     const [searching, setSearching] = useState(false);
+
+    // initialMedication이 변경되면 선택 상태 업데이트
+    useEffect(() => {
+        if (initialMedication) {
+            setSelectedMedication(initialMedication);
+        }
+    }, [initialMedication]);
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -23,20 +30,15 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
 
         setSearching(true);
         try {
-            // TODO: 실제 API 연동 시 검색 API 호출
-            // 현재는 더미 데이터 또는 기존 API 활용
-            // const results = await medicationApiClient.searchMedications(searchQuery);
-
-            // 임시 더미 데이터 (API가 준비되지 않았을 경우)
-            const results = [
-                { name: searchQuery, ingredient: '일반의약품', itemSeq: '12345' },
-                { name: `${searchQuery} 500mg`, ingredient: '전문의약품', itemSeq: '67890' }
-            ];
-
-            setSearchResults(results);
+            const results = await searchApiClient.searchDrugs(searchQuery);
+            setSearchResults(Array.isArray(results) ? results : []);
+            if (results.length === 0) {
+                toast.info('검색 결과가 없습니다');
+            }
         } catch (error) {
             console.error('약 검색 실패:', error);
             toast.error('약 검색에 실패했습니다');
+            setSearchResults([]);
         } finally {
             setSearching(false);
         }
@@ -50,11 +52,17 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
 
         setSearching(true);
         try {
-            const result = await medicationApiClient.searchMedicationsWithAI(searchQuery);
-            setSearchResults([result]);
+            const result = await searchApiClient.searchDrugsWithAI(searchQuery);
+            setSearchResults(result ? [result] : []);
+            if (result) {
+                toast.success('AI 검색 완료!');
+            } else {
+                toast.info('검색 결과가 없습니다');
+            }
         } catch (error) {
             console.error('AI 검색 실패:', error);
             toast.error('AI 검색에 실패했습니다');
+            setSearchResults([]);
         } finally {
             setSearching(false);
         }
@@ -67,7 +75,7 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
             dosageAmount: 1,
             intakeTimeIndices: intakeTimes.map((_, i) => i), // 모든 시간 선택
             daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
-            notes: medication.notes || ''
+            notes: ''
         });
     };
 
@@ -78,12 +86,13 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
         }
 
         const medicationData = {
-            name: selectedMedication.name,
-            category: selectedMedication.ingredient,
+            name: selectedMedication.itemName || selectedMedication.name,
+            category: selectedMedication.entpName || selectedMedication.ingredient,
             dosageAmount: medicationDetails.dosageAmount,
             intakeTimeIndices: medicationDetails.intakeTimeIndices,
             daysOfWeek: medicationDetails.daysOfWeek,
             notes: medicationDetails.notes,
+            imageUrl: selectedMedication.itemImage || null,
             totalIntakes: 30 // 기본값, 실제로는 계산 필요할 수 있음
         };
 
@@ -135,11 +144,21 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
                     {searchResults.map((result, index) => (
                         <div
                             key={index}
-                            className={`${styles.resultItem} ${selectedMedication?.name === result.name ? styles.selected : ''}`}
+                            className={`${styles.resultItem} ${selectedMedication?.itemSeq === result.itemSeq ? styles.selected : ''}`}
                             onClick={() => handleSelectMedication(result)}
                         >
-                            <h3>{result.name}</h3>
-                            <p>{result.ingredient}</p>
+                            {result.itemImage && (
+                                <img
+                                    src={result.itemImage}
+                                    alt={result.itemName}
+                                    className={styles.resultImage}
+                                />
+                            )}
+                            <div className={styles.resultInfo}>
+                                <h3>{result.itemName}</h3>
+                                <p>{result.entpName}</p>
+                                {result.itemSeq && <span className={styles.itemSeq}>품목코드: {result.itemSeq}</span>}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -147,7 +166,7 @@ export const MedicationSearchModal = ({ intakeTimes, onAdd, onClose }) => {
                 {/* 선택된 약 상세 설정 */}
                 {selectedMedication && (
                     <div className={styles.detailsForm}>
-                        <h3>{selectedMedication.name} 복용 정보</h3>
+                        <h3>{selectedMedication.itemName || selectedMedication.name} 복용 정보</h3>
 
                         <label>
                             1회 복용량

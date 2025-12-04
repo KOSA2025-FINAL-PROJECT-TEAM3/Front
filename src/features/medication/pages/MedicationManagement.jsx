@@ -34,10 +34,10 @@ export const MedicationManagement = () => {
               type="button"
               className={styles.addButton}
               onClick={handleAddClick}
-              aria-label="처방전 등록"
+              aria-label="약 등록"
             >
               <span className={styles.addIcon}>+</span>
-              <span className={styles.addLabel}>처방전 등록</span>
+              <span className={styles.addLabel}>약 등록</span>
             </button>
           </div>
         </header>
@@ -48,7 +48,7 @@ export const MedicationManagement = () => {
           {!loading && prescriptions.length === 0 && (
             <div className={styles.emptyState}>
               <p>등록된 처방전이 없습니다.</p>
-              <button onClick={handleAddClick}>첫 처방전 등록하기</button>
+              <button onClick={handleAddClick}>첫 약 등록하기</button>
             </div>
           )}
 
