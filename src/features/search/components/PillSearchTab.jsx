@@ -1,11 +1,15 @@
 /**
  * 알약 검색 탭 (약품명 기반 검색)
+ * AI 경고 시스템 + 처방전 선택 기능 통합 버전
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
 import { searchApiClient } from '@core/services/api/searchApiClient'
+import { ROUTE_PATHS } from '@config/routes.config'
 import Modal from '@shared/components/ui/Modal'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import { toast } from '@shared/components/toast/toastStore'
@@ -28,6 +32,7 @@ const summarize = (text = '', limit = 140) => {
 }
 
 export const PillSearchTab = () => {
+  const navigate = useNavigate()
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -35,15 +40,26 @@ export const PillSearchTab = () => {
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [registeringId, setRegisteringId] = useState(null)
+  
+  // AI 경고 관련 상태
   const [pendingAiDrug, setPendingAiDrug] = useState(null)
   const [warningOpen, setWarningOpen] = useState(false)
   const [warningContext, setWarningContext] = useState('')
   const [isAiResult, setIsAiResult] = useState(false)
+  
+  // 처방전 선택 관련 상태
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
+  const [selectedDrug, setSelectedDrug] = useState(null)
 
   const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
     addMedication: state.addMedication,
     medications: state.medications,
     fetchMedications: state.fetchMedications,
+  }))
+
+  const { prescriptions, fetchPrescriptions } = usePrescriptionStore((state) => ({
+    prescriptions: state.prescriptions,
+    fetchPrescriptions: state.fetchPrescriptions,
   }))
 
   useEffect(() => {
@@ -151,7 +167,27 @@ export const PillSearchTab = () => {
     [hasSearched, loading, error, results],
   )
 
+  // 처방전 선택 프로세스로 진행
+  const proceedToPrescriptionSelection = async (drug) => {
+    setSelectedDrug(drug)
+    setShowPrescriptionModal(true)
+    
+    try {
+      await fetchPrescriptions()
+    } catch (err) {
+      console.error('처방전 목록 조회 실패', err)
+      toast.error('처방전 목록을 불러오지 못했습니다.')
+    }
+  }
+
   const handleRegisterMedication = async (drug) => {
+    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    if (!token) {
+      toast.error('로그인 후 약을 등록할 수 있습니다.')
+      return
+    }
+
+    // AI 생성 약품이면 경고 먼저 표시
     if (drug?.aiGenerated) {
       setPendingAiDrug(drug)
       setWarningContext('AI 생성 정보로 등록하려고 합니다. 전문가 상담을 권장합니다.')
@@ -159,47 +195,32 @@ export const PillSearchTab = () => {
       return
     }
 
-    const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-    if (!token) {
-      toast.error('로그인 후 복용약을 등록할 수 있습니다.')
-      return
-    }
-
-    const key = drug.itemSeq || drug.itemName
-    if (!key) return
-
-    const alreadyExists = medications.some(
-      (med) => (drug.itemSeq && med.itemSeq === drug.itemSeq) || med.name === drug.itemName,
-    )
-    if (alreadyExists) {
-      toast.success('이미 복용약에 등록된 약입니다.')
-      return
-    }
-
-    setRegisteringId(key)
-    try {
-      const payload = {
-        name: drug.itemName || '',
-        ingredient: drug.entpName || '',
-        dosage: normalizeText(drug.useMethodQesitm)?.split('\n')?.[0] || '',
-        notes: normalizeText(drug.efcyQesitm),
-        active: true,
-      }
-      await addMedication(payload)
-      toast.success('내 복용약에 등록했습니다.')
-    } catch (err) {
-      console.error('복용약 등록 실패', err)
-      toast.error('복용약 등록에 실패했습니다. 잠시 후 다시 시도해주세요.')
-    } finally {
-      setRegisteringId(null)
-    }
+    // 일반 약품은 바로 처방전 선택으로 진행
+    await proceedToPrescriptionSelection(drug)
   }
 
-  const confirmAiRegister = async () => {
+  // AI 경고 확인 후 처방전 선택으로 진행
+  const confirmAiRegister = () => {
     if (!pendingAiDrug) return
-    await handleRegisterMedication({ ...pendingAiDrug, aiGenerated: false })
-    setPendingAiDrug(null)
     setWarningOpen(false)
+    proceedToPrescriptionSelection({ ...pendingAiDrug, aiGenerated: false })
+    setPendingAiDrug(null)
+  }
+
+  const handleAddToPrescription = (prescriptionId) => {
+    // 처방전 상세 페이지로 이동하면서 약 정보 전달
+    navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', prescriptionId), {
+      state: { addDrug: selectedDrug }
+    })
+    setShowPrescriptionModal(false)
+  }
+
+  const handleCreateNewPrescription = () => {
+    // 새 처방전 등록 페이지로 이동하면서 약 정보 전달
+    navigate(ROUTE_PATHS.prescriptionAdd, {
+      state: { addDrug: selectedDrug }
+    })
+    setShowPrescriptionModal(false)
   }
 
   const renderDetailBlock = (label, value) => {
@@ -293,10 +314,10 @@ export const PillSearchTab = () => {
                         type="button"
                         className={styles.addButton}
                         onClick={() => handleRegisterMedication(drug)}
-                        disabled={isRegistering || isRegistered}
+                        disabled={isRegistering}
                         title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
                       >
-                        {isRegistering ? '등록 중...' : isRegistered ? '등록됨' : '내 복용약에 등록'}
+                        {isRegistering ? '처리 중...' : '처방전에 추가'}
                       </button>
                       <button
                         type="button"
@@ -316,6 +337,7 @@ export const PillSearchTab = () => {
         {emptyState && <div className={styles.empty}>검색 결과가 없습니다.</div>}
       </section>
 
+      {/* 약품 상세 정보 모달 */}
       <Modal
         isOpen={!!selected}
         onClose={() => setSelected(null)}
@@ -347,6 +369,7 @@ export const PillSearchTab = () => {
         </div>
       </Modal>
 
+      {/* AI 경고 모달 */}
       <AiWarningModal
         isOpen={warningOpen}
         onClose={() => {
@@ -364,7 +387,7 @@ export const PillSearchTab = () => {
                 setPendingAiDrug(null)
               }}
             >
-              아니요
+              취소
             </button>
             <button
               type="button"
@@ -375,11 +398,47 @@ export const PillSearchTab = () => {
                 registeringId === (pendingAiDrug.itemSeq || pendingAiDrug.itemName)
               }
             >
-              등록할게요
+              계속 진행
             </button>
           </div>
         }
       />
+
+      {/* 처방전 선택 모달 */}
+      <Modal
+        isOpen={showPrescriptionModal}
+        onClose={() => setShowPrescriptionModal(false)}
+        title="처방전 선택"
+        description={selectedDrug ? `${selectedDrug.itemName}을(를) 추가할 처방전을 선택하세요` : undefined}
+      >
+        <div className={styles.prescriptionList}>
+          {prescriptions.length === 0 && (
+            <p className={styles.emptyMessage}>등록된 처방전이 없습니다.</p>
+          )}
+          {prescriptions.map((prescription) => (
+            <button
+              key={prescription.id}
+              className={styles.prescriptionItem}
+              onClick={() => handleAddToPrescription(prescription.id)}
+            >
+              <div className={styles.prescriptionInfo}>
+                <h4>{prescription.pharmacyName || '약국명 미입력'}</h4>
+                <p>{prescription.hospitalName || '병원명 미입력'}</p>
+                <span className={styles.period}>
+                  {prescription.startDate} ~ {prescription.endDate}
+                </span>
+              </div>
+              <span className={styles.arrow}>→</span>
+            </button>
+          ))}
+          <button
+            className={styles.newPrescriptionButton}
+            onClick={handleCreateNewPrescription}
+          >
+            + 새 처방전 만들기
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

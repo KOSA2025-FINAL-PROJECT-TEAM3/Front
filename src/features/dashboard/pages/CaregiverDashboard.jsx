@@ -9,6 +9,7 @@ import { FAB } from '@shared/components/ui/FAB'
 import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/data/mockUiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
+import { familyApiClient } from '@core/services/api/familyApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './CaregiverDashboard.module.scss'
 
@@ -130,12 +131,27 @@ export default CaregiverDashboard
 
 const SeniorMedicationSnapshot = ({ member, onDetail }) => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [medications, setMedications] = useState([])
   const [todayLogs, setTodayLogs] = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
-  const { data, isLoading } = useFamilyMemberDetail(member.id)
-  const medications = data?.medications ?? []
-  const relation =
-    member.relation || data?.member?.relation || (member.role === 'SENIOR' ? '어르신' : '보호자')
+  const relation = member.relation || (member.role === 'SENIOR' ? '어르신' : '보호자')
+
+  // 약 목록 조회
+  useEffect(() => {
+    const loadMedications = async () => {
+      try {
+        const meds = await familyApiClient.getMemberMedications(member.userId)
+        setMedications(meds || [])
+      } catch (error) {
+        console.error('Failed to load medications:', error)
+        setMedications([])
+      }
+    }
+
+    if (member.userId) {
+      loadMedications()
+    }
+  }, [member.userId])
 
   // 오늘 복약 일정 조회
   const loadTodayLogs = async () => {
@@ -146,16 +162,12 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
 
     setLogsLoading(true)
     try {
-      const today = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD
-      const response = await medicationLogApiClient.getByDate(today)
-
-      // 해당 member의 logs만 필터링
-      const memberLogs = (response || []).filter(log => {
-        const med = medications.find(m => m.id === log.medicationId)
-        return med && med.userId === member.id
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      const response = await familyApiClient.getMedicationLogs(member.userId, {
+        date: today
       })
 
-      setTodayLogs(memberLogs)
+      setTodayLogs(response?.logs || response || [])
       setIsExpanded(true)
     } catch (error) {
       console.error('Failed to load today logs:', error)
@@ -170,6 +182,8 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     switch (status) {
       case 'completed':
         return '#00B300'
+      case 'missed':
+        return '#FF0000'
       case 'pending':
         return '#FF9900'
       case 'scheduled':
@@ -179,19 +193,22 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     }
   }
 
-  const getStatusLabel = (completed, scheduledTime) => {
-    if (completed) return '복용완료'
-    const scheduled = new Date(scheduledTime)
-    const now = new Date()
-    const diffHours = (now - scheduled) / (1000 * 60 * 60)
-    if (diffHours > 1) return '미복용'
-    if (now > scheduled) return '복용하기'
-    return '예정'
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'completed':
+        return '복용완료'
+      case 'missed':
+        return '미복용'
+      case 'pending':
+        return '예정'
+      default:
+        return '미상'
+    }
   }
 
-  const completedToday = todayLogs.filter(log => log.completed).length
-  const missedToday = todayLogs.filter(log => !log.completed && (new Date(log.scheduledTime) < new Date())).length
-  const pendingToday = todayLogs.length - completedToday - missedToday
+  const completedToday = todayLogs.filter(log => log.status === 'completed').length
+  const missedToday = todayLogs.filter(log => log.status === 'missed').length
+  const pendingToday = todayLogs.filter(log => log.status === 'pending').length
 
   return (
     <li className={styles.memberItem}>
@@ -240,22 +257,21 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
           ) : (
             <ul className={styles.medList}>
               {todayLogs.map((log, index) => {
-                const status = getStatusLabel(log.completed, log.scheduledTime)
+                const status = getStatusLabel(log.status)
                 const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
                   hour: '2-digit',
                   minute: '2-digit',
                 })
-                const med = medications.find(m => m.id === log.medicationId)
 
                 return (
                   <li
-                    key={`${member.id}-${index}`}
+                    key={`${member.id}-${log.id || index}`}
                     className={styles.medRow}
-                    style={{ borderLeftColor: getStatusColor(log.completed ? 'completed' : 'pending') }}
+                    style={{ borderLeftColor: getStatusColor(log.status) }}
                   >
                     <span className={styles.medTime}>{time}</span>
-                    <span className={styles.medName}>{med?.name || '알 수 없는 약'}</span>
-                    <span className={styles.medStatus} style={{ color: getStatusColor(log.completed ? 'completed' : 'pending') }}>
+                    <span className={styles.medName}>{log.medicationName || '알 수 없는 약'}</span>
+                    <span className={styles.medStatus} style={{ color: getStatusColor(log.status) }}>
                       {status}
                     </span>
                   </li>

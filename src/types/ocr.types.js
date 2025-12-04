@@ -54,8 +54,8 @@
  * @returns {Object} - API 요청 페이로드
  */
 export function toRegisterFromOCRRequest(formState) {
-  // 활성화된 시간만 추출 (HH:mm 형식)
-  const intakeTimes = formState.intakeTimes.map(slot => slot.time)
+  // 활성화된 시간만 추출 (HH:mm:ss 형식)
+  const intakeTimes = formState.intakeTimes.map(slot => slot.time + ':00')
 
   const medications = formState.medications.map(med => {
     // 선택된 시간 인덱스 추출
@@ -68,11 +68,12 @@ export function toRegisterFromOCRRequest(formState) {
       category: med.category,
       dosageAmount: med.dosageAmount,
       totalIntakes: med.dailyFrequency * med.durationDays,
-      daysOfWeek: '1,2,3,4,5,6,7', // 기본: 매일
+      daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN', // 기본: 매일 (요일명 형식)
       intakeTimeIndices: intakeTimeIndices.length === intakeTimes.length
         ? null  // 전체 선택이면 null
         : intakeTimeIndices,
-      notes: null
+      notes: null,
+      imageUrl: med.imageUrl || null
     }
   })
 

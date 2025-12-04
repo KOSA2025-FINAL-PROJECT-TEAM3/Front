@@ -1,80 +1,25 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { MainLayout } from '@shared/components/layout/MainLayout'
-import { MedicationList } from '../components/MedicationList'
-import { MedicationDetailModal } from '../components/MedicationDetailModal'
-import { InventoryTracker } from '../components/InventoryTracker'
-import { useMedicationStore } from '@features/medication/store/medicationStore'
-import { ROUTE_PATHS } from '@config/routes.config'
-import { toast } from '@shared/components/toast/toastStore'
-import styles from './MedicationManagement.module.scss'
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MainLayout } from '@shared/components/layout/MainLayout';
+import { usePrescriptionStore } from '../store/prescriptionStore';
+import { ROUTE_PATHS } from '@config/routes.config';
+import styles from './MedicationManagement.module.scss';
 
 export const MedicationManagement = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const {
-    medications,
-    loading,
-    fetchMedications,
-    removeMedication,
-    toggleStatus,
-    updateMedication,
-  } = useMedicationStore()
+  const navigate = useNavigate();
+  const { prescriptions, fetchPrescriptions, loading } = usePrescriptionStore();
 
-  const [selectedMedicationId, setSelectedMedicationId] = useState(null)
-  const selectedMedication = useMemo(
-    () => medications.find((med) => med.id === selectedMedicationId) || null,
-    [medications, selectedMedicationId],
-  )
-
-  // 초기 로드 시 목록 가져오기 (mock/real 자동 전환)
   useEffect(() => {
-    fetchMedications()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Handle navigation state for opening specific medication
-  useEffect(() => {
-    if (location.state?.selectedMedicationId) {
-      setSelectedMedicationId(location.state.selectedMedicationId)
-      // Clear the state after using it
-      window.history.replaceState({}, document.title)
-    }
-  }, [location.state])
+    fetchPrescriptions();
+  }, [fetchPrescriptions]);
 
   const handleAddClick = () => {
-    navigate(ROUTE_PATHS.medicationAdd)
-  }
+    navigate(ROUTE_PATHS.prescriptionAdd);
+  };
 
-  const handleSelectMedication = (medication) => {
-    setSelectedMedicationId(medication?.id || null)
-  }
-
-  const handleCloseModal = () => {
-    setSelectedMedicationId(null)
-  }
-
-  const handleUpdateMedication = async (medId, patch) => {
-    await updateMedication(medId, patch)
-    handleCloseModal()
-  }
-
-  const handleRemoveMedication = async (medId) => {
-    try {
-      await removeMedication(medId)
-      if (selectedMedicationId === medId) {
-        handleCloseModal()
-      }
-      toast.success('약이 삭제되었습니다.')
-    } catch (error) {
-      console.error('약 삭제 실패:', error)
-      if (error.response?.data?.code === 'MEDICATION_SCHEDULE_002') {
-        toast.error('오늘 복용 기록이 있어 삭제할 수 없습니다.')
-      } else {
-        toast.error('약 삭제에 실패했습니다.')
-      }
-    }
-  }
+  const handlePrescriptionClick = (id) => {
+    navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', id));
+  };
 
   return (
     <MainLayout>
@@ -83,7 +28,7 @@ export const MedicationManagement = () => {
           <div className={styles.headerContent}>
             <div>
               <h1>약 관리</h1>
-              <p>약을 등록하고 복용 일정을 관리하세요.</p>
+              <p>처방전별로 약을 관리하세요.</p>
             </div>
             <button
               type="button"
@@ -97,28 +42,43 @@ export const MedicationManagement = () => {
           </div>
         </header>
 
-        <InventoryTracker medications={medications} />
+        <div className={styles.prescriptionList}>
+          {loading && <div className={styles.loading}>로딩 중...</div>}
 
-        <MedicationList
-          medications={medications}
-          onToggle={toggleStatus}
-          onRemove={handleRemoveMedication}
-          onSelect={handleSelectMedication}
-        />
+          {!loading && prescriptions.length === 0 && (
+            <div className={styles.emptyState}>
+              <p>등록된 처방전이 없습니다.</p>
+              <button onClick={handleAddClick}>첫 약 등록하기</button>
+            </div>
+          )}
 
-        {selectedMedication && (
-          <MedicationDetailModal
-            medication={selectedMedication}
-            loading={loading}
-            onClose={handleCloseModal}
-            onToggle={toggleStatus}
-            onRemove={handleRemoveMedication}
-            onSubmit={handleUpdateMedication}
-          />
-        )}
+          {prescriptions.map((prescription) => (
+            <div
+              key={prescription.id}
+              className={styles.prescriptionCard}
+              onClick={() => handlePrescriptionClick(prescription.id)}
+            >
+              <div className={styles.cardHeader}>
+                <h3>{prescription.pharmacyName || '약국명 미입력'}</h3>
+                <span className={`status ${prescription.active ? 'active' : 'inactive'}`}>
+                  {prescription.active ? '복용 중' : '복용 완료'}
+                </span>
+              </div>
+              <div className={styles.cardBody}>
+                <p className={styles.hospital}>{prescription.hospitalName || '병원명 미입력'}</p>
+                <p className={styles.period}>
+                  {prescription.startDate} ~ {prescription.endDate}
+                </p>
+                <div className={styles.medicationCount}>
+                  포함된 약: {prescription.medicationCount}개
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </MainLayout>
-  )
-}
+  );
+};
 
-export default MedicationManagement
+export default MedicationManagement;

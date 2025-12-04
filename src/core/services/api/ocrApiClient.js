@@ -1,4 +1,5 @@
 import ApiClient from './ApiClient'
+
 class OcrApiClient extends ApiClient {
   constructor() {
     super({
@@ -10,7 +11,7 @@ class OcrApiClient extends ApiClient {
   scan(formData) {
     return this.post('/scan', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120000,
+      timeout: 150000,  // 150초 (Google Vision 처리 시간 고려)
     })
   }
 }
