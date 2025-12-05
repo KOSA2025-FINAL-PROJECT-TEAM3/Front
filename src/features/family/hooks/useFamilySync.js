@@ -74,6 +74,7 @@ export const useFamilySync = () => {
     }
   }, [familyGroup, members, pushSyncEvent])
 
+
   return {
     familyGroup,
     members,

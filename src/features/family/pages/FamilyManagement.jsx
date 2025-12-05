@@ -32,12 +32,7 @@ export const FamilyManagementPage = () => {
     loading,
     removeMember,
     error,
-    isSyncing,
-    lastSyncTime,
-    onlineUsers,
-    connectionStatus,
     onlineMemberIds,
-    syncEvents,
     refetchFamily,
   } = useFamilySync()
 
