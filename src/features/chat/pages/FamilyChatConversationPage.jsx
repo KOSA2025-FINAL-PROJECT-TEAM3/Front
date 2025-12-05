@@ -312,11 +312,16 @@ export const FamilyChatConversationPage = () => {
 
           setMessages((prev) => {
             // [FIX] 실시간 메시지 수신 시 닉네임 누락 해결
-            // 닉네임이 없으면 familyGroup.members에서 ID로 찾아서 넣어줌
-            if (!body.memberNickname && familyGroup?.members) {
-                const sender = familyGroup.members.find(m => m.id == body.familyMemberId);
-                if (sender) {
-                    body.memberNickname = sender.nickname || sender.name;
+            // 클로저 문제 해결을 위해 스토어에서 직접 최신 상태 조회
+            if (!body.memberNickname) {
+                const currentGroups = useFamilyStore.getState().familyGroups || [];
+                const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+                
+                if (currentGroup?.members) {
+                    const sender = currentGroup.members.find(m => m.id == body.familyMemberId);
+                    if (sender) {
+                        body.memberNickname = sender.nickname || sender.name;
+                    }
                 }
             }
 
@@ -331,12 +336,26 @@ export const FamilyChatConversationPage = () => {
             
             if (body.id && prev.some((m) => m.id === body.id)) return prev;
 
+            // [FIX] 클로저 문제 해결: 스토어에서 최신 멤버 수 조회
+            let currentMemberCount = 1;
+            const currentGroups = useFamilyStore.getState().familyGroups || [];
+            const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+            if (currentGroup?.members?.length) {
+                currentMemberCount = currentGroup.members.length;
+            }
+
             const optimisticIndex = prev.findIndex(
               (m) => !m.id && m.content === body.content && m.familyMemberId === body.familyMemberId
             );
+            
+            // [DEBUG] 서버에서 온 unreadCount 확인
+            if (optimisticIndex !== -1) {
+                console.log("🔄 내 메시지 서버 응답 수신:", body, "Server Unread:", body.unreadCount, "Local Calc:", currentMemberCount - 1);
+            }
+
             if (optimisticIndex !== -1) {
               const newMessages = [...prev];
-              const serverUnreadCount = body.unreadCount !== undefined ? body.unreadCount : (totalMemberCount - 1);
+              const serverUnreadCount = body.unreadCount !== undefined ? body.unreadCount : (currentMemberCount - 1);
               newMessages[optimisticIndex] = { 
                   ...body, 
                   createdAt: body.createdAt || prev[optimisticIndex].createdAt,
@@ -345,7 +364,7 @@ export const FamilyChatConversationPage = () => {
               return newMessages;
             }
 
-            const serverUnreadCount = body.unreadCount !== undefined ? body.unreadCount : (totalMemberCount - 1);
+            const serverUnreadCount = body.unreadCount !== undefined ? body.unreadCount : (currentMemberCount - 1);
             return [...prev, { ...body, unreadCount: serverUnreadCount }];
           });
         });
@@ -425,7 +444,15 @@ export const FamilyChatConversationPage = () => {
         body: JSON.stringify(payload),
       });
       
-      const calculatedUnreadCount = Math.max(0, totalMemberCount - 1);
+      // [FIX] 클로저 문제 해결: 스토어에서 최신 멤버 수 조회
+      let currentMemberCount = 1;
+      const currentGroups = useFamilyStore.getState().familyGroups || [];
+      const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+      if (currentGroup?.members?.length) {
+          currentMemberCount = currentGroup.members.length;
+      }
+      
+      const calculatedUnreadCount = Math.max(0, currentMemberCount - 1);
       
       setMessages((prev) => {
           const newMessages = [
