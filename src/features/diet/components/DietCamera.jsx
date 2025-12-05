@@ -26,8 +26,20 @@ const CloseIcon = () => (
 );
 
 const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
-    const fileInputRef = useRef(null);
+    const galleryInputRef = useRef(null);
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+
     const [preview, setPreview] = useState(null);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const [stream, setStream] = useState(null);
+
+    // Cleanup on unmount
+    React.useEffect(() => {
+        return () => {
+            stopCamera();
+        };
+    }, []);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -47,10 +59,59 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
 
     const clearImage = () => {
         setPreview(null);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (galleryInputRef.current) galleryInputRef.current.value = '';
         onImageCapture(null, null);
+    };
+
+    const startCamera = async () => {
+        try {
+            const mediaStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment' }
+            });
+            setStream(mediaStream);
+            setIsCameraOpen(true);
+            // Wait for state update and ref to be attached
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = mediaStream;
+                }
+            }, 100);
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
+        }
+    };
+
+    const stopCamera = () => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
+        }
+        setIsCameraOpen(false);
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+            const context = canvas.getContext('2d');
+
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame to canvas
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to blob/file
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+                    processFile(file);
+                    stopCamera();
+                }
+            }, 'image/jpeg', 0.8);
+        }
     };
 
     // 외부에서 초기화할 수 있도록 ref 노출
@@ -60,17 +121,63 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
 
     return (
         <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            {/* Hidden Gallery Input */}
             <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 style={{ display: 'none' }}
-                ref={fileInputRef}
+                ref={galleryInputRef}
                 onChange={handleFileChange}
             />
 
-            {preview ? (
+            {/* Hidden Canvas for Capture */}
+            <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+            {isCameraOpen ? (
+                <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{
+                        position: 'relative',
+                        width: '100%',
+                        paddingTop: '75%', // 4:3 Aspect Ratio
+                        bgcolor: 'black',
+                        borderRadius: 3,
+                        overflow: 'hidden'
+                    }}>
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            onClick={stopCamera}
+                            sx={{ borderRadius: 2 }}
+                        >
+                            취소
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={capturePhoto}
+                            startIcon={<CameraIcon />}
+                            sx={{ borderRadius: 2, px: 3 }}
+                        >
+                            촬영
+                        </Button>
+                    </Box>
+                </Box>
+            ) : preview ? (
                 <Box sx={{ position: 'relative', width: '100%', maxWidth: 320 }}>
                     <Box
                         component="img"
@@ -102,7 +209,7 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
             ) : (
                 <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
                     <Button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={startCamera}
                         variant="outlined"
                         sx={{
                             flex: 1,
@@ -130,7 +237,7 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
                     </Button>
 
                     <Button
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={() => galleryInputRef.current?.click()}
                         variant="outlined"
                         sx={{
                             flex: 1,
