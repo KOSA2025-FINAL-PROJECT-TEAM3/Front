@@ -71,6 +71,11 @@ export const ChatMessage = ({ message, isMe, sender }) => {
         </div>
         
         <div className={styles.meta}>
+          {/* 안 읽은 사람 수 (노란 숫자) */}
+          {message.unreadCount > 0 && (
+            <span className={styles.unreadCount}>{message.unreadCount}</span>
+          )}
+          
           {/* ✅ 수정된 시간 표시 */}
           <span className={styles.time}>{timeDisplay}</span>
           

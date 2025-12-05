@@ -13,15 +13,19 @@ import styles from './MainLayout.module.scss'
  * 메인 레이아웃 컴포넌트
  * @param {React.ReactNode} children - 메인 콘텐츠
  * @param {boolean} showBottomNav - 하단 네비게이션 표시 여부
+ * @param {boolean} fullScreen - (New) 여백 없이 화면 꽉 채우기 모드 (채팅방용)
  * @param {string} className - 추가 CSS 클래스
  * @returns {JSX.Element} 레이아웃 컴포넌트
  */
-export const MainLayout = ({ children, showBottomNav = true, className }) => {
+export const MainLayout = ({ children, showBottomNav = true, fullScreen = false, className }) => {
   return (
     <div className={classNames(styles.layoutContainer, className)}>
       <Header />
 
-      <main className={styles.mainContent}>{children}</main>
+      {/* fullScreen일 경우 mainContent의 기본 스타일을 덮어쓰거나 다른 클래스 적용 */}
+      <main className={classNames(styles.mainContent, { [styles.fullScreenMode]: fullScreen })}>
+        {children}
+      </main>
 
       {showBottomNav && <BottomNavigation />}
     </div>
