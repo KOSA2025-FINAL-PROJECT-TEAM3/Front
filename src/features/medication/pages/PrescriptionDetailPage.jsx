@@ -69,6 +69,8 @@ export const PrescriptionDetailPage = () => {
                     ? med.schedules[0].daysOfWeek
                     : 'MON,TUE,WED,THU,FRI,SAT,SUN';
 
+                console.log('[DEBUG] Normalizing medication:', med.name, 'daysOfWeek:', daysOfWeek);
+
                 return {
                     ...med,
                     dosageAmount: parseInt(med.dosage) || 1,
@@ -232,9 +234,19 @@ export const PrescriptionDetailPage = () => {
                 }))
             };
 
-            await updatePrescription(id, formattedData);
+            console.log('[DEBUG] Saving prescription with medications:', formattedData.medications.map(m => ({
+                name: m.name,
+                daysOfWeek: m.daysOfWeek
+            })));
+
+            const response = await updatePrescription(id, formattedData);
+            console.log('[DEBUG] Update response medications:', response?.medications?.map(m => ({
+                name: m.name,
+                schedules: m.schedules?.map(s => ({ time: s.time, daysOfWeek: s.daysOfWeek }))
+            })));
             toast.success('처방전이 수정되었습니다');
             setIsEditMode(false);
+            setPrescriptionData(null); // Reset to allow useEffect to re-initialize
             await fetchPrescription(id);
         } catch (error) {
             console.error('처방전 수정 실패:', error);

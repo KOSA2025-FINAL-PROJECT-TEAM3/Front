@@ -25,9 +25,17 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, 
 
     // 요일 텍스트 생성
     const getDaysOfWeekText = () => {
-        if (!medication.daysOfWeek) return '매일';
+        // daysOfWeek가 직접 있는 경우 (편집 모드)
+        let daysOfWeek = medication.daysOfWeek;
 
-        const days = medication.daysOfWeek.split(',');
+        // schedules에서 가져오기 (뷰 모드)
+        if (!daysOfWeek && medication.schedules && medication.schedules.length > 0) {
+            daysOfWeek = medication.schedules[0].daysOfWeek;
+        }
+
+        if (!daysOfWeek) return '매일';
+
+        const days = daysOfWeek.split(',');
         if (days.length === 7) return '매일';
 
         const dayMap = {
