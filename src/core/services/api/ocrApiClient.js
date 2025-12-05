@@ -11,7 +11,7 @@ class OcrApiClient extends ApiClient {
   scan(formData) {
     return this.post('/scan', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 150000,  // 150초 (Google Vision 처리 시간 고려)
+      timeout: 300000,  // 300초 (Google Vision 처리 시간 고려)
     })
   }
 }
