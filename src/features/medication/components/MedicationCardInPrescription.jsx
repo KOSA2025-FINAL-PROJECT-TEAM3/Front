@@ -3,24 +3,39 @@ import styles from './MedicationCardInPrescription.module.scss';
 export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, onRemove }) => {
     // 복용 시간 텍스트 생성
     const getIntakeTimesText = () => {
-        if (!medication.intakeTimeIndices || medication.intakeTimeIndices.length === 0) {
-            return '모든 시간';
+        // intakeTimeIndices가 있는 경우 (편집 모드 또는 추가된 약)
+        if (medication.intakeTimeIndices && medication.intakeTimeIndices.length > 0) {
+            const times = medication.intakeTimeIndices
+                .filter(idx => idx >= 0 && idx < intakeTimes.length)
+                .map(idx => intakeTimes[idx]);
+
+            if (times.length === 0) return '시간 설정 필요';
+            return times.join(', ');
         }
 
-        // 인덱스가 유효한지 확인하고 시간 텍스트로 변환
-        const times = medication.intakeTimeIndices
-            .filter(idx => idx >= 0 && idx < intakeTimes.length)
-            .map(idx => intakeTimes[idx]);
+        // schedules가 있는 경우 (뷰 모드 - 백엔드에서 로드된 약)
+        if (medication.schedules && medication.schedules.length > 0) {
+            const times = medication.schedules.map(schedule => schedule.time);
+            return times.join(', ');
+        }
 
-        if (times.length === 0) return '시간 설정 필요';
-        return times.join(', ');
+        // 둘 다 없으면 모든 시간
+        return '모든 시간';
     };
 
     // 요일 텍스트 생성
     const getDaysOfWeekText = () => {
-        if (!medication.daysOfWeek) return '매일';
+        // daysOfWeek가 직접 있는 경우 (편집 모드)
+        let daysOfWeek = medication.daysOfWeek;
 
-        const days = medication.daysOfWeek.split(',');
+        // schedules에서 가져오기 (뷰 모드)
+        if (!daysOfWeek && medication.schedules && medication.schedules.length > 0) {
+            daysOfWeek = medication.schedules[0].daysOfWeek;
+        }
+
+        if (!daysOfWeek) return '매일';
+
+        const days = daysOfWeek.split(',');
         if (days.length === 7) return '매일';
 
         const dayMap = {
@@ -61,7 +76,7 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, 
 
                 <div className={styles.details}>
                     <div className={styles.detailItem}>
-                        <span>복용량:</span> {medication.dosageAmount}정
+                        <span>복용량:</span> {medication.dosage || `${medication.dosageAmount}정`}
                     </div>
                     <div className={styles.detailItem}>
                         <span>시간:</span> {getIntakeTimesText()}
@@ -78,20 +93,26 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, 
                 )}
             </div>
 
-            <div className={styles.actions}>
-                <button
-                    className={styles.editButton}
-                    onClick={() => onEdit(medication)} // 실제로는 편집 모달을 띄우거나 해야 함
-                >
-                    수정
-                </button>
-                <button
-                    className={styles.removeButton}
-                    onClick={onRemove}
-                >
-                    삭제
-                </button>
-            </div>
+            {(onEdit || onRemove) && (
+                <div className={styles.actions}>
+                    {onEdit && (
+                        <button
+                            className={styles.editButton}
+                            onClick={() => onEdit(medication)}
+                        >
+                            수정
+                        </button>
+                    )}
+                    {onRemove && (
+                        <button
+                            className={styles.removeButton}
+                            onClick={onRemove}
+                        >
+                            삭제
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

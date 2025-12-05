@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
-import { MedicationSearchModal } from '../components/MedicationSearchModal';
+import { MedicationModal } from '../components/MedicationModal';
 import { MedicationCardInPrescription } from '../components/MedicationCardInPrescription';
 import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
@@ -323,9 +323,8 @@ export const PrescriptionAddPage = () => {
                 </footer>
             </div>
 
-            {/* 약 검색 모달 */}
             {showSearchModal && (
-                <MedicationSearchModal
+                <MedicationModal
                     intakeTimes={prescriptionData.intakeTimes}
                     onAdd={handleAddMedication}
                     onClose={() => setShowSearchModal(false)}

@@ -201,7 +201,6 @@ src/
 │
 ├── devtools/                    # 개발자 도구
 │   ├── DeveloperModePanel.jsx   # 개발자 모드 패널
-│   ├── RealtimeEditorDemo.jsx   # 실시간 에디터 데모
 │   └── editor/                  # 협업 에디터
 │       └── components/
 │           └── CollaborativeEditor.jsx

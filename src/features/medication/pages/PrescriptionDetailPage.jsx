@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
 import { MedicationCardInPrescription } from '../components/MedicationCardInPrescription';
-import { MedicationSearchModal } from '../components/MedicationSearchModal';
+import { MedicationModal } from '../components/MedicationModal';
 import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
-import styles from './PrescriptionDetailPage.module.scss';
+import styles from './PrescriptionAddPage.module.scss'; // Reuse AddPage styles
 
 export const PrescriptionDetailPage = () => {
     const { id } = useParams();
@@ -16,15 +16,16 @@ export const PrescriptionDetailPage = () => {
         currentPrescription,
         fetchPrescription,
         deletePrescription,
-        addMedicationToPrescription,
-        removeMedicationFromPrescription,
+        updatePrescription,
         loading
     } = usePrescriptionStore();
 
-    const [showSearchModal, setShowSearchModal] = useState(false);
-    const [initialMedication, setInitialMedication] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
-    const [editedPrescription, setEditedPrescription] = useState(null);
+    const [prescriptionData, setPrescriptionData] = useState(null);
+    const [newTime, setNewTime] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [editingMedicationIndex, setEditingMedicationIndex] = useState(null);
+    const [initialMedication, setInitialMedication] = useState(null);
 
     useEffect(() => {
         if (id) {
@@ -38,13 +39,95 @@ export const PrescriptionDetailPage = () => {
 
     // 약 검색 탭에서 넘어온 경우 처리
     useEffect(() => {
-        if (location.state?.addDrug) {
+        if (location.state?.addDrug && currentPrescription) {
             setInitialMedication(location.state.addDrug);
-            setShowSearchModal(true);
-            // state 초기화 (새로고침 시 다시 뜨지 않도록)
+            setIsEditMode(true);
+            setPrescriptionData({
+                ...currentPrescription,
+                medications: [...currentPrescription.medications]
+            });
+            setShowModal(true);
             window.history.replaceState({}, document.title);
         }
-    }, [location.state]);
+    }, [location.state, currentPrescription]);
+
+    // currentPrescription이 로드되면 prescriptionData 초기화
+    useEffect(() => {
+        if (currentPrescription && !prescriptionData) {
+            // medications를 편집 가능한 형식으로 변환
+            const normalizedMedications = (currentPrescription.medications || []).map(med => {
+                // schedules에서 intakeTimeIndices 계산
+                const intakeTimeIndices = med.schedules
+                    ? med.schedules.map(schedule => {
+                        const timeIndex = currentPrescription.intakeTimes.findIndex(t => t === schedule.time);
+                        return timeIndex >= 0 ? timeIndex : null;
+                    }).filter(idx => idx !== null)
+                    : null;
+
+                // schedules에서 daysOfWeek 추출 (첫 번째 schedule의 값 사용)
+                const daysOfWeek = med.schedules && med.schedules.length > 0
+                    ? med.schedules[0].daysOfWeek
+                    : 'MON,TUE,WED,THU,FRI,SAT,SUN';
+
+                console.log('[DEBUG] Normalizing medication:', med.name, 'daysOfWeek:', daysOfWeek);
+
+                return {
+                    ...med,
+                    dosageAmount: parseInt(med.dosage) || 1,
+                    intakeTimeIndices: intakeTimeIndices,
+                    daysOfWeek: daysOfWeek
+                };
+            });
+
+            setPrescriptionData({
+                pharmacyName: currentPrescription.pharmacyName || '',
+                hospitalName: currentPrescription.hospitalName || '',
+                startDate: currentPrescription.startDate,
+                endDate: currentPrescription.endDate,
+                intakeTimes: currentPrescription.intakeTimes || [],
+                medications: normalizedMedications,
+                paymentAmount: currentPrescription.paymentAmount,
+                notes: currentPrescription.notes || ''
+            });
+        }
+    }, [currentPrescription, prescriptionData]);
+
+    const handleEdit = () => {
+        // medications를 편집 가능한 형식으로 변환
+        const normalizedMedications = (currentPrescription.medications || []).map(med => {
+            const intakeTimeIndices = med.schedules
+                ? med.schedules.map(schedule => {
+                    const timeIndex = currentPrescription.intakeTimes.findIndex(t => t === schedule.time);
+                    return timeIndex >= 0 ? timeIndex : null;
+                }).filter(idx => idx !== null)
+                : null;
+
+            const daysOfWeek = med.schedules && med.schedules.length > 0
+                ? med.schedules[0].daysOfWeek
+                : 'MON,TUE,WED,THU,FRI,SAT,SUN';
+
+            return {
+                ...med,
+                dosageAmount: parseInt(med.dosage) || 1,
+                intakeTimeIndices: intakeTimeIndices,
+                daysOfWeek: daysOfWeek
+            };
+        });
+
+        setIsEditMode(true);
+        setPrescriptionData({
+            ...currentPrescription,
+            medications: normalizedMedications
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditMode(false);
+        setPrescriptionData({
+            ...currentPrescription,
+            medications: [...currentPrescription.medications]
+        });
+    };
 
     const handleDelete = async () => {
         if (window.confirm('정말 이 처방전을 삭제하시겠습니까? 포함된 모든 약 복용 기록도 함께 삭제됩니다.')) {
@@ -59,75 +142,115 @@ export const PrescriptionDetailPage = () => {
         }
     };
 
-    const handleEdit = () => {
-        setIsEditMode(true);
-        setEditedPrescription({
-            ...currentPrescription,
-            medications: [...currentPrescription.medications]
-        });
+    const handleAddTime = () => {
+        if (!newTime) return;
+        if (prescriptionData.intakeTimes.includes(newTime)) {
+            toast.error('이미 등록된 시간입니다');
+            return;
+        }
+        setPrescriptionData(prev => ({
+            ...prev,
+            intakeTimes: [...prev.intakeTimes, newTime].sort()
+        }));
+        setNewTime('');
     };
 
-    const handleCancelEdit = () => {
-        setIsEditMode(false);
-        setEditedPrescription(null);
+    const handleRemoveTime = (timeToRemove) => {
+        setPrescriptionData(prev => ({
+            ...prev,
+            intakeTimes: prev.intakeTimes.filter(time => time !== timeToRemove)
+        }));
     };
 
-    const handleSaveEdit = async () => {
-        if (!editedPrescription) return;
+    const handleAddMedication = (medication) => {
+        if (editingMedicationIndex !== null) {
+            // 수정 모드
+            setPrescriptionData(prev => ({
+                ...prev,
+                medications: prev.medications.map((med, idx) =>
+                    idx === editingMedicationIndex ? medication : med
+                )
+            }));
+            toast.success('약이 수정되었습니다');
+        } else {
+            // 추가 모드
+            setPrescriptionData(prev => ({
+                ...prev,
+                medications: [...prev.medications, medication]
+            }));
+            toast.success('약이 추가되었습니다');
+        }
+        setShowModal(false);
+        setEditingMedicationIndex(null);
+        setInitialMedication(null);
+    };
+
+    const handleEditMedication = (medication, index) => {
+        setEditingMedicationIndex(index);
+        setInitialMedication(medication);
+        setShowModal(true);
+    };
+
+    const handleRemoveMedication = (indexToRemove) => {
+        setPrescriptionData(prev => ({
+            ...prev,
+            medications: prev.medications.filter((_, index) => index !== indexToRemove)
+        }));
+    };
+
+    const handleSave = async () => {
+        if (prescriptionData.medications.length === 0) {
+            toast.error('최소 1개 이상의 약을 등록해주세요');
+            return;
+        }
 
         try {
-            // 수정된 처방전 데이터를 백엔드 형식으로 변환
-            const updateData = {
-                pharmacyName: editedPrescription.pharmacyName,
-                hospitalName: editedPrescription.hospitalName,
-                startDate: editedPrescription.startDate,
-                endDate: editedPrescription.endDate,
-                intakeTimes: editedPrescription.intakeTimes.map(time => time + ':00'),
-                paymentAmount: editedPrescription.paymentAmount,
-                notes: editedPrescription.notes,
-                medications: editedPrescription.medications.map(med => ({
+            // Backend 형식으로 데이터 변환
+            const formattedData = {
+                pharmacyName: prescriptionData.pharmacyName,
+                hospitalName: prescriptionData.hospitalName,
+                startDate: prescriptionData.startDate,
+                endDate: prescriptionData.endDate,
+                // intakeTimes 포맷 확인 및 수정 (HH:mm 형식으로 통일)
+                intakeTimes: prescriptionData.intakeTimes.map(time => {
+                    // 이미 HH:mm:ss 형식이면 HH:mm만 추출
+                    if (time.length > 5) {
+                        return time.substring(0, 5);
+                    }
+                    return time;
+                }),
+                paymentAmount: prescriptionData.paymentAmount,
+                notes: prescriptionData.notes,
+                // medications를 backend가 기대하는 형식으로 변환
+                medications: prescriptionData.medications.map(med => ({
                     name: med.name,
-                    category: med.ingredient,
-                    dosageAmount: parseInt(med.dosage) || 1,
-                    totalIntakes: med.quantity || null,
-                    daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
-                    intakeTimeIndices: null,
-                    notes: med.notes,
-                    imageUrl: med.imageUrl
+                    category: med.ingredient || med.category,
+                    dosageAmount: med.dosageAmount || parseInt(med.dosage) || 1,
+                    totalIntakes: med.quantity || med.totalIntakes || null,
+                    daysOfWeek: med.daysOfWeek || 'MON,TUE,WED,THU,FRI,SAT,SUN',
+                    intakeTimeIndices: med.intakeTimeIndices || null,
+                    notes: med.notes || '',
+                    imageUrl: med.imageUrl || null
                 }))
             };
 
-            await usePrescriptionStore.getState().updatePrescription(id, updateData);
+            console.log('[DEBUG] Saving prescription with medications:', formattedData.medications.map(m => ({
+                name: m.name,
+                daysOfWeek: m.daysOfWeek
+            })));
+
+            const response = await updatePrescription(id, formattedData);
+            console.log('[DEBUG] Update response medications:', response?.medications?.map(m => ({
+                name: m.name,
+                schedules: m.schedules?.map(s => ({ time: s.time, daysOfWeek: s.daysOfWeek }))
+            })));
             toast.success('처방전이 수정되었습니다');
             setIsEditMode(false);
-            setEditedPrescription(null);
+            setPrescriptionData(null); // Reset to allow useEffect to re-initialize
             await fetchPrescription(id);
         } catch (error) {
             console.error('처방전 수정 실패:', error);
             toast.error('처방전 수정에 실패했습니다');
-        }
-    };
-
-    const handleAddMedication = async (medicationData) => {
-        try {
-            await addMedicationToPrescription(id, medicationData);
-            toast.success('약이 추가되었습니다');
-            setShowSearchModal(false);
-            setInitialMedication(null);
-        } catch (error) {
-            console.error('약 추가 실패:', error);
-            toast.error('약 추가에 실패했습니다');
-        }
-    };
-
-    const handleRemoveMedication = (medicationId) => {
-        if (isEditMode) {
-            // 편집 모드에서는 프론트엔드 상태에서만 삭제
-            setEditedPrescription(prev => ({
-                ...prev,
-                medications: prev.medications.filter(med => med.id !== medicationId)
-            }));
-            toast.info('약이 제거되었습니다. 저장 버튼을 눌러 변경사항을 반영하세요.');
         }
     };
 
@@ -139,7 +262,7 @@ export const PrescriptionDetailPage = () => {
         );
     }
 
-    if (!currentPrescription) {
+    if (!currentPrescription || !prescriptionData) {
         return (
             <MainLayout>
                 <div style={{ padding: '40px', textAlign: 'center' }}>처방전을 찾을 수 없습니다</div>
@@ -147,126 +270,261 @@ export const PrescriptionDetailPage = () => {
         );
     }
 
-    const displayPrescription = isEditMode ? editedPrescription : currentPrescription;
+    const displayData = isEditMode ? prescriptionData : currentPrescription;
 
     return (
-        <MainLayout>
+        <MainLayout showBottomNav={false}>
             <div className={styles.container}>
                 <header className={styles.header}>
-                    <h1>{displayPrescription.pharmacyName || '약국명 미입력'}</h1>
-                    <div className={styles.meta}>
-                        <span>{displayPrescription.hospitalName || '병원명 미입력'}</span>
-                        <span>{displayPrescription.startDate} ~ {displayPrescription.endDate}</span>
-                    </div>
+                    <h1>{isEditMode ? '처방전 수정' : displayData.pharmacyName || '처방전 상세'}</h1>
+                    <p>{isEditMode ? '처방전 정보를 수정하세요' : `${displayData.hospitalName || ''} | ${displayData.startDate} ~ ${displayData.endDate}`}</p>
                 </header>
 
-                <section className={styles.section}>
-                    <h2>기본 정보</h2>
-                    <div className={styles.infoGrid}>
-                        <div className={styles.infoItem}>
-                            <span className={styles.label}>복용 기간</span>
-                            <span className={styles.value}>
-                                {displayPrescription.startDate} ~ {displayPrescription.endDate}
-                            </span>
-                        </div>
-                        <div className={styles.infoItem}>
-                            <span className={styles.label}>결제 금액</span>
-                            <span className={styles.value}>
-                                {displayPrescription.paymentAmount
-                                    ? `${displayPrescription.paymentAmount.toLocaleString()}원`
-                                    : '-'}
-                            </span>
-                        </div>
-                        <div className={styles.infoItem}>
-                            <span className={styles.label}>메모</span>
-                            <span className={styles.value}>{displayPrescription.notes || '-'}</span>
-                        </div>
+                {/* 처방전 기본 정보 */}
+                <section className={styles.prescriptionInfo}>
+                    <h2>처방전 정보</h2>
+                    <div className={styles.formGrid}>
+                        <label>
+                            약국명
+                            {isEditMode ? (
+                                <input
+                                    type="text"
+                                    value={prescriptionData.pharmacyName}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        pharmacyName: e.target.value
+                                    }))}
+                                    placeholder="예: 청독약국"
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                                    {displayData.pharmacyName || '-'}
+                                </div>
+                            )}
+                        </label>
+
+                        <label>
+                            병원명
+                            {isEditMode ? (
+                                <input
+                                    type="text"
+                                    value={prescriptionData.hospitalName}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        hospitalName: e.target.value
+                                    }))}
+                                    placeholder="예: 서울대학교병원"
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                                    {displayData.hospitalName || '-'}
+                                </div>
+                            )}
+                        </label>
+
+                        <label>
+                            복용 시작일
+                            {isEditMode ? (
+                                <input
+                                    type="date"
+                                    value={prescriptionData.startDate}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        startDate: e.target.value
+                                    }))}
+                                    required
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                                    {displayData.startDate}
+                                </div>
+                            )}
+                        </label>
+
+                        <label>
+                            복용 종료일
+                            {isEditMode ? (
+                                <input
+                                    type="date"
+                                    value={prescriptionData.endDate}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        endDate: e.target.value
+                                    }))}
+                                    required
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                                    {displayData.endDate}
+                                </div>
+                            )}
+                        </label>
+
+                        <label>
+                            결제 금액
+                            {isEditMode ? (
+                                <input
+                                    type="number"
+                                    value={prescriptionData.paymentAmount || ''}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        paymentAmount: parseInt(e.target.value) || null
+                                    }))}
+                                    placeholder="금액 입력"
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                                    {displayData.paymentAmount ? `${displayData.paymentAmount.toLocaleString()}원` : '-'}
+                                </div>
+                            )}
+                        </label>
+
+                        <label>
+                            메모
+                            {isEditMode ? (
+                                <textarea
+                                    value={prescriptionData.notes}
+                                    onChange={(e) => setPrescriptionData(prev => ({
+                                        ...prev,
+                                        notes: e.target.value
+                                    }))}
+                                    placeholder="메모 입력"
+                                    rows={3}
+                                />
+                            ) : (
+                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px', minHeight: '60px' }}>
+                                    {displayData.notes || '-'}
+                                </div>
+                            )}
+                        </label>
                     </div>
 
-                    <div style={{ marginTop: '20px' }}>
-                        <span className={styles.label} style={{ display: 'block', marginBottom: '8px', fontSize: '0.85rem', color: '#888' }}>
-                            복용 시간
-                        </span>
-                        <div className={styles.intakeTimes}>
-                            {displayPrescription.intakeTimes?.map((time, index) => (
-                                <span key={index} className={styles.timeChip}>{time}</span>
+                    {/* 복용 시간 설정 */}
+                    <div className={styles.intakeTimes}>
+                        <h3>복용 시간 ({displayData.intakeTimes?.length || 0})</h3>
+                        <div className={styles.timeList}>
+                            {displayData.intakeTimes?.map((time, index) => (
+                                <div key={index} className={styles.timeItem}>
+                                    {time}
+                                    {isEditMode && (
+                                        <button onClick={() => handleRemoveTime(time)}>×</button>
+                                    )}
+                                </div>
                             ))}
                         </div>
+                        {isEditMode && (
+                            <div className={styles.addTime}>
+                                <input
+                                    type="time"
+                                    value={newTime}
+                                    onChange={(e) => setNewTime(e.target.value)}
+                                />
+                                <button onClick={handleAddTime} type="button">시간 추가</button>
+                            </div>
+                        )}
                     </div>
                 </section>
 
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h2 style={{ margin: 0 }}>처방약 목록 ({displayPrescription.medications?.length || 0})</h2>
-                        {!isEditMode && (
+                {/* 약 목록 */}
+                <section className={styles.medicationList}>
+                    <div className={styles.listHeader}>
+                        <h2>처방약 {displayData.medications?.length || 0}개</h2>
+                        {isEditMode && (
                             <button
+                                type="button"
                                 onClick={() => {
+                                    setEditingMedicationIndex(null);
                                     setInitialMedication(null);
-                                    setShowSearchModal(true);
+                                    setShowModal(true);
                                 }}
-                                style={{
-                                    padding: '6px 12px',
-                                    backgroundColor: '#4A90E2',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '6px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.9rem'
-                                }}
+                                className={styles.addButton}
                             >
                                 + 약 추가
                             </button>
                         )}
                     </div>
-                    <div className={styles.medicationList}>
-                        {displayPrescription.medications?.map((medication) => (
+
+                    <div className={styles.medications}>
+                        {displayData.medications?.map((medication, index) => (
                             <MedicationCardInPrescription
-                                key={medication.id}
-                                medication={{
-                                    ...medication,
-                                    category: medication.ingredient,
-                                    dosageAmount: parseInt(medication.dosage) || 1,
-                                }}
-                                intakeTimes={displayPrescription.intakeTimes}
-                                onEdit={() => toast.info('개별 약 수정은 준비 중입니다')}
-                                onRemove={isEditMode ? () => handleRemoveMedication(medication.id) : null}
+                                key={index}
+                                medication={medication}
+                                intakeTimes={displayData.intakeTimes}
+                                onEdit={isEditMode ? () => handleEditMedication(medication, index) : null}
+                                onRemove={isEditMode ? () => handleRemoveMedication(index) : null}
                             />
                         ))}
+
+                        {displayData.medications?.length === 0 && (
+                            <div className={styles.emptyState}>
+                                <p>약을 추가해주세요</p>
+                            </div>
+                        )}
                     </div>
                 </section>
 
-                <div className={styles.actions}>
+                {/* 저장 버튼 */}
+                <footer className={styles.footer}>
                     {isEditMode ? (
                         <>
-                            <button onClick={handleCancelEdit} className={styles.deleteButton}>
+                            <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className={styles.cancelButton}
+                                disabled={loading}
+                            >
                                 취소
                             </button>
-                            <button onClick={handleSaveEdit} className={styles.editButton}>
-                                저장
+                            <button
+                                type="button"
+                                onClick={handleSave}
+                                className={styles.submitButton}
+                                disabled={loading || prescriptionData.medications.length === 0}
+                            >
+                                {loading ? '저장 중...' : '저장'}
                             </button>
                         </>
                     ) : (
                         <>
-                            <button onClick={handleDelete} className={styles.deleteButton}>
-                                처방전 삭제
+                            <button
+                                type="button"
+                                onClick={() => navigate(-1)}
+                                className={styles.cancelButton}
+                            >
+                                뒤로
                             </button>
-                            <button onClick={handleEdit} className={styles.editButton}>
-                                처방전 수정
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className={styles.cancelButton}
+                                style={{ background: '#dc3545' }}
+                            >
+                                삭제
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleEdit}
+                                className={styles.submitButton}
+                            >
+                                수정
                             </button>
                         </>
                     )}
-                </div>
+                </footer>
             </div>
 
-            {showSearchModal && (
-                <MedicationSearchModal
-                    intakeTimes={currentPrescription.intakeTimes}
+            {/* 약 검색/수정 모달 */}
+            {showModal && (
+                <MedicationModal
+                    intakeTimes={prescriptionData.intakeTimes}
                     onAdd={handleAddMedication}
                     onClose={() => {
-                        setShowSearchModal(false);
+                        setShowModal(false);
+                        setEditingMedicationIndex(null);
                         setInitialMedication(null);
                     }}
                     initialMedication={initialMedication}
+                    mode={editingMedicationIndex !== null ? 'edit' : 'add'}
                 />
             )}
         </MainLayout>

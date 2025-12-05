@@ -54,7 +54,7 @@ class DietApiClient extends ApiClient {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: 120000,
+      timeout: 300000,
     }, {
       mockResponse: () => ({
         foodName: foodName || 'Mock Food',

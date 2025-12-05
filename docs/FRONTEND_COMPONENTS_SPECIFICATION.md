@@ -1640,54 +1640,6 @@ $breakpoint-xl: 1280px;
 }
 ```
 
----
-
-## 🚀 실시간 동기화 (Hocuspocus)
-
-### Hocuspocus Provider 설정
-```javascript
-// src/core/services/realtime/HocuspocusProvider.js
-import { HocuspocusProvider } from '@hocuspocus/provider';
-import * as Y from 'yjs';
-
-export class FamilySyncService {
-  constructor(familyGroupId, userId) {
-    this.doc = new Y.Doc();
-    this.provider = new HocuspocusProvider({
-      url: 'ws://your-server.com',
-      name: `family-group-${familyGroupId}`,
-      document: this.doc,
-      token: localStorage.getItem('accessToken')
-    });
-
-    this.medicationLogs = this.doc.getMap('medicationLogs');
-    this.onlineUsers = this.doc.getArray('onlineUsers');
-  }
-
-  // 복용 체크 동기화
-  logMedicationCompletion(medicationId, timestamp) {
-    this.medicationLogs.set(`${medicationId}-${timestamp}`, {
-      medicationId,
-      timestamp,
-      completed: true
-    });
-  }
-
-  // 실시간 변경사항 구독
-  subscribeToChanges(callback) {
-    this.medicationLogs.observe((event) => {
-      callback(event.changes);
-    });
-  }
-
-  // 연결 해제
-  disconnect() {
-    this.provider.disconnect();
-  }
-}
-```
-
----
 
 ## 📖 참고 문서
 

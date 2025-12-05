@@ -32,12 +32,7 @@ export const FamilyManagementPage = () => {
     loading,
     removeMember,
     error,
-    isSyncing,
-    lastSyncTime,
-    onlineUsers,
-    connectionStatus,
     onlineMemberIds,
-    syncEvents,
     refetchFamily,
   } = useFamilySync()
 
@@ -255,40 +250,6 @@ export const FamilyManagementPage = () => {
           </div>
         ) : (
           <>
-            <div className={styles.syncMeta}>
-              <span className={styles.statusBadge} data-state={connectionStatus}>
-                {connectionStatus === 'connected' && (isSyncing ? '동기화 중...' : '실시간 연결')}
-                {connectionStatus === 'connecting' && '연결 중...'}
-                {connectionStatus === 'waiting' && '대기'}
-                {connectionStatus === 'disabled' && '실시간 비활성화'}
-              </span>
-              {lastSyncTime && (
-                <span className={styles.syncTime}>
-                  마지막 동기화 {lastSyncTime.toLocaleTimeString('ko-KR')}
-                </span>
-              )}
-              {onlineUsers?.length > 0 && (
-                <span className={styles.onlineCount}>
-                  현재 접속 {onlineUsers.length}명
-                </span>
-              )}
-            </div>
-            {syncEvents?.length > 0 && (
-              <ul className={styles.syncTimeline} role="log" aria-live="polite">
-                {syncEvents.map((event) => (
-                  <li key={event.id}>
-                    <span className={styles.timelineTime}>
-                      {event.timestamp.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className={styles.timelineLabel}>
-                      {event.type === 'status' && `상태: ${event.status}`}
-                      {event.type === 'members' && `구성원 ${event.count}명 동기화`}
-                      {!['status', 'members'].includes(event.type) && '변경 사항 수신'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
             <FamilyGroupCard group={selectedGroup || familyGroup} memberCount={selectedMembers.length} />
             <FamilyMemberList
               members={selectedMembers}

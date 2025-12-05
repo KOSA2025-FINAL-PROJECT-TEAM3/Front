@@ -1,3 +1,5 @@
+
+
 /**
  * useFamilySync
  * - Stage 3 mock hook (Hocuspocus 없이도 동작)
@@ -7,8 +9,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useFamily } from './useFamily'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { toast } from '@shared/components/toast/toastStore'
-import { FamilySyncService } from '../services/familySyncService'
 
 export const useFamilySync = () => {
   const {
@@ -35,7 +35,6 @@ export const useFamilySync = () => {
   }))
 
   const [connectionStatus, setConnectionStatus] = useState('disabled')
-  const [onlineUsers, setOnlineUsers] = useState([])
   const [lastSyncTime, setLastSyncTime] = useState(new Date())
   const [syncEvents, setSyncEvents] = useState([])
 
@@ -60,42 +59,11 @@ export const useFamilySync = () => {
   }, [])
 
   useEffect(() => {
-    if (!realtimeEnabled || !familyGroup?.id || !token || !FamilySyncService.isSupported()) {
+    if (!realtimeEnabled || !familyGroup?.id || !token) {
       const nextStatus = realtimeEnabled ? 'waiting' : 'disabled'
       setConnectionStatus(nextStatus)
       pushSyncEvent({ type: 'status', status: nextStatus })
       return
-    }
-
-    const wsUrl = import.meta.env.VITE_WS_BASE_URL
-    const service = new FamilySyncService({
-      groupId: familyGroup.id,
-      userId: user?.id || 'anonymous',
-      token,
-      wsUrl,
-    })
-
-    const disposers = [
-      service.onStatusChange((status) => {
-        setConnectionStatus(status)
-        if (status === 'connected') {
-          setLastSyncTime(new Date())
-        }
-        pushSyncEvent({ type: 'status', status })
-      }),
-      service.subscribeToOnlineUsers((users) => {
-        setOnlineUsers(users || [])
-      }),
-      service.onError((error) => {
-        console.error('[useFamilySync] Sync error:', error)
-        toast.error(`실시간 동기화 오류: ${error.message}`)
-        pushSyncEvent({ type: 'error', message: error.message })
-      }),
-    ]
-
-    return () => {
-      disposers.forEach((dispose) => dispose?.())
-      service.disconnect()
     }
   }, [familyGroup?.id, token, user?.id, realtimeEnabled, pushSyncEvent])
 
@@ -106,13 +74,6 @@ export const useFamilySync = () => {
     }
   }, [familyGroup, members, pushSyncEvent])
 
-  const derivedOnlineIds = useMemo(() => {
-    if (onlineUsers?.length) {
-      return onlineUsers.map((user) => user?.id || user)
-    }
-    // fallback: everyone considered online when realtime disabled
-    return members.map((member) => member.id)
-  }, [onlineUsers, members])
 
   return {
     familyGroup,
@@ -122,8 +83,6 @@ export const useFamilySync = () => {
     refetchFamily,
     loading,
     error,
-    onlineUsers,
-    onlineMemberIds: derivedOnlineIds,
     connectionStatus,
     isConnected: connectionStatus === 'connected',
     isSyncing: loading || connectionStatus === 'connecting',

@@ -40,9 +40,9 @@ export const MealCard = ({ meal, onEdit, onDelete, readOnly = false }) => {
     // Backend와 동기화: "경고" = DANGER 레벨
     const normalizedLevel =
       level === '좋음' ? 'GOOD' :
-      level === '주의' ? 'WARNING' :
-      level === '경고' ? 'DANGER' :  // Backend enum의 displayName
-      level
+        level === '주의' ? 'WARNING' :
+          level === '경고' ? 'DANGER' :  // Backend enum의 displayName
+            level
 
     switch (normalizedLevel) {
       case 'GOOD':
@@ -222,7 +222,7 @@ export const MealCard = ({ meal, onEdit, onDelete, readOnly = false }) => {
                 <AccordionDetails sx={{ pt: 1, pb: 1 }}>
                   <Stack spacing={1}>
                     {diseaseInteractions.map((disease, idx) => (
-                      <Box key={idx} sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1, borderLeft: '3px solid', borderColor: isDanger ? 'error.main' : 'info.main' }}>
+                      <Box key={idx} sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1, borderLeft: '3px solid', borderColor: isDanger ? 'error.main' : 'warning.main' }}>
                         <Typography variant="subtitle2" fontWeight="600" color="text.primary">
                           {disease.diseaseName}
                         </Typography>
