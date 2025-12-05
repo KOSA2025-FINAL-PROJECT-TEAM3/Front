@@ -311,6 +311,15 @@ export const FamilyChatConversationPage = () => {
           }
 
           setMessages((prev) => {
+            // [FIX] 실시간 메시지 수신 시 닉네임 누락 해결
+            // 닉네임이 없으면 familyGroup.members에서 ID로 찾아서 넣어줌
+            if (!body.memberNickname && familyGroup?.members) {
+                const sender = familyGroup.members.find(m => m.id == body.familyMemberId);
+                if (sender) {
+                    body.memberNickname = sender.nickname || sender.name;
+                }
+            }
+
             if (body.familyMemberId === 0 && body.id) {
               const aiLoadingIndex = prev.findIndex(m => m.id === AI_LOADING_TEMP_ID);
               if (aiLoadingIndex !== -1) {
