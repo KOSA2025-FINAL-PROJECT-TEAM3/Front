@@ -154,9 +154,22 @@ export const PillSearchTab = () => {
       toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
     } catch (err) {
       console.error('AI 검색 실패', err)
-      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
+      const errorData = err?.response?.data
+      const errorCode = errorData?.code
+      const errorMsg = errorData?.message
+      
+      if (errorCode === 'SECURITY_004' || errorMsg?.includes('약물명만') || errorMsg?.includes('약품명만')) {
+        setError('약물명만 입력해주세요. 예: 타이레놀, 아스피린')
+        toast.error('약물명만 입력해주세요.')
+      } else if (errorMsg) {
+        setError(errorMsg)
+        toast.error(errorMsg)
+      } else {
+        setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        toast.error('AI 검색에 실패했습니다.')
+      }
       setResults([])
-      toast.error('AI 검색에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -249,7 +262,7 @@ export const PillSearchTab = () => {
           <input
             type="text"
             className={styles.input}
-            placeholder="예) 타이레놀, 아스피린"
+            placeholder="약품명만 입력 (예: 타이레놀)"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             aria-label="약품명 검색어"
@@ -271,7 +284,7 @@ export const PillSearchTab = () => {
             {loading ? '검색 중...' : 'AI 검색'}
           </button>
         </form>
-        <p className={styles.hint}>검색 혹은 AI 검색 버튼을 누르고 잠시 기다려주세요.</p>
+        <p className={styles.hint}>💡 약품명만 입력해주세요. "부작용", "효능" 등 추가 지시는 넣지 마세요.</p>
         {error && <p className={styles.error}>{error}</p>}
       </section>
 
