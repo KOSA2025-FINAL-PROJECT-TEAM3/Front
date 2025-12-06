@@ -3,6 +3,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom' // useLocation 추가
 import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
@@ -19,6 +20,7 @@ export const SymptomSearchTab = () => {
   const selectionRef = useRef(null)
   const [warningOpen, setWarningOpen] = useState(false)
   const [warningContext, setWarningContext] = useState('')
+  const location = useLocation() // useLocation 훅 사용
 
   const showWarningModal = (context) => {
     setWarningContext(
@@ -92,6 +94,21 @@ export const SymptomSearchTab = () => {
       setIsAiSearch(false)
     }
   }, [query])
+
+  useEffect(() => {
+    // 음성 명령으로 자동 검색어 전달 시 처리
+    if (location.state?.autoSearch && query === '') {
+      const autoSearchQuery = location.state.autoSearch
+      setQuery(autoSearchQuery)
+      // query 상태가 업데이트 된 후 handleAiSearch가 호출되도록 setTimeout 사용
+      // (React의 상태 업데이트는 비동기적이기 때문)
+      setTimeout(() => {
+        handleAiSearch()
+      }, 0)
+      // 자동 검색이 완료되면 state를 비워서 불필요한 재실행 방지
+      // history.replaceState(null, '', location.pathname) // 또는 navigate replace
+    }
+  }, [location.state, query, handleAiSearch]) // location.state, query, handleAiSearch를 의존성 배열에 추가
 
   useEffect(() => {
     // AI 검색 중일 때는 초기화하지 않음

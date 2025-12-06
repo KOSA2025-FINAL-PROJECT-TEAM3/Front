@@ -15,6 +15,26 @@ class MedicationApiClient extends ApiClient {
     })
   }
 
+  /**
+   * 오늘의 복용 스케줄 조회
+   * @returns {Promise<Object>} 오늘의 스케줄 정보
+   */
+  getTodayMedications() {
+    return this.get('/today', undefined, {
+      mockResponse: () => ({
+        schedules: [
+          {
+            id: 1,
+            medicationName: '타이레놀',
+            scheduledTime: '13:00',
+            isTaken: false,
+            status: 'PENDING'
+          }
+        ]
+      })
+    })
+  }
+
   create(payload) {
     return this.post('/', payload, undefined, {
       mockResponse: () => ({

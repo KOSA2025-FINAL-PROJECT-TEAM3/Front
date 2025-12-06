@@ -7,6 +7,8 @@ import { matchVoiceCommand } from '../utils/voiceCommandMatcher'
 import { setNavigator } from '@core/routing/navigation' // 전역 네비게이터 사용
 import { useNavigate } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
+import { medicationApiClient } from '@core/services/api/medicationApiClient'
+import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 
 export const useVoiceRecognition = () => {
   const { 
@@ -60,6 +62,50 @@ export const useVoiceRecognition = () => {
     recognitionRef.current = recognition
   }, [setIsListening, setTranscript, setFeedbackMessage])
 
+  // API 명령 처리 핸들러
+  const handleApiCommand = useCallback(async (command) => {
+    console.log('[Voice] API Command:', command)
+
+    if (command.target === 'COMPLETE_MEDICATION') {
+      // 1. 투약 완료 처리
+      try {
+        setFeedbackMessage('투약 기록을 확인하고 있습니다...')
+        const response = await medicationApiClient.getTodayMedications()
+        
+        // 응답 구조가 { schedules: [...] } 라고 가정 (백엔드 응답에 따라 조정 필요)
+        // 만약 List<Response>라면 response 자체가 배열일 수 있음. 안전하게 처리.
+        const schedules = response.schedules || (Array.isArray(response) ? response : [])
+        
+        // 아직 복용하지 않은(isTaken === false) 첫 번째 스케줄 찾기
+        // (더 정교하게 하려면 현재 시간과 가장 가까운 스케줄을 찾아야 함)
+        const pendingSchedule = schedules.find(s => !s.isTaken)
+
+        if (pendingSchedule) {
+          await medicationLogApiClient.completeMedication(pendingSchedule.id)
+          
+          // 약 이름이 있으면 이름을 포함해서 피드백
+          const medName = pendingSchedule.medicationName || '약'
+          setFeedbackMessage(`${medName} 복용을 기록했습니다.`)
+          
+          setTimeout(() => {
+            navigate('/medication') // 확인을 위해 약 관리 화면으로 이동
+          }, 1500)
+        } else {
+          setFeedbackMessage('오늘 예정된 약은 이미 모두 드셨거나 일정이 없습니다.')
+        }
+      } catch (e) {
+        console.error('투약 완료 처리 실패:', e)
+        setFeedbackMessage('투약 기록 중 오류가 발생했습니다.')
+      }
+
+    } else if (command.target === 'SEARCH_SYMPTOM') {
+      // 2. 증상 검색
+      // "머리가 아파" -> "머리가 아파" 텍스트를 가지고 검색 화면으로 이동
+      // 검색 화면에서 location.state.query를 받아 검색하도록 구현 필요
+      navigate('/search', { state: { autoSearch: command.originalText } })
+    }
+  }, [navigate, setFeedbackMessage])
+
   // 실제 명령 처리 로직 (음성 인식이 끝났을 때 호출하거나, 버튼을 다시 눌렀을 때 처리)
   const processCommand = useCallback((finalTranscript) => {
     if (!finalTranscript) return
@@ -75,13 +121,19 @@ export const useVoiceRecognition = () => {
           navigate(command.target)
         } else if (command.type === 'ACTION' && command.target === 'GO_BACK') {
           navigate(-1)
+        } else if (command.type === 'API_CALL') {
+          handleApiCommand(command)
+          // API 호출은 비동기일 수 있으므로 reset() 타이밍 주의 (여기선 간단히 처리)
         }
-        reset() // 상태 초기화
+        
+        if (command.type !== 'API_CALL') { // API 호출은 내부에서 피드백 주므로 여기선 리셋 안함
+           reset() 
+        }
       }, 800)
     } else {
       setFeedbackMessage('잘 못 알아들었어요. 다시 말씀해주세요.')
     }
-  }, [navigate, reset, setFeedbackMessage])
+  }, [navigate, reset, setFeedbackMessage, handleApiCommand])
 
   const startVoice = useCallback(() => {
     if (recognitionRef.current && !isListening) {

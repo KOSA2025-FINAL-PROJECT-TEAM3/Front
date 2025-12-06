@@ -63,5 +63,34 @@ export const matchVoiceCommand = (transcript) => {
     return { type: 'ACTION', target: 'GO_BACK', message: '이전 화면으로 갑니다.' }
   }
 
+  // 3. API 실행 명령 (투약 체크, 증상 검색)
+  const actionCommands = [
+    {
+      // 투약 완료: "약 먹었어", "복용 완료"
+      keywords: ['먹었어', '완료', '체크', '했어'],
+      requiredContext: ['약', '복용'],
+      type: 'API_CALL',
+      target: 'COMPLETE_MEDICATION',
+      message: '약을 복용하셨군요! 기록을 확인합니다.'
+    },
+    {
+      // 증상/약 검색: "머리 아파", "이 약 뭐야", "배 아픈데"
+      keywords: ['아파', '증상', '때문에', '효능', '부작용', '뭐야'],
+      requiredContext: ['약', '머리', '배', '허리', '다리', '검색', '알려줘'],
+      type: 'API_CALL',
+      target: 'SEARCH_SYMPTOM',
+      message: '관련 증상이나 약 정보를 검색해 드릴게요.'
+    }
+  ]
+
+  for (const cmd of actionCommands) {
+    const hasContext = cmd.requiredContext ? cmd.requiredContext.some(k => cleanText.includes(k)) : true
+    const hasKeyword = cmd.keywords.some(k => cleanText.includes(k))
+    
+    if (hasContext && hasKeyword) {
+      return { type: cmd.type, target: cmd.target, message: cmd.message, originalText: cleanText }
+    }
+  }
+
   return null // 매칭되는 명령 없음
 }
