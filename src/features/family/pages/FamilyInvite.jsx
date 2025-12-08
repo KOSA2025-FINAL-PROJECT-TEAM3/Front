@@ -45,7 +45,9 @@ export const FamilyInvitePage = () => {
   const [acceptingId, setAcceptingId] = useState(null)
   const [regenerating, setRegenerating] = useState(false)
 
-  const sentInvites = useMemo(() => invites?.sent || [], [invites])
+  const sentInvites = useMemo(() => {
+    return (invites?.sent || []).filter((inv) => inv.status === 'PENDING')
+  }, [invites])
   const receivedInvites = useMemo(() => invites?.received || [], [invites])
   const hasGroup = Boolean(familyGroup?.id)
 
@@ -140,7 +142,6 @@ export const FamilyInvitePage = () => {
     setCancelingId(inviteId)
     try {
       await cancelInvite?.(inviteId)
-      await loadInvites?.()
       toast.success('초대가 취소되었습니다.')
     } catch (error) {
       console.warn('[FamilyInvite] cancelInvite failed', error)
@@ -266,7 +267,7 @@ export const FamilyInvitePage = () => {
               return (
                 <li key={inviteId}>
                   <div className={styles.inviteMeta}>
-                    <span className={styles.email}>{invite.inviteeEmail || '이메일 미지정'}</span>
+                    <span className={styles.email}>{invite.intendedForEmail || invite.inviteeEmail || '이메일 미지정'}</span>
                     <span className={styles.role}>{invite.suggestedRole || '역할 미정'}</span>
                     {invite.expiresAt && (
                       <span className={styles.expiry}>

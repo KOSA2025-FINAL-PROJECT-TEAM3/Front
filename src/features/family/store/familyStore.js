@@ -78,7 +78,10 @@ export const useFamilyStore = create((set, get) => ({
 
       // 2. [선택적] 초대 목록 (invites) 로드 (실패 허용)
       try {
-        inviteList = await familyApiClient.getInvites()
+        // 현재 selectedGroupId가 있으면 유지, 없으면 첫 번째 그룹 사용
+        const currentGroupId = get().selectedGroupId
+        const targetGroupId = currentGroupId || summary?.groups?.[0]?.id || null
+        inviteList = await familyApiClient.getInvites(targetGroupId)
       } catch (inviteError) {
         const status = inviteError?.response?.status
         if (status === 401) {
@@ -89,9 +92,13 @@ export const useFamilyStore = create((set, get) => ({
         }
       }
 
+      // 현재 selectedGroupId가 있으면 유지, 없으면 첫 번째 그룹 자동 선택
+      const currentGroupId = get().selectedGroupId
+      const nextSelectedGroupId = currentGroupId || summary?.groups?.[0]?.id || null
+
       const nextState = {
         familyGroups: summary?.groups || [],
-        selectedGroupId: summary?.groups?.[0]?.id || null,  // 첫 번째 그룹 자동 선택
+        selectedGroupId: nextSelectedGroupId,
         members: summary?.members || [],
         invites: normalizeInvites(inviteList),
         error: summaryError ? summaryError : null,
@@ -142,13 +149,18 @@ export const useFamilyStore = create((set, get) => ({
       console.log('[familyStore] inviteMember - fullPayload:', fullPayload)
 
       const res = await familyApiClient.inviteMember(fullPayload)
-      set((state) => ({
-        invites: {
-          sent: res ? [res, ...(state.invites?.sent || [])] : state.invites?.sent || [],
-          received: state.invites?.received || [],
-        },
-        error: null,
-      }))
+
+      // 초대 생성 후 현재 그룹의 초대 목록 다시 로드
+      try {
+        const inviteList = await familyApiClient.getInvites(groupId)
+        set((state) => ({
+          invites: normalizeInvites(inviteList),
+          error: null,
+        }))
+      } catch (e) {
+        console.warn('[familyStore] inviteMember - failed to reload invites:', e.message)
+      }
+
       return res
     }),
 
@@ -163,7 +175,8 @@ export const useFamilyStore = create((set, get) => ({
 
   loadInvites: async () =>
     withLoading(set, async () => {
-      const invites = await familyApiClient.getInvites()
+      const groupId = get().selectedGroupId
+      const invites = await familyApiClient.getInvites(groupId)
       set((state) => ({
         invites: normalizeInvites(invites),
         error: null,
@@ -182,6 +195,16 @@ export const useFamilyStore = create((set, get) => ({
         error: null,
       }))
     }),
+
+  // SSE 이벤트용 헬퍼: 초대 ID로 보낸 초대 목록에서 제거
+  removeInviteById: (inviteId) => {
+    set((state) => ({
+      invites: {
+        sent: (state.invites?.sent || []).filter((inv) => inv.id !== inviteId),
+        received: state.invites?.received || [],
+      },
+    }))
+  },
 
   acceptInvite: async (inviteCode) =>
     withLoading(set, async () => {
