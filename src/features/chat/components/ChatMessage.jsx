@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import styles from './ChatMessage.module.scss'
+import ReactMarkdown from 'react-markdown' // react-markdown 라이브러리 추가
 
 /**
  * ChatMessage - 채팅 메시지 말풍선 컴포넌트
@@ -66,7 +67,16 @@ export const ChatMessage = ({ message, isMe, sender }) => {
             </p>
           ) : (
             // [GEMINI-FIX]: 그 외의 경우 텍스트 메시지를 렌더링
-            <p className={styles.text}>{message.content}</p>
+            <ReactMarkdown
+              components={{
+                p: ({ node, ...props }) => <p className={styles.text} {...props} />,
+                // 필요하다면 다른 HTML 요소(h1, h2, ul, li 등)에도 스타일을 적용할 수 있습니다.
+                // h1: ({ node, ...props }) => <h1 className={styles.markdownH1} {...props} />,
+                // ul: ({ node, ...props }) => <ul className={styles.markdownUl} {...props} />,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
           )}
         </div>
         
