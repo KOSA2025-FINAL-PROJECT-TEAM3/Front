@@ -86,7 +86,18 @@ export const SymptomSearchTab = () => {
       setDetailLoading(false)
     } catch (err) {
       console.error('증상 AI 검색 실패', err)
-      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
+      const errorData = err?.response?.data
+      const errorCode = errorData?.code
+      const errorMsg = errorData?.message
+      
+      if (errorCode === 'SECURITY_005' || errorMsg?.includes('증상만')) {
+        setError('증상만 입력해주세요. 예: 두통, 어지러움')
+      } else if (errorMsg) {
+        setError(errorMsg)
+      } else {
+        setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      }
       setAiLoading(false)
       setDetailLoading(false)
       setIsAiSearch(false)
