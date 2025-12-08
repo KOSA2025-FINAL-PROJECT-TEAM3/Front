@@ -45,6 +45,14 @@ export const useNotificationStream = (onNotification) => {
           })
           break
 
+        case 'invite.accepted':
+          // 초대 수락 알림 - 보낸 초대 목록에서 제거
+          import('@features/family/store/familyStore').then(({ useFamilyStore }) => {
+            useFamilyStore.getState().removeInviteById(data.inviteId)
+          })
+          toast.success(data.message || '초대가 수락되었습니다')
+          break
+
         default:
           // 기타 알림 (정보 토스트)
           toast.info(data.message || '새로운 알림이 있습니다')

@@ -68,14 +68,14 @@ class FamilyApiClient extends ApiClient {
         createdAt: group?.createdAt,
         members: Array.isArray(group?.members)
           ? group.members.map((member) => ({
-              id: member?.id?.toString() ?? member?.userId?.toString(),
-              userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
-              name: member?.user?.name || member?.userName || '이름 없음',
-              email: member?.user?.email || member?.userEmail || '',
-              role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
-              joinedAt: member?.joinedAt || new Date().toISOString(),
-              raw: member,
-            }))
+            id: member?.id?.toString() ?? member?.userId?.toString(),
+            userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
+            name: member?.user?.name || member?.userName || '이름 없음',
+            email: member?.user?.email || member?.userEmail || '',
+            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            joinedAt: member?.joinedAt || new Date().toISOString(),
+            raw: member,
+          }))
           : [],
       }
     })
@@ -85,8 +85,9 @@ class FamilyApiClient extends ApiClient {
     return this.delete(`/groups/${groupId}`)
   }
 
-  getInvites() {
-    return this.get('/invites')
+  getInvites(groupId) {
+    const query = groupId ? `?groupId=${groupId}` : ''
+    return this.get(`/invites${query}`)
   }
 
   inviteMember(payload) {

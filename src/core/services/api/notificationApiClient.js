@@ -88,6 +88,21 @@ class NotificationApiClient extends ApiClient {
             }
         })
 
+        // invite.accepted 이벤트 리스너 추가
+        this.eventSource.addEventListener('invite.accepted', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'invite.accepted' })
+                }
+            } catch (error) {
+                console.error('Failed to parse invite.accepted event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
         // Handle connection errors
         this.eventSource.onerror = (error) => {
             console.error('SSE connection error:', error)
