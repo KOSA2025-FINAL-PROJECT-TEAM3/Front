@@ -13,12 +13,23 @@ import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
 import styles from './Login.module.scss'
 
+import { useInviteStore } from '@features/family/stores/inviteStore'
+
 const roleDestinationMap = {
   [USER_ROLES.SENIOR]: ROUTE_PATHS.seniorDashboard,
   [USER_ROLES.CAREGIVER]: ROUTE_PATHS.caregiverDashboard,
 }
 
 const navigateAfterAuthentication = (navigate, redirectPath) => {
+  // 1. Check for valid invite session first
+  const { isSessionValid } = useInviteStore.getState()
+  if (isSessionValid()) {
+    console.log('[Login] Redirecting to invite entry due to valid session')
+    navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
+    return
+  }
+
+  // 2. Check for explicit redirect path
   if (redirectPath) {
     navigate(redirectPath, { replace: true })
     return
