@@ -7,6 +7,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { useInviteStore } from '@features/family/stores/inviteStore'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { ROUTE_PATHS } from '@config/routes.config'
@@ -83,6 +84,14 @@ export const KakaoCallbackPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      // 1. Check for valid invite session first
+      const { isSessionValid } = useInviteStore.getState()
+      if (isSessionValid()) {
+        console.log('[KakaoCallback] Redirecting to invite entry due to valid session')
+        navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
+        return
+      }
+
       const role =
         normalizeCustomerRole(customerRole) ||
         normalizeCustomerRole(user?.customerRole)

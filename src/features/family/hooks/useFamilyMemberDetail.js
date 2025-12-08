@@ -7,15 +7,26 @@ import { familyApiClient } from '@core/services/api/familyApiClient'
  */
 export const useFamilyMemberDetail = (memberId) => {
   const members = useFamilyStore((state) => state.members || [])
+  const familyGroups = useFamilyStore((state) => state.familyGroups || [])
 
   return useQuery({
     queryKey: ['family', 'member', memberId],
     enabled: Boolean(memberId),
     staleTime: 60 * 1000,
     queryFn: async () => {
-      const target = members.find(
+      // 1. 현재 선택된 그룹의 members에서 먼저 찾기
+      let target = members.find(
         (m) => m?.id?.toString() === memberId?.toString(),
       )
+      
+      // 2. 못 찾으면 모든 그룹의 members에서 찾기
+      if (!target) {
+        const allMembers = familyGroups.flatMap((group) => group.members || [])
+        target = allMembers.find(
+          (m) => m?.id?.toString() === memberId?.toString(),
+        )
+      }
+      
       if (!target) {
         throw new Error('구성원을 찾을 수 없습니다.')
       }

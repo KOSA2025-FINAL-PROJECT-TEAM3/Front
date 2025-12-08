@@ -75,10 +75,10 @@ export const FamilyMemberDetailPage = () => {
                   <FamilyMedicationList medications={medications} />
                 )}
                 {activeTab === 'logs' && (
-                  <MedicationLogsTab userId={parseInt(id)} />
+                  <MedicationLogsTab userId={member.userId} />
                 )}
                 {activeTab === 'detail' && (
-                  <MedicationDetailTab userId={parseInt(id)} medications={medications} />
+                  <MedicationDetailTab userId={member.userId} medications={medications} />
                 )}
               </div>
             </div>

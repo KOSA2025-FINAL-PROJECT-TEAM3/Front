@@ -75,8 +75,17 @@ export const Signup = () => {
         customerRole: formData.customerRole,
       })
 
-      console.log('[Signup] Signup successful. Checking redirect:', redirectPath)
+      console.log('[Signup] Signup successful. Checking redirects...')
+      
+      // 1. Check for valid invite session first
+      const { isSessionValid } = useInviteStore.getState()
+      if (isSessionValid()) {
+        console.log('[Signup] Redirecting to invite entry due to valid session')
+        navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
+        return
+      }
 
+      // 2. Check for explicit redirect path
       if (redirectPath) {
         console.log('[Signup] Redirecting to:', redirectPath)
         navigate(redirectPath, { replace: true })
