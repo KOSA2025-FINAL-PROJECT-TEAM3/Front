@@ -13,6 +13,8 @@ import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
 import styles from './FamilyManagement.module.scss'
 
+// [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
+
 export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
@@ -20,11 +22,15 @@ export const FamilyManagementPage = () => {
   const familyGroups = useFamilyStore((state) => state.familyGroups)
   const selectedGroupId = useFamilyStore((state) => state.selectedGroupId)
   const getSelectedGroup = useFamilyStore((state) => state.getSelectedGroup)
+  const createFamilyGroup = useFamilyStore((state) => state.createFamilyGroup)
 
   const [showGroupModal, setShowGroupModal] = useState(false)
+  const [showGroupCreateModal, setShowGroupCreateModal] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState(null)
   const [dissolving, setDissolving] = useState(false)
   const [retrying, setRetrying] = useState(false)
+  const [groupName, setGroupName] = useState('')
+  const [creatingGroup, setCreatingGroup] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
   const {
     familyGroup,
@@ -103,6 +109,75 @@ export const FamilyManagementPage = () => {
         />
       )}
 
+      {/* 그룹 생성 모달 */}
+      {showGroupCreateModal && (
+        <Modal
+          isOpen={true}
+          title="가족 그룹 만들기"
+          onClose={() => {
+            setShowGroupCreateModal(false)
+            setGroupName('')
+          }}
+          footer={
+            <div className={styles.modalButtons}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={() => {
+                  setShowGroupCreateModal(false)
+                  setGroupName('')
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                className={styles.inviteButton}
+                onClick={async () => {
+                  const trimmedName = groupName.trim()
+                  if (!trimmedName) {
+                    toast.warning('그룹 이름을 입력해주세요.')
+                    return
+                  }
+                  setCreatingGroup(true)
+                  try {
+                    const group = await createFamilyGroup(trimmedName)
+                    toast.success(`가족 그룹이 생성되었습니다: ${group?.name || trimmedName}`)
+                    setGroupName('')
+                    setShowGroupCreateModal(false)
+                    await refetchFamily?.()
+                  } catch (error) {
+                    console.warn('[FamilyManagement] createGroup failed', error)
+                    const message =
+                      error?.response?.data?.message ||
+                      error?.message ||
+                      '가족 그룹 생성에 실패했습니다. 다시 시도해주세요.'
+                    toast.error(message)
+                  } finally {
+                    setCreatingGroup(false)
+                  }
+                }}
+                disabled={creatingGroup}
+              >
+                {creatingGroup ? '생성 중...' : '그룹 생성'}
+              </button>
+            </div>
+          }
+        >
+          <div className={styles.groupCreateModalContent}>
+            <p className={styles.helper}>가족 그룹을 만들어 가족을 초대하고 관리하세요.</p>
+            <input
+              type="text"
+              value={groupName}
+              placeholder="예) 우리 가족"
+              onChange={(e) => setGroupName(e.target.value)}
+              disabled={creatingGroup}
+              className={styles.groupNameInput}
+            />
+          </div>
+        </Modal>
+      )}
+
       {confirmModal && (
         <Modal
           isOpen={true}
@@ -175,10 +250,19 @@ export const FamilyManagementPage = () => {
             </button>
           )}
           <div>
+            {/* 그룹 생성 버튼 - 항상 표시 (사용자는 0개 이상의 그룹 보유 가능) */}
+            <button
+              type="button"
+              className={styles.inviteButton}
+              onClick={() => setShowGroupCreateModal(true)}
+            >
+              + 그룹 생성
+            </button>
             <button
               type="button"
               className={styles.inviteButton}
               onClick={() => navigate(ROUTE_PATHS.familyInvite)}
+              style={{ marginLeft: 8 }}
             >
               + 가족 초대
             </button>

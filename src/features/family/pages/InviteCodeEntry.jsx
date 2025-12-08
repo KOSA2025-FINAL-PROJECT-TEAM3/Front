@@ -1,15 +1,18 @@
 /**
  * InviteCodeEntry.jsx
- * 초대 코드 수동 입력 페이지 (공개)
+ * 통합 초대 랜딩 페이지
+ * - 모든 초대(링크/코드)의 진입점
+ * - 로그인 여부에 따라 분기 처리
+ * - 보안 강화: 명시적 수락 필수
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
-import { STORAGE_KEYS } from '@config/constants'
 import { publicInviteApiClient } from '@core/services/api/publicInviteApiClient'
 import { useInviteStore } from '../stores/inviteStore'
 import { useFamily } from '../hooks/useFamily'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './InviteCodeEntry.module.scss'
 
@@ -29,29 +32,22 @@ export const InviteCodeEntryPage = () => {
 
   const tokenFromUrl = searchParams.get('token')
 
+  // Stores
   const { setInviteSession, clearInviteSession, inviteSession } = useInviteStore()
+  const { isAuthenticated, user, logout: authLogout } = useAuthStore()
   const { acceptInvite, refetchFamily } = useFamily((state) => ({
     acceptInvite: state.acceptInvite,
     refetchFamily: state.refetchFamily,
   }))
 
-  const [inputCode, setInputCode] = useState('') // No initial codeFromUrl, only for manual entry
+  // Local State
+  const [inputCode, setInputCode] = useState('')
   const [status, setStatus] = useState('idle') // idle, validating, validated, accepting, success, error
   const [errorMessage, setErrorMessage] = useState('')
   const [inviteInfo, setInviteInfo] = useState(null)
 
-  const isLoggedIn = Boolean(localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN))
-
-  const handleCodeChange = (e) => {
-    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6)
-    setInputCode(value)
-    if (errorMessage) {
-      setErrorMessage('')
-    }
-  }
-
+  // 1. 코드/토큰 검증
   const handleValidateCode = useCallback(async (valueToValidate = inputCode) => {
-    // long_token (64자) vs short_code (6자) 구분
     const isLongToken = valueToValidate.length > 6
     
     if (!isLongToken && valueToValidate.length !== 6) {
@@ -64,17 +60,10 @@ export const InviteCodeEntryPage = () => {
 
     try {
       let response
-      
       if (isLongToken) {
-        // long_token인 경우: /invite/start API 호출
         response = await publicInviteApiClient.startInvite(valueToValidate)
       } else {
-        // short_code인 경우: 직접 사용 (startInvite API는 long_token만 받음)
-        // short_code는 accept 시에만 사용되므로 여기서는 세션에 저장만
-        response = {
-          shortCode: valueToValidate,
-          suggestedRole: 'SENIOR', // 기본값 (실제로는 accept 시 검증됨)
-        }
+        response = await publicInviteApiClient.getInviteInfo(valueToValidate)
       }
 
       const info = {
@@ -92,26 +81,28 @@ export const InviteCodeEntryPage = () => {
       setInviteSession(info)
       setStatus('validated')
     } catch (error) {
-      console.warn('[InviteCodeEntry] getInviteInfo failed', error)
+      console.warn('[InviteCodeEntry] Validation failed', error)
       setStatus('error')
-
       if (error?.response?.status === 400) {
         setErrorMessage('초대 코드가 만료되었거나 잘못되었습니다.')
       } else if (error?.response?.status === 404) {
         setErrorMessage('존재하지 않는 초대 코드입니다.')
+      } else if (error?.response?.status === 429) {
+        setErrorMessage('요청 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요.')
       } else {
-        setErrorMessage('초대 코드 확인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.')
+        setErrorMessage('초대 확인 중 오류가 발생했습니다.')
       }
     }
   }, [inputCode, setInviteSession])
 
+  // 2. 초기 진입 처리 (URL 토큰)
   useEffect(() => {
     if (tokenFromUrl && status === 'idle') {
-      // If token is present, validate the token
       handleValidateCode(tokenFromUrl)
     }
   }, [handleValidateCode, status, tokenFromUrl])
 
+  // 3. 세션 복원
   useEffect(() => {
     if (inviteSession && !inviteInfo && status === 'idle') {
       setInviteInfo(inviteSession)
@@ -120,8 +111,14 @@ export const InviteCodeEntryPage = () => {
     }
   }, [inviteSession, inviteInfo, status])
 
+  // 4. 초대 수락 (로그인 상태에서만 호출됨)
   const handleAcceptInvite = async () => {
     if (!inviteInfo?.shortCode && !inviteInfo?.inviteCode) return
+    if (!isAuthenticated) {
+      toast.warning('로그인이 필요합니다.')
+      handleGoToLogin()
+      return
+    }
 
     setStatus('accepting')
     const code = inviteInfo.shortCode || inviteInfo.inviteCode
@@ -142,27 +139,46 @@ export const InviteCodeEntryPage = () => {
         }
       }, 1500)
     } catch (error) {
-      console.warn('[InviteCodeEntry] acceptInvite failed', error)
+      console.warn('[InviteCodeEntry] Accept failed', error)
       setStatus('validated')
 
-      if (error?.response?.status === 400) {
-        toast.error('초대 코드가 만료되었거나 잘못되었습니다.')
-      } else if (error?.response?.status === 409) {
-        toast.error('이미 가입된 가족 그룹입니다.')
+      if (error?.response?.status === 409) {
+        toast.info('이미 가입된 가족 그룹입니다.')
         navigate(ROUTE_PATHS.family, { replace: true })
-      } else if (error?.response?.status === 401) {
-        toast.warning('로그인이 필요합니다.')
-        navigate(ROUTE_PATHS.login)
+      } else if (error?.response?.status === 403) {
+        // Identity mismatch - 초대받은 이메일과 현재 로그인된 이메일이 다름
+        toast.error('이 초대는 다른 이메일 주소로 발송되었습니다. 초대받은 이메일로 로그인해주세요.')
+        setStatus('validated') // 다시 시도할 수 있도록 상태 유지
       } else {
-        toast.error('초대 수락에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        toast.error('초대 수락에 실패했습니다. 다시 시도해주세요.')
       }
     }
   }
 
+  // 5. 로그인 페이지로 이동 (리다이렉트 URL 불필요, 세션스토리지 사용)
   const handleGoToLogin = () => {
-    const currentPath = encodeURIComponent(window.location.pathname + window.location.search)
-    console.log('[InviteCodeEntry] Redirecting to Login with path:', currentPath)
-    navigate(`${ROUTE_PATHS.login}?redirect=${currentPath}`)
+    navigate(ROUTE_PATHS.login)
+  }
+
+  // 6. 회원가입 페이지로 이동
+  const handleGoToSignup = () => {
+    navigate(ROUTE_PATHS.signup)
+  }
+
+  // 7. 로그아웃 (초대 세션 유지)
+  const handleLogout = async () => {
+    try {
+      // 현재 초대 세션 백업 (안전장치)
+      const currentSession = inviteSession
+      await authLogout()
+      // 로그아웃 후 세션 복원 (혹시 authLogout이 스토리지를 건드린 경우 대비)
+      if (currentSession) {
+        setInviteSession(currentSession)
+      }
+      window.location.reload()
+    } catch (error) {
+      console.error('Logout failed', error)
+    }
   }
 
   const handleReset = () => {
@@ -171,27 +187,10 @@ export const InviteCodeEntryPage = () => {
     setStatus('idle')
     setErrorMessage('')
     clearInviteSession()
+    navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
   }
 
-  const formatExpiry = (expiresAt) => {
-    if (!expiresAt) return null
-    const date = new Date(expiresAt)
-    const now = new Date()
-    const diffMs = date - now
-
-    if (diffMs <= 0) return '만료됨'
-
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
-
-    if (diffHours > 24) {
-      return `${Math.floor(diffHours / 24)}일 후 만료`
-    }
-    if (diffHours > 0) {
-      return `${diffHours}시간 ${diffMinutes}분 후 만료`
-    }
-    return `${diffMinutes}분 후 만료`
-  }
+  // --- Render Steps ---
 
   if (status === 'success') {
     return (
@@ -207,11 +206,10 @@ export const InviteCodeEntryPage = () => {
     )
   }
 
+  // 검증 완료 상태: 초대 카드 표시
   if (status === 'validated' && inviteInfo) {
     const role = inviteInfo.suggestedRole || 'SENIOR'
-    const expiryText = formatExpiry(inviteInfo.expiresAt)
-    const currentPath = encodeURIComponent(window.location.pathname + window.location.search)
-
+    
     return (
       <div className={styles.page}>
         <div className={styles.container}>
@@ -221,18 +219,14 @@ export const InviteCodeEntryPage = () => {
           </div>
 
           <div className={styles.inviteInfo}>
-            <h2>초대 정보</h2>
-
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>가족 그룹</span>
               <span className={styles.infoValue}>{inviteInfo.groupName}</span>
             </div>
-
             <div className={styles.infoRow}>
               <span className={styles.infoLabel}>초대한 사람</span>
               <span className={styles.infoValue}>{inviteInfo.inviterName}</span>
             </div>
-
             <div className={styles.roleSection}>
               <p>예정된 역할</p>
               <span className={`${styles.roleBadge} ${styles[role.toLowerCase()]}`}>
@@ -240,44 +234,53 @@ export const InviteCodeEntryPage = () => {
                 {ROLE_LABELS[role] || role}
               </span>
             </div>
-
-            {expiryText && (
-              <p className={styles.expiryWarning}>
-                {expiryText === '만료됨' ? '초대가 만료되었습니다.' : `약 ${expiryText}`}
-              </p>
-            )}
           </div>
 
-          <div className={styles.actions}>
-            {isLoggedIn ? (
-              <button
-                type="button"
-                className={styles.acceptButton}
-                onClick={handleAcceptInvite}
-                disabled={status === 'accepting' || expiryText === '만료됨'}
-              >
-                {status === 'accepting' ? '처리 중...' : '초대 수락'}
-              </button>
-            ) : (
-              <>
-                <button type="button" className={styles.loginButton} onClick={handleGoToLogin}>
-                  로그인하고 수락
-                </button>
+          <div className={styles.authSection}>
+            {isAuthenticated ? (
+              // Case A: 로그인 상태
+              <div className={styles.loggedInState}>
+                <div className={styles.currentUser}>
+                  <p className={styles.userLabel}>현재 접속 중인 계정</p>
+                  <p className={styles.userName}>{user?.name} ({user?.email})</p>
+                </div>
+                
                 <button
                   type="button"
                   className={styles.acceptButton}
-                  onClick={() => {
-                    console.log('[InviteCodeEntry] Navigating to:', ROUTE_PATHS.inviteSignup)
-                    navigate(ROUTE_PATHS.inviteSignup)
-                  }}
+                  onClick={handleAcceptInvite}
+                  disabled={status === 'accepting'}
                 >
-                  회원가입 후 수락
+                  {status === 'accepting' ? '처리 중...' : '이 계정으로 수락하기'}
                 </button>
-              </>
-            )}
 
+                <div className={styles.logoutSection}>
+                  <p className={styles.notYouText}>본인이 아니신가요?</p>
+                  <button 
+                    type="button" 
+                    className={styles.logoutButton} 
+                    onClick={handleLogout}
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Case B: 비로그인 상태
+              <div className={styles.loggedOutState}>
+                <p className={styles.guideText}>초대를 수락하려면 로그인이 필요합니다.</p>
+                
+                <button type="button" className={styles.loginButton} onClick={handleGoToLogin}>
+                  로그인
+                </button>
+                <button type="button" className={styles.signupButton} onClick={handleGoToSignup}>
+                  회원가입
+                </button>
+              </div>
+            )}
+            
             <button type="button" className={styles.cancelButton} onClick={handleReset}>
-              다시 코드 입력하기
+              다른 코드 입력하기
             </button>
           </div>
         </div>
@@ -285,6 +288,7 @@ export const InviteCodeEntryPage = () => {
     )
   }
 
+  // 초기 상태: 코드 입력 폼
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -295,17 +299,13 @@ export const InviteCodeEntryPage = () => {
 
         <div className={styles.form}>
           <div className={styles.inputGroup}>
-            <label htmlFor="invite-code">초대 코드</label>
             <input
-              id="invite-code"
               type="text"
               className={styles.codeInput}
               value={inputCode}
-              onChange={handleCodeChange}
-              placeholder="ABC123"
+              onChange={(e) => setInputCode(e.target.value.toUpperCase().slice(0, 6))}
+              placeholder="초대 코드 6자리"
               maxLength={6}
-              autoComplete="off"
-              autoFocus
               disabled={status === 'validating'}
             />
           </div>
@@ -316,9 +316,9 @@ export const InviteCodeEntryPage = () => {
             type="button"
             className={styles.submitButton}
             onClick={() => handleValidateCode()}
-            disabled={inputCode.length !== 6 || status === 'validating'}
+            disabled={inputCode.length < 6 || status === 'validating'}
           >
-            {status === 'validating' ? <span>확인 중...</span> : <span>코드 확인</span>}
+            {status === 'validating' ? '확인 중...' : '코드 확인'}
           </button>
         </div>
 

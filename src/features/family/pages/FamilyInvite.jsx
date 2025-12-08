@@ -20,8 +20,6 @@ export const FamilyInvitePage = () => {
     initialized,
     initialize,
     refetchFamily,
-    createFamilyGroup,
-    loading,
   } = useFamily((state) => ({
     familyGroups: state.familyGroups, // Changed
     selectedGroupId: state.selectedGroupId, // Changed
@@ -33,8 +31,7 @@ export const FamilyInvitePage = () => {
     initialized: state.initialized,
     initialize: state.initialize,
     refetchFamily: state.refetchFamily,
-    createFamilyGroup: state.createFamilyGroup,
-    loading: state.loading,
+    // [2025-12-08] createFamilyGroup과 loading 제거 (FamilyManagement로 이동)
   }))
 
   // [Fixed] Derive familyGroup from familyGroups and selectedGroupId
@@ -47,8 +44,6 @@ export const FamilyInvitePage = () => {
   const [cancelingId, setCancelingId] = useState(null)
   const [acceptingId, setAcceptingId] = useState(null)
   const [regenerating, setRegenerating] = useState(false)
-  const [groupName, setGroupName] = useState('')
-  const [creatingGroup, setCreatingGroup] = useState(false)
 
   const sentInvites = useMemo(() => invites?.sent || [], [invites])
   const receivedInvites = useMemo(() => invites?.received || [], [invites])
@@ -193,29 +188,7 @@ export const FamilyInvitePage = () => {
     }
   }
 
-  const handleCreateGroup = async () => {
-    const trimmedName = groupName.trim()
-    if (!trimmedName) {
-      toast.warning('그룹 이름을 입력해주세요.')
-      return
-    }
-    setCreatingGroup(true)
-    try {
-      const group = await createFamilyGroup(trimmedName)
-      toast.success(`가족 그룹이 생성되었습니다: ${group?.name || trimmedName}`)
-      setGroupName('')
-      await loadInvites?.()
-    } catch (error) {
-      console.warn('[FamilyInvite] createGroup failed', error)
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        '가족 그룹 생성에 실패했습니다. 다시 시도해주세요.'
-      toast.error(message)
-    } finally {
-      setCreatingGroup(false)
-    }
-  }
+  // [2025-12-08] 가족 그룹 만들기 기능은 FamilyManagement로 이동됨
 
   return (
     <Modal
@@ -228,40 +201,19 @@ export const FamilyInvitePage = () => {
       }
       onClose={() => navigate(ROUTE_PATHS.family, { replace: true })}
     >
-      <div className={styles.groupCreateSection}>
-        <div className={styles.groupCreateHeader}>
-          <h3>가족 그룹 만들기</h3>
-          {hasGroup && (
-            <span className={styles.currentGroup}>
-              현재 그룹: {familyGroup?.name || '이름 없음'} (ID: {familyGroup?.id})
-            </span>
-          )}
-        </div>
-        <p className={styles.helper}>
-          초대는 그룹 생성자만 보낼 수 있습니다. 먼저 가족 그룹을 생성한 뒤 초대를 진행해주세요.
-        </p>
-        <div className={styles.groupRow}>
-          <input
-            type="text"
-            value={groupName}
-            placeholder="예) 우리 가족"
-            onChange={(e) => setGroupName(e.target.value)}
-            disabled={creatingGroup || loading}
-          />
+      {/* 가족 그룹이 없는 경우 안내 메시지 */}
+      {!hasGroup && (
+        <div className={styles.alert}>
+          <p>가족 그룹이 없습니다. 가족 관리 페이지에서 그룹을 먼저 생성해주세요.</p>
           <button
             type="button"
-            onClick={handleCreateGroup}
-            disabled={creatingGroup || loading}
+            onClick={() => navigate(ROUTE_PATHS.family)}
+            style={{ marginTop: 8 }}
           >
-            {creatingGroup ? '생성 중...' : '그룹 생성'}
+            가족 관리로 이동
           </button>
         </div>
-        {!hasGroup && (
-          <p className={styles.alert}>아직 생성된 가족 그룹이 없습니다. 그룹을 먼저 만들어주세요.</p>
-        )}
-      </div>
-
-      <div className={styles.divider}></div>
+      )}
 
       <InviteMemberForm onSubmit={handleSubmit} loading={submitting || !hasGroup} />
 
