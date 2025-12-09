@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './styles/tailwind.css'
 import './styles/base.scss'
 import App from './App'
-import { Logger } from '@core/utils/Logger'
+import logger from '@core/utils/logger'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
@@ -14,7 +14,7 @@ if (!rootElement) {
 // Auto-remove DEV_MODE when VITE_USE_MOCK_API=false
 if (import.meta.env.VITE_USE_MOCK_API !== 'true') {
   localStorage.removeItem('amapill_dev_mode')
-  Logger.info('✅ DEV_MODE 자동 비활성화 (실제 API 모드)')
+  logger.info('✅ DEV_MODE 자동 비활성화 (실제 API 모드)')
 }
 
 const queryClient = new QueryClient({
@@ -26,15 +26,11 @@ const queryClient = new QueryClient({
   },
 })
 
-// Auto-remove DEV_MODE when VITE_USE_MOCK_API=false
-if (import.meta.env.VITE_USE_MOCK_API !== 'true') {
-  localStorage.removeItem('amapill_dev_mode')
-}
-
 createRoot(rootElement).render(
-  
+  <StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
-  
+  </StrictMode>
 )
+

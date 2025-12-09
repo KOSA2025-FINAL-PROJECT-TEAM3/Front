@@ -3,14 +3,21 @@
  * - Controls console output based on environment
  * - Provides consistent logging interface
  */
+
+const isDebugEnabled = () =>
+  import.meta.env.VITE_DEBUG === 'true'
+
+const isApiLoggingEnabled = () =>
+  import.meta.env.VITE_ENABLE_API_LOGGING === 'true'
+
 export const logger = {
   info: (...args) => {
-    if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    if (isDebugEnabled()) {
       console.log(...args)
     }
   },
   warn: (...args) => {
-    if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    if (isDebugEnabled()) {
       console.warn(...args)
     }
   },
@@ -19,15 +26,21 @@ export const logger = {
     console.error(...args)
   },
   debug: (...args) => {
-    if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    if (isDebugEnabled()) {
       console.debug(...args)
     }
   },
   log: (...args) => {
-    if (import.meta.env.DEV || import.meta.env.VITE_ENABLE_LOGGING === 'true') {
+    if (isDebugEnabled()) {
       console.log(...args)
+    }
+  },
+  api: (type, message, data) => {
+    if (isApiLoggingEnabled()) {
+      console.log(`[API ${type}]`, message, data)
     }
   },
 }
 
 export default logger
+
