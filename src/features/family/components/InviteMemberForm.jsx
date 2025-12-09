@@ -58,11 +58,12 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
       </label>
 
       <label className={styles.label}>
-        이메일<span className={styles.optional}>(선택)</span>
+        이메일
         <input
           type="email"
           placeholder="senior@example.com"
           {...register('email', {
+            required: '이메일을 입력해주세요.',
             pattern: {
               value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
               message: '유효한 이메일을 입력해주세요.',
@@ -71,7 +72,6 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
           disabled={loading}
         />
         {errors.email && <span className={styles.fieldError}>{errors.email.message}</span>}
-        <span className={styles.hint}>이메일이 없어도 초대 코드를 통해 참여할 수 있습니다.</span>
       </label>
 
       <Controller
