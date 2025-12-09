@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
@@ -38,7 +39,7 @@ export const DiseaseDetailPage = () => {
       const detail = await diseaseApiClient.getDiseaseDetail(diseaseId)
       setDisease(detail)
     } catch (error) {
-      console.error('질병 상세 조회 실패', error)
+      logger.error('질병 상세 조회 실패', error)
       setDisease(null)
     } finally {
       setLoading(false)
@@ -60,7 +61,7 @@ export const DiseaseDetailPage = () => {
       toast.success('휴지통으로 이동했습니다.')
       navigate('/disease', { replace: true })
     } catch (error) {
-      console.error('질병 삭제 실패', error)
+      logger.error('질병 삭제 실패', error)
       toast.error('삭제에 실패했습니다.')
     } finally {
       setDeleting(false)

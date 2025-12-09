@@ -4,7 +4,7 @@ import { ProfileSection } from '../components/ProfileSection.jsx'
 import { SettingsMenu } from '../components/SettingsMenu.jsx'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { ROUTE_PATHS } from '@config/routes.config'
-import { SETTINGS_MENU_DEFINITIONS } from '@/data/mockUiConstants'
+import { SETTINGS_MENU_DEFINITIONS } from '@/constants/uiConstants'
 import styles from './Settings.module.scss'
 
 export const SettingsPage = () => {

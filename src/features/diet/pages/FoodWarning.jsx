@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 
 import { useState, useEffect } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
@@ -27,7 +28,7 @@ export const FoodWarningPage = () => {
               ? JSON.parse(latest.drugInteractions)
               : latest.drugInteractions || []
           } catch (e) {
-            console.error('Failed to parse drugInteractions', e)
+            logger.error('Failed to parse drugInteractions', e)
           }
 
           try {
@@ -35,7 +36,7 @@ export const FoodWarningPage = () => {
               ? JSON.parse(latest.diseaseInteractions)
               : latest.diseaseInteractions || []
           } catch (e) {
-            console.error('Failed to parse diseaseInteractions', e)
+            logger.error('Failed to parse diseaseInteractions', e)
           }
 
           setRecentLog({
@@ -45,7 +46,7 @@ export const FoodWarningPage = () => {
           })
         }
       } catch (err) {
-        console.error('Failed to fetch diet logs:', err)
+        logger.error('Failed to fetch diet logs:', err)
         setError('식단 기록을 불러오는데 실패했습니다.')
       } finally {
         setLoading(false)

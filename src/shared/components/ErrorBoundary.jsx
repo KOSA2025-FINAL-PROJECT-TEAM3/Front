@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * ErrorBoundary Component
  * - React 에러를 잡아서 fallback UI 표시
@@ -17,7 +18,7 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    logger.error('ErrorBoundary caught an error:', error, errorInfo)
     this.setState({ error, errorInfo })
 
     // 추후 에러 로깅 서비스에 전송 (Sentry, LogRocket 등)

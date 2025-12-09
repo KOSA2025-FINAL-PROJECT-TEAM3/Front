@@ -31,7 +31,7 @@ export const PrescriptionDetailPage = () => {
     useEffect(() => {
         if (id) {
             fetchPrescription(id).catch(err => {
-                console.error('처방전 로딩 실패:', err);
+                logger.error('처방전 로딩 실패:', err);
                 toast.error('처방전 정보를 불러오는데 실패했습니다');
                 navigate(ROUTE_PATHS.medication);
             });
@@ -137,7 +137,7 @@ export const PrescriptionDetailPage = () => {
                 toast.success('처방전이 삭제되었습니다');
                 navigate(ROUTE_PATHS.medication);
             } catch (err) {
-                console.error('삭제 실패:', err);
+                logger.error('삭제 실패:', err);
                 toast.error('처방전 삭제에 실패했습니다');
             }
         }

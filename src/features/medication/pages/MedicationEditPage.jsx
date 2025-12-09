@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * 약 편집 페이지
  * @page 10-medication-edit
@@ -56,7 +57,7 @@ export const MedicationEditPage = () => {
       toast.success('약이 수정되었습니다')
       navigate(ROUTE_PATHS.medication, { replace: true })
     } catch (error) {
-      console.error('약 수정 실패:', error)
+      logger.error('약 수정 실패:', error)
       if (error.response?.data?.code === 'MEDICATION_SCHEDULE_002') {
         toast.error('오늘 복용 기록이 있어 수정할 수 없습니다.')
       } else {

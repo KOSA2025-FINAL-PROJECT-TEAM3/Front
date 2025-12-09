@@ -122,7 +122,7 @@ export const FamilyInvitePage = () => {
       await cancelInvite?.(inviteId)
       toast.success('초대가 취소되었습니다.')
     } catch (error) {
-      console.warn('[FamilyInvite] cancelInvite failed', error)
+      logger.warn('[FamilyInvite] cancelInvite failed', error)
       toast.error('초대를 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
       setCancelingId(null)
@@ -141,7 +141,7 @@ export const FamilyInvitePage = () => {
       await Promise.all([refetchFamily?.(), loadInvites?.()])
       toast.success('초대를 수락했습니다.')
     } catch (error) {
-      console.warn('[FamilyInvite] acceptInvite failed', error)
+      logger.warn('[FamilyInvite] acceptInvite failed', error)
       const friendly =
         error?.response?.status === 400
           ? '초대 코드가 만료되었거나 잘못되었습니다.'
@@ -162,7 +162,7 @@ export const FamilyInvitePage = () => {
       await navigator.clipboard.writeText(inviteLink)
       toast.success('초대 링크가 복사되었습니다.')
     } catch (err) {
-      console.warn('초대 링크 복사 실패:', err)
+      logger.warn('초대 링크 복사 실패:', err)
       toast.error('복사에 실패했습니다. 직접 선택하여 복사해 주세요.')
     }
   }

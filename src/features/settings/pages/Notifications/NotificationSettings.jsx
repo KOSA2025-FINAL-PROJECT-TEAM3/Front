@@ -1,5 +1,5 @@
 import MainLayout from '@shared/components/layout/MainLayout'
-import { NOTIFICATION_CHANNELS } from '@/data/mockUiConstants'
+import { NOTIFICATION_CHANNELS } from '@/constants/uiConstants'
 import styles from './NotificationSettings.module.scss'
 
 export const NotificationSettingsPage = () => {

@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
@@ -74,7 +75,7 @@ export const DiseasePage = () => {
       toast.success('휴지통으로 이동했습니다.')
       setShowTrash(true)
     } catch (error) {
-      console.error('질병 삭제 실패', error)
+      logger.error('질병 삭제 실패', error)
       toast.error('삭제에 실패했습니다.')
     }
   }
@@ -92,7 +93,7 @@ export const DiseasePage = () => {
       window.URL.revokeObjectURL(url)
       toast.success('PDF 다운로드를 시작합니다.')
     } catch (error) {
-      console.error('PDF 다운로드 실패', error)
+      logger.error('PDF 다운로드 실패', error)
       toast.error('PDF 다운로드에 실패했습니다.')
     } finally {
       setExporting(false)
@@ -107,7 +108,7 @@ export const DiseasePage = () => {
       toast.success('휴지통을 비웠습니다.')
       await refresh()
     } catch (error) {
-      console.error('휴지통 비우기 실패', error)
+      logger.error('휴지통 비우기 실패', error)
       toast.error('휴지통 비우기에 실패했습니다.')
     }
   }
@@ -120,7 +121,7 @@ export const DiseasePage = () => {
       await restoreDisease(diseaseId)
       toast.success('질병이 복원되었습니다.')
     } catch (error) {
-      console.error('복원 실패', error)
+      logger.error('복원 실패', error)
       toast.error('복원에 실패했습니다.')
     }
   }
@@ -145,7 +146,7 @@ export const DiseasePage = () => {
       setShowForm(false)
       setEditing(null)
     } catch (error) {
-      console.error('질병 등록 실패', error)
+      logger.error('질병 등록 실패', error)
       toast.error('저장에 실패했습니다.')
     } finally {
       setSubmitting(false)

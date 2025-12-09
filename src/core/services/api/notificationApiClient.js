@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
 
@@ -52,7 +53,7 @@ class NotificationApiClient extends ApiClient {
                     onMessage(data)
                 }
             } catch (error) {
-                console.error('Failed to parse SSE message:', error)
+                logger.error('Failed to parse SSE message:', error)
                 if (onError) {
                     onError(error)
                 }
@@ -67,7 +68,7 @@ class NotificationApiClient extends ApiClient {
                     onMessage({ ...data, type: 'medication.logged' })
                 }
             } catch (error) {
-                console.error('Failed to parse medication.logged event:', error)
+                logger.error('Failed to parse medication.logged event:', error)
                 if (onError) {
                     onError(error)
                 }
@@ -81,7 +82,7 @@ class NotificationApiClient extends ApiClient {
                     onMessage({ ...data, type: 'medication.missed' })
                 }
             } catch (error) {
-                console.error('Failed to parse medication.missed event:', error)
+                logger.error('Failed to parse medication.missed event:', error)
                 if (onError) {
                     onError(error)
                 }
@@ -96,7 +97,7 @@ class NotificationApiClient extends ApiClient {
                     onMessage({ ...data, type: 'invite.accepted' })
                 }
             } catch (error) {
-                console.error('Failed to parse invite.accepted event:', error)
+                logger.error('Failed to parse invite.accepted event:', error)
                 if (onError) {
                     onError(error)
                 }
@@ -105,9 +106,9 @@ class NotificationApiClient extends ApiClient {
 
         // Handle connection errors
         this.eventSource.onerror = (error) => {
-            console.error('SSE connection error:', error)
+            logger.error('SSE connection error:', error)
             if (this.eventSource.readyState === EventSource.CLOSED) {
-                console.warn('SSE connection closed')
+                logger.warn('SSE connection closed')
             }
             if (onError) {
                 onError(error)

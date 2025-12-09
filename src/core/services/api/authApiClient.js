@@ -1,9 +1,6 @@
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
 
-const buildMockToken = (prefix) => `${prefix}_${Date.now()}`
-const maskEmail = (email = '') => email.split('@')[0] || 'user'
-
 class AuthApiClient extends ApiClient {
   constructor() {
     super({
@@ -14,31 +11,7 @@ class AuthApiClient extends ApiClient {
 
   login(email, password) {
     const payload = { email, password }
-    const mockResponse = () => {
-      // Mock: Retrieve stored customerRole from localStorage
-      // In production, backend should return the user's role
-      const storedUserData = typeof window !== 'undefined'
-        ? window.localStorage.getItem('amapill-user-data')
-        : null
-      const storedRole = storedUserData
-        ? JSON.parse(storedUserData).customerRole || null
-        : null
-
-      return {
-        user: {
-          id: 'auth-mock-user',
-          email,
-          name: maskEmail(email),
-          userRole: 'ROLE_USER',
-          customerRole: storedRole,
-        },
-        accessToken: buildMockToken('accessToken'),
-        userRole: 'ROLE_USER',
-        customerRole: storedRole,
-      }
-    }
-
-    return this.post('/login', payload, undefined, { mockResponse })
+    return this.post('/login', payload)
   }
 
   signup(payloadOrEmail, password, name, role) {
@@ -67,38 +40,12 @@ class AuthApiClient extends ApiClient {
       customerRole,
     }
 
-    const mockResponse = () => ({
-      user: {
-        id: 'auth-mock-user',
-        email,
-        name: displayName,
-        userRole,
-        customerRole,
-      },
-      accessToken: buildMockToken('accessToken'),
-      userRole,
-      customerRole,
-    })
-
-    return this.post('/signup', requestPayload, undefined, { mockResponse })
+    return this.post('/signup', requestPayload)
   }
 
   kakaoLogin(authorizationCode) {
     const payload = { authorizationCode }
-    const mockResponse = () => ({
-      user: {
-        id: 'kakao-user',
-        email: 'user@kakao.com',
-        name: '카카오 사용자',
-        userRole: 'ROLE_USER',
-        customerRole: null,
-      },
-      accessToken: buildMockToken('accessToken'),
-      userRole: 'ROLE_USER',
-      customerRole: null,
-    })
-
-    return this.post('/kakao-login', payload, undefined, { mockResponse })
+    return this.post('/kakao-login', payload)
   }
 
   selectRole(token, role) {
@@ -108,12 +55,7 @@ class AuthApiClient extends ApiClient {
         Authorization: `Bearer ${token}`,
       },
     }
-    const mockResponse = () => ({
-      success: true,
-      customerRole: role,
-    })
-
-    return this.post('/select-role', payload, config, { mockResponse })
+    return this.post('/select-role', payload, config)
   }
 
   logout(token) {
@@ -122,9 +64,7 @@ class AuthApiClient extends ApiClient {
         Authorization: `Bearer ${token}`,
       },
     }
-    const mockResponse = () => ({ success: true })
-
-    return this.post('/logout', {}, config, { mockResponse }).catch(() => ({
+    return this.post('/logout', {}, config).catch(() => ({
       success: true,
     }))
   }

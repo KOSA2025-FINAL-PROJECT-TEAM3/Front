@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * 약 등록 페이지
  * @page 08-medication-add
@@ -30,7 +31,7 @@ export const MedicationAddPage = () => {
       toast.success('약이 등록되었습니다')
       navigate(ROUTE_PATHS.medication, { replace: true })
     } catch (error) {
-      console.error('약 등록 실패:', error)
+      logger.error('약 등록 실패:', error)
       toast.error('약 등록에 실패했습니다')
     }
   }

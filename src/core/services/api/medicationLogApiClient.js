@@ -18,13 +18,7 @@ class MedicationLogApiClient extends ApiClient {
    * @returns {Promise<Object>} 생성된 복용 기록
    */
   create(payload) {
-    return this.post('/', payload, undefined, {
-      mockResponse: () => ({
-        id: `log-${Date.now()}`,
-        ...payload,
-        createdAt: new Date().toISOString(),
-      }),
-    })
+    return this.post('/', payload)
   }
 
   /**
@@ -34,15 +28,7 @@ class MedicationLogApiClient extends ApiClient {
    * @returns {Promise<Object>} - 업데이트된 복용 기록
    */
   completeMedication(scheduleId) {
-    return this.patch(`/${scheduleId}/complete`, undefined, undefined, {
-      mockResponse: () => ({
-        id: `log-${Date.now()}`,
-        medicationScheduleId: scheduleId,
-        completed: true,
-        completedTime: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      }),
-    })
+    return this.patch(`/${scheduleId}/complete`)
   }
 
   /**

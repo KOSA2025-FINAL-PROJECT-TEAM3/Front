@@ -6,7 +6,6 @@ export const FamilyMemberList = ({
   onDetail,
   onRemove,
   onRoleChange,
-  onlineMemberIds = [],
   removingMemberId,
   roleChangingMemberId,
   currentUserId,
@@ -32,7 +31,6 @@ export const FamilyMemberList = ({
             onDetail={onDetail}
             onRemove={onRemove}
             onRoleChange={onRoleChange}
-            isOnline={onlineMemberIds.includes(member.id)}
             isRemoving={removingMemberId === member.id}
             isRoleChanging={roleChangingMemberId === member.id}
             currentUserId={currentUserId}

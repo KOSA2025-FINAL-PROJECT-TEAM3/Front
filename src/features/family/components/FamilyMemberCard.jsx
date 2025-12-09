@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import PropTypes from 'prop-types'
 import styles from './FamilyMemberCard.module.scss'
 
@@ -12,7 +12,6 @@ export const FamilyMemberCard = ({
   onDetail,
   onRemove,
   onRoleChange,
-  isOnline,
   isRemoving,
   isRoleChanging,
   currentUserId,
@@ -55,7 +54,6 @@ export const FamilyMemberCard = ({
         <div className={styles.avatar} style={{ backgroundColor: member.avatarColor || '#c7d2fe' }}>
           {initials}
         </div>
-        {isOnline && <span className={styles.onlineDot} aria-label="온라인" />}
       </div>
       <div className={styles.info}>
         <div className={styles.topRow}>
@@ -120,7 +118,6 @@ FamilyMemberCard.propTypes = {
   onDetail: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onRoleChange: PropTypes.func,
-  isOnline: PropTypes.bool,
   isRemoving: PropTypes.bool,
   isRoleChanging: PropTypes.bool,
   currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -129,7 +126,6 @@ FamilyMemberCard.propTypes = {
 
 FamilyMemberCard.defaultProps = {
   onRoleChange: null,
-  isOnline: false,
   isRemoving: false,
   isRoleChanging: false,
   currentUserId: null,

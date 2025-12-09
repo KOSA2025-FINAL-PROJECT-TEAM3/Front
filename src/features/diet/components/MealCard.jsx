@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useState } from 'react'
 import { MEAL_TYPE_LABELS } from '@config/constants'
 import { Card, CardContent, Typography, Box, Chip, IconButton, Stack, Accordion, AccordionSummary, AccordionDetails } from '@mui/material'
@@ -65,7 +66,7 @@ export const MealCard = ({ meal, onEdit, onDelete, readOnly = false }) => {
       try {
         return JSON.parse(jsonString)
       } catch (e) {
-        console.error('Failed to parse JSON:', e)
+        logger.error('Failed to parse JSON:', e)
         return []
       }
     }

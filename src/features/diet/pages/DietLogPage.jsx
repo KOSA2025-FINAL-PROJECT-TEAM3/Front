@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MealInputForm } from '../components/MealInputForm'
@@ -21,7 +22,7 @@ export const DietLogPage = () => {
       const fetchedMeals = await dietApiClient.getDietLogs()
       setAllMeals(fetchedMeals)
     } catch (error) {
-      console.error('Failed to fetch diet logs:', error)
+      logger.error('Failed to fetch diet logs:', error)
       alert('식단 기록을 불러오는데 실패했습니다.')
     } finally {
       setLoading(false)
@@ -62,7 +63,7 @@ export const DietLogPage = () => {
         setEditingMeal(null) // Reset form after successful submission
         fetchMeals() // Re-fetch to update the list
       } catch (error) {
-        console.error('Failed to add diet log:', error)
+        logger.error('Failed to add diet log:', error)
         alert('식단 기록 추가에 실패했습니다.')
       }
     },
@@ -85,7 +86,7 @@ export const DietLogPage = () => {
           await dietApiClient.deleteDietLog(mealId)
           fetchMeals() // Re-fetch to update the list
         } catch (error) {
-          console.error('Failed to delete diet log:', error)
+          logger.error('Failed to delete diet log:', error)
           alert('식단 기록 삭제에 실패했습니다.')
         }
       }
@@ -119,7 +120,7 @@ export const DietLogPage = () => {
         setEditingMeal(null) // Reset form after successful submission
         fetchMeals() // Re-fetch
       } catch (error) {
-        console.error('Failed to update diet log:', error)
+        logger.error('Failed to update diet log:', error)
         alert('식단 기록 수정에 실패했습니다.')
       }
     },
