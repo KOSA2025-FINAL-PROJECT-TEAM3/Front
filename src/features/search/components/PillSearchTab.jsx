@@ -1,8 +1,3 @@
-/**
- * 알약 검색 탭 (약품명 기반 검색)
- * AI 경고 시스템 + 처방전 선택 기능 통합 버전
- */
-
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { STORAGE_KEYS } from '@config/constants'
@@ -14,6 +9,7 @@ import Modal from '@shared/components/ui/Modal'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './PillSearchTab.module.scss'
+import logger from '@core/utils/logger'
 
 const normalizeText = (text = '') =>
   text
@@ -39,7 +35,6 @@ export const PillSearchTab = () => {
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
-  const [registeringId, setRegisteringId] = useState(null)
   
   // AI 경고 관련 상태
   const [pendingAiDrug, setPendingAiDrug] = useState(null)
@@ -51,8 +46,7 @@ export const PillSearchTab = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
   const [selectedDrug, setSelectedDrug] = useState(null)
 
-  const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
-    addMedication: state.addMedication,
+  const { medications, fetchMedications } = useMedicationStore((state) => ({
     medications: state.medications,
     fetchMedications: state.fetchMedications,
   }))
@@ -67,7 +61,7 @@ export const PillSearchTab = () => {
     if (!token || medications.length > 0) return
 
     fetchMedications().catch((err) => {
-      console.error('복용약 목록 조회 실패', err)
+      logger.error('복용약 목록 조회 실패', err)
     })
   }, [fetchMedications, medications.length])
 
@@ -116,11 +110,11 @@ export const PillSearchTab = () => {
           toast.success('AI 검색 결과를 가져왔습니다. 내용 확인 후 전문가와 상담하세요.')
           return
         } catch (fallbackErr) {
-          console.error('약품 검색 타임아웃 후 AI 검색 실패', fallbackErr)
+          logger.error('약품 검색 타임아웃 후 AI 검색 실패', fallbackErr)
         }
       }
 
-      console.error('약품 검색 실패', err)
+      logger.error('약품 검색 실패', err)
       setError('약품 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
       setResults([])
     } finally {
@@ -153,7 +147,7 @@ export const PillSearchTab = () => {
       setResults(aiWrapped)
       toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
     } catch (err) {
-      console.error('AI 검색 실패', err)
+      logger.error('AI 검색 실패', err)
       // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
       const errorData = err?.response?.data
       const errorCode = errorData?.code
@@ -188,7 +182,7 @@ export const PillSearchTab = () => {
     try {
       await fetchPrescriptions()
     } catch (err) {
-      console.error('처방전 목록 조회 실패', err)
+      logger.error('처방전 목록 조회 실패', err)
       toast.error('처방전 목록을 불러오지 못했습니다.')
     }
   }
@@ -294,15 +288,10 @@ export const PillSearchTab = () => {
         {!loading && results.length > 0 && (
           <div className={styles.resultList}>
             {results.map((drug) => {
-              const key = drug.itemSeq || drug.itemName
-              const isRegistered = medications.some(
-                (med) => (drug.itemSeq && med.itemSeq === drug.itemSeq) || med.name === drug.itemName,
-              )
-              const isRegistering = registeringId === key
               const isAiGenerated = isAiResult || !!drug.aiGenerated
 
               return (
-                <article key={`${drug.itemSeq}-${drug.itemName}`} className={styles.resultCard}>
+                <article key={drug.itemSeq || drug.itemName} className={styles.resultCard}>
                   <div className={styles.thumbnail}>
                     {drug.itemImage ? (
                       <img src={drug.itemImage} alt={`${drug.itemName} 이미지`} />
@@ -327,10 +316,10 @@ export const PillSearchTab = () => {
                         type="button"
                         className={styles.addButton}
                         onClick={() => handleRegisterMedication(drug)}
-                        disabled={isRegistering}
+                        disabled={isAiGenerated && !pendingAiDrug}
                         title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
                       >
-                        {isRegistering ? '처리 중...' : '처방전에 추가'}
+                        {isAiGenerated && !pendingAiDrug ? '처리 중...' : '처방전에 추가'}
                       </button>
                       <button
                         type="button"
@@ -406,10 +395,7 @@ export const PillSearchTab = () => {
               type="button"
               className={styles.addButton}
               onClick={confirmAiRegister}
-              disabled={
-                pendingAiDrug &&
-                registeringId === (pendingAiDrug.itemSeq || pendingAiDrug.itemName)
-              }
+              disabled={!pendingAiDrug}
             >
               계속 진행
             </button>

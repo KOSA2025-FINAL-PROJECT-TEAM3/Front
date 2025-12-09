@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useState, useEffect } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
@@ -36,7 +37,7 @@ export const WeeklyStatsPage = () => {
         setWeeklyData(dailyData || [])
         setMedications(meds || [])
       } catch (error) {
-        console.error('주간 통계 로딩 실패:', error)
+        logger.error('주간 통계 로딩 실패:', error)
         toast.error('주간 통계를 불러오는데 실패했습니다')
       } finally {
         setLoading(false)

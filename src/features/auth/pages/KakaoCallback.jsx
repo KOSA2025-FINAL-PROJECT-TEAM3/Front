@@ -87,7 +87,6 @@ export const KakaoCallbackPage = () => {
       // 1. Check for valid invite session first
       const { isSessionValid } = useInviteStore.getState()
       if (isSessionValid()) {
-        console.log('[KakaoCallback] Redirecting to invite entry due to valid session')
         navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
         return
       }

@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useQuery } from '@tanstack/react-query'
 import { useFamilyStore } from '../store/familyStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
@@ -38,7 +39,7 @@ export const useFamilyMemberDetail = (memberId) => {
           medications = await familyApiClient.getMemberMedications(target.userId)
         }
       } catch (error) {
-        console.error('약 목록 조회 실패:', error)
+        logger.error('약 목록 조회 실패:', error)
       }
 
       return {

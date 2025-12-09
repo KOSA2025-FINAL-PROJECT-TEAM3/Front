@@ -9,59 +9,64 @@
  * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
+import React, { Suspense, useEffect, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
-import { Login } from '@features/auth/pages/Login'
-import { Signup } from '@features/auth/pages/Signup'
-import { RoleSelection } from '@features/auth/pages/RoleSelection'
-import { SeniorDashboard } from '@features/dashboard/pages/SeniorDashboard'
-import { CaregiverDashboard } from '@features/dashboard/pages/CaregiverDashboard'
-import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
-import FamilyManagementPage from '@features/family/pages/FamilyManagement'
-import FamilyInvitePage from '@features/family/pages/FamilyInvite'
-import FamilyMemberDetailPage from '@features/family/pages/FamilyMemberDetail'
-import InviteCodeEntryPage from '@features/family/pages/InviteCodeEntry'
-import FamilyJoin from '@features/family/pages/FamilyJoin'
-import SettingsPage from '@features/settings/pages/Settings'
-import ProfileEditPage from '@features/settings/pages/Profile/ProfileEdit'
-import NotificationSettingsPage from '@features/settings/pages/Notifications/NotificationSettings'
-import MyMedicationsSettingsPage from '@features/settings/pages/MyMedicationsSettingsPage'
-import MyDiseasesSettingsPage from '@features/settings/pages/MyDiseasesSettingsPage'
-import PrivacyPolicyPage from '@features/settings/pages/PrivacyPolicyPage'
-import TermsOfServicePage from '@features/settings/pages/TermsOfServicePage'
-import MedicationManagementPage from '@features/medication/pages/MedicationManagement'
-import MedicationEditPage from '@features/medication/pages/MedicationEditPage'
-import PrescriptionAddPage from '@features/medication/pages/PrescriptionAddPage'
-import PrescriptionDetailPage from '@features/medication/pages/PrescriptionDetailPage'
-import TodayMedications from '@features/medication/pages/TodayMedications'
-import FoodWarningPage from '@features/diet/pages/FoodWarning'
-import DietLogPage from '@features/diet/pages/DietLogPage'
-import PrescriptionScanPage from '@features/ocr/pages/PrescriptionScan'
-import UnifiedSearchPage from '@features/search/pages/UnifiedSearchPage'
-import PillResultPage from '@features/search/pages/PillResultPage'
-import DoctorCounselPage from '@features/counsel/pages/DoctorCounsel'
-import DiseasePage from '@features/disease/pages/Disease'
-import DiseaseDetailPage from '@features/disease/pages/DiseaseDetailPage'
-import SuspectedDiseasePage from '@features/disease/pages/SuspectedDiseasePage'
-import DiseaseRestrictionsPage from '@features/disease/pages/DiseaseRestrictionsPage'
-import DoctorChatListPage from '@features/chat/pages/DoctorChatListPage'
-import ChatConversationPage from '@features/chat/pages/ChatConversationPage'
-import FamilyChatConversationPage from '@features/chat/pages/FamilyChatConversationPage'
-import NotificationPage from '@features/notification/pages/NotificationPage'
-import NotificationDetailPage from '@features/notification/pages/NotificationDetailPage'
-import AdherenceReportPage from '@features/report/pages/AdherenceReportPage'
-import WeeklyStatsPage from '@features/report/pages/WeeklyStatsPage'
-import MorePage from '@pages/more/MorePage'
-import DeveloperModePanel from '@devtools/DeveloperModePanel'
+import LoadingSpinner from '@shared/components/LoadingSpinner'
+import envConfig from '@config/environment.config'
+
+// Lazy-loaded page components
+const Login = lazy(() => import('@features/auth/pages/Login'))
+const Signup = lazy(() => import('@features/auth/pages/Signup'))
+const RoleSelection = lazy(() => import('@features/auth/pages/RoleSelection'))
+const SeniorDashboard = lazy(() => import('@features/dashboard/pages/SeniorDashboard'))
+const CaregiverDashboard = lazy(() => import('@features/dashboard/pages/CaregiverDashboard'))
+const KakaoCallbackPage = lazy(() => import('@features/auth/pages/KakaoCallback'))
+const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyManagement'))
+const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
+const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
+const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
+const FamilyJoin = lazy(() => import('@features/family/pages/FamilyJoin'))
+const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
+const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
+const NotificationSettingsPage = lazy(() => import('@features/settings/pages/Notifications/NotificationSettings'))
+const MyMedicationsSettingsPage = lazy(() => import('@features/settings/pages/MyMedicationsSettingsPage'))
+const MyDiseasesSettingsPage = lazy(() => import('@features/settings/pages/MyDiseasesSettingsPage'))
+const PrivacyPolicyPage = lazy(() => import('@features/settings/pages/PrivacyPolicyPage'))
+const TermsOfServicePage = lazy(() => import('@features/settings/pages/TermsOfServicePage'))
+const MedicationManagementPage = lazy(() => import('@features/medication/pages/MedicationManagement'))
+const MedicationEditPage = lazy(() => import('@features/medication/pages/MedicationEditPage'))
+const PrescriptionAddPage = lazy(() => import('@features/medication/pages/PrescriptionAddPage'))
+const PrescriptionDetailPage = lazy(() => import('@features/medication/pages/PrescriptionDetailPage'))
+const TodayMedications = lazy(() => import('@features/medication/pages/TodayMedications'))
+const FoodWarningPage = lazy(() => import('@features/diet/pages/FoodWarning'))
+const DietLogPage = lazy(() => import('@features/diet/pages/DietLogPage'))
+const PrescriptionScanPage = lazy(() => import('@features/ocr/pages/PrescriptionScan'))
+const UnifiedSearchPage = lazy(() => import('@features/search/pages/UnifiedSearchPage'))
+const PillResultPage = lazy(() => import('@features/search/pages/PillResultPage'))
+const DoctorCounselPage = lazy(() => import('@features/counsel/pages/DoctorCounsel'))
+const DiseasePage = lazy(() => import('@features/disease/pages/Disease'))
+const DiseaseDetailPage = lazy(() => import('@features/disease/pages/DiseaseDetailPage'))
+const SuspectedDiseasePage = lazy(() => import('@features/disease/pages/SuspectedDiseasePage'))
+const DiseaseRestrictionsPage = lazy(() => import('@features/disease/pages/DiseaseRestrictionsPage'))
+const DoctorChatListPage = lazy(() => import('@features/chat/pages/DoctorChatListPage'))
+const ChatConversationPage = lazy(() => import('@features/chat/pages/ChatConversationPage'))
+const FamilyChatConversationPage = lazy(() => import('@features/chat/pages/FamilyChatConversationPage'))
+const NotificationPage = lazy(() => import('@features/notification/pages/NotificationPage'))
+const NotificationDetailPage = lazy(() => import('@features/notification/pages/NotificationDetailPage'))
+const AdherenceReportPage = lazy(() => import('@features/report/pages/AdherenceReportPage'))
+const WeeklyStatsPage = lazy(() => import('@features/report/pages/WeeklyStatsPage'))
+const MorePage = lazy(() => import('@pages/more/MorePage'))
+const DeveloperModePanel = lazy(() => import('@devtools/DeveloperModePanel'))
+const WsTestPage = lazy(() => import('@pages/WsTestPage'))
+
 import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
 import ToastContainer from '@shared/components/toast/ToastContainer'
 import { setNavigator } from '@core/routing/navigation'
-import WsTestPage from '@pages/WsTestPage'
 import { useNotificationStream } from '@features/notification/hooks/useNotificationStream'
 
 function NavigationRegistrar() {
@@ -106,218 +111,225 @@ function HomeRedirect() {
  * @returns {JSX.Element}
  */
 function App() {
+  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
 
   return (
     <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
-          <Routes>
-            {/* 공개 페이지: 인증 불필요 */}
-            <Route path={ROUTE_PATHS.login} element={<Login />} />
-            <Route path={ROUTE_PATHS.signup} element={<Signup />} />
-            <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
-            <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
-            <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {/* 공개 페이지: 인증 불필요 */}
+              <Route path={ROUTE_PATHS.login} element={<Login />} />
+              <Route path={ROUTE_PATHS.signup} element={<Signup />} />
+              <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
+              <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
+              <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
 
-            {/* 초대 코드 입력 및 링크 진입 (공개) */}
-            <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
-            <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
+              {/* 초대 코드 입력 및 링크 진입 (공개) */}
+              <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
+              <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
 
-            {/* 보호된 페이지: 인증 필요 */}
-            <Route
-              path={ROUTE_PATHS.roleSelection}
-              element={<PrivateRoute element={<RoleSelection />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.seniorDashboard}
-              element={<PrivateRoute element={<SeniorDashboard />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.caregiverDashboard}
-              element={<PrivateRoute element={<CaregiverDashboard />} />}
-            />
+              {/* 보호된 페이지: 인증 필요 */}
+              <Route
+                path={ROUTE_PATHS.roleSelection}
+                element={<PrivateRoute element={<RoleSelection />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.seniorDashboard}
+                element={<PrivateRoute element={<SeniorDashboard />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.caregiverDashboard}
+                element={<PrivateRoute element={<CaregiverDashboard />} />}
+              />
 
-            {/* 약 관리 */}
-            <Route
-              path={ROUTE_PATHS.medication}
-              element={<PrivateRoute element={<MedicationManagementPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.medicationToday}
-              element={<PrivateRoute element={<TodayMedications />} />}
-            />
+              {/* 약 관리 */}
+              <Route
+                path={ROUTE_PATHS.medication}
+                element={<PrivateRoute element={<MedicationManagementPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.medicationToday}
+                element={<PrivateRoute element={<TodayMedications />} />}
+              />
 
-            {/* 처방전 관리 (신규) */}
-            <Route
-              path={ROUTE_PATHS.prescriptionAdd}
-              element={<PrivateRoute element={<PrescriptionAddPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.prescriptionDetail}
-              element={<PrivateRoute element={<PrescriptionDetailPage />} />}
-            />
+              {/* 처방전 관리 (신규) */}
+              <Route
+                path={ROUTE_PATHS.prescriptionAdd}
+                element={<PrivateRoute element={<PrescriptionAddPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.prescriptionDetail}
+                element={<PrivateRoute element={<PrescriptionDetailPage />} />}
+              />
 
-            {/* 기존 라우트 호환성 유지 (리다이렉트) */}
-            <Route
-              path={ROUTE_PATHS.medicationAdd}
-              element={<Navigate to={ROUTE_PATHS.prescriptionAdd} replace />}
-            />
-            <Route
-              path={ROUTE_PATHS.medicationEdit}
-              element={<PrivateRoute element={<MedicationEditPage />} />}
-            />
+              {/* 기존 라우트 호환성 유지 (리다이렉트) */}
+              <Route
+                path={ROUTE_PATHS.medicationAdd}
+                element={<Navigate to={ROUTE_PATHS.prescriptionAdd} replace />}
+              />
+              <Route
+                path={ROUTE_PATHS.medicationEdit}
+                element={<PrivateRoute element={<MedicationEditPage />} />}
+              />
 
-            {/* 검색 */}
-            <Route
-              path={ROUTE_PATHS.search}
-              element={<PrivateRoute element={<UnifiedSearchPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.pillSearch}
-              element={<Navigate to={ROUTE_PATHS.search} replace />}
-            />
-            <Route
-              path={ROUTE_PATHS.pillResult}
-              element={<PrivateRoute element={<PillResultPage />} />}
-            />
+              {/* 검색 */}
+              <Route
+                path={ROUTE_PATHS.search}
+                element={<PrivateRoute element={<UnifiedSearchPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.pillSearch}
+                element={<Navigate to={ROUTE_PATHS.search} replace />}
+              />
+              <Route
+                path={ROUTE_PATHS.pillResult}
+                element={<PrivateRoute element={<PillResultPage />} />}
+              />
 
-            {/* 질병 */}
-            <Route
-              path={ROUTE_PATHS.disease}
-              element={<PrivateRoute element={<DiseasePage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.diseaseDetail}
-              element={<PrivateRoute element={<DiseaseDetailPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.suspectedDisease}
-              element={<PrivateRoute element={<SuspectedDiseasePage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.diseaseRestrictions}
-              element={<PrivateRoute element={<DiseaseRestrictionsPage />} />}
-            />
+              {/* 질병 */}
+              <Route
+                path={ROUTE_PATHS.disease}
+                element={<PrivateRoute element={<DiseasePage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.diseaseDetail}
+                element={<PrivateRoute element={<DiseaseDetailPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.suspectedDisease}
+                element={<PrivateRoute element={<SuspectedDiseasePage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.diseaseRestrictions}
+                element={<PrivateRoute element={<DiseaseRestrictionsPage />} />}
+              />
 
-            {/* 식단 */}
-            <Route
-              path={ROUTE_PATHS.dietWarning}
-              element={<PrivateRoute element={<FoodWarningPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.dietLog}
-              element={<PrivateRoute element={<DietLogPage />} />}
-            />
+              {/* 식단 */}
+              <Route
+                path={ROUTE_PATHS.dietWarning}
+                element={<PrivateRoute element={<FoodWarningPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.dietLog}
+                element={<PrivateRoute element={<DietLogPage />} />}
+              />
 
-            {/* OCR */}
-            <Route
-              path={ROUTE_PATHS.ocrScan}
-              element={<PrivateRoute element={<PrescriptionScanPage />} />}
-            />
+              {/* OCR */}
+              <Route
+                path={ROUTE_PATHS.ocrScan}
+                element={<PrivateRoute element={<PrescriptionScanPage />} />}
+              />
 
-            {/* 상담 */}
-            <Route
-              path={ROUTE_PATHS.counsel}
-              element={<PrivateRoute element={<DoctorCounselPage />} />}
-            />
+              {/* 상담 */}
+              <Route
+                path={ROUTE_PATHS.counsel}
+                element={<PrivateRoute element={<DoctorCounselPage />} />}
+              />
 
-            {/* 설정 */}
-            <Route
-              path={ROUTE_PATHS.settings}
-              element={<PrivateRoute element={<SettingsPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.settingsProfile}
-              element={<PrivateRoute element={<ProfileEditPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.settingsNotifications}
-              element={<PrivateRoute element={<NotificationSettingsPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.myMedicationsSettings}
-              element={<PrivateRoute element={<MyMedicationsSettingsPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.myDiseasesSettings}
-              element={<PrivateRoute element={<MyDiseasesSettingsPage />} />}
-            />
+              {/* 설정 */}
+              <Route
+                path={ROUTE_PATHS.settings}
+                element={<PrivateRoute element={<SettingsPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.settingsProfile}
+                element={<PrivateRoute element={<ProfileEditPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.settingsNotifications}
+                element={<PrivateRoute element={<NotificationSettingsPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.myMedicationsSettings}
+                element={<PrivateRoute element={<MyMedicationsSettingsPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.myDiseasesSettings}
+                element={<PrivateRoute element={<MyDiseasesSettingsPage />} />}
+              />
 
-            {/* 더보기 */}
-            <Route
-              path={ROUTE_PATHS.more}
-              element={<PrivateRoute element={<MorePage />} />}
-            />
-
-
-
-            {/* 가족 */}
-            <Route
-              path={ROUTE_PATHS.family}
-              element={<PrivateRoute element={<FamilyManagementPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.familyInvite}
-              element={<PrivateRoute element={<FamilyInvitePage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.familyMemberDetail}
-              element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
-            />
+              {/* 더보기 */}
+              <Route
+                path={ROUTE_PATHS.more}
+                element={<PrivateRoute element={<MorePage />} />}
+              />
 
 
-            {/* 채팅 */}
-            <Route
-              path={ROUTE_PATHS.chatList}
-              element={<PrivateRoute element={<DoctorChatListPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.chatConversation}
-              element={<PrivateRoute element={<ChatConversationPage />} />}
-            />
 
-            <Route
-              path={ROUTE_PATHS.familyChat}
-              element={<PrivateRoute element={<FamilyChatConversationPage />} />}
-            />
+              {/* 가족 */}
+              <Route
+                path={ROUTE_PATHS.family}
+                element={<PrivateRoute element={<FamilyManagementPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.familyInvite}
+                element={<PrivateRoute element={<FamilyInvitePage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.familyMemberDetail}
+                element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
+              />
 
-            <Route
-              path={ROUTE_PATHS.familyChatByGroup}
-              element={<PrivateRoute element={<FamilyChatConversationPage />} />}
-            />
 
-            {/* 알림 */}
-            <Route
-              path={ROUTE_PATHS.notifications}
-              element={<PrivateRoute element={<NotificationPage />} />}
-            />
+              {/* 채팅 */}
+              <Route
+                path={ROUTE_PATHS.chatList}
+                element={<PrivateRoute element={<DoctorChatListPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.chatConversation}
+                element={<PrivateRoute element={<ChatConversationPage />} />}
+              />
 
-            <Route
-              path={ROUTE_PATHS.notificationDetail}
-              element={<PrivateRoute element={<NotificationDetailPage />} />}
-            />
+              <Route
+                path={ROUTE_PATHS.familyChat}
+                element={<PrivateRoute element={<FamilyChatConversationPage />} />}
+              />
 
-            {/* 리포트 */}
-            <Route
-              path={ROUTE_PATHS.adherenceReport}
-              element={<PrivateRoute element={<AdherenceReportPage />} />}
-            />
-            <Route
-              path={ROUTE_PATHS.weeklyStats}
-              element={<PrivateRoute element={<WeeklyStatsPage />} />}
-            />
+              <Route
+                path={ROUTE_PATHS.familyChatByGroup}
+                element={<PrivateRoute element={<FamilyChatConversationPage />} />}
+              />
 
-            <Route path="/ws-test" element={<WsTestPage />} />
+              {/* 알림 */}
+              <Route
+                path={ROUTE_PATHS.notifications}
+                element={<PrivateRoute element={<NotificationPage />} />}
+              />
 
-            {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}
-            <Route path={ROUTE_PATHS.root} element={<HomeRedirect />} />
+              <Route
+                path={ROUTE_PATHS.notificationDetail}
+                element={<PrivateRoute element={<NotificationDetailPage />} />}
+              />
 
-            {/* 404: 존재하지 않는 경로 */}
-            <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
-          </Routes>
+              {/* 리포트 */}
+              <Route
+                path={ROUTE_PATHS.adherenceReport}
+                element={<PrivateRoute element={<AdherenceReportPage />} />}
+              />
+              <Route
+                path={ROUTE_PATHS.weeklyStats}
+                element={<PrivateRoute element={<WeeklyStatsPage />} />}
+              />
+
+              <Route path="/ws-test" element={<WsTestPage />} />
+
+              {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}
+              <Route path={ROUTE_PATHS.root} element={<HomeRedirect />} />
+
+              {/* 404: 존재하지 않는 경로 */}
+              <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />
+            </Routes>
+          </Suspense>
           <ToastContainer />
-          <DeveloperModePanel />
+          {showDevTools && (
+            <Suspense fallback={null}>
+              <DeveloperModePanel />
+            </Suspense>
+          )}
         </FamilyProvider>
       </ErrorBoundary>
     </BrowserRouter>

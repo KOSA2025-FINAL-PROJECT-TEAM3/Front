@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useState, useEffect } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
@@ -35,7 +36,7 @@ export const AdherenceReportPage = () => {
         setAdherenceData(summary)
         setRecentHistory(dailyData || [])
       } catch (error) {
-        console.error('순응도 데이터 로딩 실패:', error)
+        logger.error('순응도 데이터 로딩 실패:', error)
         toast.error('순응도 데이터를 불러오는데 실패했습니다')
       } finally {
         setLoading(false)

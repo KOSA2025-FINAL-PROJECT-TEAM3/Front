@@ -7,6 +7,7 @@ import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
 import styles from './PrescriptionAddPage.module.scss';
+import logger from '@core/utils/logger';
 
 export const PrescriptionAddPage = () => {
     const navigate = useNavigate();
@@ -72,7 +73,7 @@ export const PrescriptionAddPage = () => {
                         notes: data.notes || ''
                     });
                 } catch (error) {
-                    console.error('처방전 로드 실패:', error);
+                    logger.error('처방전 로드 실패:', error);
                     toast.error('처방전 정보를 불러오는데 실패했습니다');
                     navigate(-1);
                 }
@@ -85,7 +86,7 @@ export const PrescriptionAddPage = () => {
     useEffect(() => {
         if (location.state?.ocrData) {
             const ocrData = location.state.ocrData;
-            console.log('🔄 OCR 데이터 로드 시작:', ocrData);
+            logger.debug('🔄 OCR 데이터 로드 시작:', ocrData);
             setPrescriptionData(prev => ({
                 ...prev,
                 ...ocrData,
@@ -101,7 +102,7 @@ export const PrescriptionAddPage = () => {
         } else if (location.state?.addDrug) {
             // 약 검색에서 온 경우
             const drug = location.state.addDrug;
-            console.log('🔄 약 검색 데이터 로드:', drug);
+            logger.debug('🔄 약 검색 데이터 로드:', drug);
 
             const medicationData = {
                 name: drug.itemName,
@@ -167,18 +168,18 @@ export const PrescriptionAddPage = () => {
 
         try {
             if (isEditMode) {
-                console.log('📤 처방전 수정 요청:', prescriptionData);
+                logger.debug('📤 처방전 수정 요청:', prescriptionData);
                 await updatePrescription(editPrescriptionId, prescriptionData);
                 toast.success('처방전이 수정되었습니다');
                 navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', editPrescriptionId), { replace: true });
             } else {
-                console.log('📤 처방전 등록 요청:', prescriptionData);
+                logger.debug('📤 처방전 등록 요청:', prescriptionData);
                 await createPrescription(prescriptionData);
                 toast.success('처방전이 등록되었습니다');
                 navigate(ROUTE_PATHS.medication, { replace: true });
             }
         } catch (error) {
-            console.error('❌ 처방전 저장 실패:', error);
+            logger.error('❌ 처방전 저장 실패:', error);
             toast.error(error.message || '처방전 저장에 실패했습니다');
         }
     };

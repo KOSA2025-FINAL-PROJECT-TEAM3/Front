@@ -1,15 +1,12 @@
-/**
- * 증상 검색 탭 컴포넌트
- */
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
+import logger from '@core/utils/logger'
 
 export const SymptomSearchTab = () => {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [results] = useState([])
   const [selectedSymptom, setSelectedSymptom] = useState(null)
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
@@ -85,7 +82,7 @@ export const SymptomSearchTab = () => {
       setAiLoading(false)
       setDetailLoading(false)
     } catch (err) {
-      console.error('증상 AI 검색 실패', err)
+      logger.error('증상 AI 검색 실패', err)
       // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
       const errorData = err?.response?.data
       const errorCode = errorData?.code

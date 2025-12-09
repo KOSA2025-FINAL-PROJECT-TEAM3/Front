@@ -1,4 +1,6 @@
-﻿/**
+import logger from '@core/utils/logger'
+
+/**
  * Auth Store
  * - 전역 인증 상태 관리 (Zustand + localStorage persist)
  * - Context 없이도 동일 API 제공
@@ -47,6 +49,9 @@ const clearAuthStorage = () => {
   window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
   window.localStorage.removeItem(STORAGE_KEYS.ROLE)
   window.localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
+
+  // 🆕 Zustand persist 스토어도 함께 제거
+  window.localStorage.removeItem('amapill-auth-storage')
 }
 
 const normalizeAuthPayload = (payload = {}) => {
@@ -167,7 +172,7 @@ export const useAuthStore = create(
           try {
             await authApiClient.logout(token)
           } catch (error) {
-            console.warn('로그아웃 요청 실패 (무시):', error)
+            logger.warn('로그아웃 요청 실패 (무시):', error)
           } finally {
             get().clearAuthState()
           }

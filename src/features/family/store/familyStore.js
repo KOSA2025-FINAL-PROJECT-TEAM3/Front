@@ -6,6 +6,7 @@
 import { create } from 'zustand'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { STORAGE_KEYS } from '@config/constants'
+import logger from '@core/utils/logger'
 
 const initialState = {
   familyGroups: [],         // 여러 그룹 지원
@@ -63,8 +64,8 @@ export const useFamilyStore = create((set, get) => ({
       // 1. [필수] 가족 요약 정보 (summary) 로드 및 안전한 오류 처리
       try {
         summary = await familyApiClient.getSummary()
-        console.log('[familyStore] loadFamily - summary received:', summary)
-        console.log('[familyStore] loadFamily - members array:', summary?.members)
+        logger.api('familyStore', 'loadFamily - summary received:', summary)
+        logger.api('familyStore', 'loadFamily - members array:', summary?.members)
       } catch (error) {
         const status = error?.response?.status
         if (status === 401) {
@@ -72,7 +73,7 @@ export const useFamilyStore = create((set, get) => ({
           summaryError = null
         } else {
           summaryError = error
-          console.warn('[familyStore] Failed to load family summary (unauthenticated or error):', error.message)
+          logger.warn('familyStore', 'Failed to load family summary (unauthenticated or error):', error.message)
         }
       }
 
@@ -88,7 +89,7 @@ export const useFamilyStore = create((set, get) => ({
           get()._clearAuth()
           inviteList = { sent: [], received: [] }
         } else {
-          console.warn('[familyStore] getInvites failed:', inviteError.message)
+          logger.warn('familyStore', 'getInvites failed:', inviteError.message)
         }
       }
 
@@ -104,17 +105,16 @@ export const useFamilyStore = create((set, get) => ({
         error: summaryError ? summaryError : null,
         initialized: true,
       }
-      console.log('[familyStore] loadFamily - setting state:', nextState)
+      logger.api('familyStore', 'loadFamily - setting state:', nextState)
       set(nextState)
     }),
 
   inviteMember: async (payload) =>
     withLoading(set, async () => {
-      const state = get()
-      const rawGroupId = state.selectedGroupId
+      const { selectedGroupId: rawGroupId } = get()
 
-      console.log('[familyStore] inviteMember - selectedGroupId:', state.selectedGroupId)
-      console.log('[familyStore] inviteMember - rawGroupId:', rawGroupId, 'type:', typeof rawGroupId)
+      logger.api('familyStore', 'inviteMember - selectedGroupId:', rawGroupId)
+      logger.api('familyStore', 'inviteMember - rawGroupId:', rawGroupId, 'type:', typeof rawGroupId)
 
       if (!rawGroupId) {
         throw new Error('가족 그룹이 없습니다. 먼저 가족 그룹을 생성해주세요.')
@@ -136,7 +136,7 @@ export const useFamilyStore = create((set, get) => ({
       }
 
       if (!groupId || isNaN(groupId)) {
-        console.error('[familyStore] Cannot extract numeric groupId from:', rawGroupId)
+        logger.error('familyStore', 'Cannot extract numeric groupId from:', rawGroupId)
         throw new Error(`유효하지 않은 그룹 ID입니다: ${rawGroupId}`)
       }
 
@@ -146,19 +146,19 @@ export const useFamilyStore = create((set, get) => ({
         suggestedRole: payload.suggestedRole || payload.role,
       }
 
-      console.log('[familyStore] inviteMember - fullPayload:', fullPayload)
+      logger.api('familyStore', 'inviteMember - fullPayload:', fullPayload)
 
       const res = await familyApiClient.inviteMember(fullPayload)
 
       // 초대 생성 후 현재 그룹의 초대 목록 다시 로드
       try {
         const inviteList = await familyApiClient.getInvites(groupId)
-        set((state) => ({
+        set({
           invites: normalizeInvites(inviteList),
           error: null,
-        }))
+        })
       } catch (e) {
-        console.warn('[familyStore] inviteMember - failed to reload invites:', e.message)
+        logger.warn('familyStore', 'inviteMember - failed to reload invites:', e.message)
       }
 
       return res
@@ -167,8 +167,8 @@ export const useFamilyStore = create((set, get) => ({
   removeMember: async (memberId) =>
     withLoading(set, async () => {
       await familyApiClient.removeMember(memberId)
-      set((state) => ({
-        members: state.members.filter((member) => member.id !== memberId),
+      set((prev) => ({
+        members: prev.members.filter((member) => member.id !== memberId),
         error: null,
       }))
     }),
@@ -183,13 +183,13 @@ export const useFamilyStore = create((set, get) => ({
     withLoading(set, async () => {
       await familyApiClient.updateMemberRole(memberId, familyRole, newOwnerMemberId)
       // 로컬 상태 업데이트
-      set((state) => ({
-        members: state.members.map((m) =>
+      set((prev) => ({
+        members: prev.members.map((m) =>
           m.id === memberId || m.id === String(memberId)
             ? { ...m, role: familyRole }
             : m
         ),
-        familyGroups: state.familyGroups.map((g) => ({
+        familyGroups: prev.familyGroups.map((g) => ({
           ...g,
           members: g.members?.map((m) =>
             m.id === memberId || m.id === String(memberId)
@@ -205,20 +205,20 @@ export const useFamilyStore = create((set, get) => ({
     withLoading(set, async () => {
       const groupId = get().selectedGroupId
       const invites = await familyApiClient.getInvites(groupId)
-      set((state) => ({
+      set((prev) => ({
         invites: normalizeInvites(invites),
         error: null,
-        initialized: state.initialized,
+        initialized: prev.initialized,
       }))
     }),
 
   cancelInvite: async (inviteId) =>
     withLoading(set, async () => {
       await familyApiClient.cancelInvite(inviteId)
-      set((state) => ({
+      set((prev) => ({
         invites: {
-          sent: (state.invites?.sent || []).filter((invite) => invite.id !== inviteId),
-          received: state.invites?.received || [],
+          sent: (prev.invites?.sent || []).filter((invite) => invite.id !== inviteId),
+          received: prev.invites?.received || [],
         },
         error: null,
       }))
@@ -226,10 +226,10 @@ export const useFamilyStore = create((set, get) => ({
 
   // SSE 이벤트용 헬퍼: 초대 ID로 보낸 초대 목록에서 제거
   removeInviteById: (inviteId) => {
-    set((state) => ({
+    set((prev) => ({
       invites: {
-        sent: (state.invites?.sent || []).filter((inv) => inv.id !== inviteId),
-        received: state.invites?.received || [],
+        sent: (prev.invites?.sent || []).filter((inv) => inv.id !== inviteId),
+        received: prev.invites?.received || [],
       },
     }))
   },
@@ -242,8 +242,8 @@ export const useFamilyStore = create((set, get) => ({
   createFamilyGroup: async (name) =>
     withLoading(set, async () => {
       const group = await familyApiClient.createGroup(name)
-      set((state) => ({
-        familyGroups: [...state.familyGroups, group],
+      set((prev) => ({
+        familyGroups: [...prev.familyGroups, group],
         selectedGroupId: group.id,
         members: [],
         error: null,

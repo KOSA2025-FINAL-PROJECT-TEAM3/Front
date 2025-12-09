@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * useNotificationStream Hook
  * - SSE 연결 관리
@@ -74,14 +75,14 @@ export const useNotificationStream = (onNotification) => {
     }
 
     const handleError = (error) => {
-      console.error('Notification stream error:', error)
+      logger.error('Notification stream error:', error)
       // 토큰 만료 등의 에러는 auth interceptor가 처리
     }
 
     try {
       notificationApiClient.subscribe(token, handleMessage, handleError)
     } catch (error) {
-      console.error('Failed to subscribe to notifications:', error)
+      logger.error('Failed to subscribe to notifications:', error)
     }
 
     // Cleanup: 언마운트 시 연결 해제

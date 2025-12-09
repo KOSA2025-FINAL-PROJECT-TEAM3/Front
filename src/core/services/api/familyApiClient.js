@@ -1,4 +1,5 @@
 ﻿import ApiClient from './ApiClient'
+import logger from '@core/utils/logger'
 
 class FamilyApiClient extends ApiClient {
   constructor() {
@@ -12,7 +13,7 @@ class FamilyApiClient extends ApiClient {
     // GET /api/family/groups에서 모든 그룹과 멤버 정보 반환
     return this.get('/groups').then((groups) => {
       if (Array.isArray(groups) && groups.length > 0) {
-        console.log('[familyApiClient] getSummary - raw groups:', groups)
+        logger.debug('[familyApiClient] getSummary - raw groups:', groups)
 
         const normalizeMember = (member) => {
           const userId =

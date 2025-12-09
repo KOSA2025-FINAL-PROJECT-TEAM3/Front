@@ -1,4 +1,6 @@
-﻿/**
+import logger from '@core/utils/logger'
+
+/**
  * useFetch Hook
  * - API 호출을 간편하게 처리하는 커스텀 훅
  * - 로딩, 에러, 데이터 상태 관리
@@ -44,7 +46,7 @@ export const useFetch = (url, options = {}, skip = false) => {
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || '요청 실패'
       setError(errorMessage)
-      console.error(`API 호출 실패: ${url}`, err)
+      logger.error(`API 호출 실패: ${url}`, err)
       throw err
     } finally {
       setLoading(false)

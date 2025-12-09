@@ -4,6 +4,7 @@
  */
 
 import { HTTP_STATUS } from '@config/constants'
+import logger from './logger'
 
 /**
  * 에러 객체로부터 사용자 친화적인 메시지 추출
@@ -62,7 +63,7 @@ export const logError = (context, error) => {
   const timestamp = new Date().toISOString()
   const message = getErrorMessage(error)
 
-  console.error(`[${timestamp}] ${context}:`, {
+  logger.error(`[${timestamp}] ${context}:`, {
     message,
     error,
   })

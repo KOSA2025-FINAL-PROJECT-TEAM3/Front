@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * InviteCodeEntry.jsx
  * 통합 초대 랜딩 페이지
@@ -81,7 +82,7 @@ export const InviteCodeEntryPage = () => {
       setInviteSession(info)
       setStatus('validated')
     } catch (error) {
-      console.warn('[InviteCodeEntry] Validation failed', error)
+      logger.warn('[InviteCodeEntry] Validation failed', error)
       setStatus('error')
       if (error?.response?.status === 400) {
         setErrorMessage('초대 코드가 만료되었거나 잘못되었습니다.')
@@ -139,7 +140,7 @@ export const InviteCodeEntryPage = () => {
         }
       }, 1500)
     } catch (error) {
-      console.warn('[InviteCodeEntry] Accept failed', error)
+      logger.warn('[InviteCodeEntry] Accept failed', error)
       setStatus('validated')
 
       if (error?.response?.status === 409) {
@@ -177,7 +178,7 @@ export const InviteCodeEntryPage = () => {
       }
       window.location.reload()
     } catch (error) {
-      console.error('Logout failed', error)
+      logger.error('Logout failed', error)
     }
   }
 

@@ -1,5 +1,4 @@
-﻿import { ApiClient } from './ApiClient'
-import { MOCK_DISEASES } from '@/data/mockDiseases'
+import { ApiClient } from './ApiClient'
 
 const client = new ApiClient({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
@@ -8,15 +7,11 @@ const client = new ApiClient({
 
 export const diseaseApiClient = {
   async listByUser(userId) {
-    return client.get(`/user/${userId}`, undefined, {
-      mockResponse: () => MOCK_DISEASES,
-    })
+    return client.get(`/user/${userId}`)
   },
 
   async getDiseaseDetail(diseaseId) {
-    return client.get(`/${diseaseId}`, undefined, {
-      mockResponse: () => MOCK_DISEASES.find((d) => d.id === Number(diseaseId)) || null,
-    })
+    return client.get(`/${diseaseId}`)
   },
 
   async create(payload) {
@@ -36,9 +31,7 @@ export const diseaseApiClient = {
   },
 
   async getTrash(userId) {
-    return client.get(`/user/${userId}/trash`, undefined, {
-      mockResponse: () => [],
-    })
+    return client.get(`/user/${userId}/trash`)
   },
 
   async emptyTrash(userId) {

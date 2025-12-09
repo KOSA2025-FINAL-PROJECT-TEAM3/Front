@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
@@ -11,8 +11,8 @@ import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
-import { useFamilySync } from '../hooks/useFamilySync'
 import styles from './FamilyManagement.module.scss'
+import logger from '@core/utils/logger'
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -20,10 +20,18 @@ export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
   const currentUserId = useAuthStore((state) => state.user?.id || state.user?.userId)
-  const familyGroups = useFamilyStore((state) => state.familyGroups)
-  const selectedGroupId = useFamilyStore((state) => state.selectedGroupId)
-  const getSelectedGroup = useFamilyStore((state) => state.getSelectedGroup)
-  const createFamilyGroup = useFamilyStore((state) => state.createFamilyGroup)
+  
+  const {
+    familyGroups,
+    selectedGroupId,
+    getSelectedGroup,
+    createFamilyGroup,
+    removeMember,
+    updateMemberRole,
+    loading,
+    error,
+    fetchFamily: refetchFamily
+  } = useFamilyStore()
 
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [showGroupCreateModal, setShowGroupCreateModal] = useState(false)
@@ -35,21 +43,15 @@ export const FamilyManagementPage = () => {
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
   const [delegationModal, setDelegationModal] = useState({ open: false, memberId: null, newRole: null })
-  const {
-    familyGroup,
-    members,
-    loading,
-    removeMember,
-    updateMemberRole,
-    error,
-    onlineMemberIds,
-    refetchFamily,
-  } = useFamilySync()
+
+  // 선택된 그룹 및 멤버 파생
+  const familyGroup = getSelectedGroup()
+  const members = familyGroup?.members || []
 
   // 페이지 로드 시 최신 가족 데이터를 불러옴
   useEffect(() => {
     refetchFamily?.().catch((error) => {
-      console.warn('[FamilyManagement] Initial refetch failed:', error)
+      logger.warn('[FamilyManagement] Initial refetch failed:', error)
     })
   }, [refetchFamily])
 
@@ -59,10 +61,6 @@ export const FamilyManagementPage = () => {
       setShowGroupModal(true)
     }
   }, [familyGroups, selectedGroupId])
-
-  // 선택된 그룹의 members 가져오기
-  const selectedGroup = getSelectedGroup()
-  const selectedMembers = selectedGroup?.members || members
 
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
@@ -108,7 +106,7 @@ export const FamilyManagementPage = () => {
       setDelegationModal({ open: false, memberId: null, newRole: null })
       await refetchFamily?.()
     } catch (error) {
-      console.warn('[FamilyManagement] Role change failed', error)
+      logger.warn('[FamilyManagement] Role change failed', error)
       const errorCode = error?.response?.data?.code
       const message = error?.response?.data?.message || error?.message || '역할 변경에 실패했습니다.'
       // OWNER_DELEGATION_REQUIRED: 소유자 양도 필요
@@ -141,7 +139,7 @@ export const FamilyManagementPage = () => {
           isOpen={showGroupModal}
           onClose={() => setShowGroupModal(false)}
           onSelect={(groupId) => {
-            console.log('[FamilyManagement] Group selected:', groupId)
+            logger.debug('[FamilyManagement] Group selected:', groupId)
             toast.success('그룹이 선택되었습니다.')
           }}
         />
@@ -195,7 +193,7 @@ export const FamilyManagementPage = () => {
                     setShowGroupCreateModal(false)
                     await refetchFamily?.()
                   } catch (error) {
-                    console.warn('[FamilyManagement] createGroup failed', error)
+                    logger.warn('[FamilyManagement] createGroup failed', error)
                     const message =
                       error?.response?.data?.message ||
                       error?.message ||
@@ -254,7 +252,7 @@ export const FamilyManagementPage = () => {
 
                     } catch (error) {
                       toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
-                      console.warn('[FamilyManagement] removeMember failed', error)
+                      logger.warn('[FamilyManagement] removeMember failed', error)
                     } finally {
                       setRemovingMemberId(null)
                       setConfirmModal(null)
@@ -267,7 +265,7 @@ export const FamilyManagementPage = () => {
                       await refetchFamily?.()
                     } catch (error) {
                       toast.error('그룹 해산에 실패했습니다. 다시 시도해 주세요.')
-                      console.warn('[FamilyManagement] dissolve failed', error)
+                      logger.warn('[FamilyManagement] dissolve failed', error)
                     } finally {
                       setDissolving(false)
                       setConfirmModal(null)
@@ -363,7 +361,7 @@ export const FamilyManagementPage = () => {
                     toast.success('가족 정보를 다시 불러왔습니다.')
                   } catch (refetchError) {
                     toast.error('가족 정보 불러오기에 실패했습니다.')
-                    console.warn('[FamilyManagement] refetchFamily failed', refetchError)
+                    logger.warn('[FamilyManagement] refetchFamily failed', refetchError)
                   } finally {
                     setRetrying(false)
                   }
@@ -382,13 +380,12 @@ export const FamilyManagementPage = () => {
           </div>
         ) : (
           <>
-            <FamilyGroupCard group={selectedGroup || familyGroup} memberCount={selectedMembers.length} />
+            <FamilyGroupCard group={familyGroup} memberCount={members.length} />
             <FamilyMemberList
-              members={selectedMembers}
+              members={members}
               onDetail={handleDetail}
               onRemove={handleRemoveMember}
               onRoleChange={handleRoleChange}
-              onlineMemberIds={onlineMemberIds}
               removingMemberId={removingMemberId}
               roleChangingMemberId={roleChangingMemberId}
               currentUserId={currentUserId}
