@@ -13,6 +13,7 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import Modal from '@shared/components/ui/Modal'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import { toast } from '@shared/components/toast/toastStore'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
 import styles from './PillSearchTab.module.scss'
 
 const normalizeText = (text = '') =>
@@ -34,6 +35,7 @@ const summarize = (text = '', limit = 140) => {
 export const PillSearchTab = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const { consumeAction, getPendingAction } = useVoiceActionStore() // [Voice]
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -134,6 +136,26 @@ export const PillSearchTab = () => {
     event?.preventDefault?.()
     executeSearch(itemName.trim())
   }
+
+  // [Voice] 자동 검색 (Zustand)
+  useEffect(() => {
+    // 1. 대기 중인 액션 확인 (삭제하지 않고 조회만)
+    const pending = getPendingAction()
+    
+    // 2. 내 타입('PILL')이거나 타입이 없을 때만 실행
+    if (pending && pending.code === 'AUTO_SEARCH') {
+        const type = pending.params?.searchType
+        if (!type || type === 'PILL') {
+            // 3. 내 것이 확실하므로 소비(삭제)하고 실행
+            const action = consumeAction('AUTO_SEARCH')
+            if (action && action.params?.query) {
+                const keyword = action.params.query
+                setItemName(keyword)
+                executeSearch(keyword)
+            }
+        }
+    }
+  }, [getPendingAction, consumeAction, executeSearch])
 
   // 자동 검색 (location.state.autoSearch 감지)
   useEffect(() => {

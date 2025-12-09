@@ -3,8 +3,9 @@
 // ==========================================
 import { useEffect, useRef, useCallback } from 'react'
 import { useVoiceStore } from '../stores/voiceStore'
+import { useVoiceActionStore } from '../stores/voiceActionStore' // [New]
 import { matchVoiceCommand } from '../utils/voiceCommandMatcher'
-import { setNavigator } from '@core/routing/navigation' // 전역 네비게이터 사용
+import { setNavigator } from '@core/routing/navigation'
 import { useNavigate } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
 import { medicationApiClient } from '@core/services/api/medicationApiClient'
@@ -20,11 +21,12 @@ export const useVoiceRecognition = () => {
     reset 
   } = useVoiceStore()
   
+  const { setPendingAction } = useVoiceActionStore() // [New]
+  
   const recognitionRef = useRef(null)
-  const navigate = useNavigate() // 훅 내부 네비게이터
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // 브라우저 호환성 체크
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       console.warn('이 브라우저는 음성 인식을 지원하지 않습니다.')
@@ -32,9 +34,9 @@ export const useVoiceRecognition = () => {
     }
 
     const recognition = new SpeechRecognition()
-    recognition.lang = 'ko-KR' // 한국어 설정
-    recognition.continuous = false // 한 문장 끝나면 인식 종료
-    recognition.interimResults = true // 중간 결과(말하는 중) 받기
+    recognition.lang = 'ko-KR'
+    recognition.continuous = false
+    recognition.interimResults = true
 
     recognition.onstart = () => {
       setIsListening(true)
@@ -49,7 +51,6 @@ export const useVoiceRecognition = () => {
 
     recognition.onend = () => {
       setIsListening(false)
-      // onend 시점에서 마지막 transcript를 가져오는 로직은 onresult에서 처리됨
     }
 
     recognition.onerror = (event) => {
@@ -63,85 +64,39 @@ export const useVoiceRecognition = () => {
     recognitionRef.current = recognition
   }, [setIsListening, setTranscript, setFeedbackMessage])
 
-  // API 명령 처리 핸들러
-  const handleApiCommand = useCallback(async (command) => {
-    console.log('[Voice] API Command:', command)
-
-    if (command.target === 'COMPLETE_MEDICATION') {
-      // 1. 투약 완료 처리
-      try {
-        setFeedbackMessage('투약 기록을 확인하고 있습니다...')
-        const response = await medicationApiClient.getTodayMedications()
-        
-        // 응답 구조가 { schedules: [...] } 라고 가정 (백엔드 응답에 따라 조정 필요)
-        // 만약 List<Response>라면 response 자체가 배열일 수 있음. 안전하게 처리.
-        const schedules = response.schedules || (Array.isArray(response) ? response : [])
-        
-        // 아직 복용하지 않은(isTaken === false) 첫 번째 스케줄 찾기
-        // (더 정교하게 하려면 현재 시간과 가장 가까운 스케줄을 찾아야 함)
-        const pendingSchedule = schedules.find(s => !s.isTaken)
-
-        if (pendingSchedule) {
-          await medicationLogApiClient.completeMedication(pendingSchedule.id)
-          
-          // 약 이름이 있으면 이름을 포함해서 피드백
-          const medName = pendingSchedule.medicationName || '약'
-          setFeedbackMessage(`${medName} 복용을 기록했습니다.`)
-          
-          setTimeout(() => {
-            navigate('/medication') // 확인을 위해 약 관리 화면으로 이동
-          }, 1500)
-        } else {
-          setFeedbackMessage('오늘 예정된 약은 이미 모두 드셨거나 일정이 없습니다.')
-        }
-      } catch (e) {
-        console.error('투약 완료 처리 실패:', e)
-        setFeedbackMessage('투약 기록 중 오류가 발생했습니다.')
-      }
-
-    } else if (command.target === 'SEARCH_SYMPTOM') {
-      // 2. 증상 검색
-      // "머리가 아파" -> "머리가 아파" 텍스트를 가지고 검색 화면으로 이동
-      // 검색 화면에서 location.state.query를 받아 검색하도록 구현 필요
-      navigate('/search', { state: { autoSearch: command.originalText } })
-    }
-  }, [navigate, setFeedbackMessage])
-
-  // 실제 명령 처리 로직 (음성 인식이 끝났을 때 호출하거나, 버튼을 다시 눌렀을 때 처리)
+  // 실제 명령 처리 로직
   const processCommand = useCallback(async (finalTranscript) => {
     if (!finalTranscript) return
 
-    // 1. 프론트엔드 정적 규칙 매칭 시도 (레거시 유지 또는 제거 가능)
-    // const command = matchVoiceCommand(finalTranscript)
-    // ... (기존 정적 매칭 로직은 일단 주석 처리하거나 백엔드 실패 시 폴백으로 사용) ...
-
-    // 2. 백엔드 AI 호출
     setFeedbackMessage('잠시만요, 찾아볼게요...')
     
     try {
       const response = await voiceApiClient.processCommand(finalTranscript)
       
       if (response) {
-        setFeedbackMessage(response.message) // 백엔드가 준 답변 출력
+        setFeedbackMessage(response.message)
         
         // 이동이 필요한 경우
         if (response.type === 'NAVIGATE' || response.type === 'SPEAK_AND_NAVIGATE') {
           if (response.target) {
-            setTimeout(() => {
-              // ★ [핵심] 백엔드가 준 actionCode와 parameters를 state에 담아 이동
-              navigate(response.target, { 
-                state: { 
-                  actionCode: response.actionCode, 
-                  parameters: response.parameters 
-                } 
+            
+            // [Zustand] 이동 전 명령 저장
+            if (response.actionCode) {
+              setPendingAction({
+                code: response.actionCode,
+                params: response.parameters,
+                targetPath: response.target
               })
+            }
+
+            setTimeout(() => {
+              navigate(response.target) // state 없이 깔끔하게 이동
               reset()
-            }, 2000) // 메시지를 읽을 시간(2초) 부여 후 이동
+            }, 2000)
             return
           }
         }
 
-        // 이동 없이 말만 하는 경우
         setTimeout(reset, 2500)
 
       } else {
@@ -154,7 +109,7 @@ export const useVoiceRecognition = () => {
       setTimeout(reset, 1500)
     }
 
-  }, [navigate, reset, setFeedbackMessage])
+  }, [navigate, reset, setFeedbackMessage, setPendingAction])
 
   const startVoice = useCallback(() => {
     if (recognitionRef.current && !isListening) {

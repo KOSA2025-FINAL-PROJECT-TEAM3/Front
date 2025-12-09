@@ -3,12 +3,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom' // useLocation 추가
+import { useLocation } from 'react-router-dom'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
 import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 
 export const SymptomSearchTab = () => {
+  const { consumeAction, getPendingAction } = useVoiceActionStore() // [Voice]
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [selectedSymptom, setSelectedSymptom] = useState(null)
@@ -16,11 +18,14 @@ export const SymptomSearchTab = () => {
   const [detailLoading, setDetailLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isAiSearch, setIsAiSearch] = useState(false)  // AI 검색 플래그
+  const [isAiSearch, setIsAiSearch] = useState(false)
   const selectionRef = useRef(null)
   const [warningOpen, setWarningOpen] = useState(false)
   const [warningContext, setWarningContext] = useState('')
-  const location = useLocation() // useLocation 훅 사용
+  const location = useLocation()
+
+  // [Voice] 상태 변경 감지 후 실행 트리거
+  const [voiceTrigger, setVoiceTrigger] = useState(false)
 
   const showWarningModal = (context) => {
     setWarningContext(
@@ -95,21 +100,48 @@ export const SymptomSearchTab = () => {
     }
   }, [query])
 
+  // ==========================================
+  // [Voice] 음성 명령 처리 로직 (반드시 함수 정의 아래에 배치)
+  // ==========================================
+
+  // 1. 자동 검색 트리거 (Zustand)
   useEffect(() => {
-    // 음성 명령으로 자동 검색어 전달 시 처리
+    const pending = getPendingAction()
+    
+    if (pending && pending.code === 'AUTO_SEARCH') {
+        const type = pending.params?.searchType
+        // 'SYMPTOM' 타입일 때만 실행
+        if (type === 'SYMPTOM') {
+            const action = consumeAction('AUTO_SEARCH')
+            if (action && action.params?.query) {
+                const keyword = action.params.query
+                setQuery(keyword)
+                setVoiceTrigger(true) // handleAiSearch 호출을 위한 트리거 당김
+            }
+        }
+    }
+  }, [getPendingAction, consumeAction])
+
+  // 2. 트리거가 당겨지면 handleAiSearch 실행
+  useEffect(() => {
+    if (voiceTrigger && query) {
+        handleAiSearch()
+        setVoiceTrigger(false)
+    }
+  }, [voiceTrigger, query, handleAiSearch])
+
+  // 3. 자동 검색 (Legacy Fallback)
+  useEffect(() => {
     if (location.state?.autoSearch && query === '') {
       const autoSearchQuery = location.state.autoSearch
       setQuery(autoSearchQuery)
-      // query 상태가 업데이트 된 후 handleAiSearch가 호출되도록 setTimeout 사용
-      // (React의 상태 업데이트는 비동기적이기 때문)
       setTimeout(() => {
         handleAiSearch()
       }, 0)
-      // 자동 검색이 완료되면 state를 비워서 불필요한 재실행 방지
-      // history.replaceState(null, '', location.pathname) // 또는 navigate replace
     }
-  }, [location.state, query, handleAiSearch]) // location.state, query, handleAiSearch를 의존성 배열에 추가
+  }, [location.state, query, handleAiSearch])
 
+  // 4. 초기 선택 처리
   useEffect(() => {
     // AI 검색 중일 때는 초기화하지 않음
     if (isAiSearch) {
