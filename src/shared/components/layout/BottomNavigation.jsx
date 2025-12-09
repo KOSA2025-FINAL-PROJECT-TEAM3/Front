@@ -31,13 +31,7 @@ const NAV_ITEMS = [
     path: ROUTE_PATHS.medication,
     roles: [ROLE_ALL],
   },
-  {
-    id: 'invite-code',
-    label: '초대코드',
-    icon: 'ticket',
-    path: ROUTE_PATHS.inviteCodeEntry,
-    roles: [ROLE_ALL], // 노인, 보호자 모두 접근 가능
-  },
+
   {
     id: 'family',
     label: '가족',

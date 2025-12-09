@@ -12,6 +12,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { useAuth } from '@features/auth/hooks/useAuth'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from '@features/auth/pages/Login'
@@ -73,6 +74,31 @@ function NavigationRegistrar() {
     setNavigator(navigate)
   }, [navigate])
   return null
+}
+
+/**
+ * 루트 경로 리다이렉트 컴포넌트
+ * - 인증된 사용자: 역할에 맞는 대시보드로 이동
+ * - 비인증 사용자: 로그인 페이지로 이동
+ */
+function HomeRedirect() {
+  const { isAuthenticated, customerRole } = useAuth((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    customerRole: state.customerRole,
+  }))
+
+  if (isAuthenticated) {
+    if (customerRole === 'SENIOR') {
+      return <Navigate to={ROUTE_PATHS.seniorDashboard} replace />
+    }
+    if (customerRole === 'CAREGIVER') {
+      return <Navigate to={ROUTE_PATHS.caregiverDashboard} replace />
+    }
+    // 역할이 선택되지 않은 경우 역할 선택 페이지로 (혹은 기본 대시보드)
+    return <Navigate to={ROUTE_PATHS.roleSelection} replace />
+  }
+
+  return <Navigate to={ROUTE_PATHS.login} replace />
 }
 
 /**
@@ -284,8 +310,8 @@ function App() {
 
             <Route path="/ws-test" element={<WsTestPage />} />
 
-            {/* 기본 경로: 로그인 페이지로 리다이렉트 */}
-            <Route path={ROUTE_PATHS.root} element={<Navigate to={ROUTE_PATHS.login} replace />} />
+            {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}
+            <Route path={ROUTE_PATHS.root} element={<HomeRedirect />} />
 
             {/* 404: 존재하지 않는 경로 */}
             <Route path="*" element={<Navigate to={ROUTE_PATHS.login} replace />} />

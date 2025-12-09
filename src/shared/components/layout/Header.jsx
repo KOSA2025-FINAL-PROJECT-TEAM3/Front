@@ -38,14 +38,26 @@ export const Header = () => {
     <header className={styles.header}>
       <div className={styles.headerContainer}>
         {/* 좌측: 로고 및 앱 이름 */}
-        <div className={styles.logoSection}>
+        <div 
+          className={styles.logoSection} 
+          onClick={() => navigate(ROUTE_PATHS.root)}
+          style={{ cursor: 'pointer' }}
+          role="button"
+          tabIndex={0}
+        >
           <div className={styles.logoIcon}>💊</div>
           <span className={styles.appName}>뭐냑? (AMA...Pill)</span>
         </div>
 
         {/* 우측: 사용자 정보 및 알림 */}
         <div className={styles.rightSection}>
-          <div className={styles.userInfo}>
+          <div 
+            className={styles.userInfo}
+            onClick={() => navigate(ROUTE_PATHS.settingsProfile)}
+            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+          >
             <span className={styles.userName}>{userName} 님</span>
             <span className={styles.userRole}>({roleLabel})</span>
           </div>
