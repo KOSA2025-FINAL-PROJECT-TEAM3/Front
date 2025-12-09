@@ -13,6 +13,7 @@ const PUBLIC_PATHS = new Set([
   ROUTE_PATHS.inviteAccept,
   ROUTE_PATHS.privacyPolicy,
   ROUTE_PATHS.termsOfService,
+  ROUTE_PATHS.root,
 ])
 
 export const FamilyProvider = ({ children }) => {
