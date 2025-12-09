@@ -24,7 +24,6 @@ const navigateAfterAuthentication = (navigate, redirectPath) => {
   // 1. Check for valid invite session first
   const { isSessionValid } = useInviteStore.getState()
   if (isSessionValid()) {
-    console.log('[Login] Redirecting to invite entry due to valid session')
     navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
     return
   }
@@ -55,8 +54,6 @@ export const Login = () => {
   const redirectPath = searchParams.get('redirect')
     ? decodeURIComponent(searchParams.get('redirect'))
     : null // null로 원복
-
-  console.log('[Login] Initial render - redirectPath:', redirectPath)
 
   const { login, loading, error, clearError } = useAuth((state) => ({
     login: state.login,

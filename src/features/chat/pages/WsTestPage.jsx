@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import logger from '@core/utils/logger';
 
 window.global = window; // SockJS용
 
@@ -28,13 +29,13 @@ export default function WebSocketTest() {
         `http://localhost:8082/family-chat/rooms/${ROOM_ID}/messages?page=0&size=50`,
       );
       if (!res.ok) {
-        console.error("메시지 로드 실패", res.status);
+        logger.error("메시지 로드 실패", res.status);
         return;
       }
       const data = await res.json();
       setMessages(data || []);
     } catch (err) {
-      console.error("메시지 로드 에러:", err);
+      logger.error("메시지 로드 에러:", err);
     }
   };
 
@@ -55,20 +56,20 @@ export default function WebSocketTest() {
     client.connect(
       {},
       () => {
-        console.log("WS CONNECTED!!");
+        logger.debug("WS CONNECTED!!");
 
         // ✅ /topic/family/1 구독 → 새 메시지 오면 상태에 추가
         client.subscribe(`/topic/family/${ROOM_ID}`, (msg) => {
           try {
             const body = JSON.parse(msg.body);
-            console.log("RECEIVED:", body);
+            logger.debug("RECEIVED:", body);
             setMessages((prev) => [...prev, body]);
           } catch (e) {
-            console.error("메시지 파싱 실패:", e);
+            logger.error("메시지 파싱 실패:", e);
           }
         });
       },
-      (err) => console.error("WS ERROR:", err),
+      (err) => logger.error("WS ERROR:", err),
     );
 
     stompRef.current = client;
@@ -77,9 +78,9 @@ export default function WebSocketTest() {
   const disconnect = () => {
     try {
       stompRef.current?.disconnect();
-      console.log("DISCONNECTED");
+      logger.debug("DISCONNECTED");
     } catch (e) {
-      console.warn("disconnect 에러 무시:", e);
+      logger.warn("disconnect 에러 무시:", e);
     }
   };
 

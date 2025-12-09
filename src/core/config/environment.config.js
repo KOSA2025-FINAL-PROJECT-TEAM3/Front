@@ -1,3 +1,5 @@
+import logger from '@core/utils/logger'
+
 /**
  * Environment Configuration
  *
@@ -185,16 +187,16 @@ export const getEnvironmentConfig = () => {
 
   // Log configuration in development
   if (config.isDevelopment && config.DEBUG_MODE) {
-    console.group('🔧 AMApill Frontend Configuration')
-    console.log('Environment:', config.mode)
-    console.log('API Base URL:', config.API_BASE_URL)
-    console.log('WebSocket URL:', config.WS_BASE_URL)
-    console.log('Frontend URL:', config.FRONTEND_URL)
-    console.log('Use Nginx Proxy:', config.USE_NGINX)
-    console.log('Auth Service:', config.AUTH_API_URL)
-    console.log('Medication Service:', config.MEDICATION_API_URL)
-    console.log('Use Mock API:', config.USE_MOCK_API)
-    console.groupEnd()
+    logger.debug('🔧 AMApill Frontend Configuration', {
+      environment: config.mode,
+      apiBaseURL: config.API_BASE_URL,
+      wsBaseURL: config.WS_BASE_URL,
+      frontendURL: config.FRONTEND_URL,
+      useNginx: config.USE_NGINX,
+      authService: config.AUTH_API_URL,
+      medicationService: config.MEDICATION_API_URL,
+      useMockApi: config.USE_MOCK_API,
+    })
   }
 
   return config

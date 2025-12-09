@@ -15,6 +15,7 @@ import { useAuthStore } from "@/features/auth/store/authStore";
 import { useFamilyStore } from "@features/family/store/familyStore";
 import { familyChatApiClient } from "@/core/services/api/familyChatApiClient";
 import logger from '@core/utils/logger';
+import envConfig from '@config/environment.config';
 
 const AI_LOADING_TEMP_ID = 'ai-loading-temp'; 
 
@@ -51,6 +52,7 @@ export const FamilyChatConversationPage = () => {
   const [hasUnreadGap, setHasUnreadGap] = useState(false);
 
   const isFetchingRef = useRef(false);
+  const wsEndpoint = envConfig?.WS_BASE_URL || 'ws://localhost:8080/ws';
 
   // [3] 읽음 신호 (Observer) - 호이스팅 문제 해결을 위해 위로 이동
   const sendReadReceipt = useCallback((messageId) => {
@@ -222,14 +224,15 @@ export const FamilyChatConversationPage = () => {
 
   // [4] WebSocket
   const connectWebSocket = useCallback(async () => {
-    if (!token) return; 
+    if (!token) return;
+    if (stompClientRef.current?.active || stompClientRef.current?.connected) return;
 
     try {
       const stompModule = await import("@stomp/stompjs");
       const { Client } = stompModule;
 
       const client = new Client({
-        brokerURL: "ws://localhost/ws/", 
+        brokerURL: wsEndpoint,
         connectHeaders: { Authorization: `Bearer ${token}` },
         reconnectDelay: 5000, 
         heartbeatIncoming: 4000,
@@ -362,10 +365,13 @@ export const FamilyChatConversationPage = () => {
     } catch (err) {
       logger.error("WS 로드 실패:", err);
     }
-  }, [currentFamilyGroupId, token, currentUserId]); 
+  }, [currentFamilyGroupId, token, currentUserId, wsEndpoint]); 
 
   const disconnectWebSocket = () => {
-    if (stompClientRef.current) stompClientRef.current.deactivate(); 
+    if (stompClientRef.current) {
+      stompClientRef.current.deactivate();
+      stompClientRef.current = null;
+    }
   };
 
   const handleImageUpload = useCallback(async (file, content = "") => {
@@ -475,8 +481,24 @@ export const FamilyChatConversationPage = () => {
   }, [currentFamilyGroupId, currentUserId, memberNickname, handleImageUpload]);
 
   useEffect(() => {
-    if (token) connectWebSocket();
-    return () => disconnectWebSocket();
+    if (!token) return;
+
+    connectWebSocket();
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        disconnectWebSocket();
+      } else {
+        connectWebSocket();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      disconnectWebSocket();
+    };
   }, [token, connectWebSocket]);
 
   const handleBack = () => navigate(-1);

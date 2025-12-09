@@ -12,6 +12,7 @@ import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClie
 import { ROUTE_PATHS } from '@/core/config/routes.config'
 import { format } from 'date-fns'
 import styles from './MyMedicationSchedule.module.scss'
+import logger from '@core/utils/logger'
 
 // 시간대 라벨 결정
 const getTimeLabel = (time) => {
@@ -47,7 +48,7 @@ export const MyMedicationSchedule = ({
       const response = await medicationLogApiClient.getByDate(today)
       setMedicationLogs(response || [])
     } catch (error) {
-      console.error('Failed to load medication logs:', error)
+      logger.error('Failed to load medication logs:', error)
       setMedicationLogs([])
     } finally {
       setLoading(false)
@@ -115,9 +116,9 @@ export const MyMedicationSchedule = ({
       // 복용 기록 목록 다시 로드 (서버 데이터로 동기화)
       await loadMedicationLogs()
 
-      console.log('복용 완료:', scheduleId)
+      logger.debug('복용 완료:', scheduleId)
     } catch (error) {
-      console.error('Failed to complete medication:', error)
+      logger.error('Failed to complete medication:', error)
       alert('복용 기록 저장에 실패했습니다.')
       // 에러 발생 시 다시 로드하여 원래 상태로 복구
       await loadMedicationLogs()

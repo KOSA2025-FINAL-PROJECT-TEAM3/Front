@@ -19,9 +19,6 @@ const OwnerDelegationModal = ({
 
   // 새 소유자 후보: CAREGIVER 역할을 가진 다른 멤버들 (본인 제외)
   const eligibleMembers = useMemo(() => {
-    console.log('[OwnerDelegationModal] members:', members)
-    console.log('[OwnerDelegationModal] currentOwnerId:', currentOwnerId)
-    
     return members.filter((m) => {
       // CAREGIVER만 소유자가 될 수 있음
       if (m.role !== 'CAREGIVER') return false

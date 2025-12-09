@@ -13,6 +13,7 @@ import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
 import styles from './FamilyManagement.module.scss'
+import logger from '@core/utils/logger'
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -141,7 +142,7 @@ export const FamilyManagementPage = () => {
           isOpen={showGroupModal}
           onClose={() => setShowGroupModal(false)}
           onSelect={(groupId) => {
-            console.log('[FamilyManagement] Group selected:', groupId)
+            logger.debug('[FamilyManagement] Group selected:', groupId)
             toast.success('그룹이 선택되었습니다.')
           }}
         />

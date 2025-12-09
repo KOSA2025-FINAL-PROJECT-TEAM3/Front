@@ -4,6 +4,7 @@ import { useFamilyStore } from '@features/family/store/familyStore'
 import { FamilyContext } from './familyContextObject'
 import { STORAGE_KEYS } from '@config/constants'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const PUBLIC_PATHS = new Set([
   ROUTE_PATHS.login,
@@ -22,19 +23,20 @@ export const FamilyProvider = ({ children }) => {
   const group = useFamilyStore((state) => state.familyGroup)
   const members = useFamilyStore((state) => state.members)
   const location = useLocation()
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
   const isTestPage =
     location.pathname.startsWith('/chat-test') || location.pathname.startsWith('/test-websocket')
 
   useEffect(() => {
     const isPublic = PUBLIC_PATHS.has(location.pathname)
-    if (isPublic) return
+    if (isPublic || !isAuthenticated) return
 
     const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (token && !isInitialized && !isTestPage) {
       initialize()
     }
-  }, [initialize, isInitialized, isTestPage, location.pathname])
+  }, [initialize, isInitialized, isTestPage, isAuthenticated, location.pathname])
 
   const value = useMemo(
     () => ({

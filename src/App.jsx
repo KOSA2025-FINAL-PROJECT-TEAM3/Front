@@ -16,6 +16,7 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
 import LoadingSpinner from '@shared/components/LoadingSpinner'
+import envConfig from '@config/environment.config'
 
 // Lazy-loaded page components
 const Login = lazy(() => import('@features/auth/pages/Login'))
@@ -110,6 +111,7 @@ function HomeRedirect() {
  * @returns {JSX.Element}
  */
 function App() {
+  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
 
   return (
     <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
@@ -323,7 +325,11 @@ function App() {
             </Routes>
           </Suspense>
           <ToastContainer />
-          <DeveloperModePanel />
+          {showDevTools && (
+            <Suspense fallback={null}>
+              <DeveloperModePanel />
+            </Suspense>
+          )}
         </FamilyProvider>
       </ErrorBoundary>
     </BrowserRouter>

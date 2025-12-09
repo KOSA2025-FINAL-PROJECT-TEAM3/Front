@@ -6,6 +6,7 @@ import { toast } from '@shared/components/toast/toastStore'
 import InviteMemberForm from '../components/InviteMemberForm.jsx'
 import { useFamily } from '../hooks/useFamily'
 import styles from './FamilyInvite.module.scss'
+import logger from '@core/utils/logger'
 
 export const FamilyInvitePage = () => {
   const navigate = useNavigate()
@@ -54,17 +55,17 @@ export const FamilyInvitePage = () => {
   useEffect(() => {
     // familyGroup이 없으면 강제로 다시 로드
     if (!familyGroup) {
-      console.log('[FamilyInvite] familyGroup이 없음, 강제 로드')
+      logger.debug('[FamilyInvite] familyGroup이 없음, 강제 로드')
       initialize?.({ force: true }).catch((error) =>
-        console.warn('[FamilyInvite] initialize failed', error),
+        logger.warn('[FamilyInvite] initialize failed', error),
       )
     } else if (!initialized) {
       initialize?.().catch((error) =>
-        console.warn('[FamilyInvite] initialize failed', error),
+        logger.warn('[FamilyInvite] initialize failed', error),
       )
     }
     loadInvites?.().catch((error) =>
-      console.warn('[FamilyInvite] loadInvites failed', error),
+      logger.warn('[FamilyInvite] loadInvites failed', error),
     )
   }, [familyGroup, initialized, initialize, loadInvites])
 

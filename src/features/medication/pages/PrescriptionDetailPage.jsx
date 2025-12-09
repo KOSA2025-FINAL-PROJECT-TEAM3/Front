@@ -7,6 +7,7 @@ import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
 import styles from './PrescriptionAddPage.module.scss'; // Reuse AddPage styles
+import logger from '@core/utils/logger';
 
 export const PrescriptionDetailPage = () => {
     const { id } = useParams();
@@ -69,7 +70,7 @@ export const PrescriptionDetailPage = () => {
                     ? med.schedules[0].daysOfWeek
                     : 'MON,TUE,WED,THU,FRI,SAT,SUN';
 
-                console.log('[DEBUG] Normalizing medication:', med.name, 'daysOfWeek:', daysOfWeek);
+                logger.debug('[DEBUG] Normalizing medication:', med.name, 'daysOfWeek:', daysOfWeek);
 
                 return {
                     ...med,
@@ -234,13 +235,13 @@ export const PrescriptionDetailPage = () => {
                 }))
             };
 
-            console.log('[DEBUG] Saving prescription with medications:', formattedData.medications.map(m => ({
+            logger.debug('[DEBUG] Saving prescription with medications:', formattedData.medications.map(m => ({
                 name: m.name,
                 daysOfWeek: m.daysOfWeek
             })));
 
             const response = await updatePrescription(id, formattedData);
-            console.log('[DEBUG] Update response medications:', response?.medications?.map(m => ({
+            logger.debug('[DEBUG] Update response medications:', response?.medications?.map(m => ({
                 name: m.name,
                 schedules: m.schedules?.map(s => ({ time: s.time, daysOfWeek: s.daysOfWeek }))
             })));
@@ -249,7 +250,7 @@ export const PrescriptionDetailPage = () => {
             setPrescriptionData(null); // Reset to allow useEffect to re-initialize
             await fetchPrescription(id);
         } catch (error) {
-            console.error('처방전 수정 실패:', error);
+            logger.error('처방전 수정 실패:', error);
             toast.error('처방전 수정에 실패했습니다');
         }
     };
