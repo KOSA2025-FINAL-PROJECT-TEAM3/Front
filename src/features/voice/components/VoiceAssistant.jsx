@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition'
 import { useVoiceStore } from '../stores/voiceStore'
@@ -19,8 +19,9 @@ const StopIcon = () => (
 )
 
 export const VoiceAssistant = () => {
-  const { isListening, toggleVoice } = useVoiceRecognition()
+  const { isListening, toggleVoice, processCommand } = useVoiceRecognition()
   const { transcript, feedbackMessage } = useVoiceStore()
+  const [debugText, setDebugText] = useState('')
 
   return (
     <>
@@ -33,6 +34,23 @@ export const VoiceAssistant = () => {
           </div>
         </div>
       )}
+
+      {/* [DEBUG] 음성 명령 시뮬레이션 입력창 */}
+      <div style={{ position: 'fixed', bottom: '90px', right: '24px', zIndex: 9999, background: 'white', padding: '5px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+        <input 
+          type="text" 
+          value={debugText}
+          onChange={(e) => setDebugText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && debugText.trim()) {
+              processCommand(debugText)
+              setDebugText('')
+            }
+          }}
+          placeholder="음성 명령 입력 (Enter)"
+          style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ddd', width: '200px' }}
+        />
+      </div>
 
       <div className={styles.voiceContainer}>
         <button 

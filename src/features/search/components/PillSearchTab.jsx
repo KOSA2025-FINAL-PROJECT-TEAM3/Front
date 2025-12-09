@@ -3,8 +3,8 @@
  * AI 경고 시스템 + 처방전 선택 기능 통합 버전
  */
 
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
@@ -33,6 +33,7 @@ const summarize = (text = '', limit = 140) => {
 
 export const PillSearchTab = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -71,9 +72,8 @@ export const PillSearchTab = () => {
     })
   }, [fetchMedications, medications.length])
 
-  const handleSearch = async (event) => {
-    event?.preventDefault?.()
-    const keyword = itemName.trim()
+  // 실제 검색 로직 (재사용 가능)
+  const executeSearch = useCallback(async (keyword) => {
     if (!keyword) {
       setError('약품명을 입력해주세요.')
       setResults([])
@@ -94,6 +94,7 @@ export const PillSearchTab = () => {
     setIsAiResult(false)
     setLoading(true)
     setHasSearched(true)
+    
     try {
       const list = await searchApiClient.searchDrugs(keyword)
       setResults(Array.isArray(list) ? list : [])
@@ -126,7 +127,24 @@ export const PillSearchTab = () => {
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  // 폼 제출 핸들러
+  const handleSearch = (event) => {
+    event?.preventDefault?.()
+    executeSearch(itemName.trim())
   }
+
+  // 자동 검색 (location.state.autoSearch 감지)
+  useEffect(() => {
+    if (location.state?.autoSearch) {
+      const keyword = location.state.autoSearch
+      setItemName(keyword) // 검색어 입력창에 표시
+      executeSearch(keyword) // 검색 실행
+      
+      // 중복 실행 방지 (선택 사항: state를 비우는 로직은 navigate replace 등을 써야 하므로 여기선 생략)
+    }
+  }, [location.state, executeSearch])
 
   const handleAISearch = async () => {
     const keyword = itemName.trim()

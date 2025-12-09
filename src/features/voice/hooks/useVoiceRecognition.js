@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
 import { medicationApiClient } from '@core/services/api/medicationApiClient'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
+import { voiceApiClient } from '@core/services/api/voiceApiClient'
 
 export const useVoiceRecognition = () => {
   const { 
@@ -107,33 +108,53 @@ export const useVoiceRecognition = () => {
   }, [navigate, setFeedbackMessage])
 
   // 실제 명령 처리 로직 (음성 인식이 끝났을 때 호출하거나, 버튼을 다시 눌렀을 때 처리)
-  const processCommand = useCallback((finalTranscript) => {
+  const processCommand = useCallback(async (finalTranscript) => {
     if (!finalTranscript) return
 
-    const command = matchVoiceCommand(finalTranscript)
+    // 1. 프론트엔드 정적 규칙 매칭 시도 (레거시 유지 또는 제거 가능)
+    // const command = matchVoiceCommand(finalTranscript)
+    // ... (기존 정적 매칭 로직은 일단 주석 처리하거나 백엔드 실패 시 폴백으로 사용) ...
+
+    // 2. 백엔드 AI 호출
+    setFeedbackMessage('잠시만요, 찾아볼게요...')
     
-    if (command) {
-      setFeedbackMessage(command.message)
+    try {
+      const response = await voiceApiClient.processCommand(finalTranscript)
       
-      // 0.5초 뒤 실행 (사용자가 메시지를 볼 시간 확보)
-      setTimeout(() => {
-        if (command.type === 'NAVIGATE') {
-          navigate(command.target)
-        } else if (command.type === 'ACTION' && command.target === 'GO_BACK') {
-          navigate(-1)
-        } else if (command.type === 'API_CALL') {
-          handleApiCommand(command)
-          // API 호출은 비동기일 수 있으므로 reset() 타이밍 주의 (여기선 간단히 처리)
-        }
+      if (response) {
+        setFeedbackMessage(response.message) // 백엔드가 준 답변 출력
         
-        if (command.type !== 'API_CALL') { // API 호출은 내부에서 피드백 주므로 여기선 리셋 안함
-           reset() 
+        // 이동이 필요한 경우
+        if (response.type === 'NAVIGATE' || response.type === 'SPEAK_AND_NAVIGATE') {
+          if (response.target) {
+            setTimeout(() => {
+              // ★ [핵심] 백엔드가 준 actionCode와 parameters를 state에 담아 이동
+              navigate(response.target, { 
+                state: { 
+                  actionCode: response.actionCode, 
+                  parameters: response.parameters 
+                } 
+              })
+              reset()
+            }, 2000) // 메시지를 읽을 시간(2초) 부여 후 이동
+            return
+          }
         }
-      }, 800)
-    } else {
-      setFeedbackMessage('잘 못 알아들었어요. 다시 말씀해주세요.')
+
+        // 이동 없이 말만 하는 경우
+        setTimeout(reset, 2500)
+
+      } else {
+        setFeedbackMessage('죄송해요, 이해하지 못했어요.')
+        setTimeout(reset, 1500)
+      }
+    } catch (e) {
+      console.error('Voice API Error:', e)
+      setFeedbackMessage('죄송해요, 연결이 원활하지 않아요.')
+      setTimeout(reset, 1500)
     }
-  }, [navigate, reset, setFeedbackMessage, handleApiCommand])
+
+  }, [navigate, reset, setFeedbackMessage])
 
   const startVoice = useCallback(() => {
     if (recognitionRef.current && !isListening) {
@@ -167,7 +188,8 @@ export const useVoiceRecognition = () => {
     isListening,
     startVoice,
     stopVoice,
-    toggleVoice
+    toggleVoice,
+    processCommand // 테스트용: 텍스트 직접 입력 처리
   }
 }
 
