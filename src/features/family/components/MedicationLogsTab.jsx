@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import styles from './MedicationLogsTab.module.scss'
+import logger from '@core/utils/logger'
 
 export const MedicationLogsTab = ({ userId }) => {
   const [logs, setLogs] = useState([])
@@ -13,11 +14,7 @@ export const MedicationLogsTab = ({ userId }) => {
     limit: 30,
   })
 
-  useEffect(() => {
-    loadLogs()
-  }, [userId, filters])
-
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     if (!userId) {
       setLoading(false)
       return
@@ -35,13 +32,17 @@ export const MedicationLogsTab = ({ userId }) => {
       setStatistics(response?.statistics || null)
       setLogs(response?.logs || [])
     } catch (err) {
-      console.error('복약 로그 조회 실패:', err)
+      logger.error('복약 로그 조회 실패:', err)
       setError('복약 로그를 불러오지 못했습니다.')
       setLogs([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, filters])
+
+  useEffect(() => {
+    loadLogs()
+  }, [loadLogs])
 
   const getStatusColor = (status) => {
     switch (status) {

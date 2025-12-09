@@ -14,6 +14,7 @@ import styles from "./FamilyChatConversationPage.module.scss";
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useFamilyStore } from "@features/family/store/familyStore";
 import { familyChatApiClient } from "@/core/services/api/familyChatApiClient";
+import logger from '@core/utils/logger';
 
 const AI_LOADING_TEMP_ID = 'ai-loading-temp'; 
 
@@ -49,9 +50,6 @@ export const FamilyChatConversationPage = () => {
   const [currentUserLastReadMessageId, setCurrentUserLastReadMessageId] = useState(0);
   const [hasUnreadGap, setHasUnreadGap] = useState(false);
 
-  // [Safety] 멤버 수 초기값 1로 설정 (로딩 전 에러 방지)
-  const [totalMemberCount, setTotalMemberCount] = useState(1);
-
   const isFetchingRef = useRef(false);
 
   // [3] 읽음 신호 (Observer) - 호이스팅 문제 해결을 위해 위로 이동
@@ -74,13 +72,6 @@ export const FamilyChatConversationPage = () => {
       });
   }, [currentFamilyGroupId, currentUserId, currentUserLastReadMessageId]);
 
-  // 그룹 정보가 변경되면 멤버 수 업데이트 (옵셔널 체이닝 사용)
-  useEffect(() => {
-      if (familyGroup?.members?.length) {
-          setTotalMemberCount(familyGroup.members.length);
-      }
-  }, [familyGroup]);
-
   // [1] 초기 데이터 로드
   const loadInitialData = useCallback(async () => {
     if (!token) return;
@@ -93,15 +84,10 @@ export const FamilyChatConversationPage = () => {
       
       const initialMessages = response?.messages || [];
       const lastReadId = response?.currentUserLastReadMessageId || 0;
-      const memberCount = response?.totalMemberCount; 
       
       setMessages(initialMessages);
       setCurrentUserLastReadMessageId(lastReadId);
       
-      if (memberCount && memberCount > 0) {
-          setTotalMemberCount(memberCount);
-      }
-
       if (initialMessages.length > 0) {
         const oldestLoadedMessageId = initialMessages[0].id;
         if (lastReadId < oldestLoadedMessageId && lastReadId > 0) {
@@ -110,7 +96,7 @@ export const FamilyChatConversationPage = () => {
       }
 
     } catch (err) {
-      console.error("초기 데이터 로드 실패:", err);
+      logger.error("초기 데이터 로드 실패:", err);
       // 에러 나도 빈 채팅창은 보여줘야 함
       setMessages([]);
     } finally {
@@ -159,7 +145,7 @@ export const FamilyChatConversationPage = () => {
       setMessages((prev) => [...data, ...prev]);
       
     } catch (err) {
-      console.error("메시지 로드 실패", err);
+      logger.error("메시지 로드 실패", err);
     } finally {
       isFetchingRef.current = false;
       setIsLoadingPast(false);
@@ -251,12 +237,12 @@ export const FamilyChatConversationPage = () => {
       });
 
       client.onConnect = () => {
-        console.log("✅ WebSocket Connected!");
+        logger.debug("✅ WebSocket Connected!");
         client.subscribe(`/topic/family/${currentFamilyGroupId}`, (msg) => {
           const body = JSON.parse(msg.body);
 
           if (body.type === "READ") {
-              console.log("📩 READ 이벤트 수신:", body, "내 ID:", currentUserId);
+              logger.debug("📩 READ 이벤트 수신:", body, "내 ID:", currentUserId);
               
               if (body.familyMemberId === currentUserId) {
                   return;
@@ -297,7 +283,7 @@ export const FamilyChatConversationPage = () => {
                               };
                           }
 
-                          console.log(`🔻 메시지(${m.id}) 숫자 감소! (읽은사람: ${senderId}) 남은 수: ${m.unreadCount - 1}`);
+                          logger.debug(`🔻 메시지(${m.id}) 숫자 감소! (읽은사람: ${senderId}) 남은 수: ${m.unreadCount - 1}`);
                           return { 
                               ...m, 
                               unreadCount: m.unreadCount - 1,
@@ -350,7 +336,7 @@ export const FamilyChatConversationPage = () => {
             
             // [DEBUG] 서버에서 온 unreadCount 확인
             if (optimisticIndex !== -1) {
-                console.log("🔄 내 메시지 서버 응답 수신:", body, "Server Unread:", body.unreadCount, "Local Calc:", currentMemberCount - 1);
+                logger.debug("🔄 내 메시지 서버 응답 수신:", body, "Server Unread:", body.unreadCount, "Local Calc:", currentMemberCount - 1);
             }
 
             if (optimisticIndex !== -1) {
@@ -374,15 +360,15 @@ export const FamilyChatConversationPage = () => {
       stompClientRef.current = client;
 
     } catch (err) {
-      console.error("WS 로드 실패:", err);
+      logger.error("WS 로드 실패:", err);
     }
-  }, [currentFamilyGroupId, token, totalMemberCount]); 
+  }, [currentFamilyGroupId, token, currentUserId]); 
 
   const disconnectWebSocket = () => {
     if (stompClientRef.current) stompClientRef.current.deactivate(); 
   };
 
-  const handleImageUpload = async (file, content = "") => {
+  const handleImageUpload = useCallback(async (file, content = "") => {
     if (!file || isSending) return;
     const formData = new FormData();
     formData.append("file", file);
@@ -421,11 +407,11 @@ export const FamilyChatConversationPage = () => {
         }
       }
     } catch (err) {
-      console.error("이미지 전송 오류", err);
+      logger.error("이미지 전송 오류", err);
     } finally {
       setIsSending(false);
     }
-  };
+  }, [currentFamilyGroupId, currentUserId, isSending]);
 
   const handleSendMessage = useCallback(async (content, file) => {
     if (file) { await handleImageUpload(file, content); return; }
@@ -482,11 +468,11 @@ export const FamilyChatConversationPage = () => {
           return newMessages;
       });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     } finally {
       setIsSending(false);
     }
-  }, [currentFamilyGroupId, currentUserId, memberNickname, totalMemberCount]);
+  }, [currentFamilyGroupId, currentUserId, memberNickname, handleImageUpload]);
 
   useEffect(() => {
     if (token) connectWebSocket();
