@@ -18,9 +18,10 @@ import styles from './Header.module.scss'
  */
 export const Header = () => {
   const navigate = useNavigate()
-  const { user, customerRole } = useAuth((state) => ({
+  const { user, customerRole, logout } = useAuth((state) => ({
     user: state.user,
     customerRole: state.customerRole,
+    logout: state.logout,
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
 
@@ -60,6 +61,17 @@ export const Header = () => {
           >
             <span className={styles.userName}>{userName} 님</span>
             <span className={styles.userRole}>({roleLabel})</span>
+            <button 
+              className={styles.logoutBtn} 
+              onClick={() => {
+                if (window.confirm('로그아웃 하시겠습니까?')) {
+                  logout()
+                  navigate(ROUTE_PATHS.login)
+                }
+              }}
+            >
+              로그아웃
+            </button>
           </div>
 
           {unreadCount > 0 && (

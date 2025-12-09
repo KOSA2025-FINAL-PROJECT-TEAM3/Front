@@ -10,13 +10,13 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
     day: 'numeric',
   })
 
-  // [Fixed] createdBy is an ID, find name from members
-  const creator = group.members?.find(
+  // [Fixed] ownerId is the current owner, find name from members
+  const owner = group.members?.find(
     (m) =>
-      String(m.id) === String(group.createdBy) ||
-      String(m.userId) === String(group.createdBy),
+      String(m.id) === String(group.ownerId || group.createdBy) ||
+      String(m.userId) === String(group.ownerId || group.createdBy),
   )
-  const creatorName = creator?.name || group.createdBy?.name || '알 수 없음'
+  const ownerName = owner?.name || group.createdBy?.name || '알 수 없음'
 
   return (
     <section className={styles.card}>
@@ -25,7 +25,7 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
         <span className={styles.badge}>{memberCount}명 참여</span>
       </div>
       <div className={styles.meta}>
-        <span>생성자: {creatorName}</span>
+        <span>소유자: {ownerName}</span>
         <span>생성일: {createdDate}</span>
       </div>
     </section>
