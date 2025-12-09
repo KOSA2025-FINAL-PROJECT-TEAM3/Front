@@ -173,6 +173,34 @@ export const useFamilyStore = create((set, get) => ({
       }))
     }),
 
+  /**
+   * 멤버 역할 변경
+   * @param {string|number} memberId - 멤버 ID
+   * @param {string} familyRole - 새 역할 (SENIOR or CAREGIVER)
+   * @param {number|null} newOwnerMemberId - 소유자 위임 시 새 소유자 멤버 ID
+   */
+  updateMemberRole: async (memberId, familyRole, newOwnerMemberId = null) =>
+    withLoading(set, async () => {
+      await familyApiClient.updateMemberRole(memberId, familyRole, newOwnerMemberId)
+      // 로컬 상태 업데이트
+      set((state) => ({
+        members: state.members.map((m) =>
+          m.id === memberId || m.id === String(memberId)
+            ? { ...m, role: familyRole }
+            : m
+        ),
+        familyGroups: state.familyGroups.map((g) => ({
+          ...g,
+          members: g.members?.map((m) =>
+            m.id === memberId || m.id === String(memberId)
+              ? { ...m, role: familyRole }
+              : m
+          ),
+        })),
+        error: null,
+      }))
+    }),
+
   loadInvites: async () =>
     withLoading(set, async () => {
       const groupId = get().selectedGroupId

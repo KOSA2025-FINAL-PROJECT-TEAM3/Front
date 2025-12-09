@@ -10,6 +10,7 @@ import { useFamilyStore } from '../store/familyStore'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
+import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
 import { useFamilySync } from '../hooks/useFamilySync'
 import styles from './FamilyManagement.module.scss'
 
@@ -27,16 +28,19 @@ export const FamilyManagementPage = () => {
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [showGroupCreateModal, setShowGroupCreateModal] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState(null)
+  const [roleChangingMemberId, setRoleChangingMemberId] = useState(null)
   const [dissolving, setDissolving] = useState(false)
   const [retrying, setRetrying] = useState(false)
   const [groupName, setGroupName] = useState('')
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
+  const [delegationModal, setDelegationModal] = useState({ open: false, memberId: null, newRole: null })
   const {
     familyGroup,
     members,
     loading,
     removeMember,
+    updateMemberRole,
     error,
     onlineMemberIds,
     refetchFamily,
@@ -69,7 +73,7 @@ export const FamilyManagementPage = () => {
       toast.error('해산할 그룹이 없습니다.')
       return
     }
-    if (familyGroup?.createdBy?.toString?.() !== currentUserId?.toString?.()) {
+    if (familyGroup?.ownerId?.toString?.() !== currentUserId?.toString?.()) {
       toast.error('그룹 오너만 해산할 수 있습니다.')
       return
     }
@@ -95,6 +99,40 @@ export const FamilyManagementPage = () => {
     })
   }
 
+  const handleRoleChange = async (memberId, newRole, newOwnerMemberId = null) => {
+    if (!memberId || !newRole) return
+    setRoleChangingMemberId(memberId)
+    try {
+      await updateMemberRole(memberId, newRole, newOwnerMemberId)
+      toast.success('역할이 변경되었습니다.')
+      setDelegationModal({ open: false, memberId: null, newRole: null })
+      await refetchFamily?.()
+    } catch (error) {
+      console.warn('[FamilyManagement] Role change failed', error)
+      const errorCode = error?.response?.data?.code
+      const message = error?.response?.data?.message || error?.message || '역할 변경에 실패했습니다.'
+      // OWNER_DELEGATION_REQUIRED: 소유자 양도 필요
+      // 백엔드 메시지: "그룹 소유자가 역할을 전환하려면 새 소유자를 지정해야 합니다."
+      if (errorCode === 'FAMILY_009' || message.includes('소유자') && message.includes('새 소유자')) {
+        // 소유자 양도 모달을 표시 - 에러 토스트 표시하지 않음
+        setDelegationModal({ open: true, memberId, newRole })
+        // refetchFamily를 호출하지 않음 - 모달 확인/취소 시 처리
+        setRoleChangingMemberId(null)
+        return // finally를 건너뛰고 여기서 종료
+      } else {
+        toast.error(message)
+      }
+    } finally {
+      setRoleChangingMemberId(null)
+    }
+  }
+
+  const handleDelegationConfirm = async (newOwnerMemberId) => {
+    const { memberId, newRole } = delegationModal
+    if (!memberId || !newRole || !newOwnerMemberId) return
+    await handleRoleChange(memberId, newRole, newOwnerMemberId)
+  }
+
   return (
     <MainLayout>
       {/* 그룹 선택 모달 */}
@@ -108,6 +146,16 @@ export const FamilyManagementPage = () => {
           }}
         />
       )}
+
+      {/* 소유자 양도 모달 */}
+      <OwnerDelegationModal
+        isOpen={delegationModal.open}
+        onClose={() => setDelegationModal({ open: false, memberId: null, newRole: null })}
+        onConfirm={handleDelegationConfirm}
+        members={members}
+        currentOwnerId={familyGroup?.ownerId}
+        isLoading={roleChangingMemberId !== null}
+      />
 
       {/* 그룹 생성 모달 */}
       {showGroupCreateModal && (
@@ -267,7 +315,7 @@ export const FamilyManagementPage = () => {
               + 가족 초대
             </button>
             {familyGroup?.id &&
-              familyGroup?.createdBy?.toString?.() === currentUserId?.toString?.() && (
+              familyGroup?.ownerId?.toString?.() === currentUserId?.toString?.() && (
                 <button
                   type="button"
                   className={styles.dangerButton}
@@ -339,10 +387,12 @@ export const FamilyManagementPage = () => {
               members={selectedMembers}
               onDetail={handleDetail}
               onRemove={handleRemoveMember}
+              onRoleChange={handleRoleChange}
               onlineMemberIds={onlineMemberIds}
               removingMemberId={removingMemberId}
+              roleChangingMemberId={roleChangingMemberId}
               currentUserId={currentUserId}
-              groupOwnerId={familyGroup?.createdBy}
+              groupOwnerId={familyGroup?.ownerId}
             />
           </>
         )}
