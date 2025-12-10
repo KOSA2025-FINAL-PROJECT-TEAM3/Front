@@ -4,6 +4,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { MealInputForm } from '../components/MealInputForm'
 import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
 import { Box, TextField, Stack, Typography, Divider } from '@mui/material'
 import styles from './DietLogPage.module.scss'
 
@@ -15,6 +16,26 @@ export const DietLogPage = () => {
     new Date().toISOString().split('T')[0] // 오늘 날짜 기본값
   )
   const [allMeals, setAllMeals] = useState([])
+
+  // Voice Action State
+  const [autoFillData, setAutoFillData] = useState(null)
+  const { consumeAction, getPendingAction } = useVoiceActionStore()
+
+  // Voice Command Handling (Auto Fill)
+  useEffect(() => {
+    const pending = getPendingAction()
+    
+    if (pending && pending.code === 'AUTO_LOG_DIET') {
+      const action = consumeAction('AUTO_LOG_DIET')
+      if (action && action.params) {
+        logger.info('🎤 Voice Action Auto-Fill:', action)
+        setAutoFillData({
+          foodName: action.params.foodName,
+          mealType: action.params.mealType
+        })
+      }
+    }
+  }, [consumeAction, getPendingAction])
 
   const fetchMeals = useCallback(async () => {
     setLoading(true)
@@ -180,6 +201,7 @@ export const DietLogPage = () => {
             onUpdateMeal={handleUpdateMeal}
             editingMeal={editingMeal}
             onCancelEdit={handleCancelEdit}
+            autoFillData={autoFillData}
           />
         )}
 
