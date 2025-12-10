@@ -88,6 +88,20 @@ class NotificationApiClient extends ApiClient {
             }
         })
 
+        this.eventSource.addEventListener('medication.missed.aggregated', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'medication.missed.aggregated' })
+                }
+            } catch (error) {
+                console.error('Failed to parse medication.missed.aggregated event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
         // Handle connection errors
         this.eventSource.onerror = (error) => {
             console.error('SSE connection error:', error)

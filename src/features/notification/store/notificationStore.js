@@ -14,7 +14,13 @@ export const useNotificationStore = create((set, get) => ({
 
   // 읽지 않은 알림 개수
   get unreadCount() {
-    return get().notifications.filter((n) => !n.read).length
+    const seen = new Set()
+    return get().notifications.filter((n) => {
+      const key = n.groupKey || n.id
+      if (n.read || seen.has(key)) return false
+      seen.add(key)
+      return true
+    }).length
   },
 
   // 알림 목록 가져오기
@@ -44,19 +50,40 @@ export const useNotificationStore = create((set, get) => ({
   // 실시간 알림 추가 (SSE에서 호출)
   addRealtimeNotification: (notification) => {
     set((state) => {
-      // 중복 방지: 같은 ID의 알림이 이미 있으면 추가하지 않음
-      const isDuplicate = state.notifications.some((n) => n.id === notification.id)
+      const payload = notification.notification ? { ...notification, ...notification.notification } : notification
+      const normalizedType = (payload.type || notification.type || '').toLowerCase()
+      const scheduledTime = payload.scheduledTime || notification.scheduledTime
+      const missedMedications = payload.missedMedications || notification.missedMedications
+      const missedCount =
+        payload.missedCount ??
+        notification.missedCount ??
+        (Array.isArray(missedMedications) ? missedMedications.length : undefined)
+      const groupKey =
+        payload.groupKey ||
+        (scheduledTime && normalizedType.includes('missed')
+          ? `${normalizedType}-${scheduledTime}`
+          : undefined)
+      const id = payload.id || notification.id || groupKey || `realtime-${Date.now()}`
+
+      // 중복 방지: 같은 ID 또는 동일 그룹 키가 이미 있으면 추가하지 않음
+      const isDuplicate = state.notifications.some(
+        (n) => n.id === id || (groupKey && n.groupKey === groupKey)
+      )
       if (isDuplicate) {
         return state
       }
 
       const newNotification = {
-        id: notification.id || `realtime-${Date.now()}`,
-        title: notification.title || notification.medicationName || '알림',
-        message: notification.message,
+        id,
+        title: payload.title || payload.medicationName || '알림',
+        message: payload.message,
         read: false,
-        createdAt: new Date(notification.takenTime || notification.createdAt || new Date()),
-        type: notification.type,
+        createdAt: new Date(payload.takenTime || payload.createdAt || new Date()),
+        type: payload.type || notification.type || 'notification',
+        scheduledTime,
+        missedMedications,
+        missedCount,
+        groupKey,
       }
 
       return {
@@ -67,11 +94,15 @@ export const useNotificationStore = create((set, get) => ({
 
   // 알림 읽음 처리
   markAsRead: (id) => {
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    }))
+    set((state) => {
+      const target = state.notifications.find((t) => t.id === id)
+      const targetGroup = target?.groupKey
+      return {
+        notifications: state.notifications.map((n) =>
+          n.id === id || (targetGroup && n.groupKey === targetGroup) ? { ...n, read: true } : n
+        ),
+      }
+    })
     // API 호출 (비동기, 에러 무시)
     notificationApiClient.markAsRead(id).catch((error) => {
       console.warn('Failed to mark notification as read:', error)
@@ -87,9 +118,15 @@ export const useNotificationStore = create((set, get) => ({
 
   // 알림 삭제
   removeNotification: (id) => {
-    set((state) => ({
-      notifications: state.notifications.filter((n) => n.id !== id),
-    }))
+    set((state) => {
+      const target = state.notifications.find((t) => t.id === id)
+      const targetGroup = target?.groupKey
+      return {
+        notifications: state.notifications.filter((n) =>
+          targetGroup ? n.id !== id && n.groupKey !== targetGroup : n.id !== id
+        ),
+      }
+    })
   },
 }))
 

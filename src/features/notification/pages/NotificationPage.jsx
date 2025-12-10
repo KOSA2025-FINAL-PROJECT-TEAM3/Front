@@ -4,13 +4,49 @@
  * @component NotificationPage
  */
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './NotificationPage.module.scss'
+
+const mergeMedications = (a = [], b = []) => {
+  const byId = new Map()
+  a.forEach((item) => {
+    const key = item?.medicationId || item?.medicationName || JSON.stringify(item)
+    if (!byId.has(key)) byId.set(key, item)
+  })
+  b.forEach((item) => {
+    const key = item?.medicationId || item?.medicationName || JSON.stringify(item)
+    if (!byId.has(key)) byId.set(key, item)
+  })
+  return Array.from(byId.values()).filter(Boolean)
+}
+
+const formatScheduledTime = (value) => {
+  if (!value) return null
+  if (typeof value === 'string' && value.length <= 8 && value.includes(':')) {
+    return value.slice(0, 5)
+  }
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+}
+
+const buildMissedSummary = (notification) => {
+  if (!notification) return null
+  const meds = notification.missedMedications
+  if (Array.isArray(meds) && meds.length > 0) {
+    const first = meds[0]?.medicationName || '약'
+    return meds.length > 1 ? `${first} 외 ${meds.length - 1}개` : first
+  }
+  if (notification.missedCount) {
+    return `약 ${notification.missedCount}건`
+  }
+  return null
+}
 
 /**
  * 알림 목록 페이지 컴포넌트
@@ -23,6 +59,47 @@ export const NotificationPage = () => {
   useEffect(() => {
     fetchNotifications()
   }, [fetchNotifications])
+
+  const displayNotifications = useMemo(() => {
+    const grouped = new Map()
+    notifications.forEach((n) => {
+      const typeKey = (n.type || '').toLowerCase()
+      const key = n.groupKey || (typeKey.includes('missed') && n.scheduledTime ? `${typeKey}-${n.scheduledTime}` : n.id)
+      const existing = grouped.get(key)
+      if (existing) {
+        grouped.set(key, {
+          ...existing,
+          read: existing.read && n.read,
+          createdAt:
+            new Date(existing.createdAt || 0) > new Date(n.createdAt || 0)
+              ? existing.createdAt
+              : n.createdAt,
+          missedMedications: mergeMedications(existing.missedMedications, n.missedMedications),
+          missedCount: Math.max(
+            existing.missedCount || 0,
+            n.missedCount || 0,
+            Array.isArray(existing.missedMedications) ? existing.missedMedications.length : 0,
+            Array.isArray(n.missedMedications) ? n.missedMedications.length : 0
+          ),
+          message: existing.message || n.message,
+        })
+      } else {
+        grouped.set(
+          key,
+          n.scheduledTime
+            ? {
+                ...n,
+                groupKey: key,
+              }
+            : n
+        )
+      }
+    })
+
+    return Array.from(grouped.values()).sort(
+      (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    )
+  }, [notifications])
 
   const handleNotificationClick = (notification) => {
     if (!notification.read) {
@@ -60,6 +137,16 @@ export const NotificationPage = () => {
     }
   }
 
+  const renderMessage = (notification) => {
+    const isMissed = (notification.type || '').toLowerCase().includes('missed')
+    const timeLabel = formatScheduledTime(notification.scheduledTime)
+    const summary = buildMissedSummary(notification)
+    if (isMissed && timeLabel && summary) {
+      return `${timeLabel} 예정 ${summary} 복용을 아직 하지 않았습니다.`
+    }
+    return notification.message
+  }
+
   return (
     <MainLayout>
       <div className={styles.container}>
@@ -78,39 +165,51 @@ export const NotificationPage = () => {
 
         {loading && <p className={styles.placeholder}>알림을 불러오는 중...</p>}
 
-        {!loading && notifications.length === 0 && (
+        {!loading && displayNotifications.length === 0 && (
           <div className={styles.empty}>
             <p className={styles.emptyIcon}>🔔</p>
             <p className={styles.emptyText}>새로운 알림이 없습니다</p>
           </div>
         )}
 
-        {!loading && notifications.length > 0 && (
+        {!loading && displayNotifications.length > 0 && (
           <div className={styles.notificationList}>
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`${styles.notificationItem} ${!notification.read ? styles.unread : ''}`}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <div className={styles.notificationHeader}>
-                  <span className={styles.notificationTitle}>{notification.title}</span>
-                  <button
-                    type="button"
-                    className={styles.deleteButton}
-                    onClick={(e) => handleDelete(e, notification.id)}
-                    aria-label="삭제"
-                  >
-                    ✕
-                  </button>
+            {displayNotifications.map((notification) => {
+              const isMissed = (notification.type || '').toLowerCase().includes('missed')
+              const summary = buildMissedSummary(notification)
+              const timeLabel = formatScheduledTime(notification.scheduledTime)
+
+              return (
+                <div
+                  key={notification.id}
+                  className={`${styles.notificationItem} ${!notification.read ? styles.unread : ''}`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className={styles.notificationHeader}>
+                    <span className={styles.notificationTitle}>{notification.title}</span>
+                    <button
+                      type="button"
+                      className={styles.deleteButton}
+                      onClick={(e) => handleDelete(e, notification.id)}
+                      aria-label="삭제"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className={styles.notificationMessage}>{renderMessage(notification)}</p>
+                  {isMissed && (summary || timeLabel) && (
+                    <div className={styles.metaRow}>
+                      {timeLabel && <span className={styles.metaPill}>{timeLabel}</span>}
+                      {summary && <span className={styles.metaPill}>{summary}</span>}
+                    </div>
+                  )}
+                  <div className={styles.notificationFooter}>
+                    <span className={styles.notificationTime}>{formatDate(notification.createdAt)}</span>
+                    {!notification.read && <span className={styles.unreadBadge}>새 알림</span>}
+                  </div>
                 </div>
-                <p className={styles.notificationMessage}>{notification.message}</p>
-                <div className={styles.notificationFooter}>
-                  <span className={styles.notificationTime}>{formatDate(notification.createdAt)}</span>
-                  {!notification.read && <span className={styles.unreadBadge}>새 알림</span>}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
