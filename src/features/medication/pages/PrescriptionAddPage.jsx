@@ -43,6 +43,7 @@ export const PrescriptionAddPage = () => {
 
     const [newTime, setNewTime] = useState('');
     const [showSearchModal, setShowSearchModal] = useState(false);
+    const [editingMedicationIndex, setEditingMedicationIndex] = useState(null);
 
     // 마운트 시 상태 초기화 (loading 상태 리셋)
     useEffect(() => {
@@ -87,13 +88,27 @@ export const PrescriptionAddPage = () => {
         if (location.state?.ocrData) {
             const ocrData = location.state.ocrData;
             logger.debug('🔄 OCR 데이터 로드 시작:', ocrData);
+
+            // OCR 데이터 중복 약물 제거
+            const uniqueMedications = [];
+            const seenNames = new Set();
+            
+            if (ocrData.medications) {
+                ocrData.medications.forEach(med => {
+                    if (!seenNames.has(med.name)) {
+                        seenNames.add(med.name);
+                        uniqueMedications.push(med);
+                    }
+                });
+            }
+
             setPrescriptionData(prev => ({
                 ...prev,
                 ...ocrData,
                 startDate: ocrData.startDate || prev.startDate,
                 endDate: ocrData.endDate || prev.endDate,
                 intakeTimes: ocrData.intakeTimes || prev.intakeTimes,
-                medications: ocrData.medications || [],
+                medications: uniqueMedications,
                 hospitalName: ocrData.hospitalName || '',
                 pharmacyName: ocrData.pharmacyName || ''
             }));
@@ -145,6 +160,16 @@ export const PrescriptionAddPage = () => {
     };
 
     const handleAddMedication = (medication) => {
+        // 중복 약물 체크
+        const isDuplicate = prescriptionData.medications.some(
+            existing => existing.name === medication.name
+        );
+
+        if (isDuplicate) {
+            toast.error('이미 추가된 약입니다. 복용량을 조절해주세요.');
+            return;
+        }
+
         setPrescriptionData(prev => ({
             ...prev,
             medications: [...prev.medications, medication]
@@ -158,6 +183,29 @@ export const PrescriptionAddPage = () => {
             ...prev,
             medications: prev.medications.filter((_, index) => index !== indexToRemove)
         }));
+    };
+
+    const handleEditMedication = (index) => {
+        setEditingMedicationIndex(index);
+        setShowSearchModal(true);
+    };
+
+    const handleUpdateMedication = (updatedMedication) => {
+        setPrescriptionData(prev => {
+            const newMedications = [...prev.medications];
+            newMedications[editingMedicationIndex] = updatedMedication;
+            return {
+                ...prev,
+                medications: newMedications
+            };
+        });
+        handleCloseModal();
+        toast.success('약 정보가 수정되었습니다');
+    };
+
+    const handleCloseModal = () => {
+        setShowSearchModal(false);
+        setEditingMedicationIndex(null);
     };
 
     const handleSubmit = async () => {
@@ -290,7 +338,7 @@ export const PrescriptionAddPage = () => {
                                 key={index}
                                 medication={medication}
                                 intakeTimes={prescriptionData.intakeTimes}
-                                onEdit={() => toast.info('수정 기능은 준비 중입니다')}
+                                onEdit={() => handleEditMedication(index)}
                                 onRemove={() => handleRemoveMedication(index)}
                             />
                         ))}
@@ -327,8 +375,10 @@ export const PrescriptionAddPage = () => {
             {showSearchModal && (
                 <MedicationModal
                     intakeTimes={prescriptionData.intakeTimes}
-                    onAdd={handleAddMedication}
-                    onClose={() => setShowSearchModal(false)}
+                    onAdd={editingMedicationIndex !== null ? handleUpdateMedication : handleAddMedication}
+                    onClose={handleCloseModal}
+                    initialMedication={editingMedicationIndex !== null ? prescriptionData.medications[editingMedicationIndex] : null}
+                    mode={editingMedicationIndex !== null ? 'edit' : 'add'}
                 />
             )}
         </MainLayout>

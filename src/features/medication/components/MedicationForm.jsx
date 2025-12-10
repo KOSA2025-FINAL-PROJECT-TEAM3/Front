@@ -78,6 +78,28 @@ export const MedicationForm = ({
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+
+    // 클라이언트 사이드 스케줄 중복 검증
+    if (form.schedules && form.schedules.length > 0) {
+      const timeMap = {} // time -> Set<day>
+      for (const schedule of form.schedules) {
+        if (!schedule.time || !schedule.daysOfWeek) continue
+        
+        if (!timeMap[schedule.time]) {
+          timeMap[schedule.time] = new Set()
+        }
+
+        const days = schedule.daysOfWeek.split(',')
+        for (const day of days) {
+          if (timeMap[schedule.time].has(day)) {
+            alert(`중복된 스케줄이 있습니다: ${schedule.time} (${day})`)
+            return
+          }
+          timeMap[schedule.time].add(day)
+        }
+      }
+    }
+
     await onSubmit?.(form)
     if (shouldResetOnSubmit) {
       setForm(initialForm)
