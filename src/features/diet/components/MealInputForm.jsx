@@ -21,6 +21,7 @@ export const MealInputForm = ({
   onUpdateMeal,
   editingMeal,
   onCancelEdit,
+  autoFillData // [Voice] New prop
 }) => {
   const dietCameraRef = useRef(null)
   const [mealType, setMealType] = useState(MEAL_TYPES.BREAKFAST)
@@ -33,6 +34,23 @@ export const MealInputForm = ({
   const [isLoading, setIsLoading] = useState(false)
 
   const isEditing = !!editingMeal
+
+  // [Voice] Auto-fill effect
+  useEffect(() => {
+    if (autoFillData) {
+      if (autoFillData.foodName) {
+        setFoodName(autoFillData.foodName)
+      }
+      
+      if (autoFillData.mealType) {
+        // Map uppercase backend enum (e.g., 'LUNCH') to lowercase frontend constant
+        const typeKey = Object.keys(MEAL_TYPES).find(key => key === autoFillData.mealType.toUpperCase())
+        const mappedType = typeKey ? MEAL_TYPES[typeKey] : MEAL_TYPES.BREAKFAST
+        
+        setMealType(mappedType)
+      }
+    }
+  }, [autoFillData])
 
   useEffect(() => {
     if (isEditing) {
