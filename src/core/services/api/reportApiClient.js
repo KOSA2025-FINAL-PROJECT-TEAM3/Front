@@ -1,6 +1,5 @@
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
-import { MOCK_ADHERENCE_REPORT, MOCK_WEEKLY_STATS } from '@/data/mockReports'
 
 class ReportApiClient extends ApiClient {
     constructor() {
@@ -11,15 +10,11 @@ class ReportApiClient extends ApiClient {
     }
 
     getAdherenceReport(userId, startDate, endDate) {
-        return this.post('/adherence', { userId, startDate, endDate }, undefined, {
-            mockResponse: () => MOCK_ADHERENCE_REPORT,
-        })
+        return this.post('/adherence', { userId, startDate, endDate })
     }
 
     getWeeklyStats(userId) {
-        return this.get('/weekly', { userId }, {
-            mockResponse: () => MOCK_WEEKLY_STATS,
-        })
+        return this.get('/weekly', { userId })
     }
 }
 

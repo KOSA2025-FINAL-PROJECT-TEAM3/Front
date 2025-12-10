@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import logger from "@core/utils/logger"
+import React, { useRef, useState, useCallback } from 'react';
 import { Box, Button, IconButton, Typography, Paper } from '@mui/material';
 import { CameraAlt, CloudUpload, Close } from '@mui/icons-material';
 
@@ -34,12 +35,20 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [stream, setStream] = useState(null);
 
+    const stopCamera = useCallback(() => {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            setStream(null);
+        }
+        setIsCameraOpen(false);
+    }, [stream]);
+
     // Cleanup on unmount
     React.useEffect(() => {
         return () => {
             stopCamera();
         };
-    }, []);
+    }, [stopCamera]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -77,17 +86,9 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
                 }
             }, 100);
         } catch (err) {
-            console.error("Error accessing camera:", err);
+            logger.error("Error accessing camera:", err);
             alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
         }
-    };
-
-    const stopCamera = () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-        setIsCameraOpen(false);
     };
 
     const capturePhoto = () => {

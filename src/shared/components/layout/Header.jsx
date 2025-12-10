@@ -18,9 +18,10 @@ import styles from './Header.module.scss'
  */
 export const Header = () => {
   const navigate = useNavigate()
-  const { user, customerRole } = useAuth((state) => ({
+  const { user, customerRole, logout } = useAuth((state) => ({
     user: state.user,
     customerRole: state.customerRole,
+    logout: state.logout,
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
 
@@ -38,16 +39,39 @@ export const Header = () => {
     <header className={styles.header}>
       <div className={styles.headerContainer}>
         {/* 좌측: 로고 및 앱 이름 */}
-        <div className={styles.logoSection}>
+        <div 
+          className={styles.logoSection} 
+          onClick={() => navigate(ROUTE_PATHS.root)}
+          style={{ cursor: 'pointer' }}
+          role="button"
+          tabIndex={0}
+        >
           <div className={styles.logoIcon}>💊</div>
           <span className={styles.appName}>뭐냑? (AMA...Pill)</span>
         </div>
 
         {/* 우측: 사용자 정보 및 알림 */}
         <div className={styles.rightSection}>
-          <div className={styles.userInfo}>
+          <div 
+            className={styles.userInfo}
+            onClick={() => navigate(ROUTE_PATHS.settingsProfile)}
+            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+          >
             <span className={styles.userName}>{userName} 님</span>
             <span className={styles.userRole}>({roleLabel})</span>
+            <button 
+              className={styles.logoutBtn} 
+              onClick={() => {
+                if (window.confirm('로그아웃 하시겠습니까?')) {
+                  logout()
+                  navigate(ROUTE_PATHS.login)
+                }
+              }}
+            >
+              로그아웃
+            </button>
           </div>
 
           {unreadCount > 0 && (

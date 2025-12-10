@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -19,7 +20,7 @@ export default function RoleSelectionPage() {
       await axios.post('/api/auth/select-role', { role: selectedRole });
       navigate('/dashboard');
     } catch (error) {
-      console.error('역할 선택 실패:', error);
+      logger.error('역할 선택 실패:', error);
       alert('역할 선택에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLoading(false);

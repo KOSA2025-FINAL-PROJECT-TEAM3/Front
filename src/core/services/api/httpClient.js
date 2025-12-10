@@ -2,6 +2,7 @@
 import { API_CONFIG } from '@config/api.config'
 import { attachAuthInterceptor } from '@core/interceptors/authInterceptor'
 import { attachErrorInterceptor } from '@core/interceptors/errorInterceptor'
+import logger from '@core/utils/logger'
 
 export const httpClient = axios.create({
   baseURL: API_CONFIG.baseURL,
@@ -15,14 +16,14 @@ export const httpClient = axios.create({
 // 요청 로깅 인터셉터
 httpClient.interceptors.request.use(
   (config) => {
-    console.log(`[API REQUEST] ${config.method.toUpperCase()} ${config.url}`, {
+    logger.api('REQUEST', `${config.method.toUpperCase()} ${config.url}`, {
       headers: config.headers,
       data: config.data
     })
     return config
   },
   (error) => {
-    console.error('[API REQUEST ERROR]', error)
+    logger.error('[API REQUEST ERROR]', error)
     return Promise.reject(error)
   }
 )
@@ -30,11 +31,11 @@ httpClient.interceptors.request.use(
 // 응답 로깅 인터셉터
 httpClient.interceptors.response.use(
   (response) => {
-    console.log(`[API RESPONSE] ${response.status} ${response.config.method.toUpperCase()} ${response.config.url}`, response.data)
+    logger.api('RESPONSE', `${response.status} ${response.config.method.toUpperCase()} ${response.config.url}`, response.data)
     return response
   },
   (error) => {
-    console.error(`[API ERROR] ${error.response?.status || 'UNKNOWN'} ${error.config?.method.toUpperCase()} ${error.config?.url}`, {
+    logger.error(`[API ERROR] ${error.response?.status || 'UNKNOWN'} ${error.config?.method.toUpperCase()} ${error.config?.url}`, {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message

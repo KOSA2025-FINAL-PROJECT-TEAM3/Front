@@ -1,6 +1,6 @@
 /**
  * UI 상수 Mock 데이터
- * @file mockUiConstants.js
+ * @file uiConstants.js
  * @description 대시보드, 설정 등의 UI 상수 데이터
  */
 

@@ -1,5 +1,14 @@
 # Frontend 결정 사항 (증상 검색 기능)
 
+## 2025-12-03: 증상 AI 검색 mock 제거 & 약 등록 폼 AI 버튼 제거
+
+- **증상 AI 검색** (`src/core/services/api/searchApiClient.js`)
+  - `searchSymptomsWithAI`의 mock 응답을 삭제하고 `useMock: false`로 고정하여 항상 백엔드 실제 호출만 사용.
+  - 이유: 스트레스/피로/수면 부족 등 하드코딩된 목업 응답이 노출되는 문제 방지.
+- **약 등록 폼** (`src/features/medication/components/MedicationForm.jsx`)
+  - 약 이름 옆 AI 검색 버튼 및 관련 상태/모달 의존성 제거. 단순 수기 입력만 남김.
+  - 이유: AI 버튼 제거 요구사항 및 참조 오류(AiWarningModal undefined) 해소.
+
 ## 이슈 #54: 증상 검색 기능 개선
 
 ### 1. 검색 방식 변경

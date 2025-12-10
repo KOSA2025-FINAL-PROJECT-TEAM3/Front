@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * useNotificationStream Hook
  * - SSE 연결 관리
@@ -11,15 +12,28 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
 import { toast } from '@shared/components/toast/toastStore'
+import { useLocation } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
+
+const PUBLIC_PATHS = new Set([
+  ROUTE_PATHS.login,
+  ROUTE_PATHS.signup,
+  ROUTE_PATHS.root,
+  ROUTE_PATHS.inviteCodeEntry,
+  ROUTE_PATHS.inviteAccept,
+  ROUTE_PATHS.kakaoCallback,
+])
 
 export const useNotificationStream = (onNotification) => {
   const token = useAuthStore((state) => state.token)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const addRealtimeNotification = useNotificationStore((state) => state.addRealtimeNotification)
+  const location = useLocation()
 
   useEffect(() => {
-    // SSE 연결 조건: 인증되었고 토큰이 있어야 함
-    if (!isAuthenticated || !token) {
+    // SSE 연결 조건: 인증되었고 토큰이 있어야 함, 그리고 public 페이지가 아니어야 함
+    const isPublic = PUBLIC_PATHS.has(location.pathname)
+    if (!isAuthenticated || !token || isPublic) {
       return
     }
 
@@ -45,6 +59,14 @@ export const useNotificationStream = (onNotification) => {
           })
           break
 
+        case 'invite.accepted':
+          // 초대 수락 알림 - 보낸 초대 목록에서 제거
+          import('@features/family/store/familyStore').then(({ useFamilyStore }) => {
+            useFamilyStore.getState().removeInviteById(data.inviteId)
+          })
+          toast.success(data.message || '초대가 수락되었습니다')
+          break
+
         default:
           // 기타 알림 (정보 토스트)
           toast.info(data.message || '새로운 알림이 있습니다')
@@ -53,19 +75,19 @@ export const useNotificationStream = (onNotification) => {
     }
 
     const handleError = (error) => {
-      console.error('Notification stream error:', error)
+      logger.error('Notification stream error:', error)
       // 토큰 만료 등의 에러는 auth interceptor가 처리
     }
 
     try {
       notificationApiClient.subscribe(token, handleMessage, handleError)
     } catch (error) {
-      console.error('Failed to subscribe to notifications:', error)
+      logger.error('Failed to subscribe to notifications:', error)
     }
 
     // Cleanup: 언마운트 시 연결 해제
     return () => {
       notificationApiClient.disconnect()
     }
-  }, [isAuthenticated, token, onNotification, addRealtimeNotification])
+  }, [isAuthenticated, token, onNotification, addRealtimeNotification, location.pathname])
 }

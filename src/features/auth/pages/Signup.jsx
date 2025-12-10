@@ -26,8 +26,6 @@ export const Signup = () => {
   const rawRedirect = searchParams.get('redirect')
   const redirectPath = rawRedirect ? decodeURIComponent(rawRedirect) : null // null로 원복
 
-  console.log('[Signup] Initial render - redirectPath:', redirectPath)
-
   const { signup, loading, error, clearError } = useAuth((state) => ({
     signup: state.signup,
     loading: state.loading,
@@ -74,11 +72,16 @@ export const Signup = () => {
         userRole: DEFAULT_USER_ROLE,
         customerRole: formData.customerRole,
       })
+      
+      // 1. Check for valid invite session first
+      const { isSessionValid } = useInviteStore.getState()
+      if (isSessionValid()) {
+        navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
+        return
+      }
 
-      console.log('[Signup] Signup successful. Checking redirect:', redirectPath)
-
+      // 2. Check for explicit redirect path
       if (redirectPath) {
-        console.log('[Signup] Redirecting to:', redirectPath)
         navigate(redirectPath, { replace: true })
         return
       }

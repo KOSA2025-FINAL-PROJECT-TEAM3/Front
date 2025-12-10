@@ -1,4 +1,5 @@
 ﻿import ApiClient from './ApiClient'
+import logger from '@core/utils/logger'
 
 class FamilyApiClient extends ApiClient {
   constructor() {
@@ -12,7 +13,7 @@ class FamilyApiClient extends ApiClient {
     // GET /api/family/groups에서 모든 그룹과 멤버 정보 반환
     return this.get('/groups').then((groups) => {
       if (Array.isArray(groups) && groups.length > 0) {
-        console.log('[familyApiClient] getSummary - raw groups:', groups)
+        logger.debug('[familyApiClient] getSummary - raw groups:', groups)
 
         const normalizeMember = (member) => {
           const userId =
@@ -36,6 +37,7 @@ class FamilyApiClient extends ApiClient {
           id: group?.id,
           name: group?.name,
           createdBy: group?.createdBy?.id ?? group?.createdBy,
+          ownerId: group?.ownerId, // 현재 소유자 ID (양도 가능)
           createdAt: group?.createdAt,
           members: Array.isArray(group?.members)
             ? group.members.map(normalizeMember)
@@ -58,24 +60,29 @@ class FamilyApiClient extends ApiClient {
     })
   }
 
-  createGroup(name) {
-    return this.post('/groups', { name }).then((group) => {
+  createGroup(name, familyRole = null) {
+    const body = { name }
+    if (familyRole) {
+      body.familyRole = familyRole
+    }
+    return this.post('/groups', body).then((group) => {
       // Normalize the created group to match getSummary structure
       return {
         id: group?.id,
         name: group?.name,
         createdBy: group?.createdBy?.id ?? group?.createdBy,
+        ownerId: group?.ownerId, // 현재 소유자 ID (양도 가능)
         createdAt: group?.createdAt,
         members: Array.isArray(group?.members)
           ? group.members.map((member) => ({
-              id: member?.id?.toString() ?? member?.userId?.toString(),
-              userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
-              name: member?.user?.name || member?.userName || '이름 없음',
-              email: member?.user?.email || member?.userEmail || '',
-              role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
-              joinedAt: member?.joinedAt || new Date().toISOString(),
-              raw: member,
-            }))
+            id: member?.id?.toString() ?? member?.userId?.toString(),
+            userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
+            name: member?.user?.name || member?.userName || '이름 없음',
+            email: member?.user?.email || member?.userEmail || '',
+            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            joinedAt: member?.joinedAt || new Date().toISOString(),
+            raw: member,
+          }))
           : [],
       }
     })
@@ -85,8 +92,24 @@ class FamilyApiClient extends ApiClient {
     return this.delete(`/groups/${groupId}`)
   }
 
-  getInvites() {
-    return this.get('/invites')
+  /**
+   * 멤버 역할 변경
+   * @param {number} memberId - 멤버 ID
+   * @param {string} familyRole - 새 역할 (SENIOR or CAREGIVER)
+   * @param {number|null} newOwnerMemberId - 소유자 위임 시 새 소유자 멤버 ID
+   * @returns {Promise}
+   */
+  updateMemberRole(memberId, familyRole, newOwnerMemberId = null) {
+    const body = { familyRole }
+    if (newOwnerMemberId) {
+      body.newOwnerMemberId = newOwnerMemberId
+    }
+    return this.put(`/members/${memberId}/role`, body)
+  }
+
+  getInvites(groupId) {
+    const query = groupId ? `?groupId=${groupId}` : ''
+    return this.get(`/invites${query}`)
   }
 
   inviteMember(payload) {

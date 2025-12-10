@@ -1,8 +1,4 @@
 import ApiClient from './ApiClient'
-import {
-  MOCK_FOOD_CONFLICT,
-  MOCK_ALTERNATIVES,
-} from '@/data/mockFoodWarnings'
 
 class DietApiClient extends ApiClient {
   constructor() {
@@ -13,12 +9,7 @@ class DietApiClient extends ApiClient {
   }
 
   getFoodWarnings() {
-    return this.get('/warnings', undefined, {
-      mockResponse: () => ({
-        conflict: MOCK_FOOD_CONFLICT,
-        alternatives: MOCK_ALTERNATIVES,
-      }),
-    })
+    return this.get('/warnings')
   }
 
   // Get all diet logs
@@ -55,16 +46,6 @@ class DietApiClient extends ApiClient {
         'Content-Type': 'multipart/form-data',
       },
       timeout: 300000,
-    }, {
-      mockResponse: () => ({
-        foodName: foodName || 'Mock Food',
-        calories: 500,
-        mealType: mealType,
-        overallLevel: 'GOOD',
-        drugInteractions: [],
-        diseaseInteractions: [],
-        summary: '안전: 현재 복용 중인 약물 및 질병과 특별한 상호작용이 없습니다.',
-      }),
     })
   }
 }

@@ -1,18 +1,15 @@
-/**
- * 증상 검색 탭 컴포넌트
- */
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
 import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
+import logger from '@core/utils/logger'
 
 export const SymptomSearchTab = () => {
   const { consumeAction, getPendingAction } = useVoiceActionStore() // [Voice]
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [results] = useState([])
   const [selectedSymptom, setSelectedSymptom] = useState(null)
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
@@ -92,8 +89,19 @@ export const SymptomSearchTab = () => {
       setAiLoading(false)
       setDetailLoading(false)
     } catch (err) {
-      console.error('증상 AI 검색 실패', err)
-      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      logger.error('증상 AI 검색 실패', err)
+      // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
+      const errorData = err?.response?.data
+      const errorCode = errorData?.code
+      const errorMsg = errorData?.message
+      
+      if (errorCode === 'SECURITY_005' || errorMsg?.includes('증상만')) {
+        setError('증상만 입력해주세요. 예: 두통, 어지러움')
+      } else if (errorMsg) {
+        setError(errorMsg)
+      } else {
+        setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      }
       setAiLoading(false)
       setDetailLoading(false)
       setIsAiSearch(false)

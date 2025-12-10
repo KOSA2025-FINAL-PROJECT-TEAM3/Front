@@ -7,6 +7,7 @@ import { medicationLogApiClient } from '../../../core/services/api/medicationLog
 import MedicationCard from '../../../components/medication/MedicationCard';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import logger from '@core/utils/logger';
 
 const TodayMedications = () => {
     const { consumeAction } = useVoiceActionStore(); // [Voice]
@@ -28,7 +29,7 @@ const TodayMedications = () => {
             const medsResponse = await medicationApiClient.list();
             setMedications(medsResponse.data || []);
         } catch (err) {
-            console.error('Failed to fetch today logs:', err);
+            logger.error('Failed to fetch today logs:', err);
             setError('오늘의 복용 기록을 불러오는데 실패했습니다.');
         } finally {
             setLoading(false);
@@ -97,10 +98,10 @@ const TodayMedications = () => {
 
     const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view
-        console.log('Clicked medication:', medication);
+        logger.debug('Clicked medication:');
     };
 
-    const handleScheduleClick = async (schedule, medication) => {
+    const handleScheduleClick = async (schedule) => {
         if (schedule.isTakenToday) {
             // Already taken
             return;
@@ -121,7 +122,7 @@ const TodayMedications = () => {
             await medicationLogApiClient.completeMedication(schedule.id);
             // Success - keep optimistic state
         } catch (err) {
-            console.error('Failed to complete medication:', err);
+            logger.error('Failed to complete medication:', err);
             // Revert state
             setLogs(previousLogs);
             alert('복용 체크에 실패했습니다. 다시 시도해주세요.');

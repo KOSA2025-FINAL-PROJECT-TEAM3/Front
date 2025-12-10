@@ -1,5 +1,5 @@
 import MainLayout from '@shared/components/layout/MainLayout'
-import { PROFILE_EDIT_FIELDS } from '@/data/mockUiConstants'
+import { PROFILE_EDIT_FIELDS } from '@/constants/uiConstants'
 import styles from './ProfileEdit.module.scss'
 
 export const ProfileEditPage = () => {

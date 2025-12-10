@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * Notification Store
  * - 알림 상태 관리
@@ -36,7 +37,7 @@ export const useNotificationStore = create((set, get) => ({
         set({ notifications: [], loading: false })
       }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error)
+      logger.error('Failed to fetch notifications:', error)
       set({ error, loading: false, notifications: [] })
     }
   },
@@ -74,7 +75,7 @@ export const useNotificationStore = create((set, get) => ({
     }))
     // API 호출 (비동기, 에러 무시)
     notificationApiClient.markAsRead(id).catch((error) => {
-      console.warn('Failed to mark notification as read:', error)
+      logger.warn('Failed to mark notification as read:', error)
     })
   },
 

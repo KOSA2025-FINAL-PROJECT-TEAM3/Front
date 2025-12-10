@@ -6,6 +6,7 @@ import { toast } from '@shared/components/toast/toastStore'
 import InviteMemberForm from '../components/InviteMemberForm.jsx'
 import { useFamily } from '../hooks/useFamily'
 import styles from './FamilyInvite.module.scss'
+import logger from '@core/utils/logger'
 
 export const FamilyInvitePage = () => {
   const navigate = useNavigate()
@@ -20,8 +21,6 @@ export const FamilyInvitePage = () => {
     initialized,
     initialize,
     refetchFamily,
-    createFamilyGroup,
-    loading,
   } = useFamily((state) => ({
     familyGroups: state.familyGroups, // Changed
     selectedGroupId: state.selectedGroupId, // Changed
@@ -33,8 +32,7 @@ export const FamilyInvitePage = () => {
     initialized: state.initialized,
     initialize: state.initialize,
     refetchFamily: state.refetchFamily,
-    createFamilyGroup: state.createFamilyGroup,
-    loading: state.loading,
+    // [2025-12-08] createFamilyGroup과 loading 제거 (FamilyManagement로 이동)
   }))
 
   // [Fixed] Derive familyGroup from familyGroups and selectedGroupId
@@ -46,36 +44,38 @@ export const FamilyInvitePage = () => {
   const [latestInvite, setLatestInvite] = useState(null)
   const [cancelingId, setCancelingId] = useState(null)
   const [acceptingId, setAcceptingId] = useState(null)
-  const [regenerating, setRegenerating] = useState(false)
-  const [groupName, setGroupName] = useState('')
-  const [creatingGroup, setCreatingGroup] = useState(false)
 
-  const sentInvites = useMemo(() => invites?.sent || [], [invites])
+
+  const sentInvites = useMemo(() => {
+    return (invites?.sent || []).filter((inv) => inv.status === 'PENDING')
+  }, [invites])
   const receivedInvites = useMemo(() => invites?.received || [], [invites])
   const hasGroup = Boolean(familyGroup?.id)
 
   useEffect(() => {
     // familyGroup이 없으면 강제로 다시 로드
     if (!familyGroup) {
-      console.log('[FamilyInvite] familyGroup이 없음, 강제 로드')
+      logger.debug('[FamilyInvite] familyGroup이 없음, 강제 로드')
       initialize?.({ force: true }).catch((error) =>
-        console.warn('[FamilyInvite] initialize failed', error),
+        logger.warn('[FamilyInvite] initialize failed', error),
       )
     } else if (!initialized) {
       initialize?.().catch((error) =>
-        console.warn('[FamilyInvite] initialize failed', error),
+        logger.warn('[FamilyInvite] initialize failed', error),
       )
     }
     loadInvites?.().catch((error) =>
-      console.warn('[FamilyInvite] loadInvites failed', error),
+      logger.warn('[FamilyInvite] loadInvites failed', error),
     )
   }, [familyGroup, initialized, initialize, loadInvites])
 
   useEffect(() => {
-    if (sentInvites?.length) {
-      setLatestInvite(sentInvites[0])
+    // 컴포넌트 언마운트 시 상태 초기화
+    return () => {
+      setLatestInvite(null)
+      setSubmitting(false)
     }
-  }, [sentInvites])
+  }, [])
 
   const inviteLink = useMemo(() => {
     if (typeof window === 'undefined') return ''
@@ -112,43 +112,17 @@ export const FamilyInvitePage = () => {
     }
   }
 
-  const handleRegenerate = async () => {
-    if (!hasGroup) {
-      toast.warning('먼저 가족 그룹을 생성해주세요.')
-      return
-    }
-    const name = prompt('초대받을 분의 이름을 입력해주세요')
-    const email = prompt('초대받을 분의 이메일을 입력해주세요')
-    const suggestedRole = 'SENIOR'
-    if (!email || !name) {
-      toast.warning('이름과 이메일이 모두 필요합니다.')
-      return
-    }
-    setRegenerating(true)
-    try {
-      const response = await inviteMember({ name, email, suggestedRole })
-      if (response?.inviteCode) {
-        setLatestInvite(response)
-        toast.success('새 초대 링크가 생성되었습니다.')
-      }
-    } catch (error) {
-      console.warn('[FamilyInvite] regenerate failed', error)
-      toast.error('초대 링크를 다시 만들지 못했습니다. 잠시 후 재시도해 주세요.')
-    } finally {
-      setRegenerating(false)
-    }
+  const handleClose = () => {
+    setLatestInvite(null)
   }
-
-
 
   const handleCancel = async (inviteId) => {
     setCancelingId(inviteId)
     try {
       await cancelInvite?.(inviteId)
-      await loadInvites?.()
       toast.success('초대가 취소되었습니다.')
     } catch (error) {
-      console.warn('[FamilyInvite] cancelInvite failed', error)
+      logger.warn('[FamilyInvite] cancelInvite failed', error)
       toast.error('초대를 취소하지 못했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
       setCancelingId(null)
@@ -167,7 +141,7 @@ export const FamilyInvitePage = () => {
       await Promise.all([refetchFamily?.(), loadInvites?.()])
       toast.success('초대를 수락했습니다.')
     } catch (error) {
-      console.warn('[FamilyInvite] acceptInvite failed', error)
+      logger.warn('[FamilyInvite] acceptInvite failed', error)
       const friendly =
         error?.response?.status === 400
           ? '초대 코드가 만료되었거나 잘못되었습니다.'
@@ -188,80 +162,37 @@ export const FamilyInvitePage = () => {
       await navigator.clipboard.writeText(inviteLink)
       toast.success('초대 링크가 복사되었습니다.')
     } catch (err) {
-      console.warn('초대 링크 복사 실패:', err)
+      logger.warn('초대 링크 복사 실패:', err)
       toast.error('복사에 실패했습니다. 직접 선택하여 복사해 주세요.')
     }
   }
 
-  const handleCreateGroup = async () => {
-    const trimmedName = groupName.trim()
-    if (!trimmedName) {
-      toast.warning('그룹 이름을 입력해주세요.')
-      return
-    }
-    setCreatingGroup(true)
-    try {
-      const group = await createFamilyGroup(trimmedName)
-      toast.success(`가족 그룹이 생성되었습니다: ${group?.name || trimmedName}`)
-      setGroupName('')
-      await loadInvites?.()
-    } catch (error) {
-      console.warn('[FamilyInvite] createGroup failed', error)
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        '가족 그룹 생성에 실패했습니다. 다시 시도해주세요.'
-      toast.error(message)
-    } finally {
-      setCreatingGroup(false)
-    }
-  }
+  // [2025-12-08] 가족 그룹 만들기 기능은 FamilyManagement로 이동됨
 
   return (
     <Modal
       title="가족 초대"
       description={
         <>
-          <span>그룹을 만든 뒤 이름과 이메일을 입력하면 초대 링크를 만들 수 있습니다.</span>
-          <span>초대 링크를 복사하거나 코드로 공유해 가족을 초대하세요.</span>
+          <span>소중한 가족을 초대하여 건강 관리를 함께 시작해보세요.</span>
+          <span>초대 링크를 보내면 간편하게, 또는 코드를 직접 입력하여 참여할 수 있습니다.</span>
         </>
       }
       onClose={() => navigate(ROUTE_PATHS.family, { replace: true })}
     >
-      <div className={styles.groupCreateSection}>
-        <div className={styles.groupCreateHeader}>
-          <h3>가족 그룹 만들기</h3>
-          {hasGroup && (
-            <span className={styles.currentGroup}>
-              현재 그룹: {familyGroup?.name || '이름 없음'} (ID: {familyGroup?.id})
-            </span>
-          )}
-        </div>
-        <p className={styles.helper}>
-          초대는 그룹 생성자만 보낼 수 있습니다. 먼저 가족 그룹을 생성한 뒤 초대를 진행해주세요.
-        </p>
-        <div className={styles.groupRow}>
-          <input
-            type="text"
-            value={groupName}
-            placeholder="예) 우리 가족"
-            onChange={(e) => setGroupName(e.target.value)}
-            disabled={creatingGroup || loading}
-          />
+      {/* 가족 그룹이 없는 경우 안내 메시지 */}
+      {!hasGroup && (
+        <div className={styles.alert}>
+          <p>가족 그룹이 없습니다. 가족 관리 페이지에서 그룹을 먼저 생성해주세요.</p>
           <button
             type="button"
-            onClick={handleCreateGroup}
-            disabled={creatingGroup || loading}
+            onClick={() => navigate(ROUTE_PATHS.family)}
+            style={{ marginTop: 8 }}
           >
-            {creatingGroup ? '생성 중...' : '그룹 생성'}
+            가족 관리로 이동
           </button>
         </div>
-        {!hasGroup && (
-          <p className={styles.alert}>아직 생성된 가족 그룹이 없습니다. 그룹을 먼저 만들어주세요.</p>
-        )}
-      </div>
-
-      <div className={styles.divider}></div>
+      )}
 
       <InviteMemberForm onSubmit={handleSubmit} loading={submitting || !hasGroup} />
 
@@ -278,12 +209,12 @@ export const FamilyInvitePage = () => {
           <button type="button" onClick={handleCopy} disabled={!linkAvailable}>
             복사
           </button>
-          <button type="button" onClick={handleRegenerate} disabled={regenerating || !hasGroup}>
-            {regenerating ? '재생성 중...' : '새로 만들기'}
+          <button type="button" onClick={handleClose} disabled={!latestInvite}>
+            닫기
           </button>
         </div>
         {!linkAvailable && (
-          <p className={styles.helper}>초대 생성 후에 초대 링크가 표시됩니다. 먼저 초대를 만들어 주세요.</p>
+          <p className={styles.helper}>초대 발송 후 초대 링크가 표시됩니다. 먼저 초대를 발송해주세요.</p>
         )}
         <p className={styles.helper}>
           초대받은 분은 <a href={ROUTE_PATHS.inviteCodeEntry} style={{ color: '#2563eb' }}>초대 코드 입력 페이지</a>에서 코드를 직접 입력할 수 있습니다.
@@ -312,9 +243,15 @@ export const FamilyInvitePage = () => {
             {sentInvites.map((invite) => {
               const inviteId = invite.id || invite.shortCode || invite.inviteCode
               return (
-                <li key={inviteId}>
+                <li
+                  key={inviteId}
+                  className={`${styles.inviteItem} ${latestInvite?.id === invite.id ? styles.selected : ''}`}
+                  onClick={() => setLatestInvite(invite)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className={styles.inviteMeta}>
-                    <span className={styles.email}>{invite.inviteeEmail || '이메일 미지정'}</span>
+                    <span className={styles.name}>{invite.inviteeName || '이름 없음'}</span>
+                    <span className={styles.email}>{invite.intendedForEmail || invite.inviteeEmail || '이메일 미지정'}</span>
                     <span className={styles.role}>{invite.suggestedRole || '역할 미정'}</span>
                     {invite.expiresAt && (
                       <span className={styles.expiry}>
@@ -325,7 +262,10 @@ export const FamilyInvitePage = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleCancel(inviteId)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleCancel(inviteId)
+                    }}
                     disabled={cancelingId === inviteId}
                   >
                     {cancelingId === inviteId ? '취소 중...' : '취소'}

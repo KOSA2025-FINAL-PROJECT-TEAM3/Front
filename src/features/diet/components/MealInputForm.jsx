@@ -14,6 +14,7 @@ import {
   Stack,
   CircularProgress
 } from '@mui/material'
+import logger from '@core/utils/logger'
 
 export const MealInputForm = ({
   onAddMeal,
@@ -94,7 +95,7 @@ export const MealInputForm = ({
       setAnalysisResult(result)
       setImageUrl(previewUrl)
     } catch (error) {
-      console.error('Failed to analyze image:', error)
+      logger.error('Failed to analyze image:', error)
       alert('이미지 분석에 실패했습니다.')
       setIsModalOpen(false)
     } finally {
@@ -114,10 +115,10 @@ export const MealInputForm = ({
     try {
       // 텍스트 분석: 식사구분 + 음식 이름 (이미지 없음)
       const result = await dietApiClient.analyzeFoodImage(null, mealType, foodName)
-      console.log('[MealInputForm] Analysis result received:', result)
+      logger.debug('[MealInputForm] Analysis result received:', result)
       setAnalysisResult(result)
     } catch (error) {
-      console.error('Failed to analyze food:', error)
+      logger.error('Failed to analyze food:', error)
       alert('음식 분석에 실패했습니다.')
       setIsModalOpen(false)
     } finally {

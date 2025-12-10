@@ -20,6 +20,15 @@ class PublicInviteApiClient extends ApiClient {
   startInvite(token) {
     return this.get(`/start?token=${encodeURIComponent(token)}`)
   }
+
+  /**
+   * 초대 정보 조회 (초대 코드로 조회)
+   * @param {string} code - 짧은 초대 코드 (6자리)
+   * @returns {Promise<{shortCode: string, suggestedRole: string, groupName: string, inviterName: string, expiresAt?: string}>}
+   */
+  getInviteInfo(code) {
+    return this.get(`/info?code=${encodeURIComponent(code)}`)
+  }
 }
 
 export const publicInviteApiClient = new PublicInviteApiClient()

@@ -1,10 +1,4 @@
 import ApiClient from './ApiClient'
-import {
-  MOCK_CHAT_ROOMS_RESPONSE,
-  MOCK_CHAT_MESSAGES_RESPONSE,
-  createMockMessage,
-  createMockRoom,
-} from '@/data/mockChat'
 
 /**
  * Chat API Client
@@ -28,9 +22,7 @@ class ChatApiClient extends ApiClient {
    * @returns {Promise<ChatRoomListResponse>}
    */
   async getRooms() {
-    return this.get('/rooms', {}, {
-      mockResponse: () => MOCK_CHAT_ROOMS_RESPONSE,
-    })
+    return this.get('/rooms')
   }
 
   /**
@@ -41,13 +33,7 @@ class ChatApiClient extends ApiClient {
    */
   async getMessages(roomId, options = {}) {
     const { limit = 50, before } = options
-
-    return this.get(`/rooms/${roomId}/messages`, { params: { limit, before } }, {
-      mockResponse: () => ({
-        roomId,
-        ...MOCK_CHAT_MESSAGES_RESPONSE,
-      }),
-    })
+    return this.get(`/rooms/${roomId}/messages`, { params: { limit, before } })
   }
 
   /**
@@ -57,9 +43,7 @@ class ChatApiClient extends ApiClient {
    * @returns {Promise<ChatMessage>}
    */
   async sendMessage(roomId, content) {
-    return this.post(`/rooms/${roomId}/messages`, { content }, {}, {
-      mockResponse: () => createMockMessage(roomId, content),
-    })
+    return this.post(`/rooms/${roomId}/messages`, { content })
   }
 
   /**
@@ -69,9 +53,7 @@ class ChatApiClient extends ApiClient {
    * @returns {Promise<ChatRoom>}
    */
   async createRoom(counselorId, type = 'doctor') {
-    return this.post('/rooms', { counselorId, type }, {}, {
-      mockResponse: () => createMockRoom(counselorId, type),
-    })
+    return this.post('/rooms', { counselorId, type })
   }
 
   /**
@@ -81,9 +63,7 @@ class ChatApiClient extends ApiClient {
    * @returns {Promise<void>}
    */
   async markAsRead(roomId, messageId) {
-    const mockResponse = () => ({ success: true })
-
-    return this.patch(`/rooms/${roomId}/messages/${messageId}/read`, {}, {}, { mockResponse })
+    return this.patch(`/rooms/${roomId}/messages/${messageId}/read`)
   }
 
   /**
@@ -92,9 +72,7 @@ class ChatApiClient extends ApiClient {
    * @returns {Promise<void>}
    */
   async leaveRoom(roomId) {
-    const mockResponse = () => ({ success: true })
-
-    return this.delete(`/rooms/${roomId}`, {}, { mockResponse })
+    return this.delete(`/rooms/${roomId}`)
   }
 }
 
