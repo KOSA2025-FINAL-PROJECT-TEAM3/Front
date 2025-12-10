@@ -7,6 +7,7 @@
 import classNames from 'classnames'
 import { Header } from './Header'
 import { BottomNavigation } from './BottomNavigation'
+import { VoiceAssistant } from '@features/voice/components/VoiceAssistant'
 import styles from './MainLayout.module.scss'
 
 /**
@@ -27,6 +28,7 @@ export const MainLayout = ({ children, showBottomNav = true, fullScreen = false,
         {children}
       </main>
 
+      <VoiceAssistant />
       {showBottomNav && <BottomNavigation />}
     </div>
   )

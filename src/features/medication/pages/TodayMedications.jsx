@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useVoiceActionStore } from '../../../features/voice/stores/voiceActionStore'; // [Voice] Zustand 스토어
+import { toast } from '@shared/components/toast/toastStore';
 import { Box, Typography, CircularProgress, Alert, Container, Paper } from '@mui/material';
 import { medicationApiClient } from '../../../core/services/api/medicationApiClient';
 import { medicationLogApiClient } from '../../../core/services/api/medicationLogApiClient';
@@ -8,6 +10,7 @@ import { ko } from 'date-fns/locale';
 import logger from '@core/utils/logger';
 
 const TodayMedications = () => {
+    const { consumeAction } = useVoiceActionStore(); // [Voice]
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [logs, setLogs] = useState([]);
@@ -37,7 +40,63 @@ const TodayMedications = () => {
         fetchTodayLogs();
     }, []);
 
-    const handleMedicationClick = () => {
+    // [Voice] 음성 명령 처리 (자동 복용 체크) - Zustand 버전
+    useEffect(() => {
+        if (!loading && logs.length > 0) {
+            // 스토어에서 'AUTO_COMPLETE' 명령이 있는지 확인하고 가져옴 (가져오면 스토어에선 삭제됨)
+            const action = consumeAction('AUTO_COMPLETE');
+            
+            if (action) {
+                const { params } = action;
+                const timeSlot = params?.timeSlot || 'NOW'; // MORNING, LUNCH, DINNER, NOW
+                const targetMedName = params?.medicationName; // [New] 특정 약 이름
+
+                // 1. 체크할 스케줄 찾기
+                const now = new Date();
+                const currentHour = now.getHours();
+
+                const targetLogs = logs.filter(log => {
+                    if (log.completed) return false; // 이미 먹은 건 패스
+
+                    // 1-1. 약 이름 매칭 (이름이 지정된 경우만)
+                    if (targetMedName) {
+                        const logName = (log.medicationName || '').replace(/\s+/g, ''); // 공백 제거 후 비교
+                        const queryName = targetMedName.replace(/\s+/g, '');
+                        if (!logName.includes(queryName)) {
+                            return false; // 이름이 안 맞으면 탈락
+                        }
+                    }
+
+                    // 1-2. 시간대 매칭
+                    const scheduleHour = log.scheduledTime ? new Date(log.scheduledTime).getHours() : 0;
+                    
+                    if (timeSlot === 'MORNING') return scheduleHour >= 5 && scheduleHour < 11;
+                    if (timeSlot === 'LUNCH') return scheduleHour >= 11 && scheduleHour < 15;
+                    if (timeSlot === 'DINNER') return scheduleHour >= 17 && scheduleHour < 22;
+                    if (timeSlot === 'NOW') {
+                        return Math.abs(scheduleHour - currentHour) <= 2;
+                    }
+                    return false;
+                });
+
+                // 2. 자동 체크 실행
+                if (targetLogs.length > 0) {
+                    targetLogs.forEach(log => {
+                        const schedule = { id: log.medicationScheduleId, isTakenToday: false };
+                        handleScheduleClick(schedule);
+                    });
+                    
+                    const countMsg = targetMedName ? `'${targetMedName}'` : `${targetLogs.length}건`;
+                    toast.success(`${timeSlot === 'NOW' ? '현재' : timeSlot} 시간대 ${countMsg}을(를) 복용 처리했습니다.`);
+                } else {
+                    const failMsg = targetMedName ? `'${targetMedName}'` : '해당 시간대에 복용할 약';
+                    toast.info(`${failMsg}이(가) 없거나 이미 드셨습니다.`);
+                }
+            }
+        }
+    }, [loading, logs, consumeAction]); // consumeAction이 의존성에 포함됨
+
+    const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view
         logger.debug('Clicked medication:');
     };

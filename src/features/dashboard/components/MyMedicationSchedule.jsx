@@ -11,6 +11,8 @@ import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
 import { ROUTE_PATHS } from '@/core/config/routes.config'
 import { format } from 'date-fns'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
+import { toast } from '@shared/components/toast/toastStore' // [Voice]
 import styles from './MyMedicationSchedule.module.scss'
 import logger from '@core/utils/logger'
 
@@ -36,6 +38,7 @@ export const MyMedicationSchedule = ({
   className = ''
 }) => {
   const navigate = useNavigate()
+  const { consumeAction } = useVoiceActionStore() // [Voice]
   const { medications, fetchMedications } = useMedicationStore()
   const [medicationLogs, setMedicationLogs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -96,6 +99,51 @@ export const MyMedicationSchedule = ({
       }
     }).sort((a, b) => a.time.localeCompare(b.time))
   }, [medicationLogs, medications, today.currentTime])
+
+  // [Voice] 음성 명령 처리 (자동 복용 체크)
+  useEffect(() => {
+    if (!loading && todaySchedules.length > 0) {
+      const action = consumeAction('AUTO_COMPLETE')
+      
+      if (action) {
+        const { params } = action
+        const timeSlot = params?.timeSlot || 'NOW'
+        const targetMedName = params?.medicationName
+
+        const nowHour = new Date().getHours()
+
+        const targetSchedules = todaySchedules.filter(schedule => {
+          if (schedule.status === 'completed') return false
+
+          // 1. 이름 매칭
+          if (targetMedName) {
+            const medName = schedule.medications[0]?.name?.replace(/\s+/g, '') || ''
+            const query = targetMedName.replace(/\s+/g, '')
+            if (!medName.includes(query)) return false
+          }
+
+          // 2. 시간대 매칭 (HH:mm 파싱)
+          const hour = parseInt(schedule.time.split(':')[0])
+          
+          if (timeSlot === 'MORNING') return hour >= 5 && hour < 12
+          if (timeSlot === 'LUNCH') return hour >= 12 && hour < 17
+          if (timeSlot === 'DINNER') return hour >= 17 && hour < 21
+          if (timeSlot === 'NOW') return Math.abs(hour - nowHour) <= 2
+          
+          return false
+        })
+
+        if (targetSchedules.length > 0) {
+          targetSchedules.forEach(s => handleTakeMedication(s.id))
+          const countMsg = targetMedName ? `'${targetMedName}'` : `${targetSchedules.length}건`
+          toast.success(`${timeSlot === 'NOW' ? '현재' : timeSlot} 시간대 ${countMsg}을(를) 복용 처리했습니다.`)
+        } else {
+          // 홈 화면에서는 토스트 메시지를 생략하거나 조용히 처리할 수도 있음
+          // toast.info('해당하는 복용 일정이 없습니다.')
+        }
+      }
+    }
+  }, [loading, todaySchedules, consumeAction])
 
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')
