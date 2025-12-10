@@ -58,6 +58,12 @@ export const useNotificationStream = (onNotification) => {
             duration: 0, // 수동 해제 필요
           })
           break
+        case 'medication.missed.aggregated':
+          // 여러 약 미복용 알림 (경고 토스트 - 지속)
+          toast.warning(data.message || '여러 약 복용 시간을 놓쳤습니다', {
+            duration: 0,
+          })
+          break
 
         case 'invite.accepted':
           // 초대 수락 알림 - 보낸 초대 목록에서 제거

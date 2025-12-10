@@ -5,21 +5,45 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { Card } from '@shared/components/ui/Card'
 import { BackButton } from '@shared/components/ui/BackButton'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
+import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import styles from './NotificationDetailPage.module.scss'
+
+const formatScheduledTime = (value) => {
+  if (!value) return null
+  if (typeof value === 'string' && value.length <= 8 && value.includes(':')) {
+    return value.slice(0, 5)
+  }
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+}
+
+const buildMissedSummary = (missedMedications = [], missedCount) => {
+  if (Array.isArray(missedMedications) && missedMedications.length > 0) {
+    const first = missedMedications[0]?.medicationName || '약'
+    return missedMedications.length > 1 ? `${first} 외 ${missedMedications.length - 1}개` : first
+  }
+  if (missedCount) {
+    return `약 ${missedCount}건`
+  }
+  return null
+}
 
 export const NotificationDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { notifications, markAsRead } = useNotificationStore()
+  const [fetchedMeds, setFetchedMeds] = useState([])
+  const [fetching, setFetching] = useState(false)
 
   // ID로 알림 조회
   const notification = useMemo(() => {
-    return notifications.find((n) => n.id === Number(id))
+    return notifications.find((n) => String(n.id) === String(id) || n.groupKey === id)
   }, [notifications, id])
 
   useEffect(() => {
@@ -56,16 +80,65 @@ export const NotificationDetailPage = () => {
     minute: 'numeric',
   })
 
+  const isMissed = (notification.type || '').toLowerCase().includes('missed')
+  const timeLabel = formatScheduledTime(notification.scheduledTime)
+  const resolvedMissedMedications = useMemo(() => {
+    const merged = new Map()
+    const push = (item = {}) => {
+      const key = item.medicationId || item.medicationName || JSON.stringify(item)
+      if (!key || merged.has(key)) return
+      merged.set(key, item)
+    }
+    ;(notification.missedMedications || []).forEach(push)
+    ;(fetchedMeds || []).forEach(push)
+    return Array.from(merged.values())
+  }, [notification.missedMedications, fetchedMeds])
+
+  const summary = buildMissedSummary(resolvedMissedMedications, notification.missedCount)
+
   const getTypeBadgeText = (type) => {
     switch (type) {
       case 'medication.logged':
         return '복용 알림'
       case 'medication.missed':
+      case 'medication.missed.aggregated':
         return '미복용 알림'
       default:
         return '알림'
     }
   }
+
+  useEffect(() => {
+    if (!isMissed) return
+    if (notification?.missedMedications && notification.missedMedications.length > 0) return
+    const created = new Date(notification.createdAt)
+    if (Number.isNaN(created.getTime())) return
+
+    const pad = (num) => String(num).padStart(2, '0')
+    const dateStr = `${created.getFullYear()}-${pad(created.getMonth() + 1)}-${pad(created.getDate())}`
+
+    const targetTimeLabel = formatScheduledTime(notification.scheduledTime)
+
+    setFetching(true)
+    medicationLogApiClient
+      .getByDate(dateStr)
+      .then((logs = []) => {
+        const missedLogs = logs.filter((log) => log.missed)
+        const filtered = targetTimeLabel
+          ? missedLogs.filter((log) => formatScheduledTime(log.scheduledTime) === targetTimeLabel)
+          : missedLogs
+        const meds = (filtered.length > 0 ? filtered : missedLogs).map((log) => ({
+          medicationId: log.medicationId,
+          medicationName: log.medicationName || '약',
+          dosage: log.dosage,
+        }))
+        setFetchedMeds(meds)
+      })
+      .catch((error) => {
+        console.warn('Failed to fetch missed medications for detail', error)
+      })
+      .finally(() => setFetching(false))
+  }, [isMissed, notification])
 
   return (
     <MainLayout>
@@ -87,9 +160,33 @@ export const NotificationDetailPage = () => {
 
           <div className={styles.divider} />
 
-          <p className={styles.bodyText}>
-            {notification.message}
-          </p>
+          <p className={styles.bodyText}>{notification.message}</p>
+
+          {isMissed && (
+            <div className={styles.metaSection}>
+              {timeLabel && <div className={styles.metaPill}>예정 시간 {timeLabel}</div>}
+              {summary && <div className={styles.metaPill}>{summary}</div>}
+            </div>
+          )}
+
+          {isMissed && (
+            <div className={styles.listSection}>
+              <h3 className={styles.sectionTitle}>미복용 약 목록</h3>
+              {fetching && <div className={styles.subtleText}>목록을 불러오는 중...</div>}
+              {resolvedMissedMedications.length > 0 ? (
+                <ul className={styles.medList}>
+                  {resolvedMissedMedications.map((med, idx) => (
+                    <li key={`${med.medicationId || med.medicationName || idx}`} className={styles.medItem}>
+                      <div className={styles.medName}>{med.medicationName || '약'}</div>
+                      {med.dosage && <div className={styles.medDosage}>{med.dosage}</div>}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className={styles.subtleText}>표시할 미복용 약 정보가 없습니다.</div>
+              )}
+            </div>
+          )}
         </Card>
       </div>
     </MainLayout>

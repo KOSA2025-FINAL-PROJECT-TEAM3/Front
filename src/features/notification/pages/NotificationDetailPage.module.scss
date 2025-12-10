@@ -4,14 +4,136 @@
   margin: 0 auto;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .title {
   font-size: 32px;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin: 0;
   color: #333;
 }
 
-.placeholder {
+.contentCard {
+  padding: 1.5rem;
+}
+
+.metaInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.typeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.medication {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.date {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.notiTitle {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0.25rem 0 0.75rem;
+  color: #111827;
+}
+
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 1rem 0;
+}
+
+.bodyText {
+  margin: 0 0 1rem 0;
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.metaSection {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 1rem;
+}
+
+.metaPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #374151;
+}
+
+.listSection {
+  margin-top: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+}
+
+.medList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.medItem {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.medName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.medDosage {
+  font-size: 13px;
+  color: #4b5563;
+  margin-top: 0.15rem;
+}
+
+.subtleText {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 0.35rem;
+}
+
+.emptyText {
   font-size: 16px;
   color: #999;
 }
