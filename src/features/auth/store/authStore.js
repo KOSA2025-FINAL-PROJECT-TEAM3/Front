@@ -19,6 +19,7 @@ const initialState = {
   customerRole: null,
   loading: false,
   error: null,
+  _hasHydrated: false,  // Hydration 완료 플래그
 }
 
 const persistAuthToStorage = ({ user, token, customerRole }) => {
@@ -43,16 +44,7 @@ const persistAuthToStorage = ({ user, token, customerRole }) => {
   }
 }
 
-const clearAuthStorage = () => {
-  if (typeof window === 'undefined') return
-  window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-  window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
-  window.localStorage.removeItem(STORAGE_KEYS.ROLE)
-  window.localStorage.removeItem(STORAGE_KEYS.DEV_MODE)
 
-  // 🆕 Zustand persist 스토어도 함께 제거
-  window.localStorage.removeItem('amapill-auth-storage')
-}
 
 const normalizeAuthPayload = (payload = {}) => {
   const {
@@ -123,12 +115,26 @@ export const useAuthStore = create(
           userRole: normalized.userRole,
           customerRole: normalized.customerRole,
           isAuthenticated: Boolean(normalized.user && normalized.token),
+          _hasHydrated: true,  // 로그인 성공 후 항상 true
         }))
       },
 
       clearAuthState: () => {
-        clearAuthStorage()
-        set({ ...initialState })
+        // 1. 먼저 모든 Auth 관련 localStorage 삭제
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+          window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
+          window.localStorage.removeItem(STORAGE_KEYS.ROLE)
+          window.localStorage.removeItem('amapill-auth-storage-v2')
+        }
+
+        // 2. Zustand 상태 초기화 (persist가 빈 상태 저장할 수 있음)
+        set({ ...initialState, _hasHydrated: true })
+
+        // 3. persist가 재생성한 키 최종 삭제 (확실한 정리)
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('amapill-auth-storage-v2')
+        }
       },
 
       clearError: () => set({ error: null }),
@@ -166,27 +172,47 @@ export const useAuthStore = create(
       // Alias for selectRole (체크리스트 호환성)
       updateUserRole: async (selectedRole) => get().selectRole(selectedRole),
 
-      logout: async () =>
-        withLoading(set, async () => {
-          const token = get().token
-          try {
-            await authApiClient.logout(token)
-          } catch (error) {
-            logger.warn('로그아웃 요청 실패 (무시):', error)
-          } finally {
-            get().clearAuthState()
-          }
-        }),
+      logout: async () => {
+        set({ loading: true, error: null })
+        const token = get().token
+        try {
+          await authApiClient.logout(token)
+        } catch (error) {
+          logger.warn('로그아웃 요청 실패 (무시):', error)
+        }
+        // clearAuthState가 initialState(loading: false 포함)로 완전 리셋
+        get().clearAuthState()
+      },
     }),
     {
-      name: 'amapill-auth-storage',
+      name: 'amapill-auth-storage-v2',
       partialize: (state) => ({
         user: state.user,
         token: state.token,
         userRole: state.userRole,
         customerRole: state.customerRole,
-        isAuthenticated: state.isAuthenticated,
+        // isAuthenticated 제거 - hydration 시 재계산
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // 저장된 상태가 있는 경우
+          // Self-healing: Store를 Source of Truth로 간주하고 Raw Key 동기화
+          if (state.token) {
+            window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, state.token)
+          }
+          if (state.user) {
+            window.localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(state.user))
+          }
+          if (state.customerRole) {
+            window.localStorage.setItem(STORAGE_KEYS.ROLE, state.customerRole)
+          }
+          state.isAuthenticated = Boolean(state.user && state.token)
+          state._hasHydrated = true
+        } else {
+          // 저장된 상태가 없는 경우 (첫 방문 등)
+          useAuthStore.setState({ _hasHydrated: true })
+        }
+      },
     },
   ),
 )

@@ -1,6 +1,7 @@
 import { ROUTE_PATHS } from '@config/routes.config'
 import { navigateTo } from '@core/routing/navigation'
 import { toast } from '@shared/components/toast/toastStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const redirectToLogin = () => navigateTo(ROUTE_PATHS.login, { replace: true })
 
@@ -20,6 +21,8 @@ export const attachErrorInterceptor = (axiosInstance) =>
       }
 
       if (status === 401) {
+        // Auth 상태 완전 정리 (Dual Storage 불일치 방지)
+        useAuthStore.getState().clearAuthState()
         redirectToLogin()
       }
       return Promise.reject(error)
@@ -27,3 +30,4 @@ export const attachErrorInterceptor = (axiosInstance) =>
   )
 
 export default attachErrorInterceptor
+

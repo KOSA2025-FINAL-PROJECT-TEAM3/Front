@@ -87,12 +87,31 @@ function NavigationRegistrar() {
  * - 비인증 사용자: 로그인 페이지로 이동
  */
 function HomeRedirect() {
-  const { isAuthenticated, customerRole } = useAuth((state) => ({
+  const { isAuthenticated, customerRole, _hasHydrated, token } = useAuth((state) => ({
     isAuthenticated: state.isAuthenticated,
     customerRole: state.customerRole,
+    _hasHydrated: state._hasHydrated,
+    token: state.token,
   }))
 
-  if (isAuthenticated) {
+  // Hydration 미완료 시 로딩 표시
+  if (!_hasHydrated) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        fontSize: '18px',
+        color: '#666',
+      }}>
+        로딩 중...
+      </div>
+    )
+  }
+
+  // isAuthenticated + 실제 token 존재 여부 확인
+  if (isAuthenticated && token) {
     if (customerRole === 'SENIOR') {
       return <Navigate to={ROUTE_PATHS.seniorDashboard} replace />
     }

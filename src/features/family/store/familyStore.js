@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { STORAGE_KEYS } from '@config/constants'
 import logger from '@core/utils/logger'
+// 순환 참조 방지: useAuthStore는 동적 import로 사용
 
 const initialState = {
   familyGroups: [],         // 여러 그룹 지원
@@ -37,8 +38,10 @@ const withLoading = async (set, fn) => {
 
 export const useFamilyStore = create((set, get) => ({
   ...initialState,
-  _clearAuth: () => {
-    window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+  _clearAuth: async () => {
+    // 동적 import로 순환 참조 방지
+    const { useAuthStore } = await import('@features/auth/store/authStore')
+    useAuthStore.getState().clearAuthState()
   },
 
   initialize: async ({ force } = {}) => {

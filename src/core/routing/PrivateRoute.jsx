@@ -15,9 +15,15 @@ import { ROUTE_PATHS } from '@config/routes.config'
  * @returns {JSX.Element} element 또는 Navigate
  */
 export const PrivateRoute = ({ element }) => {
-  const { isAuthenticated, loading } = useAuth()
+  const { isAuthenticated, loading, _hasHydrated, token } = useAuth((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    loading: state.loading,
+    _hasHydrated: state._hasHydrated,
+    token: state.token,
+  }))
 
-  if (loading) {
+  // Hydration 미완료 또는 로딩 중이면 대기
+  if (!_hasHydrated || loading) {
     return (
       <div style={{
         display: 'flex',
@@ -32,7 +38,8 @@ export const PrivateRoute = ({ element }) => {
     )
   }
 
-  if (isAuthenticated) {
+  // isAuthenticated + 실제 token 존재 여부 확인
+  if (isAuthenticated && token) {
     return element
   }
 
