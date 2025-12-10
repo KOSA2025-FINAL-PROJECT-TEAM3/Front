@@ -1,5 +1,10 @@
 # Frontend 결정 사항 (증상 검색 기능)
 
+## 2025-12-11: 프론트 로깅 컨벤션 업데이트
+
+- 모든 프론트엔드 코드에서 `console.*` 대신 `@core/utils/logger` 사용 (`logger.error`는 항상 출력, 나머지는 `VITE_DEBUG`/`VITE_ENABLE_API_LOGGING`에 따름).
+- 로깅 규칙을 `docs/shadow/conventions.md`, `docs/FRONTEND_WORKFLOW.md`에 반영 완료.
+
 ## 2025-12-03: 증상 AI 검색 mock 제거 & 약 등록 폼 AI 버튼 제거
 
 - **증상 AI 검색** (`src/core/services/api/searchApiClient.js`)
