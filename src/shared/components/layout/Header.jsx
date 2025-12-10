@@ -63,10 +63,11 @@ export const Header = () => {
             <span className={styles.userRole}>({roleLabel})</span>
             <button 
               className={styles.logoutBtn} 
-              onClick={() => {
+              onClick={async (e) => {
+                e.stopPropagation()
                 if (window.confirm('로그아웃 하시겠습니까?')) {
-                  logout()
-                  navigate(ROUTE_PATHS.login)
+                  await logout()
+                  navigate(ROUTE_PATHS.login, { replace: true })
                 }
               }}
             >

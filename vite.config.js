@@ -52,6 +52,30 @@ export default defineConfig(({ command, mode }) => {
       target: 'ES2020',
       outDir: 'dist',
       sourcemap: false,
+      // Chunk splitting for better caching and parallel loading
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // React core - rarely changes
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            // MUI components - large bundle, separate for caching
+            'vendor-mui': [
+              '@mui/material',
+              '@mui/icons-material',
+              '@emotion/react',
+              '@emotion/styled'
+            ],
+            // Collaboration/real-time features - only needed in specific pages
+            'vendor-collab': ['yjs', '@hocuspocus/provider'],
+            // Data fetching and state management
+            'vendor-data': ['@tanstack/react-query', 'zustand', 'axios'],
+            // Date utilities
+            'vendor-date': ['date-fns'],
+          }
+        }
+      },
+      // Increase chunk size warning limit (optional)
+      chunkSizeWarningLimit: 500,
     }
   }
 })

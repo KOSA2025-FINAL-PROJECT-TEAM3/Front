@@ -147,11 +147,11 @@ export const getEnvironmentConfig = () => {
 
     // Microservice-specific URLs
     AUTH_API_URL: getServiceURL('VITE_AUTH_API_URL', 80),
-    MEDICATION_API_URL: getServiceURL('VITE_MEDICATION_API_URL', 8082),
-    FAMILY_API_URL: getServiceURL('VITE_FAMILY_API_URL', 8082),
-    DIET_API_URL: getServiceURL('VITE_DIET_API_URL', 8082),
-    SEARCH_API_URL: getServiceURL('VITE_SEARCH_API_URL', 8082),
-    CHAT_API_URL: getServiceURL('VITE_CHAT_API_URL', 8082),
+    MEDICATION_API_URL: getServiceURL('VITE_MEDICATION_API_URL', 80),
+    FAMILY_API_URL: getServiceURL('VITE_FAMILY_API_URL', 80),
+    DIET_API_URL: getServiceURL('VITE_DIET_API_URL', 80),
+    SEARCH_API_URL: getServiceURL('VITE_SEARCH_API_URL', 80),
+    CHAT_API_URL: getServiceURL('VITE_CHAT_API_URL', 80),
 
     // WebSocket Configuration
     WS_BASE_URL: getWsBaseURL(),
