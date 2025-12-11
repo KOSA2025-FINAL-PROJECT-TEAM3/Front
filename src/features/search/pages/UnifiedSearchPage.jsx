@@ -17,21 +17,20 @@ import styles from './UnifiedSearchPage.module.scss'
  * @returns {JSX.Element}
  */
 export const UnifiedSearchPage = () => {
-  const { getPendingAction } = useVoiceActionStore() // [Voice]
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
   const [initialTab, setInitialTab] = useState('symptom')
 
   useEffect(() => {
-    // 페이지 진입 시 대기 중인 액션 확인하여 탭 결정
-    const action = getPendingAction()
-    if (action && action.code === 'AUTO_SEARCH') {
-      const type = action.params?.searchType // 'PILL' or 'SYMPTOM'
+    // 실시간으로 대기 중인 액션 감지하여 탭 전환
+    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
+      const type = pendingAction.params?.searchType // 'PILL' or 'SYMPTOM'
       if (type === 'PILL') {
         setInitialTab('pill')
       } else if (type === 'SYMPTOM') {
         setInitialTab('symptom')
       }
     }
-  }, [getPendingAction])
+  }, [pendingAction])
 
   const tabs = [
     {
