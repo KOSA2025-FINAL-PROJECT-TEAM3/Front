@@ -4,11 +4,8 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useVoiceStore } from '../stores/voiceStore'
 import { useVoiceActionStore } from '../stores/voiceActionStore' // [New]
-import { setNavigator } from '@core/routing/navigation'
 import { useNavigate } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
-import { medicationApiClient } from '@core/services/api/medicationApiClient'
-import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { voiceApiClient } from '@core/services/api/voiceApiClient'
 
 export const useVoiceRecognition = () => {

@@ -64,43 +64,39 @@ export const NotificationDetailPage = () => {
     }
   }, [notification, navigate, markAsRead])
 
-  if (!notification) {
-    return (
-      <MainLayout>
-        <div className={styles.container}>
-          <header className={styles.header}>
-            <BackButton />
-            <h1 className={styles.title}>알림 상세</h1>
-          </header>
-          <p className={styles.emptyText}>알림을 찾을 수 없습니다.</p>
-        </div>
-      </MainLayout>
-    )
-  }
+  const formattedDate = useMemo(() => {
+    if (!notification) return null
+    return new Date(notification.createdAt).toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    })
+  }, [notification])
 
-  const formattedDate = new Date(notification.createdAt).toLocaleString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  })
-
-  const isMissed = (notification.type || '').toLowerCase().includes('missed')
-  const timeLabel = formatScheduledTime(notification.scheduledTime)
+  const isMissed = useMemo(
+    () => (notification?.type || '').toLowerCase().includes('missed'),
+    [notification]
+  )
+  const timeLabel = useMemo(() => formatScheduledTime(notification?.scheduledTime), [notification])
   const resolvedMissedMedications = useMemo(() => {
+    if (!notification) return []
     const merged = new Map()
     const push = (item = {}) => {
       const key = item.medicationId || item.medicationName || JSON.stringify(item)
       if (!key || merged.has(key)) return
       merged.set(key, item)
     }
-      ; (notification.missedMedications || []).forEach(push)
-      ; (fetchedMeds || []).forEach(push)
+    ; (notification.missedMedications || []).forEach(push)
+    ; (fetchedMeds || []).forEach(push)
     return Array.from(merged.values())
-  }, [notification.missedMedications, fetchedMeds])
+  }, [notification, fetchedMeds])
 
-  const summary = buildMissedSummary(resolvedMissedMedications, notification.missedCount)
+  const summary = useMemo(
+    () => buildMissedSummary(resolvedMissedMedications, notification?.missedCount),
+    [resolvedMissedMedications, notification?.missedCount]
+  )
 
   const getTypeBadgeText = (type) => {
     switch (type) {
@@ -115,7 +111,7 @@ export const NotificationDetailPage = () => {
   }
 
   useEffect(() => {
-    if (!isMissed) return
+    if (!notification || !isMissed) return
     if (notification?.missedMedications && notification.missedMedications.length > 0) return
     const created = new Date(notification.createdAt)
     if (Number.isNaN(created.getTime())) return
@@ -145,6 +141,20 @@ export const NotificationDetailPage = () => {
       })
       .finally(() => setFetching(false))
   }, [isMissed, notification])
+
+  if (!notification) {
+    return (
+      <MainLayout>
+        <div className={styles.container}>
+          <header className={styles.header}>
+            <BackButton />
+            <h1 className={styles.title}>알림 상세</h1>
+          </header>
+          <p className={styles.emptyText}>알림을 찾을 수 없습니다.</p>
+        </div>
+      </MainLayout>
+    )
+  }
 
   return (
     <MainLayout>

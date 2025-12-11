@@ -48,10 +48,16 @@ const DietLogsTab = ({ userId }) => {
                 let diseaseInteractions = []
                 try {
                     drugInteractions = typeof log.drugInteractions === 'string' ? JSON.parse(log.drugInteractions) : log.drugInteractions || []
-                } catch (e) { }
+                } catch (e) {
+                    console.warn('Failed to parse drugInteractions:', e)
+                    drugInteractions = []
+                }
                 try {
                     diseaseInteractions = typeof log.diseaseInteractions === 'string' ? JSON.parse(log.diseaseInteractions) : log.diseaseInteractions || []
-                } catch (e) { }
+                } catch (e) {
+                    console.warn('Failed to parse diseaseInteractions:', e)
+                    diseaseInteractions = []
+                }
 
                 const overallLevel = log.overallLevel || log.analysisResult?.overallLevel
 

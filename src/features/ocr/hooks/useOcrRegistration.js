@@ -11,7 +11,6 @@ import { ROUTE_PATHS } from '@core/config/routes.config'
 import { toast } from '@shared/components/toast/toastStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import logger from '@core/utils/logger'
-import logger from '@core/utils/logger'
 
 /**
  * OCR 스캔 및 약물 등록 커스텀 훅
@@ -134,6 +133,7 @@ export function useOcrRegistration() {
         const medications = fromOCRResponse(result.medications)
 
         const durationDays = medications[0]?.durationDays || 3
+        const payment = parsePaymentAmount(result.paymentAmount ?? result.totalAmount)
 
         setFormState(prev => ({
           ...prev,
@@ -142,7 +142,10 @@ export function useOcrRegistration() {
           intakeTimes: adjustIntakeTimes(
             prev.intakeTimes,
             medications[0]?.dailyFrequency || 5
-          )
+          ),
+          pharmacyName: result.pharmacyName || prev.pharmacyName || '',
+          hospitalName: result.hospitalName || result.clinicName || prev.hospitalName || '',
+          paymentAmount: payment ?? prev.paymentAmount
         }))
 
         setStep('edit')
@@ -168,11 +171,15 @@ export function useOcrRegistration() {
     if (job.status === 'DONE' && job.result?.medications?.length > 0) {
       const medications = fromOCRResponse(job.result.medications)
       const durationDays = medications[0]?.durationDays || 3
+      const payment = parsePaymentAmount(job.result.paymentAmount ?? job.result.totalAmount)
       setFormState((prev) => ({
         ...prev,
         medications,
         endDate: calculateEndDate(durationDays),
         intakeTimes: adjustIntakeTimes(prev.intakeTimes, medications[0]?.dailyFrequency || 5),
+        pharmacyName: job.result.pharmacyName || prev.pharmacyName || '',
+        hospitalName: job.result.hospitalName || job.result.clinicName || prev.hospitalName || '',
+        paymentAmount: payment ?? prev.paymentAmount,
       }))
       setStep('edit')
       setIsLoading(false)
@@ -386,6 +393,14 @@ function adjustIntakeTimes(intakeTimes, frequency) {
     // 필요한 슬롯만 활성화 (앞에서부터)
     hasAlarm: index < frequency
   }))
+}
+
+function parsePaymentAmount(value) {
+  if (value === null || value === undefined) return null
+  const digits = String(value).replace(/[^0-9]/g, '')
+  if (!digits) return null
+  const parsed = Number.parseInt(digits, 10)
+  return Number.isNaN(parsed) ? null : parsed
 }
 
 export default useOcrRegistration

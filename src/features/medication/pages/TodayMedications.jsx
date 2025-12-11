@@ -142,7 +142,7 @@ const TodayMedications = () => {
 
     const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view
-        logger.debug('Clicked medication:');
+        logger.debug('Clicked medication:', medication);
     };
 
     const handleScheduleClick = async (schedule) => {

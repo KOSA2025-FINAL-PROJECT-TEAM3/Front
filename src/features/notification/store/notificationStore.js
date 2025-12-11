@@ -18,7 +18,7 @@ const calculateUnreadCount = (notifications) => {
   }).length
 }
 
-export const useNotificationStore = create((set, get) => ({
+export const useNotificationStore = create((set) => ({
   notifications: [],
   unreadCount: 0,
   loading: false,
