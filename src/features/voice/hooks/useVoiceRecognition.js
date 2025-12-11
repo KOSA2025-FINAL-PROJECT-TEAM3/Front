@@ -25,44 +25,6 @@ export const useVoiceRecognition = () => {
   const recognitionRef = useRef(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      console.warn('이 브라우저는 음성 인식을 지원하지 않습니다.')
-      return
-    }
-
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'ko-KR'
-    recognition.continuous = false
-    recognition.interimResults = true
-
-    recognition.onstart = () => {
-      setIsListening(true)
-      setFeedbackMessage('듣고 있어요...')
-    }
-
-    recognition.onresult = (event) => {
-      const current = event.resultIndex
-      const transcript = event.results[current][0].transcript
-      setTranscript(transcript)
-    }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.onerror = (event) => {
-      console.error('음성 인식 에러:', event.error)
-      setIsListening(false)
-      if (event.error === 'not-allowed') {
-        toast.error('마이크 권한을 허용해주세요.')
-      }
-    }
-
-    recognitionRef.current = recognition
-  }, [setIsListening, setTranscript, setFeedbackMessage])
-
   // 실제 명령 처리 로직
   const processCommand = useCallback(async (finalTranscript) => {
     if (!finalTranscript) return
@@ -110,6 +72,49 @@ export const useVoiceRecognition = () => {
 
   }, [navigate, reset, setFeedbackMessage, setPendingAction])
 
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      console.warn('이 브라우저는 음성 인식을 지원하지 않습니다.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'ko-KR'
+    recognition.continuous = false
+    recognition.interimResults = true
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      setFeedbackMessage('듣고 있어요...')
+    }
+
+    recognition.onresult = (event) => {
+      const current = event.resultIndex
+      const transcript = event.results[current][0].transcript
+      setTranscript(transcript)
+    }
+
+    recognition.onend = () => {
+      setIsListening(false)
+      // 음성 인식이 끝나면 자동으로 명령 처리
+      const finalTranscript = useVoiceStore.getState().transcript
+      if (finalTranscript) {
+        processCommand(finalTranscript)
+      }
+    }
+
+    recognition.onerror = (event) => {
+      console.error('음성 인식 에러:', event.error)
+      setIsListening(false)
+      if (event.error === 'not-allowed') {
+        toast.error('마이크 권한을 허용해주세요.')
+      }
+    }
+
+    recognitionRef.current = recognition
+  }, [setIsListening, setTranscript, setFeedbackMessage, processCommand])
+
   const startVoice = useCallback(() => {
     if (recognitionRef.current && !isListening) {
       setTranscript('')
@@ -124,11 +129,9 @@ export const useVoiceRecognition = () => {
   const stopVoice = useCallback(() => {
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop()
-      // 수동 종료 시 현재까지 인식된 텍스트로 명령 처리 시도
-      const currentTranscript = useVoiceStore.getState().transcript
-      processCommand(currentTranscript)
+      // onend에서 processCommand를 호출하므로 여기서는 중복 호출 제거
     }
-  }, [isListening, processCommand])
+  }, [isListening])
 
   const toggleVoice = useCallback(() => {
     if (isListening) {
