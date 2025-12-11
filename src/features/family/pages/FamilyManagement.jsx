@@ -20,6 +20,7 @@ export const FamilyManagementPage = () => {
   const familyGroups = useFamilyStore((state) => state.familyGroups)
   const selectedGroupId = useFamilyStore((state) => state.selectedGroupId)
   const getSelectedGroup = useFamilyStore((state) => state.getSelectedGroup)
+  const [currentUserRole, setCurrentUserRole] = useState(null)
 
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [removingMemberId, setRemovingMemberId] = useState(null)
@@ -54,6 +55,15 @@ export const FamilyManagementPage = () => {
   const selectedGroup = getSelectedGroup()
   const selectedMembers = selectedGroup?.members || members
 
+  useEffect(() => {
+    if (!selectedMembers?.length || !currentUserId) {
+      setCurrentUserRole(null)
+      return
+    }
+    const me = selectedMembers.find((m) => m.userId?.toString?.() === currentUserId?.toString?.())
+    setCurrentUserRole(me?.role || null)
+  }, [selectedMembers, currentUserId])
+
   const handleDetail = (memberId) => {
     navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
   }
@@ -72,6 +82,58 @@ export const FamilyManagementPage = () => {
       title: '그룹 해산',
       message: '그룹을 해산하면 모든 구성원이 제거됩니다. 진행하시겠어요?',
     })
+  }
+
+  const [showNotificationModal, setShowNotificationModal] = useState(false)
+  const [selectedMemberId, setSelectedMemberId] = useState(null)
+  const [notificationSettings, setNotificationSettings] = useState({
+    kakaoEnabled: true,
+    dietWarningEnabled: true,
+    medicationMissedEnabled: true,
+  })
+  const [notificationLoading, setNotificationLoading] = useState(false)
+
+  const handleOpenNotificationSettings = async (memberId) => {
+    if (!familyGroup?.id || !memberId) return
+    setSelectedMemberId(memberId)
+    setShowNotificationModal(true)
+    setNotificationLoading(true)
+    try {
+      const settings = await familyApiClient.getMemberNotificationSettings(familyGroup.id, memberId)
+      if (settings) {
+        setNotificationSettings((prev) => ({
+          ...prev,
+          kakaoEnabled: settings.kakaoEnabled ?? prev.kakaoEnabled,
+          dietWarningEnabled: settings.dietWarningEnabled ?? prev.dietWarningEnabled,
+          medicationMissedEnabled: settings.medicationMissedEnabled ?? prev.medicationMissedEnabled,
+        }))
+      }
+    } catch (e) {
+      console.warn('가족 구성원 알림 설정 로드 실패', e)
+      toast.error('알림 설정을 불러오지 못했습니다.')
+    } finally {
+      setNotificationLoading(false)
+    }
+  }
+
+  const handleSaveNotificationSettings = async () => {
+    if (!familyGroup?.id || !selectedMemberId) return
+    setNotificationLoading(true)
+    try {
+      await familyApiClient.updateMemberNotificationSettings(familyGroup.id, selectedMemberId, {
+        familyGroupId: familyGroup.id,
+        targetUserId: selectedMemberId,
+        ...notificationSettings,
+      })
+      toast.success('알림 설정이 저장되었습니다.')
+      setShowNotificationModal(false)
+      setSelectedMemberId(null)
+    } catch (e) {
+      console.error('가족 구성원 알림 설정 저장 실패', e)
+      toast.error('알림 설정 저장에 실패했습니다.')
+    } finally {
+      setNotificationLoading(false)
+    }
   }
 
   const handleRemoveMember = (memberId) => {
@@ -162,6 +224,82 @@ export const FamilyManagementPage = () => {
         </Modal>
       )}
       <div className={styles.page} role="region" aria-busy={loading}>
+        {/* 알림 설정 모달 */}
+        {showNotificationModal && (
+          <Modal
+            isOpen={showNotificationModal}
+            title="가족 알림 설정"
+            onClose={() => setShowNotificationModal(false)}
+            footer={
+              <div className={styles.modalButtons}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowNotificationModal(false)}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className={styles.confirmButton}
+                  onClick={handleSaveNotificationSettings}
+                  disabled={notificationLoading}
+                >
+                  {notificationLoading ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            }
+          >
+            <div className={styles.notificationSettings}>
+              <p className={styles.description}>
+                이 가족 그룹에서 발생하는 알림을 카카오톡이나 앱 알림으로 받을지 설정합니다.
+              </p>
+              <div className={styles.channelList}>
+                <h3>채널</h3>
+                <label className={styles.settingItem}>
+                  <span>카카오톡 알림</span>
+                  <input
+                    type="checkbox"
+                    checked={notificationSettings.kakaoEnabled}
+                    onChange={(e) =>
+                      setNotificationSettings((prev) => ({ ...prev, kakaoEnabled: e.target.checked }))
+                    }
+                  />
+                </label>
+              </div>
+              <div className={styles.channelList}>
+                <h3>알림 종류</h3>
+                <label className={styles.settingItem}>
+                  <span>식단 경고 알림</span>
+                  <input
+                    type="checkbox"
+                    checked={notificationSettings.dietWarningEnabled}
+                    onChange={(e) =>
+                      setNotificationSettings((prev) => ({
+                        ...prev,
+                        dietWarningEnabled: e.target.checked,
+                      }))
+                    }
+                  />
+                </label>
+                <label className={styles.settingItem}>
+                  <span>미복용 알림</span>
+                  <input
+                    type="checkbox"
+                    checked={notificationSettings.medicationMissedEnabled}
+                    onChange={(e) =>
+                      setNotificationSettings((prev) => ({
+                        ...prev,
+                        medicationMissedEnabled: e.target.checked,
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+            </div>
+          </Modal>
+        )}
+
         <header className={styles.header}>
           <h1>가족 관리</h1>
           {familyGroups.length > 1 && (
@@ -255,10 +393,12 @@ export const FamilyManagementPage = () => {
               members={selectedMembers}
               onDetail={handleDetail}
               onRemove={handleRemoveMember}
+              onSettings={handleOpenNotificationSettings}
               onlineMemberIds={onlineMemberIds}
               removingMemberId={removingMemberId}
               currentUserId={currentUserId}
               groupOwnerId={familyGroup?.createdBy}
+              canManageNotifications={currentUserRole === 'CAREGIVER'}
             />
           </>
         )}

@@ -10,10 +10,12 @@ export const FamilyMemberCard = ({
   member,
   onDetail,
   onRemove,
+  onSettings,
   isOnline,
   isRemoving,
   currentUserId,
   groupOwnerId,
+  canManageNotifications,
 }) => {
   if (!member) return null
   const initials = member.name?.[0] ?? 'U'
@@ -26,6 +28,7 @@ export const FamilyMemberCard = ({
     currentUserId != null &&
     groupOwnerId != null &&
     currentUserId?.toString?.() === groupOwnerId?.toString?.()
+  const canOpenSettings = onSettings && !isCardSelf && canManageNotifications
 
   // 1. 관리자(ViewerOwner)는 본인 제외 다른 사람 제거 가능
   // 2. 일반 멤버는 본인만 탈퇴 가능 (단, 그룹장이면 탈퇴 불가 -> 해산 이용)
@@ -54,6 +57,16 @@ export const FamilyMemberCard = ({
         <button type="button" className={styles.detailButton} onClick={() => onDetail?.(member.id)}>
           상세
         </button>
+        {canOpenSettings && (
+          <button
+            type="button"
+            className={styles.settingsButton}
+            onClick={() => onSettings?.(member.userId)}
+            title="알림 설정"
+          >
+            ⚙️
+          </button>
+        )}
         {showRemove && (
           <button
             type="button"
@@ -82,10 +95,12 @@ FamilyMemberCard.propTypes = {
   }).isRequired,
   onDetail: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
+  onSettings: PropTypes.func,
   isOnline: PropTypes.bool,
   isRemoving: PropTypes.bool,
   currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   groupOwnerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  canManageNotifications: PropTypes.bool,
 }
 
 FamilyMemberCard.defaultProps = {
@@ -93,6 +108,7 @@ FamilyMemberCard.defaultProps = {
   isRemoving: false,
   currentUserId: null,
   groupOwnerId: null,
+  canManageNotifications: false,
 }
 
 export default FamilyMemberCard

@@ -16,6 +16,8 @@ export const useNotificationStream = (onNotification) => {
   const token = useAuthStore((state) => state.token)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const addRealtimeNotification = useNotificationStore((state) => state.addRealtimeNotification)
+  const setDietJobResult = useNotificationStore((state) => state.setDietJobResult)
+  const setOcrJobResult = useNotificationStore((state) => state.setOcrJobResult)
 
   useEffect(() => {
     // SSE 연결 조건: 인증되었고 토큰이 있어야 함
@@ -49,6 +51,25 @@ export const useNotificationStream = (onNotification) => {
           toast.warning(data.message || '여러 약 복용 시간을 놓쳤습니다', {
             duration: 0,
           })
+          break
+        case 'diet.warning':
+          toast.warning(data.message || '식단 경고가 도착했습니다')
+          break
+        case 'diet.job.done':
+          setDietJobResult(data)
+          if (data.status === 'DONE') {
+            toast.success('식단 분석이 완료되었습니다')
+          } else if (data.status === 'FAILED') {
+            toast.error(`식단 분석 실패: ${data.error || '오류 발생'}`)
+          }
+          break
+        case 'ocr.job.done':
+          setOcrJobResult(data)
+          if (data.status === 'DONE') {
+            toast.success('OCR 처리가 완료되었습니다')
+          } else if (data.status === 'FAILED') {
+            toast.error(`OCR 처리 실패: ${data.error || '오류 발생'}`)
+          }
           break
 
         default:

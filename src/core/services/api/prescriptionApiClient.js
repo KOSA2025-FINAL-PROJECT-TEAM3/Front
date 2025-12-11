@@ -63,6 +63,15 @@ class PrescriptionApiClient extends ApiClient {
     }
 
     /**
+     * 처방전 활성 상태 토글
+     * @param {number} id - 처방전 ID
+     * @returns {Promise<Object>} 변경된 처방전 상세 정보
+     */
+    async toggleActive(id) {
+        return this.patch(`/${id}/toggle-active`);
+    }
+
+    /**
      * 처방전에서 약 제거
      * @param {number} prescriptionId - 처방전 ID
      * @param {number} medicationId - 약 ID

@@ -182,6 +182,27 @@ export const usePrescriptionStore = create((set, get) => ({
         }
     },
 
+    // 처방전 활성 상태 토글
+    toggleActivePrescription: async (id) => {
+        set({ loading: true, error: null });
+        try {
+            const updated = await prescriptionApiClient.toggleActive(id);
+            set(state => ({
+                prescriptions: state.prescriptions.map(p =>
+                    p.id === id ? { ...p, active: updated.active } : p
+                ),
+                currentPrescription: state.currentPrescription?.id === id
+                    ? { ...state.currentPrescription, active: updated.active }
+                    : state.currentPrescription,
+                loading: false
+            }));
+            return updated;
+        } catch (error) {
+            set({ error: error.message, loading: false });
+            throw error;
+        }
+    },
+
     // 상태 초기화
     resetState: () => {
         set({

@@ -68,14 +68,14 @@ class FamilyApiClient extends ApiClient {
         createdAt: group?.createdAt,
         members: Array.isArray(group?.members)
           ? group.members.map((member) => ({
-              id: member?.id?.toString() ?? member?.userId?.toString(),
-              userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
-              name: member?.user?.name || member?.userName || '이름 없음',
-              email: member?.user?.email || member?.userEmail || '',
-              role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
-              joinedAt: member?.joinedAt || new Date().toISOString(),
-              raw: member,
-            }))
+            id: member?.id?.toString() ?? member?.userId?.toString(),
+            userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
+            name: member?.user?.name || member?.userName || '이름 없음',
+            email: member?.user?.email || member?.userEmail || '',
+            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            joinedAt: member?.joinedAt || new Date().toISOString(),
+            raw: member,
+          }))
           : [],
       }
     })
@@ -154,6 +154,27 @@ class FamilyApiClient extends ApiClient {
    */
   getMedicationDetail(userId, medicationId) {
     return this.get(`/members/${userId}/medications/${medicationId}`)
+  }
+
+  /**
+   * 가족 구성원 알림 설정 조회
+   * @param {number} groupId - 가족 그룹 ID
+   * @param {number} memberId - 대상 구성원 ID
+   * @returns {Promise}
+   */
+  getMemberNotificationSettings(groupId, memberId) {
+    return this.get(`/${groupId}/members/${memberId}/notification-settings`)
+  }
+
+  /**
+   * 가족 구성원 알림 설정 수정
+   * @param {number} groupId - 가족 그룹 ID
+   * @param {number} memberId - 대상 구성원 ID
+   * @param {Object} settings - 설정 값
+   * @returns {Promise}
+   */
+  updateMemberNotificationSettings(groupId, memberId, settings) {
+    return this.put(`/${groupId}/members/${memberId}/notification-settings`, settings)
   }
 }
 

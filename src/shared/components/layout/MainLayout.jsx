@@ -4,9 +4,12 @@
  * - Header가 자동으로 사용자 정보와 알림을 가져옴
  */
 
+import { useEffect } from 'react'
 import classNames from 'classnames'
 import { Header } from './Header'
 import { BottomNavigation } from './BottomNavigation'
+import { useAuth } from '@features/auth/hooks/useAuth'
+import { useNotificationStore } from '@features/notification/store/notificationStore'
 import styles from './MainLayout.module.scss'
 
 /**
@@ -17,6 +20,15 @@ import styles from './MainLayout.module.scss'
  * @returns {JSX.Element} 레이아웃 컴포넌트
  */
 export const MainLayout = ({ children, showBottomNav = true, className }) => {
+  const { isAuthenticated } = useAuth((state) => ({ isAuthenticated: state.isAuthenticated }))
+  const { fetchNotifications } = useNotificationStore()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications()
+    }
+  }, [isAuthenticated, fetchNotifications])
+
   return (
     <div className={classNames(styles.layoutContainer, className)}>
       <Header />

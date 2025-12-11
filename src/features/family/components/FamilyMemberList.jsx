@@ -5,10 +5,12 @@ export const FamilyMemberList = ({
   members = [],
   onDetail,
   onRemove,
+  onSettings,
   onlineMemberIds = [],
   removingMemberId,
   currentUserId,
   groupOwnerId,
+  canManageNotifications = false,
 }) => {
   if (!members.length) {
     return (
@@ -29,6 +31,8 @@ export const FamilyMemberList = ({
             member={member}
             onDetail={onDetail}
             onRemove={onRemove}
+            onSettings={onSettings}
+            canManageNotifications={canManageNotifications}
             isOnline={onlineMemberIds.includes(member.id)}
             isRemoving={removingMemberId === member.id}
             currentUserId={currentUserId}

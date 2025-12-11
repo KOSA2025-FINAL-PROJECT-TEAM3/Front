@@ -10,6 +10,7 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
 import { Icon } from '@shared/components/ui/Icon'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
+import { useNotificationStore } from '@features/notification/store/notificationStore'
 import styles from './BottomNavigation.module.scss'
 
 const ROLE_ALL = 'ALL'
@@ -29,6 +30,13 @@ const NAV_ITEMS = [
     label: '약',
     icon: 'pill',
     path: ROUTE_PATHS.medication,
+    roles: [ROLE_ALL],
+  },
+  {
+    id: 'notification',
+    label: '알림',
+    icon: 'bell',
+    path: ROUTE_PATHS.notifications,
     roles: [ROLE_ALL],
   },
   {
@@ -61,6 +69,7 @@ export const BottomNavigation = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { customerRole } = useAuth((state) => ({ customerRole: state.customerRole }))
+  const unreadCount = useNotificationStore((state) => state.unreadCount)
 
   const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
@@ -75,7 +84,7 @@ export const BottomNavigation = () => {
     if (path === ROUTE_PATHS.more) {
       const moreRelatedPaths = [
         ROUTE_PATHS.more,
-        ROUTE_PATHS.notifications,
+        // ROUTE_PATHS.notifications, // Removed from 'more' active check as it has its own button now
         ROUTE_PATHS.adherenceReport,
         ROUTE_PATHS.weeklyStats,
         ROUTE_PATHS.ocrScan,
@@ -105,6 +114,14 @@ export const BottomNavigation = () => {
 
   const handleNavigate = (path) => navigate(path)
 
+  const renderBadge = (count) => {
+    if (!count || count <= 0) return null
+    const displayCount = count > 999 ? '+999' : count
+    return (
+      <span className={styles.badge}>{displayCount}</span>
+    )
+  }
+
   return (
     <nav className={styles.bottomNav} role="navigation" aria-label="하단 네비게이션">
       <div className={styles.navContainer}>
@@ -117,8 +134,11 @@ export const BottomNavigation = () => {
             aria-current={isActive(item.path) ? 'page' : undefined}
             type="button"
           >
-            <span className={styles.navIcon}>
-              <Icon name={item.icon} aria-hidden />
+            <span className={styles.navIconWrapper}>
+              <span className={styles.navIcon}>
+                <Icon name={item.icon} aria-hidden />
+              </span>
+              {item.id === 'notification' && renderBadge(unreadCount)}
             </span>
             <span className={styles.navLabel}>{item.label}</span>
           </button>

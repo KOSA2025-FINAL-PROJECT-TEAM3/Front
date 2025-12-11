@@ -17,6 +17,7 @@ import { PrivateRoute } from './core/routing/PrivateRoute'
 import { Login } from '@features/auth/pages/Login'
 import { Signup } from '@features/auth/pages/Signup'
 import { RoleSelection } from '@features/auth/pages/RoleSelection'
+import DeepLinkResolverPage from '@features/auth/pages/DeepLinkResolver'
 import { SeniorDashboard } from '@features/dashboard/pages/SeniorDashboard'
 import { CaregiverDashboard } from '@features/dashboard/pages/CaregiverDashboard'
 import KakaoCallbackPage from '@features/auth/pages/KakaoCallback'
@@ -92,6 +93,7 @@ function App() {
             <Route path={ROUTE_PATHS.login} element={<Login />} />
             <Route path={ROUTE_PATHS.signup} element={<Signup />} />
             <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
+            <Route path={ROUTE_PATHS.deeplink} element={<DeepLinkResolverPage />} />
             <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
             <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
 

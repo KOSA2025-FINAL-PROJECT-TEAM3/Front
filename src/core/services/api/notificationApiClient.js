@@ -22,6 +22,10 @@ class NotificationApiClient extends ApiClient {
         return this.patch(`/${id}/read`)
     }
 
+    deleteNotification(id) {
+        return this.delete(`/${id}`)
+    }
+
     /**
      * Subscribe to real-time notifications via Server-Sent Events (SSE)
      * @param {string} token - Authentication token for authorization
@@ -96,6 +100,48 @@ class NotificationApiClient extends ApiClient {
                 }
             } catch (error) {
                 console.error('Failed to parse medication.missed.aggregated event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
+        this.eventSource.addEventListener('diet.warning', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'diet.warning' })
+                }
+            } catch (error) {
+                console.error('Failed to parse diet.warning event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
+        this.eventSource.addEventListener('diet.job.done', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'diet.job.done' })
+                }
+            } catch (error) {
+                console.error('Failed to parse diet.job.done event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
+        this.eventSource.addEventListener('ocr.job.done', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'ocr.job.done' })
+                }
+            } catch (error) {
+                console.error('Failed to parse ocr.job.done event:', error)
                 if (onError) {
                     onError(error)
                 }

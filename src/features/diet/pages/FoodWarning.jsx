@@ -4,8 +4,10 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { dietApiClient } from '@/core/services/api/dietApiClient'
 import styles from './FoodWarning.module.scss'
 import { CircularProgress, Alert, Box, Typography, Chip, Stack, Divider, Card, CardContent } from '@mui/material'
+import { useSearchParams } from 'react-router-dom'
 
 export const FoodWarningPage = () => {
+  const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [recentLog, setRecentLog] = useState(null)
@@ -14,7 +16,8 @@ export const FoodWarningPage = () => {
     const fetchRecentLog = async () => {
       try {
         setLoading(true)
-        const logs = await dietApiClient.getDietLogs()
+        const userIdParam = searchParams.get('userId')
+        const logs = await dietApiClient.getDietLogs(userIdParam ? { userId: userIdParam } : undefined)
         if (logs && logs.length > 0) {
           const latest = logs[0]
 
