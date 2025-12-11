@@ -1,6 +1,9 @@
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
 
+const buildMockToken = (prefix = 'token') =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+
 class AuthApiClient extends ApiClient {
   constructor() {
     super({
