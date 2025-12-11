@@ -70,6 +70,7 @@ export const InviteCodeEntryPage = () => {
       const info = {
         inviteCode: response.shortCode || valueToValidate,
         shortCode: response.shortCode || valueToValidate,
+        token: isLongToken ? valueToValidate : null, // Store Long Token for Open Invite flow
         groupId: response.groupId,
         groupName: response.groupName || '가족 그룹',
         inviterName: response.inviterName || '알 수 없음',
@@ -123,9 +124,12 @@ export const InviteCodeEntryPage = () => {
 
     setStatus('accepting')
     const code = inviteInfo.shortCode || inviteInfo.inviteCode
+    const token = inviteInfo.token // Long token if available
 
     try {
-      await acceptInvite(code)
+      // If we have a long token (Open Invite), use it. Otherwise use short code (Legacy).
+      const payload = token ? { token } : { shortCode: code }
+      await acceptInvite(payload)
       await refetchFamily?.()
 
       setStatus('success')
