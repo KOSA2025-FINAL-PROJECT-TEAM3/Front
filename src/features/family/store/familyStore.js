@@ -237,9 +237,21 @@ export const useFamilyStore = create((set, get) => ({
     }))
   },
 
-  acceptInvite: async (inviteCode) =>
+  updateInvite: async (inviteId, payload) =>
     withLoading(set, async () => {
-      return familyApiClient.acceptInvite(inviteCode)
+      await familyApiClient.updateInvite(inviteId, payload) // Assume API client has this
+      set((prev) => ({
+        invites: {
+          sent: prev.invites.sent.map(inv => inv.id === inviteId ? { ...inv, ...payload } : inv),
+          received: prev.invites.received.map(inv => inv.id === inviteId ? { ...inv, ...payload } : inv),
+        },
+        error: null,
+      }))
+    }),
+
+  acceptInvite: async (payload) =>
+    withLoading(set, async () => {
+      return familyApiClient.acceptInvite(payload)
     }),
 
   createFamilyGroup: async (name) =>

@@ -1,11 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Container, Stack, Chip, IconButton, Collapse, Button } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
-import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
 import { QuickActions } from '@shared/components/ui/QuickActions'
 import { FAB } from '@shared/components/ui/FAB'
@@ -88,9 +85,7 @@ export function CaregiverDashboard() {
   if (loading && members.length === 0) {
     return (
       <MainLayout userName="보호자" userRole="보호자">
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
-          <Typography>가족 데이터를 불러오는 중...</Typography>
-        </Container>
+        <p className={styles.stateMessage}>가족 데이터를 불러오는 중...</p>
       </MainLayout>
     )
   }
@@ -98,59 +93,40 @@ export function CaregiverDashboard() {
   if (error) {
     return (
       <MainLayout userName="보호자" userRole="보호자">
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
-          <Typography color="error">가족 데이터를 불러오지 못했습니다. {error.message}</Typography>
-        </Container>
+        <p className={styles.stateMessage}>가족 데이터를 불러오지 못했습니다. {error.message}</p>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout userName="보호자" userRole="보호자">
-      <ResponsiveContainer maxWidth="lg">
-        <Stack spacing={4}>
-          {/* 헤더 */}
-          <Box>
-            <Typography 
-              variant="h4" 
-              component="h1"
-              fontWeight={700}
-              gutterBottom
-              sx={{ fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
-            >
-              보호자 대시보드
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              가족 구성원의 오늘 복약 상태를 빠르게 확인할 수 있습니다.
-            </Typography>
-          </Box>
+      <section className={styles.dashboard}>
+        <header className={styles.header}>
+          <h1>보호자 대시보드</h1>
+          <p>가족 구성원의 오늘 복약 상태를 빠르게 확인할 수 있습니다.</p>
+        </header>
 
-          <QuickActions actions={CAREGIVER_QUICK_ACTIONS} />
+        <QuickActions actions={CAREGIVER_QUICK_ACTIONS} />
 
-          <MyMedicationSchedule title="내 복용 일정" showEmptyState={false} />
+        <MyMedicationSchedule title="내 복용 일정" showEmptyState={false} className={styles.mySchedule} />
 
-          <RoundedCard elevation={2} padding="large">
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              어르신 복약 현황
-            </Typography>
-            {seniorMembers.length === 0 && (
-              <Typography color="text.secondary">등록된 어르신이 없습니다.</Typography>
-            )}
+        <article className={styles.card}>
+          <h2>어르신 복약 현황</h2>
+          {seniorMembers.length === 0 && <p>등록된 어르신이 없습니다.</p>}
 
-            <Stack spacing={2}>
-              {seniorMembers.map((member) => (
-                <SeniorMedicationSnapshot
-                  key={member.id}
-                  member={member}
-                  onDetail={() => handleViewDetail(member.id)}
-                />
-              ))}
-            </Stack>
-          </RoundedCard>
+          <ul className={styles.memberList}>
+            {seniorMembers.map((member) => (
+              <SeniorMedicationSnapshot
+                key={member.id}
+                member={member}
+                onDetail={() => handleViewDetail(member.id)}
+              />
+            ))}
+          </ul>
+        </article>
 
-          <FAB actions={fabActions} />
-        </Stack>
-      </ResponsiveContainer>
+        <FAB actions={fabActions} />
+      </section>
     </MainLayout>
   )
 }
@@ -183,6 +159,8 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
 
   const [expandedSections, setExpandedSections] = useState({})
 
+  // ... (existing helper functions)
+
   const getTimeCategory = (dateString) => {
     if (!dateString) return 'NIGHT';
     const hour = new Date(dateString).getHours();
@@ -198,11 +176,13 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     const sections = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
 
     sections.forEach(section => {
+      // 1. Current Time -> Open
       if (section === currentCategory) {
         nextExpanded[section] = true;
         return;
       }
 
+      // 2. Untaken items -> Open
       const logsInSection = currentLogs.filter(log =>
         getTimeCategory(log.scheduledTime) === section
       );
@@ -223,7 +203,7 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
       [section]: !prev[section]
     }))
   }
-
+  // 오늘 복약 일정 조회
   const loadTodayLogs = async () => {
     if (isExpanded) {
       setIsExpanded(false)
@@ -232,7 +212,7 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
 
     setLogsLoading(true)
     try {
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
       const response = await familyApiClient.getMedicationLogs(member.userId, {
         date: today
       })
@@ -248,6 +228,8 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
       setLogsLoading(false)
     }
   }
+
+  // ... (styles)
 
   const completedToday = todayLogs.filter((l) => l.status === 'completed').length
   const pendingToday = todayLogs.filter((l) => l.status === 'pending').length
@@ -278,69 +260,52 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
   }
 
   return (
-    <RoundedCard elevation={1} padding="default">
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h6" fontWeight={600}>
-            {member.name}
-          </Typography>
-          <Chip 
-            label={relation} 
-            size="small" 
-            color="primary" 
-            variant="outlined"
-          />
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton
+    <li className={styles.memberItem}>
+      {/* ... (existing header) */}
+      <div className={styles.memberMeta}>
+        <div>
+          <strong>{member.name}</strong>
+          <span className={styles.relation}> · {relation}</span>
+        </div>
+        <div className={styles.actions}>
+          <button
+            type="button"
             onClick={loadTodayLogs}
-            color="primary"
+            className={`${styles.expandButton} ${isExpanded ? styles.expanded : ''}`}
             aria-label="복약 일정 펼치기"
-            sx={{
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s',
-            }}
           >
-            <ExpandMoreIcon />
-          </IconButton>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={onDetail}
-          >
-            자세히
-          </Button>
-        </Box>
-      </Box>
+            {isExpanded ? '▼' : '▶'}
+          </button>
+          <button type="button" onClick={onDetail} className={styles.detailButton}>
+            자세히 보기
+          </button>
+        </div>
+      </div>
 
-      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-        <Box sx={{ mt: 2 }}>
-          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Chip 
-              label={`완료 ${completedToday}`}
-              color="success"
-              sx={{ fontWeight: 600 }}
-            />
-            <Chip 
-              label={`예정 ${pendingToday}`}
-              color="warning"
-              sx={{ fontWeight: 600 }}
-            />
-            <Chip 
-              label={`미복용 ${missedToday}`}
-              color="error"
-              sx={{ fontWeight: 600 }}
-            />
-          </Stack>
+      {/* 아코디언 섹션 - 펼쳐졌을 때만 표시 */}
+      {isExpanded && (
+        <div className={styles.accordionContainer}>
+          {/* 통계 요약 */}
+          <div className={styles.stats}>
+            {/* ... reuse stats ... */}
+            <span className={styles.stat}>
+              <strong style={{ color: '#00B300' }}>{completedToday}</strong>
+              <small>완료</small>
+            </span>
+            <span className={styles.stat}>
+              <strong style={{ color: '#FF9900' }}>{pendingToday}</strong>
+              <small>예정</small>
+            </span>
+            <span className={styles.stat}>
+              <strong style={{ color: '#FF0000' }}>{missedToday}</strong>
+              <small>미복용</small>
+            </span>
+          </div>
 
           {logsLoading ? (
-            <Typography color="text.secondary" sx={{ py: 2 }}>
-              오늘 복약 일정을 불러오는 중...
-            </Typography>
+            <p className={styles.loadingRow}>오늘 복약 일정을 불러오는 중...</p>
           ) : todayLogs.length === 0 ? (
-            <Typography color="text.secondary" sx={{ py: 2 }}>
-              오늘 복약 일정이 없습니다.
-            </Typography>
+            <p className={styles.emptyRow}>오늘 복약 일정이 없습니다.</p>
           ) : (
             ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'].map(sectionKey => {
               const SECTION_LABELS = {
@@ -354,7 +319,9 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
                 const isCorrectTime = getTimeCategory(log.scheduledTime) === sectionKey;
                 if (!isCorrectTime) return false;
 
+                // Filter out inactive medications
                 const medication = medications.find(m => m.id === log.medicationId);
+                // If medication is found and inactive, hide the log
                 if (medication && medication.active === false) return false;
 
                 return true;
@@ -365,91 +332,53 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
               const isSectionExpanded = expandedSections[sectionKey];
 
               return (
-                <Box key={sectionKey} sx={{ mb: 2 }}>
-                  <Box
+                <div key={sectionKey} className={styles.accordion}>
+                  <div
+                    className={styles.accordionHeader}
                     onClick={() => toggleSection(sectionKey)}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: 'grey.50',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        bgcolor: 'grey.100',
-                      },
-                    }}
                   >
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {SECTION_LABELS[sectionKey].label}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {SECTION_LABELS[sectionKey].sub}
-                      </Typography>
-                    </Box>
+                    <div className={styles.headerTitle}>
+                      <strong>{SECTION_LABELS[sectionKey].label}</strong>
+                      <span>{SECTION_LABELS[sectionKey].sub}</span>
+                    </div>
                     <ExpandMoreIcon
-                      sx={{
-                        transform: isSectionExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.3s',
-                      }}
+                      className={`${styles.accordionIcon} ${isSectionExpanded ? styles.expanded : ''}`}
                     />
-                  </Box>
+                  </div>
 
-                  <Collapse in={isSectionExpanded} timeout="auto" unmountOnExit>
-                    <Stack spacing={1} sx={{ mt: 1 }}>
-                      {sectionLogs.map((log, index) => {
-                        const statusLabel = getStatusLabel(log.status)
-                        const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
+                  {isSectionExpanded && (
+                    <div className={styles.accordionContent}>
+                      <ul className={styles.medList}>
+                        {sectionLogs.map((log, index) => {
+                          const statusLabel = getStatusLabel(log.status)
+                          const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
 
-                        return (
-                          <Box
-                            key={`${member.id}-${log.id || index}`}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2,
-                              p: 1.5,
-                              borderLeft: 4,
-                              borderLeftColor: getStatusColor(log.status),
-                              bgcolor: 'background.paper',
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              sx={{ minWidth: 60 }}
+                          return (
+                            <li
+                              key={`${member.id}-${log.id || index}`}
+                              className={styles.medRow}
+                              style={{ borderLeftColor: getStatusColor(log.status) }}
                             >
-                              {time}
-                            </Typography>
-                            <Typography variant="body2" sx={{ flex: 1 }}>
-                              {log.medicationName || '알 수 없는 약'}
-                            </Typography>
-                            <Chip
-                              label={statusLabel}
-                              size="small"
-                              sx={{
-                                bgcolor: getStatusColor(log.status),
-                                color: 'white',
-                                fontWeight: 600,
-                              }}
-                            />
-                          </Box>
-                        )
-                      })}
-                    </Stack>
-                  </Collapse>
-                </Box>
+                              <span className={styles.medTime}>{time}</span>
+                              <span className={styles.medName}>{log.medicationName || '알 수 없는 약'}</span>
+                              <span className={styles.medStatus} style={{ color: getStatusColor(log.status) }}>
+                                {statusLabel}
+                              </span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               );
             })
           )}
-        </Box>
-      </Collapse>
-    </RoundedCard>
+        </div>
+      )}
+    </li>
   )
 }

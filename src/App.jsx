@@ -10,6 +10,9 @@
  */
 
 import React, { Suspense, useEffect, lazy } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import theme from '@/styles/theme'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
@@ -30,6 +33,7 @@ const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyMan
 const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
 const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
 const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
+const InviteLanding = lazy(() => import('@features/family/pages/InviteLanding'))
 const FamilyJoin = lazy(() => import('@features/family/pages/FamilyJoin'))
 const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
 const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
@@ -134,7 +138,9 @@ function App() {
   const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
 
   return (
-    <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
@@ -150,6 +156,7 @@ function App() {
 
               {/* 초대 코드 입력 및 링크 진입 (공개) */}
               <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
+              <Route path={ROUTE_PATHS.inviteLanding} element={<InviteLanding />} />
               <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
 
               {/* 보호된 페이지: 인증 필요 */}
@@ -354,6 +361,7 @@ function App() {
         </FamilyProvider>
       </ErrorBoundary>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

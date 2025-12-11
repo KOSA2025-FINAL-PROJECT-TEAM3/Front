@@ -107,6 +107,10 @@ class FamilyApiClient extends ApiClient {
     return this.put(`/members/${memberId}/role`, body)
   }
 
+  updateInvite(inviteId, payload) {
+    return this.put(`/invites/${inviteId}`, payload)
+  }
+
   getInvites(groupId) {
     const query = groupId ? `?groupId=${groupId}` : ''
     return this.get(`/invites${query}`)
@@ -125,11 +129,15 @@ class FamilyApiClient extends ApiClient {
 
   /**
    * 초대 수락 (인증 필요)
-   * @param {string} shortCode - 6자리 초대 코드
+   * @param {string|object} codeOrToken - 6자리 초대 코드 (string) 또는 { token, shortCode } 객체
    * @returns {Promise<AcceptInviteResponse>}
    */
-  acceptInvite(shortCode) {
-    return this.post('/invites/accept', { shortCode })
+  acceptInvite(codeOrToken) {
+    if (typeof codeOrToken === 'string') {
+      return this.post('/invites/accept', { shortCode: codeOrToken })
+    }
+    // { token: "...", shortCode: "..." }
+    return this.post('/invites/accept', codeOrToken)
   }
 
   cancelInvite(inviteId) {
