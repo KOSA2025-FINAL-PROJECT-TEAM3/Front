@@ -3,6 +3,7 @@ export const ROUTE_PATHS = {
   login: '/login',
   signup: '/signup',
   kakaoCallback: '/auth/kakao/callback',
+  deeplink: '/deeplink',
   roleSelection: '/role-selection',
   seniorDashboard: '/dashboard',
   caregiverDashboard: '/caregiver',

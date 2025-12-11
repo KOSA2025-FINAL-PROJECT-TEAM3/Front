@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient'
@@ -9,6 +9,8 @@ import {
 } from '@/types/ocr.types'
 import { ROUTE_PATHS } from '@core/config/routes.config'
 import { toast } from '@shared/components/toast/toastStore'
+import { useNotificationStore } from '@features/notification/store/notificationStore'
+import logger from '@core/utils/logger'
 import logger from '@core/utils/logger'
 
 /**
@@ -38,6 +40,8 @@ import logger from '@core/utils/logger'
  */
 export function useOcrRegistration() {
   const navigate = useNavigate()
+  const ocrJobs = useNotificationStore((state) => state.ocrJobs)
+  const ocrJobsRef = useRef({})
 
   // === 상태 ===
   const [step, setStep] = useState('select')
@@ -45,6 +49,7 @@ export function useOcrRegistration() {
   const [previewUrl, setPreviewUrl] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const currentJobIdRef = useRef(null)
 
   // 폼 상태 (이미지 2,3,4 참고)
   const [formState, setFormState] = useState({
@@ -76,6 +81,10 @@ export function useOcrRegistration() {
     setError(null)
   }, [])
 
+  useEffect(() => {
+    ocrJobsRef.current = ocrJobs || {}
+  }, [ocrJobs])
+
   // === OCR 분석 ===
   const startAnalysis = useCallback(async () => {
     if (!file) return
@@ -88,34 +97,48 @@ export function useOcrRegistration() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await ocrApiClient.scan(formData)
+      const jobResp = ocrApiClient.startScanJob(formData)
+        .then(res => (res && res.data) ? res.data : res)
+      const { jobId } = await jobResp
+      currentJobIdRef.current = jobId
 
-      /**
-       * 백엔드 응답 형식:
-       * {
-       *   success: boolean,
-       *   data: {
-       *     medications: OCRMedicationInfo[],
-       *     confidence: number,
-       *     rawText: string,
-       *     ocrEngine: string,
-       *     processingTime: number
-       *   },
-       *   message: string | null,
-       *   timestamp: string
-       * }
-       */
-      if (response.success && response.data?.medications?.length > 0) {
-        const medications = fromOCRResponse(response.data.medications)
+      const pollJob = async () => {
+        const maxAttempts = 30
+        for (let i = 0; i < maxAttempts; i++) {
+          const sseJob = ocrJobsRef.current?.[jobId]
+          if (sseJob) {
+            if (sseJob.status === 'DONE') {
+              return sseJob.result
+            }
+            if (sseJob.status === 'FAILED') {
+              throw new Error(sseJob.error || 'OCR 처리 실패')
+            }
+          }
+          const statusResp = ocrApiClient.getScanJob(jobId)
+            .then(res => (res && res.data) ? res.data : res)
+          const data = await statusResp
+          if (data.status === 'DONE') {
+            return data.result
+          }
+          if (data.status === 'FAILED') {
+            throw new Error(data.error || 'OCR 처리 실패')
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+        throw new Error('OCR 처리 지연: 잠시 후 다시 시도해주세요.')
+      }
 
-        // 일수 자동 계산 (첫 번째 약의 duration 기준)
+      const result = await pollJob()
+
+      if (result?.medications?.length > 0) {
+        const medications = fromOCRResponse(result.medications)
+
         const durationDays = medications[0]?.durationDays || 3
 
         setFormState(prev => ({
           ...prev,
           medications,
           endDate: calculateEndDate(durationDays),
-          // 횟수에 따라 시간 슬롯 활성화 조정
           intakeTimes: adjustIntakeTimes(
             prev.intakeTimes,
             medications[0]?.dailyFrequency || 5
@@ -129,11 +152,37 @@ export function useOcrRegistration() {
     } catch (err) {
       logger.error('OCR Error:', err)
       setError(err.message || '분석 중 오류가 발생했습니다.')
-      setStep('select')
+      // 파일은 유지하고 미리보기 단계로 돌려 재시도 용이하게 함
+      setStep(file ? 'preview' : 'select')
     } finally {
       setIsLoading(false)
     }
   }, [file])
+
+  // SSE로 완료된 Job 결과 감지 시 현재 Job과 일치하면 즉시 반영
+  useEffect(() => {
+    const jobId = currentJobIdRef.current
+    if (!jobId) return
+    const job = ocrJobs?.[jobId]
+    if (!job) return
+    if (job.status === 'DONE' && job.result?.medications?.length > 0) {
+      const medications = fromOCRResponse(job.result.medications)
+      const durationDays = medications[0]?.durationDays || 3
+      setFormState((prev) => ({
+        ...prev,
+        medications,
+        endDate: calculateEndDate(durationDays),
+        intakeTimes: adjustIntakeTimes(prev.intakeTimes, medications[0]?.dailyFrequency || 5),
+      }))
+      setStep('edit')
+      setIsLoading(false)
+      setError(null)
+    } else if (job.status === 'FAILED') {
+      setError(job.error || 'OCR 처리 실패')
+      setIsLoading(false)
+      setStep(file ? 'preview' : 'select')
+    }
+  }, [ocrJobs, file])
 
   // === 폼 상태 업데이트 ===
   const updateFormState = useCallback((updates) => {

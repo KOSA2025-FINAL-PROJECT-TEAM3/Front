@@ -178,6 +178,27 @@ class FamilyApiClient extends ApiClient {
   getMedicationDetail(userId, medicationId) {
     return this.get(`/members/${userId}/medications/${medicationId}`)
   }
+
+  /**
+   * 가족 구성원 알림 설정 조회
+   * @param {number} groupId - 가족 그룹 ID
+   * @param {number} memberId - 대상 구성원 ID
+   * @returns {Promise}
+   */
+  getMemberNotificationSettings(groupId, memberId) {
+    return this.get(`/${groupId}/members/${memberId}/notification-settings`)
+  }
+
+  /**
+   * 가족 구성원 알림 설정 수정
+   * @param {number} groupId - 가족 그룹 ID
+   * @param {number} memberId - 대상 구성원 ID
+   * @param {Object} settings - 설정 값
+   * @returns {Promise}
+   */
+  updateMemberNotificationSettings(groupId, memberId, settings) {
+    return this.put(`/${groupId}/members/${memberId}/notification-settings`, settings)
+  }
 }
 
 export const familyApiClient = new FamilyApiClient()

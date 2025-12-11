@@ -12,10 +12,13 @@ export const FamilyMemberCard = ({
   onDetail,
   onRemove,
   onRoleChange,
+  onSettings,
+  isOnline,
   isRemoving,
   isRoleChanging,
   currentUserId,
   groupOwnerId,
+  canManageNotifications,
 }) => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false)
 
@@ -30,6 +33,7 @@ export const FamilyMemberCard = ({
     currentUserId != null &&
     groupOwnerId != null &&
     currentUserId?.toString?.() === groupOwnerId?.toString?.()
+  const canOpenSettings = onSettings && !isCardSelf && canManageNotifications
 
   // 역할 변경 권한: 그룹 소유자 또는 본인
   const canChangeRole = isViewerGroupOwner || isCardSelf
@@ -54,6 +58,7 @@ export const FamilyMemberCard = ({
         <div className={styles.avatar} style={{ backgroundColor: member.avatarColor || '#c7d2fe' }}>
           {initials}
         </div>
+        {isOnline && <span className={styles.onlineDot} aria-label="온라인" />}
       </div>
       <div className={styles.info}>
         <div className={styles.topRow}>
@@ -89,6 +94,16 @@ export const FamilyMemberCard = ({
         <button type="button" className={styles.detailButton} onClick={() => onDetail?.(member.id)}>
           상세
         </button>
+        {canOpenSettings && (
+          <button
+            type="button"
+            className={styles.settingsButton}
+            onClick={() => onSettings?.(member.userId)}
+            title="알림 설정"
+          >
+            ⚙️
+          </button>
+        )}
         {showRemove && (
           <button
             type="button"
@@ -118,18 +133,24 @@ FamilyMemberCard.propTypes = {
   onDetail: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onRoleChange: PropTypes.func,
+  onSettings: PropTypes.func,
+  isOnline: PropTypes.bool,
   isRemoving: PropTypes.bool,
   isRoleChanging: PropTypes.bool,
   currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   groupOwnerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  canManageNotifications: PropTypes.bool,
 }
 
 FamilyMemberCard.defaultProps = {
   onRoleChange: null,
+  onSettings: null,
+  isOnline: false,
   isRemoving: false,
   isRoleChanging: false,
   currentUserId: null,
   groupOwnerId: null,
+  canManageNotifications: false,
 }
 
 export default FamilyMemberCard

@@ -201,11 +201,51 @@
   @extend .confirmButton;
   background: #dc2626;
 
+
   &:hover {
     background: #b91c1c;
   }
 }
 
+.notificationSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+
+  span {
+    font-size: 15px;
+    font-weight: 500;
+    color: #1f2937;
+  }
+
+  input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
 // [2025-12-08] 가족 그룹 만들기 섹션 스타일 추가 (FamilyInvite에서 이동)
 .groupCreateSection {
   display: flex;

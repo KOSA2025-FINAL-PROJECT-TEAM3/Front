@@ -97,6 +97,23 @@ export const MealCard = ({ meal, onEdit, onDelete, readOnly = false }) => {
   return (
     <Card elevation={isWarningLevel ? 2 : 1} sx={cardSx}>
       <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        {meal.imageUrl && (
+          <Box
+            component="img"
+            src={meal.imageUrl}
+            alt={meal.foodName}
+            sx={{
+              width: '100%',
+              height: 180,
+              objectFit: 'cover',
+              borderRadius: 2,
+              mb: 1.5,
+              border: '1px solid',
+              borderColor: 'grey.200',
+            }}
+          />
+        )}
+
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
           <Box flex={1}>
             <Stack direction="row" alignItems="center" spacing={1} mb={0.5} flexWrap="wrap">

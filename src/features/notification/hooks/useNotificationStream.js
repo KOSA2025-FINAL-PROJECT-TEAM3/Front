@@ -28,6 +28,8 @@ export const useNotificationStream = (onNotification) => {
   const token = useAuthStore((state) => state.token)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const addRealtimeNotification = useNotificationStore((state) => state.addRealtimeNotification)
+  const setDietJobResult = useNotificationStore((state) => state.setDietJobResult)
+  const setOcrJobResult = useNotificationStore((state) => state.setOcrJobResult)
   const location = useLocation()
 
   useEffect(() => {
@@ -64,6 +66,25 @@ export const useNotificationStream = (onNotification) => {
             duration: 0,
           })
           break
+        case 'diet.warning':
+          toast.warning(data.message || '식단 경고가 도착했습니다')
+          break
+        case 'diet.job.done':
+          setDietJobResult(data)
+          if (data.status === 'DONE') {
+            toast.success('식단 분석이 완료되었습니다')
+          } else if (data.status === 'FAILED') {
+            toast.error(`식단 분석 실패: ${data.error || '오류 발생'}`)
+          }
+          break
+        case 'ocr.job.done':
+          setOcrJobResult(data)
+          if (data.status === 'DONE') {
+            toast.success('OCR 처리가 완료되었습니다')
+          } else if (data.status === 'FAILED') {
+            toast.error(`OCR 처리 실패: ${data.error || '오류 발생'}`)
+          }
+          break
 
         case 'invite.accepted':
           // 초대 수락 알림 - 보낸 초대 목록에서 제거
@@ -95,5 +116,5 @@ export const useNotificationStream = (onNotification) => {
     return () => {
       notificationApiClient.disconnect()
     }
-  }, [isAuthenticated, token, onNotification, addRealtimeNotification, location.pathname])
+  }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname])
 }

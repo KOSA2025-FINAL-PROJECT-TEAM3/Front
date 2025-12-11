@@ -22,6 +22,7 @@ import envConfig from '@config/environment.config'
 const Login = lazy(() => import('@features/auth/pages/Login'))
 const Signup = lazy(() => import('@features/auth/pages/Signup'))
 const RoleSelection = lazy(() => import('@features/auth/pages/RoleSelection'))
+const DeepLinkResolverPage = lazy(() => import('@features/auth/pages/DeepLinkResolver'))
 const SeniorDashboard = lazy(() => import('@features/dashboard/pages/SeniorDashboard'))
 const CaregiverDashboard = lazy(() => import('@features/dashboard/pages/CaregiverDashboard'))
 const KakaoCallbackPage = lazy(() => import('@features/auth/pages/KakaoCallback'))
@@ -143,6 +144,7 @@ function App() {
               <Route path={ROUTE_PATHS.login} element={<Login />} />
               <Route path={ROUTE_PATHS.signup} element={<Signup />} />
               <Route path={ROUTE_PATHS.kakaoCallback} element={<KakaoCallbackPage />} />
+              <Route path={ROUTE_PATHS.deeplink} element={<DeepLinkResolverPage />} />
               <Route path={ROUTE_PATHS.privacyPolicy} element={<PrivacyPolicyPage />} />
               <Route path={ROUTE_PATHS.termsOfService} element={<TermsOfServicePage />} />
 

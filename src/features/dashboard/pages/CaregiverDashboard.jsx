@@ -12,6 +12,7 @@ import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './CaregiverDashboard.module.scss'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import logger from '@core/utils/logger'
 
 /**
@@ -32,7 +33,7 @@ export function CaregiverDashboard() {
 
   useEffect(() => {
     if (!initialized) {
-      initialize().catch(() => {})
+      initialize().catch(() => { })
     }
   }, [initialized, initialize])
 
@@ -134,10 +135,74 @@ export default CaregiverDashboard
 
 const SeniorMedicationSnapshot = ({ member, onDetail }) => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [medications, setMedications] = useState([])
   const [todayLogs, setTodayLogs] = useState([])
   const [logsLoading, setLogsLoading] = useState(false)
   const relation = member.relation || (member.role === 'SENIOR' ? '어르신' : '보호자')
 
+  // 약 목록 조회
+  useEffect(() => {
+    const loadMedications = async () => {
+      try {
+        const meds = await familyApiClient.getMemberMedications(member.userId)
+        setMedications(meds || [])
+      } catch (error) {
+        logger.error('Failed to load medications:', error)
+        setMedications([])
+      }
+    }
+
+    if (member.userId) {
+      loadMedications()
+    }
+  }, [member.userId])
+
+  const [expandedSections, setExpandedSections] = useState({})
+
+  // ... (existing helper functions)
+
+  const getTimeCategory = (dateString) => {
+    if (!dateString) return 'NIGHT';
+    const hour = new Date(dateString).getHours();
+    if (hour >= 5 && hour < 11) return 'MORNING';
+    if (hour >= 11 && hour < 17) return 'LUNCH';
+    if (hour >= 17 && hour < 21) return 'DINNER';
+    return 'NIGHT';
+  };
+
+  const initializeExpandedState = (currentLogs) => {
+    const currentCategory = getTimeCategory(new Date());
+    const nextExpanded = {};
+    const sections = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
+
+    sections.forEach(section => {
+      // 1. Current Time -> Open
+      if (section === currentCategory) {
+        nextExpanded[section] = true;
+        return;
+      }
+
+      // 2. Untaken items -> Open
+      const logsInSection = currentLogs.filter(log =>
+        getTimeCategory(log.scheduledTime) === section
+      );
+
+      const hasUntaken = logsInSection.some(log => log.status !== 'completed');
+      if (hasUntaken) {
+        nextExpanded[section] = true;
+      } else {
+        nextExpanded[section] = false;
+      }
+    });
+    setExpandedSections(nextExpanded);
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
   // 오늘 복약 일정 조회
   const loadTodayLogs = async () => {
     if (isExpanded) {
@@ -151,8 +216,9 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
       const response = await familyApiClient.getMedicationLogs(member.userId, {
         date: today
       })
-
-      setTodayLogs(response?.logs || response || [])
+      const logs = response?.logs || response || []
+      setTodayLogs(logs)
+      initializeExpandedState(logs)
       setIsExpanded(true)
     } catch (error) {
       logger.error('Failed to load today logs:', error)
@@ -163,6 +229,24 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     }
   }
 
+  // ... (styles)
+
+  const completedToday = todayLogs.filter((l) => l.status === 'completed').length
+  const pendingToday = todayLogs.filter((l) => l.status === 'pending').length
+  const missedToday = todayLogs.filter((l) => l.status === 'missed').length
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'completed':
+        return '복용 완료'
+      case 'missed':
+        return '미복용'
+      case 'pending':
+      default:
+        return '복용 예정'
+    }
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed':
@@ -170,33 +254,14 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
       case 'missed':
         return '#FF0000'
       case 'pending':
+      default:
         return '#FF9900'
-      case 'scheduled':
-        return '#CCCCCC'
-      default:
-        return '#999999'
     }
   }
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'completed':
-        return '복용완료'
-      case 'missed':
-        return '미복용'
-      case 'pending':
-        return '예정'
-      default:
-        return '미상'
-    }
-  }
-
-  const completedToday = todayLogs.filter(log => log.status === 'completed').length
-  const missedToday = todayLogs.filter(log => log.status === 'missed').length
-  const pendingToday = todayLogs.filter(log => log.status === 'pending').length
 
   return (
     <li className={styles.memberItem}>
+      {/* ... (existing header) */}
       <div className={styles.memberMeta}>
         <div>
           <strong>{member.name}</strong>
@@ -219,9 +284,10 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
 
       {/* 아코디언 섹션 - 펼쳐졌을 때만 표시 */}
       {isExpanded && (
-        <div className={styles.accordion}>
+        <div className={styles.accordionContainer}>
           {/* 통계 요약 */}
           <div className={styles.stats}>
+            {/* ... reuse stats ... */}
             <span className={styles.stat}>
               <strong style={{ color: '#00B300' }}>{completedToday}</strong>
               <small>완료</small>
@@ -236,36 +302,80 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
             </span>
           </div>
 
-          {/* 로그 리스트 */}
           {logsLoading ? (
             <p className={styles.loadingRow}>오늘 복약 일정을 불러오는 중...</p>
+          ) : todayLogs.length === 0 ? (
+            <p className={styles.emptyRow}>오늘 복약 일정이 없습니다.</p>
           ) : (
-            <ul className={styles.medList}>
-              {todayLogs.map((log, index) => {
-                const status = getStatusLabel(log.status)
-                const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })
+            ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'].map(sectionKey => {
+              const SECTION_LABELS = {
+                MORNING: { label: '아침', sub: '05:00 - 11:00' },
+                LUNCH: { label: '점심', sub: '11:00 - 17:00' },
+                DINNER: { label: '저녁', sub: '17:00 - 21:00' },
+                NIGHT: { label: '취침 전', sub: '21:00 - 05:00' }
+              };
 
-                return (
-                  <li
-                    key={`${member.id}-${log.id || index}`}
-                    className={styles.medRow}
-                    style={{ borderLeftColor: getStatusColor(log.status) }}
+              const sectionLogs = todayLogs.filter(log => {
+                const isCorrectTime = getTimeCategory(log.scheduledTime) === sectionKey;
+                if (!isCorrectTime) return false;
+
+                // Filter out inactive medications
+                const medication = medications.find(m => m.id === log.medicationId);
+                // If medication is found and inactive, hide the log
+                if (medication && medication.active === false) return false;
+
+                return true;
+              });
+              if (sectionLogs.length === 0) return null;
+
+              sectionLogs.sort((a, b) => new Date(a.scheduledTime) - new Date(b.scheduledTime));
+              const isSectionExpanded = expandedSections[sectionKey];
+
+              return (
+                <div key={sectionKey} className={styles.accordion}>
+                  <div
+                    className={styles.accordionHeader}
+                    onClick={() => toggleSection(sectionKey)}
                   >
-                    <span className={styles.medTime}>{time}</span>
-                    <span className={styles.medName}>{log.medicationName || '알 수 없는 약'}</span>
-                    <span className={styles.medStatus} style={{ color: getStatusColor(log.status) }}>
-                      {status}
-                    </span>
-                  </li>
-                )
-              })}
-              {todayLogs.length === 0 && (
-                <li className={styles.emptyRow}>오늘 복약 일정이 없습니다.</li>
-              )}
-            </ul>
+                    <div className={styles.headerTitle}>
+                      <strong>{SECTION_LABELS[sectionKey].label}</strong>
+                      <span>{SECTION_LABELS[sectionKey].sub}</span>
+                    </div>
+                    <ExpandMoreIcon
+                      className={`${styles.accordionIcon} ${isSectionExpanded ? styles.expanded : ''}`}
+                    />
+                  </div>
+
+                  {isSectionExpanded && (
+                    <div className={styles.accordionContent}>
+                      <ul className={styles.medList}>
+                        {sectionLogs.map((log, index) => {
+                          const statusLabel = getStatusLabel(log.status)
+                          const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+
+                          return (
+                            <li
+                              key={`${member.id}-${log.id || index}`}
+                              className={styles.medRow}
+                              style={{ borderLeftColor: getStatusColor(log.status) }}
+                            >
+                              <span className={styles.medTime}>{time}</span>
+                              <span className={styles.medName}>{log.medicationName || '알 수 없는 약'}</span>
+                              <span className={styles.medStatus} style={{ color: getStatusColor(log.status) }}>
+                                {statusLabel}
+                              </span>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       )}

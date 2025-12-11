@@ -5,11 +5,14 @@ export const FamilyMemberList = ({
   members = [],
   onDetail,
   onRemove,
+  onSettings,
   onRoleChange,
+  onlineMemberIds = [],
   removingMemberId,
   roleChangingMemberId,
   currentUserId,
   groupOwnerId,
+  canManageNotifications = false,
 }) => {
   if (!members.length) {
     return (
@@ -30,7 +33,10 @@ export const FamilyMemberList = ({
             member={member}
             onDetail={onDetail}
             onRemove={onRemove}
+            onSettings={onSettings}
             onRoleChange={onRoleChange}
+            canManageNotifications={canManageNotifications}
+            isOnline={onlineMemberIds.includes(member.id)}
             isRemoving={removingMemberId === member.id}
             isRoleChanging={roleChangingMemberId === member.id}
             currentUserId={currentUserId}

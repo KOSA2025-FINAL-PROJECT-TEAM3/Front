@@ -14,6 +14,17 @@ class OcrApiClient extends ApiClient {
       timeout: 300000,  // 300초 (Google Vision 처리 시간 고려)
     })
   }
+
+  startScanJob(formData) {
+    return this.post('/scan/jobs', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 300000,
+    })
+  }
+
+  getScanJob(jobId) {
+    return this.get(`/scan/jobs/${jobId}`)
+  }
 }
 
 export const ocrApiClient = new OcrApiClient()

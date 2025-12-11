@@ -26,7 +26,7 @@ const CloseIcon = () => (
     </svg>
 );
 
-const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
+const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, ref) => {
     const galleryInputRef = useRef(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -42,6 +42,15 @@ const DietCamera = React.forwardRef(({ onImageCapture }, ref) => {
         }
         setIsCameraOpen(false);
     }, [stream]);
+
+    // 초기 프리뷰 동기화 (기존 이미지 표시용)
+    React.useEffect(() => {
+        if (initialPreview) {
+            setPreview(initialPreview);
+        } else {
+            setPreview(null);
+        }
+    }, [initialPreview]);
 
     // Cleanup on unmount
     React.useEffect(() => {

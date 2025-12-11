@@ -45,20 +45,41 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
       .join(', ')
   }
 
+  const [showInactive, setShowInactive] = useState(false)
+
+  // Filter medications based on showInactive state
+  const filteredMedications = medications
+    .filter(med => showInactive ? true : med.active)
+    .sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0);
+      const dateB = new Date(b.createdAt || 0);
+      return dateB - dateA;
+    });
+
   return (
     <section className={styles.detailTab}>
       <div className={styles.container}>
         {/* 약 목록 */}
         <div className={styles.medicationList}>
-          <h3>약 목록</h3>
-          {medications.length === 0 ? (
+          <div className={styles.listHeader}>
+            <h3>약 목록</h3>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+              />
+              중단된 약 포함
+            </label>
+          </div>
+          {filteredMedications.length === 0 ? (
             <p className={styles.empty}>등록된 약이 없습니다.</p>
           ) : (
             <ul className={styles.list}>
-              {medications.map((med) => (
+              {filteredMedications.map((med) => (
                 <li
                   key={med.id}
-                  className={`${styles.item} ${selectedMedication?.id === med.id ? styles.active : ''}`}
+                  className={`${styles.item} ${selectedMedication?.id === med.id ? styles.active : ''} ${!med.active ? styles.inactiveItem : ''}`}
                   onClick={() => handleSelectMedication(med)}
                   role="button"
                   tabIndex={0}
@@ -68,7 +89,10 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
                     }
                   }}
                 >
-                  <span className={styles.name}>{med.name || '알 수 없는 약'}</span>
+                  <span className={styles.name}>
+                    {med.name || '알 수 없는 약'}
+                    {!med.active && <span className={styles.badgeStopped}>중단</span>}
+                  </span>
                   <span className={styles.dosage}>{med.dosage || ''}</span>
                 </li>
               ))}

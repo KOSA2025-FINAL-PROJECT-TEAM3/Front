@@ -33,7 +33,7 @@ const CheckIcon = () => (
     </svg>
 );
 
-const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading }) => {
+const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading, errorMessage, onRetry }) => {
     const [editedResult, setEditedResult] = useState(null);
 
     useEffect(() => {
@@ -81,6 +81,22 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading 
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
                         <CircularProgress size={48} sx={{ mb: 2 }} />
                         <Typography color="text.secondary">음식을 분석하는 중...</Typography>
+                    </Box>
+                ) : errorMessage ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography color="error" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            {errorMessage}
+                        </Typography>
+                        <Stack direction="row" spacing={1} justifyContent="center">
+                            {onRetry && (
+                                <Button variant="contained" onClick={onRetry}>
+                                    재시도
+                                </Button>
+                            )}
+                            <Button variant="text" onClick={onClose}>
+                                닫기
+                            </Button>
+                        </Stack>
                     </Box>
                 ) : editedResult ? (
                     <Stack spacing={3} sx={{ py: 1 }}>

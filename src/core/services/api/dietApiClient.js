@@ -13,8 +13,8 @@ class DietApiClient extends ApiClient {
   }
 
   // Get all diet logs
-  async getDietLogs() {
-    return this.get('/logs')
+  async getDietLogs(params) {
+    return this.get('/logs', params)
   }
 
   // Add a new diet log
@@ -46,6 +46,33 @@ class DietApiClient extends ApiClient {
         'Content-Type': 'multipart/form-data',
       },
       timeout: 300000,
+    })
+  }
+
+  async startAnalysisJob(file, mealType, foodName) {
+    const formData = new FormData()
+    if (file) {
+      formData.append('file', file)
+    }
+    formData.append('mealType', mealType)
+    formData.append('foodName', foodName)
+
+    return this.post('/analyze/jobs', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 300000,
+    })
+  }
+
+  async getAnalysisJob(jobId) {
+    return this.get(`/analyze/jobs/${jobId}`)
+  }
+
+  async uploadDietImage(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return this.post('/logs/image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
     })
   }
 }
