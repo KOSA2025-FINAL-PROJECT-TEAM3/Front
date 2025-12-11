@@ -20,14 +20,14 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
     const origin = envConfig.FRONTEND_URL
 
     if (invite.longToken) {
-      return `${origin}${ROUTE_PATHS.inviteAccept}?token=${invite.longToken}`
+      return `${origin}${ROUTE_PATHS.inviteLanding}?token=${invite.longToken}`
     }
     if (invite.inviteUrl) {
       return invite.inviteUrl
     }
     if (invite.shortCode || invite.inviteCode) {
-        const code = invite.shortCode || invite.inviteCode
-        return `${origin}${ROUTE_PATHS.inviteCodeEntry}?code=${code}`
+      const code = invite.shortCode || invite.inviteCode
+      return `${origin}${ROUTE_PATHS.inviteCodeEntry}?code=${code}`
     }
     return ''
   }, [invite])
@@ -56,7 +56,7 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
   return (
     <div className={styles.resultSection}>
       <h4 className={styles.successTitle}>초대 정보 확인</h4>
-      
+
       <div className={styles.infoRow}>
         <span className={styles.infoLabel}>이름:</span>
         <span className={styles.infoValue}>{invite.inviteeName || '이름 미지정'}</span>
@@ -75,10 +75,10 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
       </div>
 
       <div className={styles.linkContainer}>
-        <input 
-          className={styles.linkInput} 
-          value={inviteLink} 
-          readOnly 
+        <input
+          className={styles.linkInput}
+          value={inviteLink}
+          readOnly
         />
         <button type="button" className={styles.actionButton} onClick={handleCopyLink}>
           링크 복사
@@ -86,9 +86,9 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
       </div>
 
       <button type="button" className={styles.kakaoButton} onClick={handleKakaoShare} disabled={!linkAvailable}>
-         카카오톡으로 공유하기
+        카카오톡으로 공유하기
       </button>
-      
+
       {invite.shortCode && (
         <div className={styles.shortCodeSection}>
           <p className={styles.helper}>수동 입력 코드</p>

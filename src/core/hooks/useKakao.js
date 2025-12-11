@@ -36,12 +36,19 @@ export const useKakao = () => {
       return
     }
 
+    console.log('[useKakao] Sharing Invite:', { inviteUrl, inviterName }) // Debug Log
+
+    const title = '💌 가족 그룹 초대장이 도착했습니다!'
+    const description = `${inviterName}님을 가족 그룹에 초대합니다.\n함께 건강 관리를 시작해보세요.`
+
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
       content: {
-        title: `${inviterName}님의 가족 초대`,
-        description: '링크를 눌러 가족 그룹에 참여하세요. (로그인 필요)',
-        imageUrl: 'https://amapill.com/assets/invite_preview.png', // Placeholder
+        title: title,
+        description: description,
+        imageUrl: 'https://k.kakaocdn.net/dn/bWnQ5W/btsLwgZJ5qJ/A4kKjKjKjKjKjKjKjKjKjK/img_640x640.jpg', // Backend same image
+        imageWidth: 640,
+        imageHeight: 640,
         link: {
           mobileWebUrl: inviteUrl,
           webUrl: inviteUrl,

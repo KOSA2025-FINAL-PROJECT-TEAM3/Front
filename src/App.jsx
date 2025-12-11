@@ -30,6 +30,7 @@ const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyMan
 const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
 const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
 const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
+const InviteLanding = lazy(() => import('@features/family/pages/InviteLanding'))
 const FamilyJoin = lazy(() => import('@features/family/pages/FamilyJoin'))
 const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
 const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
@@ -150,6 +151,7 @@ function App() {
 
               {/* 초대 코드 입력 및 링크 진입 (공개) */}
               <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
+              <Route path={ROUTE_PATHS.inviteLanding} element={<InviteLanding />} />
               <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
 
               {/* 보호된 페이지: 인증 필요 */}

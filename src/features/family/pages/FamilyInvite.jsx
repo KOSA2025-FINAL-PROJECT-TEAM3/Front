@@ -105,7 +105,7 @@ export const FamilyInvitePage = () => {
     const origin = envConfig.FRONTEND_URL
     if (inviteData.inviteUrl) return inviteData.inviteUrl
     if (inviteData.longToken) {
-      return `${origin}${ROUTE_PATHS.inviteAccept}?token=${inviteData.longToken}`
+      return `${origin}${ROUTE_PATHS.inviteLanding}?token=${inviteData.longToken}`
     }
     if (inviteData.shortCode || inviteData.inviteCode) {
       const code = inviteData.shortCode || inviteData.inviteCode
@@ -212,7 +212,7 @@ export const FamilyInvitePage = () => {
             updatingInviteId={updatingInviteId}
           />
         )}
-        
+
         <div className={styles.listSection}>
           <h3>보낸 초대</h3>
           {sentInvites?.length ? (

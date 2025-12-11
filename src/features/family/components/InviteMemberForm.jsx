@@ -1,14 +1,9 @@
 import PropTypes from 'prop-types'
-import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import MemberRoleSelector from './MemberRoleSelector.jsx'
-import useKakao from '../../../core/hooks/useKakao.js'
 import styles from './InviteMemberForm.module.scss'
 
 export const InviteMemberForm = ({ onSubmit, loading }) => {
-  const [inviteResult, setInviteResult] = useState(null)
-  const { isInitialized, shareInvite } = useKakao()
-
   const {
     register,
     handleSubmit,
@@ -28,13 +23,12 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
   const handleInvite = async (formData) => {
     try {
       // API call expects { email, name, ... }. For Open Invite, email might be empty.
-      const result = await onSubmit?.({
+      await onSubmit?.({
         ...formData,
         email: formData.email || null, // Convert empty string to null if needed
       })
 
-      // result should contain { inviteUrl, shortCode, ... }
-      setInviteResult(result)
+      // Form reset only on success
       reset({ name: '', email: '', suggestedRole: 'SENIOR' })
     } catch (err) {
       setError('root', {
@@ -44,46 +38,8 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
     }
   }
 
-  const handleCopyLink = () => {
-    if (!inviteResult?.inviteUrl) return
-    navigator.clipboard.writeText(inviteResult.inviteUrl)
-      .then(() => alert('초대 링크가 복사되었습니다.'))
-      .catch(() => alert('복사에 실패했습니다.'))
-  }
-
-  const handleKakaoShare = () => {
-    if (!inviteResult?.inviteUrl) return
-    shareInvite(inviteResult.inviteUrl, '가족')
-  }
-
   return (
     <div className={styles.container}>
-      {/* Invite Result Section */}
-      {inviteResult && (
-        <div className={styles.resultSection}>
-          <h4 className={styles.successTitle}>초대장이 생성되었습니다!</h4>
-          
-          <div className={styles.linkContainer}>
-            <input 
-              className={styles.linkInput} 
-              value={inviteResult.inviteUrl || ''} 
-              readOnly 
-            />
-            <button type="button" className={styles.actionButton} onClick={handleCopyLink}>
-              링크 복사
-            </button>
-          </div>
-
-          <button type="button" className={styles.kakaoButton} onClick={handleKakaoShare}>
-             카카오톡으로 공유하기
-          </button>
-          
-          <p className={styles.hint}>
-            수동 입력 코드: <strong>{inviteResult.shortCode}</strong>
-          </p>
-        </div>
-      )}
-
       {/* Invite Form */}
       <form className={styles.form} onSubmit={handleSubmit(handleInvite)}>
         {errors.root && <p className={styles.error}>{errors.root.message}</p>}
