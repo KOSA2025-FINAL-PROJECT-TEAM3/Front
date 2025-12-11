@@ -31,7 +31,6 @@ export const useNotificationStream = (onNotification) => {
   const setDietJobResult = useNotificationStore((state) => state.setDietJobResult)
   const setOcrJobResult = useNotificationStore((state) => state.setOcrJobResult)
   const location = useLocation()
-  const location = useLocation()
 
   useEffect(() => {
     // SSE 연결 조건: 인증되었고 토큰이 있어야 함, 그리고 public 페이지가 아니어야 함
