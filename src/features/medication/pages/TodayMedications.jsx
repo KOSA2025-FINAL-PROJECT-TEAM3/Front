@@ -10,6 +10,7 @@ import { ko } from 'date-fns/locale';
 import logger from '@core/utils/logger';
 
 const TodayMedications = () => {
+    const pendingAction = useVoiceActionStore((state) => state.pendingAction); // [Voice] Subscribe
     const { consumeAction } = useVoiceActionStore(); // [Voice]
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -42,7 +43,7 @@ const TodayMedications = () => {
 
     // [Voice] 음성 명령 처리 (자동 복용 체크) - Zustand 버전
     useEffect(() => {
-        if (!loading && logs.length > 0) {
+        if (!loading && logs.length > 0 && pendingAction?.code === 'AUTO_COMPLETE') {
             // 스토어에서 'AUTO_COMPLETE' 명령이 있는지 확인하고 가져옴 (가져오면 스토어에선 삭제됨)
             const action = consumeAction('AUTO_COMPLETE');
             
@@ -94,7 +95,7 @@ const TodayMedications = () => {
                 }
             }
         }
-    }, [loading, logs, consumeAction]); // consumeAction이 의존성에 포함됨
+    }, [loading, logs, consumeAction, pendingAction]); // consumeAction이 의존성에 포함됨
 
     const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view

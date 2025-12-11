@@ -19,13 +19,12 @@ export const DietLogPage = () => {
 
   // Voice Action State
   const [autoFillData, setAutoFillData] = useState(null)
-  const { consumeAction, getPendingAction } = useVoiceActionStore()
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
+  const { consumeAction } = useVoiceActionStore()
 
   // Voice Command Handling (Auto Fill)
   useEffect(() => {
-    const pending = getPendingAction()
-    
-    if (pending && pending.code === 'AUTO_LOG_DIET') {
+    if (pendingAction && pendingAction.code === 'AUTO_LOG_DIET') {
       const action = consumeAction('AUTO_LOG_DIET')
       if (action && action.params) {
         logger.info('🎤 Voice Action Auto-Fill:', action)
@@ -35,7 +34,7 @@ export const DietLogPage = () => {
         })
       }
     }
-  }, [consumeAction, getPendingAction])
+  }, [pendingAction, consumeAction])
 
   const fetchMeals = useCallback(async () => {
     setLoading(true)

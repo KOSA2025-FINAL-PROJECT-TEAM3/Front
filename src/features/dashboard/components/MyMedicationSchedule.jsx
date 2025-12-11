@@ -38,6 +38,7 @@ export const MyMedicationSchedule = ({
   className = ''
 }) => {
   const navigate = useNavigate()
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
   const { consumeAction } = useVoiceActionStore() // [Voice]
   const { medications, fetchMedications } = useMedicationStore()
   const [medicationLogs, setMedicationLogs] = useState([])
@@ -102,7 +103,7 @@ export const MyMedicationSchedule = ({
 
   // [Voice] 음성 명령 처리 (자동 복용 체크)
   useEffect(() => {
-    if (!loading && todaySchedules.length > 0) {
+    if (!loading && todaySchedules.length > 0 && pendingAction?.code === 'AUTO_COMPLETE') {
       const action = consumeAction('AUTO_COMPLETE')
       
       if (action) {
@@ -143,7 +144,7 @@ export const MyMedicationSchedule = ({
         }
       }
     }
-  }, [loading, todaySchedules, consumeAction])
+  }, [loading, todaySchedules, consumeAction, pendingAction])
 
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')

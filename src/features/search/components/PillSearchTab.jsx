@@ -36,7 +36,8 @@ const summarize = (text = '', limit = 140) => {
 export const PillSearchTab = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { consumeAction, getPendingAction } = useVoiceActionStore() // [Voice]
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe to state
+  const { consumeAction } = useVoiceActionStore()
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -138,14 +139,11 @@ export const PillSearchTab = () => {
 
   // [Voice] 자동 검색 (Zustand)
   useEffect(() => {
-    // 1. 대기 중인 액션 확인 (삭제하지 않고 조회만)
-    const pending = getPendingAction()
-    
-    // 2. 내 타입('PILL')이거나 타입이 없을 때만 실행
-    if (pending && pending.code === 'AUTO_SEARCH') {
-        const type = pending.params?.searchType
+    // 1. 대기 중인 액션 확인 (Reactive)
+    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
+        const type = pendingAction.params?.searchType
         if (!type || type === 'PILL') {
-            // 3. 내 것이 확실하므로 소비(삭제)하고 실행
+            // 2. 내 것이 확실하므로 소비(삭제)하고 실행
             const action = consumeAction('AUTO_SEARCH')
             if (action && action.params?.query) {
                 const keyword = action.params.query
@@ -154,7 +152,7 @@ export const PillSearchTab = () => {
             }
         }
     }
-  }, [getPendingAction, consumeAction, executeSearch])
+  }, [pendingAction, consumeAction, executeSearch])
 
   // 자동 검색 (location.state.autoSearch 감지)
   useEffect(() => {

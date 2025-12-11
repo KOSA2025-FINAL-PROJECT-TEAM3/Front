@@ -7,7 +7,8 @@ import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import logger from '@core/utils/logger'
 
 export const SymptomSearchTab = () => {
-  const { consumeAction, getPendingAction } = useVoiceActionStore() // [Voice]
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
+  const { consumeAction } = useVoiceActionStore()
   const [query, setQuery] = useState('')
   const [results] = useState([])
   const [selectedSymptom, setSelectedSymptom] = useState(null)
@@ -112,12 +113,10 @@ export const SymptomSearchTab = () => {
   // [Voice] 음성 명령 처리 로직 (반드시 함수 정의 아래에 배치)
   // ==========================================
 
-  // 1. 자동 검색 트리거 (Zustand)
+  // 1. 자동 검색 트리거 (Zustand Reactive)
   useEffect(() => {
-    const pending = getPendingAction()
-    
-    if (pending && pending.code === 'AUTO_SEARCH') {
-        const type = pending.params?.searchType
+    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
+        const type = pendingAction.params?.searchType
         // 'SYMPTOM' 타입일 때만 실행
         if (type === 'SYMPTOM') {
             const action = consumeAction('AUTO_SEARCH')
@@ -128,7 +127,7 @@ export const SymptomSearchTab = () => {
             }
         }
     }
-  }, [getPendingAction, consumeAction])
+  }, [pendingAction, consumeAction])
 
   // 2. 트리거가 당겨지면 handleAiSearch 실행
   useEffect(() => {
