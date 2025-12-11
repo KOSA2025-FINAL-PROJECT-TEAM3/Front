@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react'
+import logger from "@core/utils/logger"
+import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatRoomCard from '../components/ChatRoomCard'
 import { chatApiClient } from '@/core/services/api/chatApiClient'
@@ -24,7 +25,7 @@ export const DoctorChatListPage = () => {
       const response = await chatApiClient.getRooms()
       setRooms(response.rooms || [])
     } catch (err) {
-      console.error('채팅방 목록 로드 실패:', err)
+      logger.error('채팅방 목록 로드 실패:', err)
       setError('채팅방 목록을 불러오는데 실패했습니다.')
     } finally {
       setIsLoading(false)
@@ -38,7 +39,7 @@ export const DoctorChatListPage = () => {
       const newRoom = await chatApiClient.createRoom('doctor_ai_001')
       setRooms([newRoom, ...rooms])
     } catch (err) {
-      console.error('채팅방 생성 실패:', err)
+      logger.error('채팅방 생성 실패:', err)
       alert('채팅방 생성에 실패했습니다.')
     }
   }

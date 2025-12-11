@@ -3,8 +3,8 @@
  * AI 경고 시스템 + 처방전 선택 기능 통합 버전
  */
 
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { STORAGE_KEYS } from '@config/constants'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
@@ -13,7 +13,9 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import Modal from '@shared/components/ui/Modal'
 import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
 import { toast } from '@shared/components/toast/toastStore'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
 import styles from './PillSearchTab.module.scss'
+import logger from '@core/utils/logger'
 
 const normalizeText = (text = '') =>
   text
@@ -33,13 +35,15 @@ const summarize = (text = '', limit = 140) => {
 
 export const PillSearchTab = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe to state
+  const { consumeAction } = useVoiceActionStore()
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
-  const [registeringId, setRegisteringId] = useState(null)
   
   // AI 경고 관련 상태
   const [pendingAiDrug, setPendingAiDrug] = useState(null)
@@ -51,8 +55,7 @@ export const PillSearchTab = () => {
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
   const [selectedDrug, setSelectedDrug] = useState(null)
 
-  const { addMedication, medications, fetchMedications } = useMedicationStore((state) => ({
-    addMedication: state.addMedication,
+  const { medications, fetchMedications } = useMedicationStore((state) => ({
     medications: state.medications,
     fetchMedications: state.fetchMedications,
   }))
@@ -67,13 +70,12 @@ export const PillSearchTab = () => {
     if (!token || medications.length > 0) return
 
     fetchMedications().catch((err) => {
-      console.error('복용약 목록 조회 실패', err)
+      logger.error('복용약 목록 조회 실패', err)
     })
   }, [fetchMedications, medications.length])
 
-  const handleSearch = async (event) => {
-    event?.preventDefault?.()
-    const keyword = itemName.trim()
+  // 실제 검색 로직 (재사용 가능)
+  const executeSearch = useCallback(async (keyword) => {
     if (!keyword) {
       setError('약품명을 입력해주세요.')
       setResults([])
@@ -94,6 +96,7 @@ export const PillSearchTab = () => {
     setIsAiResult(false)
     setLoading(true)
     setHasSearched(true)
+    
     try {
       const list = await searchApiClient.searchDrugs(keyword)
       setResults(Array.isArray(list) ? list : [])
@@ -116,17 +119,51 @@ export const PillSearchTab = () => {
           toast.success('AI 검색 결과를 가져왔습니다. 내용 확인 후 전문가와 상담하세요.')
           return
         } catch (fallbackErr) {
-          console.error('약품 검색 타임아웃 후 AI 검색 실패', fallbackErr)
+          logger.error('약품 검색 타임아웃 후 AI 검색 실패', fallbackErr)
         }
       }
 
-      console.error('약품 검색 실패', err)
+      logger.error('약품 검색 실패', err)
       setError('약품 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
       setResults([])
     } finally {
       setLoading(false)
     }
+  }, [])
+
+  // 폼 제출 핸들러
+  const handleSearch = (event) => {
+    event?.preventDefault?.()
+    executeSearch(itemName.trim())
   }
+
+  // [Voice] 자동 검색 (Zustand)
+  useEffect(() => {
+    // 1. 대기 중인 액션 확인 (Reactive)
+    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
+        const type = pendingAction.params?.searchType
+        if (!type || type === 'PILL') {
+            // 2. 내 것이 확실하므로 소비(삭제)하고 실행
+            const action = consumeAction('AUTO_SEARCH')
+            if (action && action.params?.query) {
+                const keyword = action.params.query
+                setItemName(keyword)
+                executeSearch(keyword)
+            }
+        }
+    }
+  }, [pendingAction, consumeAction, executeSearch])
+
+  // 자동 검색 (location.state.autoSearch 감지)
+  useEffect(() => {
+    if (location.state?.autoSearch) {
+      const keyword = location.state.autoSearch
+      setItemName(keyword) // 검색어 입력창에 표시
+      executeSearch(keyword) // 검색 실행
+      
+      // 중복 실행 방지 (선택 사항: state를 비우는 로직은 navigate replace 등을 써야 하므로 여기선 생략)
+    }
+  }, [location.state, executeSearch])
 
   const handleAISearch = async () => {
     const keyword = itemName.trim()
@@ -153,10 +190,23 @@ export const PillSearchTab = () => {
       setResults(aiWrapped)
       toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
     } catch (err) {
-      console.error('AI 검색 실패', err)
-      setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      logger.error('AI 검색 실패', err)
+      // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
+      const errorData = err?.response?.data
+      const errorCode = errorData?.code
+      const errorMsg = errorData?.message
+      
+      if (errorCode === 'SECURITY_004' || errorMsg?.includes('약물명만') || errorMsg?.includes('약품명만')) {
+        setError('약물명만 입력해주세요. 예: 타이레놀, 아스피린')
+        toast.error('약물명만 입력해주세요.')
+      } else if (errorMsg) {
+        setError(errorMsg)
+        toast.error(errorMsg)
+      } else {
+        setError('AI 검색에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        toast.error('AI 검색에 실패했습니다.')
+      }
       setResults([])
-      toast.error('AI 검색에 실패했습니다.')
     } finally {
       setLoading(false)
     }
@@ -175,7 +225,7 @@ export const PillSearchTab = () => {
     try {
       await fetchPrescriptions()
     } catch (err) {
-      console.error('처방전 목록 조회 실패', err)
+      logger.error('처방전 목록 조회 실패', err)
       toast.error('처방전 목록을 불러오지 못했습니다.')
     }
   }
@@ -249,7 +299,7 @@ export const PillSearchTab = () => {
           <input
             type="text"
             className={styles.input}
-            placeholder="예) 타이레놀, 아스피린"
+            placeholder="약품명만 입력 (예: 타이레놀)"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             aria-label="약품명 검색어"
@@ -271,7 +321,7 @@ export const PillSearchTab = () => {
             {loading ? '검색 중...' : 'AI 검색'}
           </button>
         </form>
-        <p className={styles.hint}>검색 혹은 AI 검색 버튼을 누르고 잠시 기다려주세요.</p>
+        <p className={styles.hint}>💡 약품명만 입력해주세요. "부작용", "효능" 등 추가 지시는 넣지 마세요.</p>
         {error && <p className={styles.error}>{error}</p>}
       </section>
 
@@ -281,15 +331,10 @@ export const PillSearchTab = () => {
         {!loading && results.length > 0 && (
           <div className={styles.resultList}>
             {results.map((drug) => {
-              const key = drug.itemSeq || drug.itemName
-              const isRegistered = medications.some(
-                (med) => (drug.itemSeq && med.itemSeq === drug.itemSeq) || med.name === drug.itemName,
-              )
-              const isRegistering = registeringId === key
               const isAiGenerated = isAiResult || !!drug.aiGenerated
 
               return (
-                <article key={`${drug.itemSeq}-${drug.itemName}`} className={styles.resultCard}>
+                <article key={drug.itemSeq || drug.itemName} className={styles.resultCard}>
                   <div className={styles.thumbnail}>
                     {drug.itemImage ? (
                       <img src={drug.itemImage} alt={`${drug.itemName} 이미지`} />
@@ -314,10 +359,10 @@ export const PillSearchTab = () => {
                         type="button"
                         className={styles.addButton}
                         onClick={() => handleRegisterMedication(drug)}
-                        disabled={isRegistering}
+                        disabled={isAiGenerated && !pendingAiDrug}
                         title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
                       >
-                        {isRegistering ? '처리 중...' : '처방전에 추가'}
+                        {isAiGenerated && !pendingAiDrug ? '처리 중...' : '처방전에 추가'}
                       </button>
                       <button
                         type="button"
@@ -393,10 +438,7 @@ export const PillSearchTab = () => {
               type="button"
               className={styles.addButton}
               onClick={confirmAiRegister}
-              disabled={
-                pendingAiDrug &&
-                registeringId === (pendingAiDrug.itemSeq || pendingAiDrug.itemName)
-              }
+              disabled={!pendingAiDrug}
             >
               계속 진행
             </button>

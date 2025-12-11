@@ -1,4 +1,5 @@
-﻿import { useEffect, useState, useRef, useCallback } from 'react'
+import logger from "@core/utils/logger"
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import ChatMessage from '../components/ChatMessage'
@@ -52,7 +53,7 @@ export const ChatConversationPage = () => {
         })
       }
     } catch (err) {
-      console.error('메시지 로드 실패:', err)
+      logger.error('메시지 로드 실패:', err)
       setError('메시지를 불러오는데 실패했습니다.')
     } finally {
       setIsLoading(false)
@@ -71,7 +72,7 @@ export const ChatConversationPage = () => {
       // WebSocket이 연결되면 여기서 실시간으로 전송
       // TODO: WebSocket 연동 후 구현
     } catch (err) {
-      console.error('메시지 전송 실패:', err)
+      logger.error('메시지 전송 실패:', err)
       alert('메시지 전송에 실패했습니다.')
     } finally {
       setIsSending(false)

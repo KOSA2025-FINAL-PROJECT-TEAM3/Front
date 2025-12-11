@@ -12,15 +12,16 @@ import {
   Typography,
   Chip,
   Box,
-  Stack,
-  CircularProgress
+  Stack
 } from '@mui/material'
+import logger from '@core/utils/logger'
 
 export const MealInputForm = ({
   onAddMeal,
   onUpdateMeal,
   editingMeal,
   onCancelEdit,
+  autoFillData // [Voice] New prop
 }) => {
   const dietCameraRef = useRef(null)
   const dietJobs = useNotificationStore((state) => state.dietJobs)
@@ -89,6 +90,21 @@ export const MealInputForm = ({
       setIsModalOpen(true)
     }
   }, [dietJobs])
+
+  // [Voice] Auto-fill effect
+  useEffect(() => {
+    if (autoFillData) {
+      if (autoFillData.foodName) {
+        setFoodName(autoFillData.foodName)
+      }
+
+      if (autoFillData.mealType) {
+        const typeKey = Object.keys(MEAL_TYPES).find(key => key === autoFillData.mealType.toUpperCase())
+        const mappedType = typeKey ? MEAL_TYPES[typeKey] : MEAL_TYPES.BREAKFAST
+        setMealType(mappedType)
+      }
+    }
+  }, [autoFillData])
 
   useEffect(() => {
     if (isEditing) {
@@ -178,7 +194,7 @@ export const MealInputForm = ({
       setAnalysisResult(result)
       setAnalysisError(null)
     } catch (error) {
-      console.error('Failed to analyze image:', error)
+      logger.error('Failed to analyze image:', error)
       setAnalysisError(error.message || '이미지 분석에 실패했습니다.')
     } finally {
       setIsLoading(false)
@@ -201,11 +217,11 @@ export const MealInputForm = ({
       const jobId = jobResp.jobId
       currentJobIdRef.current = jobId
       const result = await pollAnalysisJob(jobId)
-      console.log('[MealInputForm] Analysis result received:', result)
+      logger.debug('[MealInputForm] Analysis result received:', result)
       setAnalysisResult(result)
       setAnalysisError(null)
     } catch (error) {
-      console.error('Failed to analyze food:', error)
+      logger.error('Failed to analyze food:', error)
       setAnalysisError(error.message || '음식 분석에 실패했습니다.')
     } finally {
       setIsLoading(false)

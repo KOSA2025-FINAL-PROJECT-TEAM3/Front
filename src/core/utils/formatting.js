@@ -5,6 +5,7 @@
 
 import { format, parseISO, formatDistance } from 'date-fns'
 import { ko } from 'date-fns/locale'
+import logger from './logger'
 
 /**
  * 날짜를 지정된 형식으로 포맷
@@ -17,7 +18,7 @@ export const formatDate = (date, formatStr = 'yyyy-MM-dd') => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date
     return format(dateObj, formatStr, { locale: ko })
   } catch (error) {
-    console.error('날짜 포맷 실패:', error)
+    logger.error('날짜 포맷 실패:', error)
     return ''
   }
 }
@@ -32,7 +33,7 @@ export const formatRelativeTime = (date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date
     return formatDistance(dateObj, new Date(), { locale: ko, addSuffix: true })
   } catch (error) {
-    console.error('상대시간 포맷 실패:', error)
+    logger.error('상대시간 포맷 실패:', error)
     return ''
   }
 }
@@ -47,7 +48,7 @@ export const formatTime = (time) => {
     const timeObj = typeof time === 'string' ? parseISO(`2000-01-01T${time}`) : time
     return format(timeObj, 'HH:mm', { locale: ko })
   } catch (error) {
-    console.error('시간 포맷 실패:', error)
+    logger.error('시간 포맷 실패:', error)
     return ''
   }
 }
@@ -62,7 +63,7 @@ export const formatDateTime = (dateTime) => {
     const dateObj = typeof dateTime === 'string' ? parseISO(dateTime) : dateTime
     return format(dateObj, 'yyyy-MM-dd HH:mm', { locale: ko })
   } catch (error) {
-    console.error('날짜시간 포맷 실패:', error)
+    logger.error('날짜시간 포맷 실패:', error)
     return ''
   }
 }

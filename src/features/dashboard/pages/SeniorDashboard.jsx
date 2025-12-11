@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * Senior Dashboard Page
  * - 어르신용 개인 복용 일정 대시보드 (실제 API 기반)
@@ -8,7 +9,7 @@ import { MainLayout } from '@shared/components/layout/MainLayout'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
 import { QuickActions } from '@shared/components/ui/QuickActions'
 import { FAB } from '@shared/components/ui/FAB'
-import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/data/mockUiConstants'
+import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
@@ -39,7 +40,7 @@ export const SeniorDashboard = () => {
       window.URL.revokeObjectURL(url)
       toast.success('PDF 다운로드를 시작합니다.')
     } catch (error) {
-      console.error('PDF 다운로드 실패', error)
+      logger.error('PDF 다운로드 실패', error)
       toast.error('PDF 다운로드에 실패했습니다.')
     } finally {
       setExporting(false)

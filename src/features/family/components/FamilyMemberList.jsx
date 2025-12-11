@@ -6,8 +6,10 @@ export const FamilyMemberList = ({
   onDetail,
   onRemove,
   onSettings,
+  onRoleChange,
   onlineMemberIds = [],
   removingMemberId,
+  roleChangingMemberId,
   currentUserId,
   groupOwnerId,
   canManageNotifications = false,
@@ -32,9 +34,11 @@ export const FamilyMemberList = ({
             onDetail={onDetail}
             onRemove={onRemove}
             onSettings={onSettings}
+            onRoleChange={onRoleChange}
             canManageNotifications={canManageNotifications}
             isOnline={onlineMemberIds.includes(member.id)}
             isRemoving={removingMemberId === member.id}
+            isRoleChanging={roleChangingMemberId === member.id}
             currentUserId={currentUserId}
             groupOwnerId={groupOwnerId}
           />

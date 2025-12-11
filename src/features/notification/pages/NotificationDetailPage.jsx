@@ -4,7 +4,7 @@
  * @component NotificationDetailPage
  */
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { Card } from '@shared/components/ui/Card'
@@ -37,14 +37,20 @@ const buildMissedSummary = (missedMedications = [], missedCount) => {
 export const NotificationDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { notifications, markAsRead } = useNotificationStore()
   const [fetchedMeds, setFetchedMeds] = useState([])
   const [fetching, setFetching] = useState(false)
 
-  // ID로 알림 조회
+  // 1. location.state에서 전달된 notification 우선 사용
+  // 2. 없으면 store에서 조회 (새로고침 시)
   const notification = useMemo(() => {
+    const fromState = location.state?.notification
+    if (fromState && (String(fromState.id) === String(id) || fromState.groupKey === id)) {
+      return fromState
+    }
     return notifications.find((n) => String(n.id) === String(id) || n.groupKey === id)
-  }, [notifications, id])
+  }, [location.state, notifications, id])
 
   useEffect(() => {
     // 알림이 없으면 목록으로 리다이렉트
@@ -89,8 +95,8 @@ export const NotificationDetailPage = () => {
       if (!key || merged.has(key)) return
       merged.set(key, item)
     }
-    ;(notification.missedMedications || []).forEach(push)
-    ;(fetchedMeds || []).forEach(push)
+      ; (notification.missedMedications || []).forEach(push)
+      ; (fetchedMeds || []).forEach(push)
     return Array.from(merged.values())
   }, [notification.missedMedications, fetchedMeds])
 

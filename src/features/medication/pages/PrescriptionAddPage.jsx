@@ -7,6 +7,7 @@ import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
 import styles from './PrescriptionAddPage.module.scss';
+import logger from '@core/utils/logger';
 
 export const PrescriptionAddPage = () => {
     const navigate = useNavigate();
@@ -42,6 +43,7 @@ export const PrescriptionAddPage = () => {
 
     const [newTime, setNewTime] = useState('');
     const [showSearchModal, setShowSearchModal] = useState(false);
+    const [editingMedicationIndex, setEditingMedicationIndex] = useState(null);
 
     // 마운트 시 상태 초기화 (loading 상태 리셋)
     useEffect(() => {
@@ -72,7 +74,7 @@ export const PrescriptionAddPage = () => {
                         notes: data.notes || ''
                     });
                 } catch (error) {
-                    console.error('처방전 로드 실패:', error);
+                    logger.error('처방전 로드 실패:', error);
                     toast.error('처방전 정보를 불러오는데 실패했습니다');
                     navigate(-1);
                 }
@@ -85,14 +87,28 @@ export const PrescriptionAddPage = () => {
     useEffect(() => {
         if (location.state?.ocrData) {
             const ocrData = location.state.ocrData;
-            console.log('🔄 OCR 데이터 로드 시작:', ocrData);
+            logger.debug('🔄 OCR 데이터 로드 시작:', ocrData);
+
+            // OCR 데이터 중복 약물 제거
+            const uniqueMedications = [];
+            const seenNames = new Set();
+            
+            if (ocrData.medications) {
+                ocrData.medications.forEach(med => {
+                    if (!seenNames.has(med.name)) {
+                        seenNames.add(med.name);
+                        uniqueMedications.push(med);
+                    }
+                });
+            }
+
             setPrescriptionData(prev => ({
                 ...prev,
                 ...ocrData,
                 startDate: ocrData.startDate || prev.startDate,
                 endDate: ocrData.endDate || prev.endDate,
                 intakeTimes: ocrData.intakeTimes || prev.intakeTimes,
-                medications: ocrData.medications || [],
+                medications: uniqueMedications,
                 hospitalName: ocrData.hospitalName || '',
                 pharmacyName: ocrData.pharmacyName || ''
             }));
@@ -101,7 +117,7 @@ export const PrescriptionAddPage = () => {
         } else if (location.state?.addDrug) {
             // 약 검색에서 온 경우
             const drug = location.state.addDrug;
-            console.log('🔄 약 검색 데이터 로드:', drug);
+            logger.debug('🔄 약 검색 데이터 로드:', drug);
 
             const medicationData = {
                 name: drug.itemName,
@@ -144,6 +160,16 @@ export const PrescriptionAddPage = () => {
     };
 
     const handleAddMedication = (medication) => {
+        // 중복 약물 체크
+        const isDuplicate = prescriptionData.medications.some(
+            existing => existing.name === medication.name
+        );
+
+        if (isDuplicate) {
+            toast.error('이미 추가된 약입니다. 복용량을 조절해주세요.');
+            return;
+        }
+
         setPrescriptionData(prev => ({
             ...prev,
             medications: [...prev.medications, medication]
@@ -159,6 +185,29 @@ export const PrescriptionAddPage = () => {
         }));
     };
 
+    const handleEditMedication = (index) => {
+        setEditingMedicationIndex(index);
+        setShowSearchModal(true);
+    };
+
+    const handleUpdateMedication = (updatedMedication) => {
+        setPrescriptionData(prev => {
+            const newMedications = [...prev.medications];
+            newMedications[editingMedicationIndex] = updatedMedication;
+            return {
+                ...prev,
+                medications: newMedications
+            };
+        });
+        handleCloseModal();
+        toast.success('약 정보가 수정되었습니다');
+    };
+
+    const handleCloseModal = () => {
+        setShowSearchModal(false);
+        setEditingMedicationIndex(null);
+    };
+
     const handleSubmit = async () => {
         if (prescriptionData.medications.length === 0) {
             toast.error('최소 1개 이상의 약을 등록해주세요');
@@ -167,18 +216,18 @@ export const PrescriptionAddPage = () => {
 
         try {
             if (isEditMode) {
-                console.log('📤 처방전 수정 요청:', prescriptionData);
+                logger.debug('📤 처방전 수정 요청:', prescriptionData);
                 await updatePrescription(editPrescriptionId, prescriptionData);
                 toast.success('처방전이 수정되었습니다');
                 navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', editPrescriptionId), { replace: true });
             } else {
-                console.log('📤 처방전 등록 요청:', prescriptionData);
+                logger.debug('📤 처방전 등록 요청:', prescriptionData);
                 await createPrescription(prescriptionData);
                 toast.success('처방전이 등록되었습니다');
                 navigate(ROUTE_PATHS.medication, { replace: true });
             }
         } catch (error) {
-            console.error('❌ 처방전 저장 실패:', error);
+            logger.error('❌ 처방전 저장 실패:', error);
             toast.error(error.message || '처방전 저장에 실패했습니다');
         }
     };
@@ -289,7 +338,7 @@ export const PrescriptionAddPage = () => {
                                 key={index}
                                 medication={medication}
                                 intakeTimes={prescriptionData.intakeTimes}
-                                onEdit={() => toast.info('수정 기능은 준비 중입니다')}
+                                onEdit={() => handleEditMedication(index)}
                                 onRemove={() => handleRemoveMedication(index)}
                             />
                         ))}
@@ -326,8 +375,10 @@ export const PrescriptionAddPage = () => {
             {showSearchModal && (
                 <MedicationModal
                     intakeTimes={prescriptionData.intakeTimes}
-                    onAdd={handleAddMedication}
-                    onClose={() => setShowSearchModal(false)}
+                    onAdd={editingMedicationIndex !== null ? handleUpdateMedication : handleAddMedication}
+                    onClose={handleCloseModal}
+                    initialMedication={editingMedicationIndex !== null ? prescriptionData.medications[editingMedicationIndex] : null}
+                    mode={editingMedicationIndex !== null ? 'edit' : 'add'}
                 />
             )}
         </MainLayout>

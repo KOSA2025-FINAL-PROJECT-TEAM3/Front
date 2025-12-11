@@ -105,7 +105,9 @@ export const NotificationPage = () => {
     if (!notification.read) {
       markAsRead(notification.id)
     }
-    navigate(ROUTE_PATHS.notificationDetail.replace(':id', notification.id))
+    navigate(ROUTE_PATHS.notificationDetail.replace(':id', notification.id), {
+      state: { notification }
+    })
   }
 
   const handleMarkAllAsRead = () => {

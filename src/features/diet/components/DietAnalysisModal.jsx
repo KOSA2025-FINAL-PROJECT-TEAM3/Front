@@ -17,6 +17,7 @@ import {
     Chip,
     Stack
 } from '@mui/material';
+import logger from '@core/utils/logger';
 
 // Fallback icons
 const CloseIcon = () => (
@@ -37,10 +38,10 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading,
 
     useEffect(() => {
         if (analysisResult) {
-            console.log('[DietAnalysisModal] analysisResult received:', analysisResult);
+            logger.debug('[DietAnalysisModal] analysisResult received:', analysisResult);
             setEditedResult(analysisResult);
         } else {
-            console.log('[DietAnalysisModal] analysisResult is null/undefined');
+            logger.debug('[DietAnalysisModal] analysisResult is null/undefined');
         }
     }, [analysisResult]);
 

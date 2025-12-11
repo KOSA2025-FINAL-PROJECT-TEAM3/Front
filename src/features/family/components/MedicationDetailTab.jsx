@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { familyApiClient } from '@core/services/api/familyApiClient'
+import logger from '@core/utils/logger'
 import styles from './MedicationDetailTab.module.scss'
 
 export const MedicationDetailTab = ({ userId, medications = [] }) => {
@@ -18,7 +19,7 @@ export const MedicationDetailTab = ({ userId, medications = [] }) => {
       const detail = await familyApiClient.getMedicationDetail(userId, medication.id)
       setMedicationDetail(detail)
     } catch (err) {
-      console.error('약 세부 정보 조회 실패:', err)
+      logger.error('약 세부 정보 조회 실패:', err)
       setError('약 정보를 불러오지 못했습니다.')
     } finally {
       setLoading(false)

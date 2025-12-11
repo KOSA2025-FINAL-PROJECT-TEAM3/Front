@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient';
+import logger from '@core/utils/logger';
 
 export const usePrescriptionStore = create((set, get) => ({
     prescriptions: [],
@@ -36,7 +37,7 @@ export const usePrescriptionStore = create((set, get) => ({
     createPrescription: async (prescriptionData) => {
         set({ loading: true, error: null });
         try {
-            console.log('Creating prescription with raw data:', prescriptionData);
+            logger.debug('Creating prescription with raw data:', prescriptionData);
 
             // 데이터 형식 변환
             const formattedData = {
@@ -62,18 +63,18 @@ export const usePrescriptionStore = create((set, get) => ({
                 }))
             };
 
-            console.log('Creating prescription with formatted data:', formattedData);
+            logger.debug('Creating prescription with formatted data:', formattedData);
             const newPrescription = await prescriptionApiClient.createPrescription(formattedData);
-            console.log('Prescription created successfully:', newPrescription);
+            logger.debug('Prescription created successfully:', newPrescription);
             set(state => ({
                 prescriptions: [newPrescription, ...state.prescriptions],
                 loading: false
             }));
             return newPrescription;
         } catch (error) {
-            console.error('Prescription creation error:', error);
-            console.error('Error response:', error.response?.data);
-            console.error('Error status:', error.response?.status);
+            logger.error('Prescription creation error:', error);
+            logger.error('Error response:', error.response?.data);
+            logger.error('Error status:', error.response?.status);
             set({ error: error.message, loading: false });
             throw error;
         }

@@ -1,4 +1,5 @@
-﻿import PropTypes from 'prop-types'
+import { useState } from 'react'
+import PropTypes from 'prop-types'
 import styles from './FamilyMemberCard.module.scss'
 
 const roleLabels = {
@@ -10,13 +11,17 @@ export const FamilyMemberCard = ({
   member,
   onDetail,
   onRemove,
+  onRoleChange,
   onSettings,
   isOnline,
   isRemoving,
+  isRoleChanging,
   currentUserId,
   groupOwnerId,
   canManageNotifications,
 }) => {
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false)
+
   if (!member) return null
   const initials = member.name?.[0] ?? 'U'
   const joinedDate = new Date(member.joinedAt).toLocaleDateString('ko-KR')
@@ -30,12 +35,22 @@ export const FamilyMemberCard = ({
     currentUserId?.toString?.() === groupOwnerId?.toString?.()
   const canOpenSettings = onSettings && !isCardSelf && canManageNotifications
 
-  // 1. 관리자(ViewerOwner)는 본인 제외 다른 사람 제거 가능
-  // 2. 일반 멤버는 본인만 탈퇴 가능 (단, 그룹장이면 탈퇴 불가 -> 해산 이용)
+  // 역할 변경 권한: 그룹 소유자 또는 본인
+  const canChangeRole = isViewerGroupOwner || isCardSelf
+
+  // 제거 권한
   const showRemove =
     (isViewerGroupOwner && !isCardSelf) || (isCardSelf && !isCardGroupOwner)
 
   const removeLabel = isCardSelf ? '탈퇴' : '제거'
+  const currentRole = member.role
+  const oppositeRole = currentRole === 'SENIOR' ? 'CAREGIVER' : 'SENIOR'
+
+  const handleRoleToggle = () => {
+    if (!canChangeRole || isRoleChanging) return
+    setShowRoleDropdown(false)
+    onRoleChange?.(member.id, oppositeRole)
+  }
 
   return (
     <div className={styles.card}>
@@ -48,7 +63,29 @@ export const FamilyMemberCard = ({
       <div className={styles.info}>
         <div className={styles.topRow}>
           <span className={styles.name}>{member.name}</span>
-          <span className={styles.role}>{roleLabels[member.role] || member.role}</span>
+          <div className={styles.roleContainer}>
+            {canChangeRole && onRoleChange ? (
+              <button
+                type="button"
+                className={styles.roleButton}
+                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                disabled={isRoleChanging}
+                title="역할 변경"
+              >
+                {isRoleChanging ? '변경 중...' : roleLabels[currentRole] || currentRole}
+                <span className={styles.dropdownArrow}>▼</span>
+              </button>
+            ) : (
+              <span className={styles.role}>{roleLabels[currentRole] || currentRole}</span>
+            )}
+            {showRoleDropdown && (
+              <div className={styles.roleDropdown}>
+                <button type="button" onClick={handleRoleToggle}>
+                  {roleLabels[oppositeRole]}(으)로 변경
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <p className={styles.meta}>가입일: {joinedDate}</p>
         <p className={styles.meta}>{member.email}</p>
@@ -95,17 +132,22 @@ FamilyMemberCard.propTypes = {
   }).isRequired,
   onDetail: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
+  onRoleChange: PropTypes.func,
   onSettings: PropTypes.func,
   isOnline: PropTypes.bool,
   isRemoving: PropTypes.bool,
+  isRoleChanging: PropTypes.bool,
   currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   groupOwnerId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   canManageNotifications: PropTypes.bool,
 }
 
 FamilyMemberCard.defaultProps = {
+  onRoleChange: null,
+  onSettings: null,
   isOnline: false,
   isRemoving: false,
+  isRoleChanging: false,
   currentUserId: null,
   groupOwnerId: null,
   canManageNotifications: false,

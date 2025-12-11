@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import styles from './MedicationLogsTab.module.scss'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import logger from '@core/utils/logger'
 
 export const MedicationLogsTab = ({ userId }) => {
   const [logs, setLogs] = useState([])
@@ -64,17 +65,7 @@ export const MedicationLogsTab = ({ userId }) => {
     setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc');
   };
 
-  useEffect(() => {
-    loadLogs()
-  }, [userId, filters])
-
-  useEffect(() => {
-    if (logs.length > 0) {
-      initializeExpandedState(logs);
-    }
-  }, [logs]);
-
-  const loadLogs = async () => {
+  const loadLogs = useCallback(async () => {
     if (!userId) {
       setLoading(false)
       return
@@ -92,13 +83,23 @@ export const MedicationLogsTab = ({ userId }) => {
       setStatistics(response?.statistics || null)
       setLogs(response?.logs || [])
     } catch (err) {
-      console.error('복약 로그 조회 실패:', err)
+      logger.error('복약 로그 조회 실패:', err)
       setError('복약 로그를 불러오지 못했습니다.')
       setLogs([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, filters])
+
+  useEffect(() => {
+    loadLogs()
+  }, [loadLogs])
+
+  useEffect(() => {
+    if (logs.length > 0) {
+      initializeExpandedState(logs)
+    }
+  }, [logs])
 
   const getStatusColor = (status) => {
     switch (status) {

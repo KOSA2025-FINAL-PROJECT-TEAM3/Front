@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
-import { useFamilyMemberDetail } from '@features/family/hooks/useFamilyMemberDetail'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
 import { QuickActions } from '@shared/components/ui/QuickActions'
 import { FAB } from '@shared/components/ui/FAB'
-import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/data/mockUiConstants'
+import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './CaregiverDashboard.module.scss'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import logger from '@core/utils/logger'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드
@@ -64,7 +64,7 @@ export function CaregiverDashboard() {
       window.URL.revokeObjectURL(url)
       toast.success('PDF 다운로드를 시작합니다.')
     } catch (error) {
-      console.error('PDF 다운로드 실패', error)
+      logger.error('PDF 다운로드 실패', error)
       toast.error('PDF 다운로드에 실패했습니다.')
     } finally {
       setExporting(false)
@@ -147,7 +147,7 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
         const meds = await familyApiClient.getMemberMedications(member.userId)
         setMedications(meds || [])
       } catch (error) {
-        console.error('Failed to load medications:', error)
+        logger.error('Failed to load medications:', error)
         setMedications([])
       }
     }
@@ -201,9 +201,8 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
-    }));
-  };
-
+    }))
+  }
   // 오늘 복약 일정 조회
   const loadTodayLogs = async () => {
     if (isExpanded) {
@@ -222,7 +221,7 @@ const SeniorMedicationSnapshot = ({ member, onDetail }) => {
       initializeExpandedState(logs)
       setIsExpanded(true)
     } catch (error) {
-      console.error('Failed to load today logs:', error)
+      logger.error('Failed to load today logs:', error)
       setTodayLogs([])
       setIsExpanded(true)
     } finally {

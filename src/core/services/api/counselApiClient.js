@@ -10,8 +10,7 @@ class CounselApiClient extends ApiClient {
 
   submit(message) {
     const payload = { message }
-    const mockResponse = () => ({ success: true, ticketId: `csl-${Date.now()}` })
-    return this.post('/submit', payload, undefined, { mockResponse })
+    return this.post('/submit', payload)
   }
 }
 

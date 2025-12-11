@@ -78,42 +78,58 @@
 }
 
 .inviteList li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #fff;
+  display: flex; /* Changed from grid to flex */
+  justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
 }
 
 .inviteMeta {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  gap: 8px;
+  display: flex;
+  flex-direction: column; /* Stack info vertically */
+  gap: 4px;
   font-size: 13px;
-  align-items: center;
-  grid-column: 1 / -1;
+  flex: 1; /* Take up remaining space */
 }
 
-.email {
-  font-weight: 600;
+/* Optional: Group Name & Role on one line if desired, but simple stack is safe */
+.name {
+  font-weight: 700;
+  font-size: 14px;
   color: #111827;
 }
 
+.email {
+  color: #4b5563;
+  font-size: 13px;
+}
+
 .role {
+  display: inline-block;
   color: #2563eb;
   font-weight: 600;
+  font-size: 12px;
+  margin-top: 2px;
 }
 
 .expiry {
-  color: #6b7280;
-  font-size: 12px;
+  color: #9ca3af;
+  font-size: 11px;
 }
 
 .status {
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 500;
   color: #f97316;
 }
 
@@ -123,21 +139,31 @@
 
 .inviteList button {
   border: 1px solid #d1d5db;
-  background: #f3f4f6;
-  padding: 8px 12px;
-  border-radius: 10px;
+  background: #fff;
+  color: #374151;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
-  height: fit-content;
-}
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s;
 
-.inviteList button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  &:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
 }
 
 .inviteActions {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .shortCodeSection {

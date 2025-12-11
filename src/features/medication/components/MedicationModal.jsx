@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 import { useState, useEffect } from 'react';
 import { searchApiClient } from '@core/services/api/searchApiClient';
 import { toast } from '@shared/components/toast/toastStore';
@@ -43,7 +44,7 @@ export const MedicationModal = ({ intakeTimes, onAdd, onClose, initialMedication
                 toast.info('검색 결과가 없습니다');
             }
         } catch (error) {
-            console.error('약 검색 실패:', error);
+            logger.error('약 검색 실패:', error);
             toast.error('약 검색에 실패했습니다');
             setSearchResults([]);
         } finally {
@@ -67,7 +68,7 @@ export const MedicationModal = ({ intakeTimes, onAdd, onClose, initialMedication
                 toast.info('검색 결과가 없습니다');
             }
         } catch (error) {
-            console.error('AI 검색 실패:', error);
+            logger.error('AI 검색 실패:', error);
             toast.error('AI 검색에 실패했습니다');
             setSearchResults([]);
         } finally {

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useVoiceActionStore } from '../../../features/voice/stores/voiceActionStore'; // [Voice] Zustand 스토어
+import { toast } from '@shared/components/toast/toastStore';
 import { Box, Typography, CircularProgress, Alert, Container, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { medicationApiClient } from '../../../core/services/api/medicationApiClient';
@@ -6,8 +8,11 @@ import { medicationLogApiClient } from '../../../core/services/api/medicationLog
 import MedicationCard from '../../../components/medication/MedicationCard';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import logger from '@core/utils/logger';
 
 const TodayMedications = () => {
+    const pendingAction = useVoiceActionStore((state) => state.pendingAction); // [Voice] Subscribe
+    const { consumeAction } = useVoiceActionStore(); // [Voice]
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [logs, setLogs] = useState([]);
@@ -31,7 +36,7 @@ const TodayMedications = () => {
             // 초기 아코디언 상태 설정
             initializeExpandedState(fetchedLogs);
         } catch (err) {
-            console.error('Failed to fetch today logs:', err);
+            logger.error('Failed to fetch today logs:', err);
             setError('오늘의 복용 기록을 불러오는데 실패했습니다.');
         } finally {
             setLoading(false);
@@ -84,12 +89,63 @@ const TodayMedications = () => {
         setExpanded(prev => ({ ...prev, [panel]: isExpanded }));
     };
 
+    // [Voice] 음성 명령 처리 (자동 복용 체크) - Zustand 버전
+    useEffect(() => {
+        if (!loading && logs.length > 0 && pendingAction?.code === 'AUTO_COMPLETE') {
+            const action = consumeAction('AUTO_COMPLETE');
+
+            if (action) {
+                const { params } = action;
+                const timeSlot = params?.timeSlot || 'NOW'; // MORNING, LUNCH, DINNER, NOW
+                const targetMedName = params?.medicationName; // [New] 특정 약 이름
+
+                const now = new Date();
+                const currentHour = now.getHours();
+
+                const targetLogs = logs.filter(log => {
+                    if (log.completed) return false; // 이미 먹은 건 패스
+
+                    if (targetMedName) {
+                        const logName = (log.medicationName || '').replace(/\s+/g, '');
+                        const queryName = targetMedName.replace(/\s+/g, '');
+                        if (!logName.includes(queryName)) {
+                            return false;
+                        }
+                    }
+
+                    const scheduleHour = log.scheduledTime ? new Date(log.scheduledTime).getHours() : 0;
+
+                    if (timeSlot === 'MORNING') return scheduleHour >= 5 && scheduleHour < 11;
+                    if (timeSlot === 'LUNCH') return scheduleHour >= 11 && scheduleHour < 15;
+                    if (timeSlot === 'DINNER') return scheduleHour >= 17 && scheduleHour < 22;
+                    if (timeSlot === 'NOW') {
+                        return Math.abs(scheduleHour - currentHour) <= 2;
+                    }
+                    return false;
+                });
+
+                if (targetLogs.length > 0) {
+                    targetLogs.forEach(log => {
+                        const schedule = { id: log.medicationScheduleId, isTakenToday: false };
+                        handleScheduleClick(schedule);
+                    });
+
+                    const countMsg = targetMedName ? `'${targetMedName}'` : `${targetLogs.length}건`;
+                    toast.success(`${timeSlot === 'NOW' ? '현재' : timeSlot} 시간대 ${countMsg}을(를) 복용 처리했습니다.`);
+                } else {
+                    const failMsg = targetMedName ? `'${targetMedName}'` : '해당 시간대에 복용할 약';
+                    toast.info(`${failMsg}이(가) 없거나 이미 드셨습니다.`);
+                }
+            }
+        }
+    }, [loading, logs, consumeAction, pendingAction]);
+
     const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view
-        console.log('Clicked medication:', medication);
+        logger.debug('Clicked medication:');
     };
 
-    const handleScheduleClick = async (schedule, medication) => {
+    const handleScheduleClick = async (schedule) => {
         if (schedule.isTakenToday) {
             // Already taken
             return;
@@ -110,7 +166,7 @@ const TodayMedications = () => {
             await medicationLogApiClient.completeMedication(schedule.id);
             // Success - keep optimistic state
         } catch (err) {
-            console.error('Failed to complete medication:', err);
+            logger.error('Failed to complete medication:', err);
             // Revert state
             setLogs(previousLogs);
             alert('복용 체크에 실패했습니다. 다시 시도해주세요.');

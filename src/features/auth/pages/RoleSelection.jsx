@@ -1,4 +1,6 @@
-﻿/**
+import logger from '@core/utils/logger'
+
+/**
  * RoleSelection Page
  * - 역할 선택 페이지(프로토타입)
  * - 어르신/보호자 선택 후 대시보드로 이동
@@ -34,7 +36,7 @@ export const RoleSelection = () => {
         navigate(ROUTE_PATHS.caregiverDashboard)
       }
     } catch (err) {
-      console.error('역할 선택 실패:', err)
+      logger.error('역할 선택 실패:', err)
     }
   }
 

@@ -13,12 +13,22 @@ import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
 import styles from './Login.module.scss'
 
+import { useInviteStore } from '@features/family/stores/inviteStore'
+
 const roleDestinationMap = {
   [USER_ROLES.SENIOR]: ROUTE_PATHS.seniorDashboard,
   [USER_ROLES.CAREGIVER]: ROUTE_PATHS.caregiverDashboard,
 }
 
 const navigateAfterAuthentication = (navigate, redirectPath) => {
+  // 1. Check for valid invite session first
+  const { isSessionValid } = useInviteStore.getState()
+  if (isSessionValid()) {
+    navigate(ROUTE_PATHS.inviteCodeEntry, { replace: true })
+    return
+  }
+
+  // 2. Check for explicit redirect path
   if (redirectPath) {
     navigate(redirectPath, { replace: true })
     return
@@ -44,8 +54,6 @@ export const Login = () => {
   const redirectPath = searchParams.get('redirect')
     ? decodeURIComponent(searchParams.get('redirect'))
     : null // null로 원복
-
-  console.log('[Login] Initial render - redirectPath:', redirectPath)
 
   const { login, loading, error, clearError } = useAuth((state) => ({
     login: state.login,

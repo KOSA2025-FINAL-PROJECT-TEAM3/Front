@@ -105,7 +105,7 @@ export const FamilyMemberDetailPage = () => {
                   <DietLogsTab userId={parseInt(id)} />
                 )}
                 {activeTab === 'detail' && (
-                  <MedicationDetailTab userId={parseInt(id)} medications={medications} />
+                  <MedicationDetailTab userId={member.userId} medications={medications} />
                 )}
               </div>
             </div>

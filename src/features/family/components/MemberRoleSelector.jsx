@@ -1,4 +1,4 @@
-import { MEMBER_ROLE_OPTIONS } from '@/data/mockUiConstants'
+import { MEMBER_ROLE_OPTIONS } from '@/constants/uiConstants'
 import styles from './MemberRoleCard.module.scss'
 
 export const MemberRoleSelector = ({ value, onChange, disabled }) => {
