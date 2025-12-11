@@ -1,26 +1,139 @@
-import logger from "@core/utils/logger"
 /**
  * Senior Dashboard Page
  * - 어르신용 개인 복용 일정 대시보드 (실제 API 기반)
+ * - MUI 스타일 적용 (React Native UI 구조)
  */
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
+import { Box, Typography, Stack } from '@mui/material'
 import { MainLayout } from '@shared/components/layout/MainLayout'
+import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
-import { QuickActions } from '@shared/components/ui/QuickActions'
+import { QuickActionGrid } from '../components/QuickActionGrid'
 import { FAB } from '@shared/components/ui/FAB'
+import { HeroMedicationCard } from '../components/HeroMedicationCard'
+import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
+import { TodayMedicationCheckbox } from '../components/TodayMedicationCheckbox'
+import { LargeActionButtons } from '../components/LargeActionButtons'
 import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
-import styles from './SeniorDashboard.module.scss'
+import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
+import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { format } from 'date-fns'
+import logger from '@core/utils/logger'
 
 export const SeniorDashboard = () => {
   const { user } = useAuth((state) => ({ user: state.user }))
+  const { medications, fetchMedications } = useMedicationStore()
   const [exporting, setExporting] = useState(false)
+  const [medicationLogs, setMedicationLogs] = useState([])
+  const [loading, setLoading] = useState(true)
 
   // 오늘 날짜
   const today = useMemo(() => new Date(), [])
+
+  // 복약 로그 조회
+  const loadMedicationLogs = useCallback(async () => {
+    try {
+      setLoading(true)
+      const todayStr = today.toLocaleDateString('en-CA') // YYYY-MM-DD
+      const response = await medicationLogApiClient.getByDate(todayStr)
+      setMedicationLogs(response || [])
+    } catch (error) {
+      logger.error('Failed to load medication logs:', error)
+      setMedicationLogs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [today])
+
+  useEffect(() => {
+    fetchMedications()
+    loadMedicationLogs()
+  }, [fetchMedications, loadMedicationLogs])
+
+  // 현재 시간대의 다음 복약 정보 (Hero Card용)
+  const nextMedication = useMemo(() => {
+    const now = new Date()
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+
+    const upcoming = medicationLogs
+      .filter(log => !log.completed)
+      .map(log => {
+        const medication = medications.find(m => m.id === log.medicationId)
+        const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
+        
+        return {
+          log,
+          medication,
+          scheduleTime,
+          scheduledDate: log.scheduledTime ? new Date(log.scheduledTime) : null
+        }
+      })
+      .filter(item => item.scheduleTime >= currentTime)
+      .sort((a, b) => a.scheduleTime.localeCompare(b.scheduleTime))
+      [0]
+
+    if (upcoming) {
+      return {
+        time: upcoming.scheduleTime,
+        medications: [{
+          name: upcoming.medication?.name || upcoming.log.medicationName || '알 수 없는 약',
+          dosage: upcoming.medication?.dosage || '',
+        }],
+        scheduleId: upcoming.log.medicationScheduleId,
+      }
+    }
+
+    return null
+  }, [medicationLogs, medications])
+
+  // 오늘 일정을 시간대별로 변환
+  const todaySchedules = useMemo(() => {
+    const getTimeSection = (time) => {
+      const hour = parseInt(time.split(':')[0])
+      if (hour >= 5 && hour < 11) return 'morning'
+      if (hour >= 11 && hour < 17) return 'lunch'
+      if (hour >= 17 && hour < 21) return 'dinner'
+      return 'night'
+    }
+
+    return medicationLogs.map((log, index) => {
+      const medication = medications.find(m => m.id === log.medicationId)
+      const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
+      
+      return {
+        id: log.id || index,
+        time: scheduleTime,
+        medicationName: medication?.name || log.medicationName || '알 수 없는 약',
+        dosage: medication?.dosage || '',
+        status: log.completed ? 'completed' : 'pending',
+        section: getTimeSection(scheduleTime),
+      }
+    })
+  }, [medicationLogs, medications])
+
+  // 주간 통계 데이터 (실제 API 연동 필요 - 현재는 mock)
+  const weeklyStats = useMemo(() => {
+    // TODO: 실제 API에서 주간 데이터 가져오기
+    // 임시로 최근 7일 데이터 생성
+    return [
+      { status: 'completed' },
+      { status: 'completed' },
+      { status: 'completed' },
+      { status: 'pending' },
+      { status: 'completed' },
+      { status: 'missed' },
+      { status: 'pending' },
+    ]
+  }, [])
+
+  const adherenceRate = useMemo(() => {
+    const completed = weeklyStats.filter(d => d.status === 'completed').length
+    return Math.round((completed / weeklyStats.length) * 100)
+  }, [weeklyStats])
 
   const handleExportPdf = async () => {
     const userId = user?.id || user?.userId
@@ -47,6 +160,22 @@ export const SeniorDashboard = () => {
     }
   }
 
+  // 복약 완료 처리
+  const handleConfirmMedication = async () => {
+    if (!nextMedication?.scheduleId) return
+
+    try {
+      await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
+      toast.success('복약이 완료되었습니다.')
+      
+      // 로그 다시 불러오기
+      await loadMedicationLogs()
+    } catch (error) {
+      logger.error('Failed to complete medication:', error)
+      toast.error('복약 완료 처리에 실패했습니다.')
+    }
+  }
+
   const fabActions = SENIOR_FAB_ACTIONS.map((action) => {
     if (action.id === 'pdf_export') {
       return {
@@ -67,18 +196,84 @@ export const SeniorDashboard = () => {
 
   return (
     <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
-      <div className={styles.dashboardContent}>
-        <div className={styles.titleSection}>
-          <h1 className={styles.pageTitle}>오늘의 복용</h1>
-          <p className={styles.dateInfo}>{todayDate}</p>
-        </div>
+      <ResponsiveContainer maxWidth="lg">
+        <Stack spacing={4}>
+          {/* 헤더 */}
+          <Box>
+            <Typography 
+              variant="h4" 
+              component="h1"
+              fontWeight={700}
+              gutterBottom
+              sx={{
+                fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' }
+              }}
+            >
+              오늘의 복용
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {todayDate}
+            </Typography>
+          </Box>
 
-        <QuickActions actions={SENIOR_QUICK_ACTIONS} />
+          {/* Hero 복약 알림 카드 - 항상 표시 */}
+          {loading ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography>로딩 중...</Typography>
+            </Box>
+          ) : nextMedication ? (
+            <HeroMedicationCard
+              title="복약 시간입니다 💊"
+              subtitle="정확한 약품 정보를 확인하세요."
+              time={nextMedication.time}
+              medications={nextMedication.medications}
+              onConfirm={handleConfirmMedication}
+            />
+          ) : (
+            <HeroMedicationCard
+              title="오늘 복약 일정이 없습니다"
+              subtitle="약 관리 페이지에서 약을 등록해주세요."
+              medications={[]}
+            />
+          )}
 
-        <MyMedicationSchedule title="오늘의 복용" showEmptyState={true} />
+          {/* 오늘 복약 체크박스 (큼직하게) */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+              gap: 3,
+            }}
+          >
+            <TodayMedicationCheckbox schedules={todaySchedules} />
+            
+            {/* 주간 복약 현황 */}
+            <WeeklyStatsWidget
+              title="지난 7일 기록"
+              weeklyData={weeklyStats}
+              adherenceRate={adherenceRate}
+            />
+          </Box>
+
+          {/* 큰 버튼 2개 (약품 검색, 식단 로그) */}
+          <LargeActionButtons />
+
+          {/* 약 리스트 */}
+          <Box>
+            <MyMedicationSchedule title="전체 일정" showEmptyState={true} />
+          </Box>
+
+          {/* 빠른 작업 (맨 아래) - 나머지 작업들 */}
+          <Box>
+            <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+              기타 작업
+            </Typography>
+            <QuickActionGrid actions={SENIOR_QUICK_ACTIONS} />
+          </Box>
+        </Stack>
 
         <FAB actions={fabActions} />
-      </div>
+      </ResponsiveContainer>
     </MainLayout>
   )
 }

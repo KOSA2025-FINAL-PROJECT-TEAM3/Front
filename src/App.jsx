@@ -10,6 +10,9 @@
  */
 
 import React, { Suspense, useEffect, lazy } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import theme from '@/styles/theme'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
@@ -135,7 +138,9 @@ function App() {
   const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
 
   return (
-    <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <ErrorBoundary fallback={<ErrorFallback />}>
         <FamilyProvider>
           <NavigationRegistrar />
@@ -356,6 +361,7 @@ function App() {
         </FamilyProvider>
       </ErrorBoundary>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

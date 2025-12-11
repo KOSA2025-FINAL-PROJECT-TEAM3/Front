@@ -11,7 +11,6 @@ import { ROUTE_PATHS } from '@core/config/routes.config'
 import { toast } from '@shared/components/toast/toastStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import logger from '@core/utils/logger'
-import logger from '@core/utils/logger'
 
 /**
  * OCR 스캔 및 약물 등록 커스텀 훅
