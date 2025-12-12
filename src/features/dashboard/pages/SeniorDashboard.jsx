@@ -21,7 +21,7 @@ import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
-import { format } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addDays, isAfter } from 'date-fns'
 import logger from '@core/utils/logger'
 
 export const SeniorDashboard = () => {
@@ -106,6 +106,7 @@ export const SeniorDashboard = () => {
       
       return {
         id: log.id || index,
+        log, // Add this line
         time: scheduleTime,
         medicationName: medication?.name || log.medicationName || '알 수 없는 약',
         dosage: medication?.dosage || '',
@@ -115,20 +116,52 @@ export const SeniorDashboard = () => {
     })
   }, [medicationLogs, medications])
 
-  // 주간 통계 데이터 (실제 API 연동 필요 - 현재는 mock)
-  const weeklyStats = useMemo(() => {
-    // TODO: 실제 API에서 주간 데이터 가져오기
-    // 임시로 최근 7일 데이터 생성
-    return [
-      { status: 'completed' },
-      { status: 'completed' },
-      { status: 'completed' },
-      { status: 'pending' },
-      { status: 'completed' },
-      { status: 'missed' },
-      { status: 'pending' },
-    ]
-  }, [])
+  const [weeklyStats, setWeeklyStats] = useState(Array(7).fill({ status: 'pending' }))
+
+  // 주간 통계 조회
+  const loadWeeklyStats = useCallback(async () => {
+    try {
+      // 이번 주 월요일 ~ 일요일 계산
+      const start = startOfWeek(today, { weekStartsOn: 1 })
+      const end = endOfWeek(today, { weekStartsOn: 1 })
+      
+      const startDateStr = format(start, 'yyyy-MM-dd')
+      const endDateStr = format(end, 'yyyy-MM-dd')
+
+      const response = await medicationLogApiClient.getDailyAdherence(startDateStr, endDateStr)
+      
+      // API 응답을 7일 배열(월~일)로 변환
+      const stats = Array.from({ length: 7 }).map((_, index) => {
+        const dayDate = addDays(start, index)
+        const dateStr = format(dayDate, 'yyyy-MM-dd')
+        
+        // 미래 날짜는 'pending'
+        if (isAfter(dayDate, new Date())) {
+          return { status: 'pending' }
+        }
+
+        const record = response?.find(r => r.date === dateStr)
+        
+        if (record) {
+          if (record.total > 0 && record.completed >= record.total) {
+            return { status: 'completed' }
+          } else if (record.total > 0) {
+            return { status: 'missed' }
+          }
+        }
+        
+        return { status: 'pending' }
+      })
+
+      setWeeklyStats(stats)
+    } catch (error) {
+      logger.error('Failed to load weekly stats:', error)
+    }
+  }, [today])
+
+  useEffect(() => {
+    loadWeeklyStats()
+  }, [loadWeeklyStats])
 
   const adherenceRate = useMemo(() => {
     const completed = weeklyStats.filter(d => d.status === 'completed').length
@@ -176,6 +209,31 @@ export const SeniorDashboard = () => {
     }
   }
 
+  // 시간대별 일괄 복약 처리
+  const handleToggleTimeSection = async (section, items) => {
+    // 이미 완료된 항목은 제외, 스케줄 ID가 있는 항목만 처리
+    const pendingItems = items.filter(item => item.status === 'pending' && item.log?.medicationScheduleId)
+    
+    if (pendingItems.length === 0) return
+
+    if (!window.confirm(`${pendingItems.length}개의 약을 복용 완료 처리하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      await Promise.all(
+        pendingItems.map(item => 
+          medicationLogApiClient.completeMedication(item.log.medicationScheduleId)
+        )
+      )
+      toast.success('복용 처리가 완료되었습니다.')
+      await loadMedicationLogs()
+    } catch (error) {
+      logger.error('Failed to complete medications:', error)
+      toast.error('일괄 처리 중 오류가 발생했습니다.')
+    }
+  }
+
   const fabActions = SENIOR_FAB_ACTIONS.map((action) => {
     if (action.id === 'pdf_export') {
       return {
@@ -197,7 +255,7 @@ export const SeniorDashboard = () => {
   return (
     <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
       <ResponsiveContainer maxWidth="lg">
-        <Stack spacing={4}>
+        <Stack spacing={4} sx={{ pb: 12 }}>
           {/* 헤더 */}
           <Box>
             <Typography 
@@ -245,7 +303,10 @@ export const SeniorDashboard = () => {
               gap: 3,
             }}
           >
-            <TodayMedicationCheckbox schedules={todaySchedules} />
+            <TodayMedicationCheckbox 
+              schedules={todaySchedules} 
+              onToggle={handleToggleTimeSection}
+            />
             
             {/* 주간 복약 현황 */}
             <WeeklyStatsWidget

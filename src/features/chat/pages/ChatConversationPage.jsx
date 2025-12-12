@@ -47,8 +47,8 @@ export const ChatConversationPage = () => {
       if (counselorMessage) {
         setCounselor({
           id: counselorMessage.senderId,
-          name: '김의사', // TODO: 실제 API에서 가져오기
-          profileImage: 'https://via.placeholder.com/100',
+          name: counselorMessage.senderName || '상담사',
+          profileImage: counselorMessage.senderProfileImage,
           type: 'doctor',
         })
       }
@@ -162,10 +162,7 @@ export const ChatConversationPage = () => {
         {/* 입력창 */}
         <ChatInput onSend={handleSendMessage} disabled={isSending} />
 
-        {/* WebSocket 미연동 알림 */}
-        <div className={styles.notice}>
-          <p>⚠️ WebSocket 연동 전: 실시간 메시지는 Mock 데이터로 표시됩니다.</p>
-        </div>
+
       </div>
     </MainLayout>
   )

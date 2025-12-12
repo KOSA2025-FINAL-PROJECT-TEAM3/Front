@@ -33,15 +33,8 @@ export const DoctorChatListPage = () => {
   }
 
   const handleCreateNewChat = async () => {
-    try {
-      // TODO: 의사/AI 챗봇 선택 모달 구현 필요
-      // 지금은 임시로 새 채팅방 생성
-      const newRoom = await chatApiClient.createRoom('doctor_ai_001')
-      setRooms([newRoom, ...rooms])
-    } catch (err) {
-      logger.error('채팅방 생성 실패:', err)
-      alert('채팅방 생성에 실패했습니다.')
-    }
+    // TODO: 의사/AI 챗봇 선택 모달 구현 후 연동
+    alert('준비 중인 기능입니다.')
   }
 
   return (
@@ -84,12 +77,6 @@ export const DoctorChatListPage = () => {
             ))}
           </div>
         )}
-
-        <div className={styles.notice}>
-          <p>💡 <strong>Stage 4 Preview</strong></p>
-          <p>실시간 채팅은 WebSocket 연동 후 활성화됩니다.</p>
-          <p>의사 상담 및 AI 챗봇 기능은 추후 구현 예정입니다.</p>
-        </div>
       </div>
     </MainLayout>
   )

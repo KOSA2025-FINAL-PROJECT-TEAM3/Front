@@ -36,7 +36,7 @@ export const VoiceAssistant = () => {
       )}
 
       {/* [DEBUG] 음성 명령 시뮬레이션 입력창 */}
-      <div style={{ position: 'fixed', bottom: '90px', right: '24px', zIndex: 9999, background: 'white', padding: '5px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+      <div style={{ position: 'fixed', bottom: '150px', left: '20px', zIndex: 9999, background: 'white', padding: '5px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
         <input 
           type="text" 
           value={debugText}
