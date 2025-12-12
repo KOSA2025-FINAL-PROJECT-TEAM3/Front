@@ -77,14 +77,21 @@ export const MyMedicationSchedule = ({
   // 로그 기반으로 오늘의 복용 스케줄 생성
   const todaySchedules = useMemo(() => {
     return medicationLogs.map((log, index) => {
+      const scheduleId =
+        log.medicationScheduleId ??
+        log.scheduleId ??
+        log.medicationSchedule?.id ??
+        log.schedule?.id ??
+        null
       const medication = medications.find((m) => m.id === log.medicationId)
       const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
       const isTaken = log.completed
 
       return {
-        id: `${log.medicationId}-${log.medicationScheduleId}-${log.id || index}`,
+        id: `${log.medicationId}-${scheduleId ?? `nosched-${log.id ?? index}`}`,
         medicationId: log.medicationId,
-        scheduleId: log.medicationScheduleId,
+        scheduleId,
+        isCompletable: Boolean(scheduleId),
         time: scheduleTime,
         timeLabel: getTimeLabel(scheduleTime),
         medications: [
@@ -100,6 +107,56 @@ export const MyMedicationSchedule = ({
       }
     }).sort((a, b) => a.time.localeCompare(b.time))
   }, [medicationLogs, medications, today.currentTime])
+
+  const handleTakeMedication = useCallback(async (schedule) => {
+    const scheduleIdRaw = schedule?.scheduleId ?? schedule?.medicationScheduleId
+    const medicationIdRaw = schedule?.medicationId
+    const scheduleId = scheduleIdRaw != null ? parseInt(scheduleIdRaw, 10) : null
+    const medicationId = medicationIdRaw != null ? parseInt(medicationIdRaw, 10) : null
+
+    if (!scheduleId || Number.isNaN(scheduleId) || !medicationId || Number.isNaN(medicationId)) {
+      logger.error('Invalid schedule:', schedule)
+      toast.error('유효하지 않은 스케줄입니다.')
+      return
+    }
+
+    try {
+      const completedTime = new Date().toISOString()
+      setMedicationLogs((prev) => {
+        let found = false
+        const next = prev.map((log) => {
+          const logScheduleId = log.medicationScheduleId ?? log.scheduleId
+          if (logScheduleId != null && parseInt(logScheduleId, 10) === scheduleId) {
+            found = true
+            return { ...log, completed: true, completedTime }
+          }
+          return log
+        })
+
+        if (!found) {
+          next.push({
+            medicationId,
+            medicationScheduleId: scheduleId,
+            scheduledTime: schedule?.scheduledTime ?? completedTime,
+            completed: true,
+            completedTime,
+          })
+        }
+
+        return next
+      })
+
+      await medicationLogApiClient.completeMedication(scheduleId)
+
+      await loadMedicationLogs()
+
+      logger.debug('복용 완료:', scheduleId)
+    } catch (error) {
+      logger.error('Failed to complete medication:', error)
+      toast.error('복용 기록 저장에 실패했습니다.')
+      await loadMedicationLogs()
+    }
+  }, [loadMedicationLogs])
 
   // [Voice] 음성 명령 처리 (자동 복용 체크)
   useEffect(() => {
@@ -135,7 +192,7 @@ export const MyMedicationSchedule = ({
         })
 
         if (targetSchedules.length > 0) {
-          targetSchedules.forEach(s => handleTakeMedication(s.id))
+          targetSchedules.forEach((s) => handleTakeMedication(s))
           const countMsg = targetMedName ? `'${targetMedName}'` : `${targetSchedules.length}건`
           toast.success(`${timeSlot === 'NOW' ? '현재' : timeSlot} 시간대 ${countMsg}을(를) 복용 처리했습니다.`)
         } else {
@@ -144,41 +201,7 @@ export const MyMedicationSchedule = ({
         }
       }
     }
-  }, [loading, todaySchedules, consumeAction, pendingAction])
-
-  const handleTakeMedication = async (scheduleId) => {
-    const [medicationId, schedId] = scheduleId.split('-')
-
-    if (!schedId || schedId === 'undefined' || schedId === 'null' || isNaN(parseInt(schedId))) {
-      logger.error('Invalid schedule ID:', scheduleId)
-      toast.error('유효하지 않은 스케줄입니다.')
-      return
-    }
-
-    try {
-      // Optimistic update: 즉시 UI 업데이트
-      const optimisticLog = {
-        medicationId: parseInt(medicationId),
-        medicationScheduleId: parseInt(schedId),
-        completed: true,
-        completedTime: new Date().toISOString(),
-      }
-      setMedicationLogs((prev) => [...prev, optimisticLog])
-
-      // PATCH /medications/logs/{scheduleId}/complete 호출
-      await medicationLogApiClient.completeMedication(parseInt(schedId))
-
-      // 복용 기록 목록 다시 로드 (서버 데이터로 동기화)
-      await loadMedicationLogs()
-
-      logger.debug('복용 완료:', scheduleId)
-    } catch (error) {
-      logger.error('Failed to complete medication:', error)
-      toast.error('복용 기록 저장에 실패했습니다.')
-      // 에러 발생 시 다시 로드하여 원래 상태로 복구
-      await loadMedicationLogs()
-    }
-  }
+  }, [loading, todaySchedules, consumeAction, pendingAction, handleTakeMedication])
 
   const handleCardClick = (medicationId) => {
     // 약 관리 페이지로 이동하면서 해당 약의 상세 모달 열기

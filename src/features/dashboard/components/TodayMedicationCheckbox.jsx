@@ -5,12 +5,15 @@
  */
 
 import { Box, Typography, Stack, Checkbox } from '@mui/material'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import PropTypes from 'prop-types'
+	import { RoundedCard } from '@shared/components/ui/RoundedCard'
+	import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+	import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
+	import { parseServerLocalDateTime } from '@core/utils/formatting'
+	import PropTypes from 'prop-types'
 
 export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
+  const now = new Date()
+
   // 시간대별 그룹화
   const groupedByTime = {
     morning: schedules.filter(s => s.section === 'morning'),
@@ -38,6 +41,15 @@ export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
 
           const allCompleted = items.every(item => item.status === 'completed')
           const someCompleted = items.some(item => item.status === 'completed')
+	          const validTimeItems = items.filter((item) => item.log?.scheduledTime)
+	          const isFutureSection =
+	            validTimeItems.length > 0 &&
+	            validTimeItems.every((item) => {
+	              const scheduledDate = parseServerLocalDateTime(item.log.scheduledTime)
+	              if (!scheduledDate) return false
+	              return scheduledDate.getTime() - now.getTime() > 60 * 60 * 1000
+	            })
+          const isDisabled = isFutureSection && !allCompleted
 
           return (
             <Box
@@ -50,18 +62,24 @@ export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
                 border: '2px solid',
                 borderColor: allCompleted ? 'success.main' : 'grey.300',
                 bgcolor: allCompleted ? 'success.light' : 'background.paper',
-                cursor: 'pointer',
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                opacity: isDisabled ? 0.6 : 1,
                 transition: 'all 0.2s',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  bgcolor: 'grey.50',
-                },
+                ...(isDisabled
+                  ? {}
+                  : {
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'grey.50',
+                      },
+                    }),
               }}
-              onClick={() => onToggle && onToggle(timeKey, items)}
+              onClick={() => !isDisabled && onToggle && onToggle(timeKey, items)}
             >
               <Checkbox
                 checked={allCompleted}
                 indeterminate={someCompleted && !allCompleted}
+                disabled={isDisabled}
                 icon={<RadioButtonUncheckedIcon sx={{ fontSize: 32 }} />}
                 checkedIcon={<CheckCircleIcon sx={{ fontSize: 32 }} />}
                 sx={{

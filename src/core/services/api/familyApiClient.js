@@ -16,10 +16,8 @@ class FamilyApiClient extends ApiClient {
         logger.debug('[familyApiClient] getSummary - raw groups:', groups)
 
         const normalizeMember = (member) => {
-          const userId =
-            member?.user?.id ??
-            member?.userId ??
-            (typeof member?.id === 'number' ? member.id : null)
+          // Backend 응답에서 member.id는 FamilyMember ID, member.user.id가 실제 User ID임.
+          const userId = member?.user?.id ?? member?.userId ?? null
 
           return {
             id: member?.id?.toString() ?? member?.userId?.toString(),
@@ -76,7 +74,8 @@ class FamilyApiClient extends ApiClient {
         members: Array.isArray(group?.members)
           ? group.members.map((member) => ({
             id: member?.id?.toString() ?? member?.userId?.toString(),
-            userId: member?.user?.id ?? member?.userId ?? (typeof member?.id === 'number' ? member.id : null),
+            // Backend 응답에서 member.id는 FamilyMember ID, member.user.id가 실제 User ID임.
+            userId: member?.user?.id ?? member?.userId ?? null,
             name: member?.user?.name || member?.userName || '이름 없음',
             email: member?.user?.email || member?.userEmail || '',
             role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',

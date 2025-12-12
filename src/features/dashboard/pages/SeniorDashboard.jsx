@@ -22,7 +22,15 @@ import { toast } from '@shared/components/toast/toastStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { format, startOfWeek, endOfWeek, addDays, isAfter } from 'date-fns'
+import { parseServerLocalDateTime } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
+
+const getLogScheduleId = (log) =>
+  log?.medicationScheduleId ??
+  log?.scheduleId ??
+  log?.medicationSchedule?.id ??
+  log?.schedule?.id ??
+  null
 
 export const SeniorDashboard = () => {
   const { user } = useAuth((state) => ({ user: state.user }))
@@ -56,38 +64,37 @@ export const SeniorDashboard = () => {
 
   // 현재 시간대의 다음 복약 정보 (Hero Card용)
   const nextMedication = useMemo(() => {
-    const now = new Date()
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    const pendingItems = medicationLogs
+      .filter((log) => !log.completed && log.scheduledTime)
+      .map((log) => {
+        const medication = medications.find((m) => m.id === log.medicationId)
+        const scheduledDate = parseServerLocalDateTime(log.scheduledTime)
+        const scheduleTime = scheduledDate ? format(scheduledDate, 'HH:mm') : ''
 
-    const upcoming = medicationLogs
-      .filter(log => !log.completed)
-      .map(log => {
-        const medication = medications.find(m => m.id === log.medicationId)
-        const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
-        
         return {
           log,
           medication,
           scheduleTime,
-          scheduledDate: log.scheduledTime ? new Date(log.scheduledTime) : null
+          scheduledDate,
         }
       })
-      .filter(item => item.scheduleTime >= currentTime)
-      .sort((a, b) => a.scheduleTime.localeCompare(b.scheduleTime))
-      [0]
+      .filter((item) => item.scheduledDate)
+      .sort((a, b) => a.scheduledDate - b.scheduledDate)
 
-    if (upcoming) {
-      return {
-        time: upcoming.scheduleTime,
-        medications: [{
-          name: upcoming.medication?.name || upcoming.log.medicationName || '알 수 없는 약',
-          dosage: upcoming.medication?.dosage || '',
-        }],
-        scheduleId: upcoming.log.medicationScheduleId,
-      }
+    const next = pendingItems[0]
+
+    if (!next) return null
+
+    return {
+      time: next.scheduleTime,
+      medications: [
+        {
+          name: next.medication?.name || next.log.medicationName || '알 수 없는 약',
+          dosage: next.medication?.dosage || '',
+        },
+      ],
+      scheduleId: getLogScheduleId(next.log),
     }
-
-    return null
   }, [medicationLogs, medications])
 
   // 오늘 일정을 시간대별로 변환
@@ -102,8 +109,9 @@ export const SeniorDashboard = () => {
 
     return medicationLogs.map((log, index) => {
       const medication = medications.find(m => m.id === log.medicationId)
-      const scheduleTime = log.scheduledTime ? format(new Date(log.scheduledTime), 'HH:mm') : ''
-      
+      const scheduledDate = log.scheduledTime ? parseServerLocalDateTime(log.scheduledTime) : null
+      const scheduleTime = scheduledDate ? format(scheduledDate, 'HH:mm') : ''
+
       return {
         id: log.id || index,
         log, // Add this line
@@ -118,39 +126,50 @@ export const SeniorDashboard = () => {
 
   const [weeklyStats, setWeeklyStats] = useState(Array(7).fill({ status: 'pending' }))
 
-  // 주간 통계 조회
+  // 주간 통계 조회 (로그 기반)
   const loadWeeklyStats = useCallback(async () => {
     try {
       // 이번 주 월요일 ~ 일요일 계산
       const start = startOfWeek(today, { weekStartsOn: 1 })
       const end = endOfWeek(today, { weekStartsOn: 1 })
-      
+
       const startDateStr = format(start, 'yyyy-MM-dd')
       const endDateStr = format(end, 'yyyy-MM-dd')
 
-      const response = await medicationLogApiClient.getDailyAdherence(startDateStr, endDateStr)
-      
-      // API 응답을 7일 배열(월~일)로 변환
+      // 로그 기반으로 직접 조회
+      const logs = await medicationLogApiClient.getByDateRange(startDateStr, endDateStr) || []
+
+      // 로그를 날짜별로 그룹화하여 집계
       const stats = Array.from({ length: 7 }).map((_, index) => {
         const dayDate = addDays(start, index)
         const dateStr = format(dayDate, 'yyyy-MM-dd')
-        
+
         // 미래 날짜는 'pending'
         if (isAfter(dayDate, new Date())) {
           return { status: 'pending' }
         }
 
-        const record = response?.find(r => r.date === dateStr)
-        
-        if (record) {
-          if (record.total > 0 && record.completed >= record.total) {
-            return { status: 'completed' }
-          } else if (record.total > 0) {
-            return { status: 'missed' }
-          }
+        // 해당 날짜의 로그 필터링
+        const dayLogs = logs.filter(log => {
+          if (!log.scheduledTime) return false
+          const logDate = parseServerLocalDateTime(log.scheduledTime)
+          return logDate && format(logDate, 'yyyy-MM-dd') === dateStr
+        })
+
+        // 로그가 없으면 pending
+        if (dayLogs.length === 0) {
+          return { status: 'pending' }
         }
-        
-        return { status: 'pending' }
+
+        // 완료된 로그 수 계산
+        const completed = dayLogs.filter(log => log.completed).length
+        const total = dayLogs.length
+
+        if (completed >= total) {
+          return { status: 'completed' }
+        } else {
+          return { status: 'missed' }
+        }
       })
 
       setWeeklyStats(stats)
@@ -200,9 +219,10 @@ export const SeniorDashboard = () => {
     try {
       await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
       toast.success('복약이 완료되었습니다.')
-      
+
       // 로그 다시 불러오기
       await loadMedicationLogs()
+      await loadWeeklyStats()
     } catch (error) {
       logger.error('Failed to complete medication:', error)
       toast.error('복약 완료 처리에 실패했습니다.')
@@ -212,8 +232,8 @@ export const SeniorDashboard = () => {
   // 시간대별 일괄 복약 처리
   const handleToggleTimeSection = async (section, items) => {
     // 이미 완료된 항목은 제외, 스케줄 ID가 있는 항목만 처리
-    const pendingItems = items.filter(item => item.status === 'pending' && item.log?.medicationScheduleId)
-    
+    const pendingItems = items.filter((item) => item.status === 'pending' && getLogScheduleId(item.log))
+
     if (pendingItems.length === 0) return
 
     if (!window.confirm(`${pendingItems.length}개의 약을 복용 완료 처리하시겠습니까?`)) {
@@ -222,12 +242,14 @@ export const SeniorDashboard = () => {
 
     try {
       await Promise.all(
-        pendingItems.map(item => 
-          medicationLogApiClient.completeMedication(item.log.medicationScheduleId)
-        )
+        pendingItems.map((item) => {
+          const scheduleId = getLogScheduleId(item.log)
+          return medicationLogApiClient.completeMedication(scheduleId)
+        })
       )
       toast.success('복용 처리가 완료되었습니다.')
       await loadMedicationLogs()
+      await loadWeeklyStats()
     } catch (error) {
       logger.error('Failed to complete medications:', error)
       toast.error('일괄 처리 중 오류가 발생했습니다.')
@@ -258,8 +280,8 @@ export const SeniorDashboard = () => {
         <Stack spacing={4} sx={{ pb: 12 }}>
           {/* 헤더 */}
           <Box>
-            <Typography 
-              variant="h4" 
+            <Typography
+              variant="h4"
               component="h1"
               fontWeight={700}
               gutterBottom
@@ -303,11 +325,11 @@ export const SeniorDashboard = () => {
               gap: 3,
             }}
           >
-            <TodayMedicationCheckbox 
-              schedules={todaySchedules} 
+            <TodayMedicationCheckbox
+              schedules={todaySchedules}
               onToggle={handleToggleTimeSection}
             />
-            
+
             {/* 주간 복약 현황 */}
             <WeeklyStatsWidget
               title="지난 7일 기록"

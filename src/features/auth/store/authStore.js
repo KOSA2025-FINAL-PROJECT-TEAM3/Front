@@ -15,6 +15,7 @@ const initialState = {
   isAuthenticated: false,
   user: null,
   token: null,
+  refreshToken: null,
   userRole: null,
   customerRole: null,
   loading: false,
@@ -22,13 +23,19 @@ const initialState = {
   _hasHydrated: false,  // Hydration 완료 플래그
 }
 
-const persistAuthToStorage = ({ user, token, customerRole }) => {
+const persistAuthToStorage = ({ user, token, refreshToken, customerRole }) => {
   if (typeof window === 'undefined') return
 
   if (token) {
     window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
   } else {
     window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+  }
+
+  if (refreshToken) {
+    window.localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken)
+  } else {
+    window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
   }
 
   if (user) {
@@ -51,6 +58,7 @@ const normalizeAuthPayload = (payload = {}) => {
     user,
     token,
     accessToken,
+    refreshToken,
     role,
     userRole,
     customerRole,
@@ -59,6 +67,7 @@ const normalizeAuthPayload = (payload = {}) => {
 
   const resolvedUser = user ?? rest.userData ?? null
   const resolvedToken = token ?? accessToken ?? null
+  const resolvedRefreshToken = refreshToken ?? null
   const resolvedUserRole = userRole ?? resolvedUser?.userRole ?? null
   const resolvedCustomerRole =
     customerRole ?? resolvedUser?.customerRole ?? role ?? resolvedUser?.role ?? null
@@ -66,6 +75,7 @@ const normalizeAuthPayload = (payload = {}) => {
   return {
     user: resolvedUser,
     token: resolvedToken,
+    refreshToken: resolvedRefreshToken,
     userRole: resolvedUserRole,
     customerRole: resolvedCustomerRole,
   }
@@ -112,6 +122,7 @@ export const useAuthStore = create(
           ...state,
           user: normalized.user,
           token: normalized.token,
+          refreshToken: normalized.refreshToken,
           userRole: normalized.userRole,
           customerRole: normalized.customerRole,
           isAuthenticated: Boolean(normalized.user && normalized.token),
@@ -123,6 +134,7 @@ export const useAuthStore = create(
         // 1. 먼저 모든 Auth 관련 localStorage 삭제
         if (typeof window !== 'undefined') {
           window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+          window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
           window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
           window.localStorage.removeItem(STORAGE_KEYS.ROLE)
           window.localStorage.removeItem('amapill-auth-storage-v2')
@@ -189,6 +201,7 @@ export const useAuthStore = create(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
         userRole: state.userRole,
         customerRole: state.customerRole,
         // isAuthenticated 제거 - hydration 시 재계산
@@ -199,6 +212,9 @@ export const useAuthStore = create(
           // Self-healing: Store를 Source of Truth로 간주하고 Raw Key 동기화
           if (state.token) {
             window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, state.token)
+          }
+          if (state.refreshToken) {
+            window.localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, state.refreshToken)
           }
           if (state.user) {
             window.localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(state.user))

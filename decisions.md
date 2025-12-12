@@ -5,6 +5,18 @@
 - 모든 프론트엔드 코드에서 `console.*` 대신 `@core/utils/logger` 사용 (`logger.error`는 항상 출력, 나머지는 `VITE_DEBUG`/`VITE_ENABLE_API_LOGGING`에 따름).
 - 로깅 규칙을 `docs/shadow/conventions.md`, `docs/FRONTEND_WORKFLOW.md`에 반영 완료.
 
+## 2025-12-12: 가족 멤버 User ID 매핑 버그 수정
+
+- `GET /api/family/groups` 응답에서 `member.id`는 **FamilyMember ID**이고, 실제 사용자 ID는 `member.user.id`임.
+- 프론트의 `familyApiClient.getSummary()`/`createGroup()`에서 `userId`를 `member.id`로 대체하던 하위 호환 fallback을 제거하고, `member.user.id`(또는 `member.userId`)만 사용하도록 수정.
+- 효과: 보호자 대시보드에서 `/members/{familyMemberId}/medications`로 잘못 호출되어 `UnauthorizedException`(500) 발생하던 문제 해소.
+
+## 2025-12-12: WebSocket 기본 엔드포인트 자동 보정
+
+- `.env`의 `VITE_WS_BASE_URL`이 호스트만(`ws://localhost:8080`) 설정되면 STOMP 연결이 루트로 시도되어 실패함.
+- `environment.config.js`에서 WS_BASE_URL을 정규화하여, 경로가 없으면 자동으로 `/ws`를 붙이도록 변경.
+- 효과: 채팅 페이지 진입 시 `ws://.../ws`로 정상 연결, 백엔드 STOMP 엔드포인트(`/ws`, `/ws/`)와 일치.
+
 ## 2025-12-03: 증상 AI 검색 mock 제거 & 약 등록 폼 AI 버튼 제거
 
 - **증상 AI 검색** (`src/core/services/api/searchApiClient.js`)

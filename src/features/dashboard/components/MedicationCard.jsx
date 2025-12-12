@@ -36,14 +36,14 @@ export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
 
   const handleTakeMedication = (e) => {
     e.stopPropagation() // 카드 클릭 이벤트 전파 방지
-    if (onTakeMedication && schedule.status === 'pending') {
-      onTakeMedication(schedule.id)
+    if (onTakeMedication && schedule.status === 'pending' && schedule.isCompletable) {
+      onTakeMedication(schedule)
     }
   }
 
   const handleCheckboxClick = (e) => {
     e.stopPropagation() // 카드 클릭 이벤트 전파 방지
-    if (schedule.status === 'pending') {
+    if (schedule.status === 'pending' && schedule.isCompletable) {
       handleTakeMedication(e)
     }
   }
@@ -70,8 +70,8 @@ export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
           className={styles.checkbox}
           checked={schedule.status === 'completed'}
           onChange={handleCheckboxClick}
-          disabled={schedule.status !== 'pending'}
-          style={{ cursor: schedule.status === 'pending' ? 'pointer' : 'default' }}
+          disabled={schedule.status !== 'pending' || !schedule.isCompletable}
+          style={{ cursor: schedule.status === 'pending' && schedule.isCompletable ? 'pointer' : 'default' }}
         />
       </div>
 
@@ -103,6 +103,7 @@ export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
           <button
             className={styles.actionButton}
             onClick={handleTakeMedication}
+            disabled={!schedule.isCompletable}
             style={{ borderColor: getStatusColor(), color: getStatusColor() }}
           >
             {schedule.statusLabel}

@@ -61,6 +61,11 @@ class AuthApiClient extends ApiClient {
     return this.post('/select-role', payload, config)
   }
 
+  refresh(refreshToken) {
+    const payload = { refreshToken }
+    return this.post('/refresh', payload)
+  }
+
   logout(token) {
     const config = {
       headers: {

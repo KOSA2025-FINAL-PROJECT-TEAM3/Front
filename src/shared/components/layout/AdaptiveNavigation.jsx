@@ -21,12 +21,13 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const navigate = useNavigate()
-  const location = useLocation()
-  const [value, setValue] = useState(location.pathname)
+	export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
+	  const theme = useTheme()
+	  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+	  const navigate = useNavigate()
+	  const location = useLocation()
+	  const [value, setValue] = useState(location.pathname)
+	  const useBottomNavigation = position === 'bottom' && isMobile
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
@@ -38,8 +39,8 @@ export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
     navigate(path)
   }
 
-  // Mobile: BottomNavigation
-  if (isMobile) {
+	// Mobile: BottomNavigation (position='bottom'일 때만)
+	if (useBottomNavigation) {
     return (
       <BottomNavigation
         value={value}

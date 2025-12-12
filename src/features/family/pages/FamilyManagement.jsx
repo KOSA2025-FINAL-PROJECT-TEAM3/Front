@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import Modal from '@shared/components/ui/Modal'
@@ -48,7 +48,7 @@ export const FamilyManagementPage = () => {
 
   // 선택된 그룹 및 멤버 파생
   const familyGroup = getSelectedGroup()
-  const members = familyGroup?.members || []
+  const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
 
   useEffect(() => {
     if (!members?.length || !currentUserId) {
@@ -118,7 +118,7 @@ export const FamilyManagementPage = () => {
         }))
       }
     } catch (e) {
-      console.warn('가족 구성원 알림 설정 로드 실패', e)
+      logger.warn('가족 구성원 알림 설정 로드 실패', e)
       toast.error('알림 설정을 불러오지 못했습니다.')
     } finally {
       setNotificationLoading(false)
