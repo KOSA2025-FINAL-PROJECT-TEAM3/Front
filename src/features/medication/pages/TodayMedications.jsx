@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useVoiceActionStore } from '../../../features/voice/stores/voiceActionStore'; // [Voice] Zustand 스토어
 import { toast } from '@shared/components/toast/toastStore';
 import { Box, Typography, CircularProgress, Alert, Container, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
@@ -10,6 +10,25 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import logger from '@core/utils/logger';
 
+const getTimeCategory = (dateString = null) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    const hour = date.getHours();
+
+    if (hour >= 5 && hour < 11) return 'MORNING'; // 05:00 ~ 10:59
+    if (hour >= 11 && hour < 17) return 'LUNCH';  // 11:00 ~ 16:59
+    if (hour >= 17 && hour < 21) return 'DINNER'; // 17:00 ~ 20:59
+    return 'NIGHT'; // 21:00 ~ 04:59
+};
+
+const SECTION_LABELS = {
+    MORNING: { label: '아침', sub: '05:00 - 11:00' },
+    LUNCH: { label: '점심', sub: '11:00 - 17:00' },
+    DINNER: { label: '저녁', sub: '17:00 - 21:00' },
+    NIGHT: { label: '취침 전', sub: '21:00 - 05:00' }
+};
+
+const SECTION_ORDER = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
+
 const TodayMedications = () => {
     const pendingAction = useVoiceActionStore((state) => state.pendingAction); // [Voice] Subscribe
     const { consumeAction } = useVoiceActionStore(); // [Voice]
@@ -19,75 +38,77 @@ const TodayMedications = () => {
     const [medications, setMedications] = useState([]);
     const [expanded, setExpanded] = useState({});
 
-    const fetchTodayLogs = async () => {
-        try {
-            setLoading(true);
-            const today = format(new Date(), 'yyyy-MM-dd');
-
-            // 오늘 날짜의 로그 조회
-            const logsResponse = await medicationLogApiClient.getByDate(today);
-            const fetchedLogs = logsResponse || [];
-            setLogs(fetchedLogs);
-
-            // 약 정보 조회 (로그에서 약 이름 표시용)
-            const medsResponse = await medicationApiClient.list();
-            setMedications(medsResponse.data || []);
-
-            // 초기 아코디언 상태 설정
-            initializeExpandedState(fetchedLogs);
-        } catch (err) {
-            logger.error('Failed to fetch today logs:', err);
-            setError('오늘의 복용 기록을 불러오는데 실패했습니다.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const initializeExpandedState = (currentLogs) => {
+            const currentCategory = getTimeCategory(); // 현재 시간대
+            const nextExpanded = {};
+
+            SECTION_ORDER.forEach(section => {
+                if (section === currentCategory) {
+                    nextExpanded[section] = true;
+                    return;
+                }
+
+                const logsInSection = currentLogs.filter(log =>
+                    getTimeCategory(log.scheduledTime) === section
+                );
+
+                const hasUntaken = logsInSection.some(log => !log.completed);
+                nextExpanded[section] = hasUntaken;
+            });
+            setExpanded(nextExpanded);
+        };
+
+        const fetchTodayLogs = async () => {
+            try {
+                setLoading(true);
+                const today = format(new Date(), 'yyyy-MM-dd');
+
+                const logsResponse = await medicationLogApiClient.getByDate(today);
+                const fetchedLogs = logsResponse || [];
+                setLogs(fetchedLogs);
+
+                const medsResponse = await medicationApiClient.list();
+                setMedications(medsResponse.data || []);
+
+                initializeExpandedState(fetchedLogs);
+            } catch (err) {
+                logger.error('Failed to fetch today logs:', err);
+                setError('오늘의 복용 기록을 불러오는데 실패했습니다.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTodayLogs();
     }, []);
-
-    // 시간대별 분류 함수
-    const getTimeCategory = (dateString = null) => {
-        const date = dateString ? new Date(dateString) : new Date();
-        const hour = date.getHours();
-
-        if (hour >= 5 && hour < 11) return 'MORNING'; // 05:00 ~ 10:59
-        if (hour >= 11 && hour < 17) return 'LUNCH';  // 11:00 ~ 16:59
-        if (hour >= 17 && hour < 21) return 'DINNER'; // 17:00 ~ 20:59
-        return 'NIGHT'; // 21:00 ~ 04:59
-    };
-
-    const initializeExpandedState = (currentLogs) => {
-        const currentCategory = getTimeCategory(); // 현재 시간대
-        const nextExpanded = {};
-
-        SECTION_ORDER.forEach(section => {
-            // 1. 현재 시간대이면 Open
-            if (section === currentCategory) {
-                nextExpanded[section] = true;
-                return;
-            }
-
-            // 2. 미복용 상태가 있으면 Open
-            // 해당 섹션의 로그 찾기
-            const logsInSection = currentLogs.filter(log =>
-                getTimeCategory(log.scheduledTime) === section
-            );
-
-            const hasUntaken = logsInSection.some(log => !log.completed);
-            if (hasUntaken) {
-                nextExpanded[section] = true;
-            } else {
-                nextExpanded[section] = false;
-            }
-        });
-        setExpanded(nextExpanded);
-    };
 
     const handleAccordionChange = (panel) => (event, isExpanded) => {
         setExpanded(prev => ({ ...prev, [panel]: isExpanded }));
     };
+
+    const handleScheduleClick = useCallback(async (schedule) => {
+        if (schedule.isTakenToday) {
+            return;
+        }
+
+        const previousLogs = [...logs];
+
+        const newLogs = logs.map(log =>
+            log.medicationScheduleId === schedule.id
+                ? { ...log, completed: true, completedTime: new Date().toISOString() }
+                : log
+        );
+        setLogs(newLogs);
+
+        try {
+            await medicationLogApiClient.completeMedication(schedule.id);
+        } catch (err) {
+            logger.error('Failed to complete medication:', err);
+            setLogs(previousLogs);
+            alert('복용 체크에 실패했습니다. 다시 시도해주세요.');
+        }
+    }, [logs]);
 
     // [Voice] 음성 명령 처리 (자동 복용 체크) - Zustand 버전
     useEffect(() => {
@@ -138,39 +159,11 @@ const TodayMedications = () => {
                 }
             }
         }
-    }, [loading, logs, consumeAction, pendingAction]);
+    }, [loading, logs, consumeAction, pendingAction, handleScheduleClick]);
 
     const handleMedicationClick = (medication) => {
         // TODO: Implement medication detail view
         logger.debug('Clicked medication:', medication);
-    };
-
-    const handleScheduleClick = async (schedule) => {
-        if (schedule.isTakenToday) {
-            // Already taken
-            return;
-        }
-
-        // Optimistic update
-        const previousLogs = [...logs];
-
-        // Update local state
-        const newLogs = logs.map(log =>
-            log.medicationScheduleId === schedule.id
-                ? { ...log, completed: true, completedTime: new Date().toISOString() }
-                : log
-        );
-        setLogs(newLogs);
-
-        try {
-            await medicationLogApiClient.completeMedication(schedule.id);
-            // Success - keep optimistic state
-        } catch (err) {
-            logger.error('Failed to complete medication:', err);
-            // Revert state
-            setLogs(previousLogs);
-            alert('복용 체크에 실패했습니다. 다시 시도해주세요.');
-        }
     };
 
     if (loading) {
@@ -188,18 +181,6 @@ const TodayMedications = () => {
             </Container>
         );
     }
-
-
-
-    const SECTION_LABELS = {
-        MORNING: { label: '아침', sub: '05:00 - 11:00' },
-        LUNCH: { label: '점심', sub: '11:00 - 17:00' },
-        DINNER: { label: '저녁', sub: '17:00 - 21:00' },
-        NIGHT: { label: '취침 전', sub: '21:00 - 05:00' }
-    };
-
-    const SECTION_ORDER = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
-
     // 로그를 시간대별 -> 약별로 그룹화
     const groupedLogs = logs.reduce((acc, log) => {
         const category = getTimeCategory(log.scheduledTime);

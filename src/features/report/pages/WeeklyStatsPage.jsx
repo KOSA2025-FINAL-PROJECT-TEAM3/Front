@@ -4,6 +4,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
 import { medicationApiClient } from '@/core/services/api/medicationApiClient'
+import { normalizeServerLocalDate } from '@core/utils/formatting'
 import { toast } from '@shared/components/toast/toastStore'
 import styles from './WeeklyStatsPage.module.scss'
 
@@ -56,9 +57,11 @@ export const WeeklyStatsPage = () => {
     return Math.round(total / weeklyData.length)
   }
 
-  const getDayName = (dateString) => {
+  const getDayName = (value) => {
     const days = ['일', '월', '화', '수', '목', '금', '토']
-    const date = new Date(dateString)
+    const normalized = normalizeServerLocalDate(value)
+    if (!normalized) return ''
+    const date = new Date(normalized)
     return days[date.getDay()]
   }
 
@@ -95,12 +98,14 @@ export const WeeklyStatsPage = () => {
             {weeklyData.length === 0 ? (
               <p className={styles.noData}>최근 7일간 데이터가 없습니다</p>
             ) : (
-              weeklyData.map((day, index) => {
-                const rate = day.total > 0 ? (day.completed / day.total) * 100 : 0
-                return (
-                  <div key={index} className={styles.chartBar}>
-                    <div className={styles.barContainer}>
-                      <div
+	              weeklyData.map((day, index) => {
+	                const rate = day.total > 0 ? (day.completed / day.total) * 100 : 0
+	                const normalizedDate = normalizeServerLocalDate(day.date)
+	                const dateObj = normalizedDate ? new Date(normalizedDate) : null
+	                return (
+	                  <div key={index} className={styles.chartBar}>
+	                    <div className={styles.barContainer}>
+	                      <div
                         className={styles.barFill}
                         style={{
                           height: `${rate}%`,
@@ -112,15 +117,15 @@ export const WeeklyStatsPage = () => {
                                 : '#f44336',
                         }}
                       />
-                    </div>
-                    <div className={styles.barLabel}>
-                      <span className={styles.dayName}>{getDayName(day.date)}</span>
-                      <span className={styles.dayDate}>
-                        {new Date(day.date).getDate()}
-                      </span>
-                      <span className={styles.dayRate}>{Math.round(rate)}%</span>
-                    </div>
-                  </div>
+	                    </div>
+	                    <div className={styles.barLabel}>
+	                      <span className={styles.dayName}>{getDayName(day.date)}</span>
+	                      <span className={styles.dayDate}>
+	                        {dateObj ? dateObj.getDate() : ''}
+	                      </span>
+	                      <span className={styles.dayRate}>{Math.round(rate)}%</span>
+	                    </div>
+	                  </div>
                 )
               })
             )}

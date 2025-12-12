@@ -5,11 +5,16 @@ import './styles/tailwind.css'
 import './styles/base.scss'
 import App from './App'
 import logger from '@core/utils/logger'
+import { injectStore } from '@core/interceptors/authInterceptor'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {
   throw new Error('Root element not found')
 }
+
+// Auth Store를 Axios Interceptor에 주입 (순환 참조 방지)
+injectStore(useAuthStore)
 
 // Auto-remove DEV_MODE when VITE_USE_MOCK_API=false
 if (import.meta.env.VITE_USE_MOCK_API !== 'true') {

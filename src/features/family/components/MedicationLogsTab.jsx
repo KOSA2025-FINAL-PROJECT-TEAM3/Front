@@ -4,6 +4,15 @@ import styles from './MedicationLogsTab.module.scss'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import logger from '@core/utils/logger'
 
+const getTimeCategory = (dateString) => {
+  if (!dateString) return 'NIGHT'
+  const hour = new Date(dateString).getHours()
+  if (hour >= 5 && hour < 11) return 'MORNING'
+  if (hour >= 11 && hour < 17) return 'LUNCH'
+  if (hour >= 17 && hour < 21) return 'DINNER'
+  return 'NIGHT'
+}
+
 export const MedicationLogsTab = ({ userId }) => {
   const [logs, setLogs] = useState([])
   const [statistics, setStatistics] = useState(null)
@@ -17,42 +26,6 @@ export const MedicationLogsTab = ({ userId }) => {
   const [expandedSections, setExpandedSections] = useState({})
 
   const [sortOrder, setSortOrder] = useState('desc'); // 'desc' | 'asc'
-
-  const getTimeCategory = (dateString) => {
-    if (!dateString) return 'NIGHT';
-    const hour = new Date(dateString).getHours();
-    if (hour >= 5 && hour < 11) return 'MORNING';
-    if (hour >= 11 && hour < 17) return 'LUNCH';
-    if (hour >= 17 && hour < 21) return 'DINNER';
-    return 'NIGHT';
-  };
-
-  const initializeExpandedState = (currentLogs) => {
-    const currentCategory = getTimeCategory(new Date());
-    const nextExpanded = {};
-    const sections = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
-
-    sections.forEach(section => {
-      // 1. Current Time -> Open
-      if (section === currentCategory) {
-        nextExpanded[section] = true;
-        return;
-      }
-
-      // 2. Untaken items -> Open
-      const logsInSection = currentLogs.filter(log =>
-        getTimeCategory(log.scheduledTime) === section
-      );
-
-      const hasUntaken = logsInSection.some(log => log.status !== 'completed');
-      if (hasUntaken) {
-        nextExpanded[section] = true;
-      } else {
-        nextExpanded[section] = false;
-      }
-    });
-    setExpandedSections(nextExpanded);
-  };
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -97,7 +70,25 @@ export const MedicationLogsTab = ({ userId }) => {
 
   useEffect(() => {
     if (logs.length > 0) {
-      initializeExpandedState(logs)
+      const currentCategory = getTimeCategory(new Date())
+      const nextExpanded = {}
+      const sections = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT']
+
+      sections.forEach(section => {
+        if (section === currentCategory) {
+          nextExpanded[section] = true
+          return
+        }
+
+        const logsInSection = logs.filter(log =>
+          getTimeCategory(log.scheduledTime) === section
+        )
+
+        const hasUntaken = logsInSection.some(log => log.status !== 'completed')
+        nextExpanded[section] = hasUntaken
+      })
+
+      setExpandedSections(nextExpanded)
     }
   }, [logs])
 

@@ -12,11 +12,10 @@ import { FAB } from '@shared/components/ui/FAB'
 import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
-import { familyApiClient } from '@core/services/api/familyApiClient'
-import { toast } from '@shared/components/toast/toastStore'
-import styles from './CaregiverDashboard.module.scss'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import logger from '@core/utils/logger'
+	import { familyApiClient } from '@core/services/api/familyApiClient'
+	import { toast } from '@shared/components/toast/toastStore'
+	import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+	import logger from '@core/utils/logger'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드

@@ -8,6 +8,57 @@ import { ko } from 'date-fns/locale'
 import logger from './logger'
 
 /**
+ * 서버(LocalDate) 날짜 값을 YYYY-MM-DD로 정규화
+ * - string, [y,m,d], {year,month,day} 모두 지원
+ */
+export const normalizeServerLocalDate = (value) => {
+  try {
+    if (!value) return ''
+    if (typeof value === 'string') return value.slice(0, 10)
+    if (Array.isArray(value) && value.length >= 3) {
+      const [year, month, day] = value
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    }
+    if (typeof value === 'object' && value.year && value.month && value.day) {
+      return `${value.year}-${String(value.month).padStart(2, '0')}-${String(value.day).padStart(2, '0')}`
+    }
+    return ''
+  } catch (error) {
+    logger.error('서버 날짜 정규화 실패:', error)
+    return ''
+  }
+}
+
+/**
+ * 서버(LocalDateTime) 값을 JS Date로 변환
+ * - ISO string, [y,m,d,h,mm,ss,nano], {year,month,day,hour,minute,second,nano} 지원
+ */
+export const parseServerLocalDateTime = (value) => {
+  try {
+    if (!value) return null
+    if (value instanceof Date) return value
+    if (typeof value === 'string') return parseISO(value)
+    if (Array.isArray(value) && value.length >= 3) {
+      const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = value
+      const ms = Math.floor(nano / 1e6)
+      return new Date(year, month - 1, day, hour, minute, second, ms)
+    }
+    if (typeof value === 'object' && value.year && value.month && value.day) {
+      const hour = value.hour ?? 0
+      const minute = value.minute ?? 0
+      const second = value.second ?? 0
+      const nano = value.nano ?? 0
+      const ms = Math.floor(nano / 1e6)
+      return new Date(value.year, value.month - 1, value.day, hour, minute, second, ms)
+    }
+    return null
+  } catch (error) {
+    logger.error('서버 날짜시간 파싱 실패:', error)
+    return null
+  }
+}
+
+/**
  * 날짜를 지정된 형식으로 포맷
  * @param {Date|string} date - 포맷할 날짜
  * @param {string} formatStr - 형식 문자열 (기본값: 'yyyy-MM-dd')

@@ -4,6 +4,27 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import styles from './FamilyMedicationList.module.scss';
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient';
 import { toast } from '@shared/components/toast/toastStore';
+import logger from '@core/utils/logger';
+
+const getTimeCategory = (timeString = null) => {
+  let hour;
+  if (timeString) {
+    // If "HH:mm:ss" or "HH:mm"
+    if (timeString.includes(':')) {
+      hour = parseInt(timeString.split(':')[0], 10);
+    } else {
+      // Date string
+      hour = new Date(timeString).getHours();
+    }
+  } else {
+    hour = new Date().getHours();
+  }
+
+  if (hour >= 5 && hour < 11) return 'MORNING';
+  if (hour >= 11 && hour < 17) return 'LUNCH';
+  if (hour >= 17 && hour < 21) return 'DINNER';
+  return 'NIGHT';
+};
 
 export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
   const [expanded, setExpanded] = useState({});
@@ -47,7 +68,7 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
       // Notify parent if callback exists (to re-fetch)
       if (onUpdate) onUpdate();
     } catch (error) {
-      console.error('Failed to toggle active status:', error);
+      logger.error('Failed to toggle active status:', error);
       toast.error('상태 변경에 실패했습니다.');
     }
   };
@@ -73,26 +94,6 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
   const getStatusColor = (active) => {
     return active ? '#00B300' : '#999999'
   }
-
-  const getTimeCategory = (timeString = null) => {
-    let hour;
-    if (timeString) {
-      // If "HH:mm:ss" or "HH:mm"
-      if (timeString.includes(':')) {
-        hour = parseInt(timeString.split(':')[0], 10);
-      } else {
-        // Date string
-        hour = new Date(timeString).getHours();
-      }
-    } else {
-      hour = new Date().getHours();
-    }
-
-    if (hour >= 5 && hour < 11) return 'MORNING';
-    if (hour >= 11 && hour < 17) return 'LUNCH';
-    if (hour >= 17 && hour < 21) return 'DINNER';
-    return 'NIGHT';
-  };
 
   const SECTION_LABELS = {
     MORNING: { label: '아침', sub: '05:00 - 11:00' },

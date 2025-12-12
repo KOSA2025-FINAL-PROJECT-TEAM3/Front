@@ -57,7 +57,7 @@ export const FoodWarningPage = () => {
     }
 
     fetchRecentLog()
-  }, [])
+  }, [searchParams])
 
   const getLevelColor = (level) => {
     switch (level) {

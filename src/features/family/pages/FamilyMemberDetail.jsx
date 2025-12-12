@@ -12,7 +12,6 @@ import styles from './FamilyMemberDetail.module.scss'
 
 export const FamilyMemberDetailPage = () => {
   const { id } = useParams()
-  const searchParams = new URLSearchParams(window.location.search)
   const navigate = useNavigate()
   const { data, isLoading, error } = useFamilyMemberDetail(id)
   const [activeTab, setActiveTab] = useState('medications')
@@ -21,7 +20,8 @@ export const FamilyMemberDetailPage = () => {
   const medications = data?.medications ?? []
 
   useEffect(() => {
-    const tabParam = searchParams.get('tab')
+    const params = new URLSearchParams(window.location.search)
+    const tabParam = params.get('tab')
     if (tabParam && ['medications', 'medication-logs', 'logs', 'detail'].includes(tabParam)) {
       setActiveTab(tabParam)
     }
