@@ -48,8 +48,8 @@ export const ROUTE_PATHS = {
   familyMemberDetail: '/family/member/:id',
 
   inviteAccept: '/invites/start',
-  inviteCodeEntry: '/invites/enter', // 초대 코드 수동 입력 페이지 (공개)
-  inviteLanding: '/invites/accept', // ✅ 초대 수락 페이지 (오픈 초대)
+  inviteCodeEntry: '/invites/enter', // 통합 초대 랜딩 페이지 (코드/토큰 모두 처리)
+  inviteLanding: '/invites/enter', // ✅ InviteCodeEntry로 통합 (레거시 호환)
 
   chatList: '/chat',
   chatConversation: '/chat/:roomId',
