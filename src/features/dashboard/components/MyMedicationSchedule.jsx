@@ -149,6 +149,12 @@ export const MyMedicationSchedule = ({
   const handleTakeMedication = async (scheduleId) => {
     const [medicationId, schedId] = scheduleId.split('-')
 
+    if (!schedId || schedId === 'undefined' || schedId === 'null' || isNaN(parseInt(schedId))) {
+      logger.error('Invalid schedule ID:', scheduleId)
+      toast.error('유효하지 않은 스케줄입니다.')
+      return
+    }
+
     try {
       // Optimistic update: 즉시 UI 업데이트
       const optimisticLog = {
@@ -168,7 +174,7 @@ export const MyMedicationSchedule = ({
       logger.debug('복용 완료:', scheduleId)
     } catch (error) {
       logger.error('Failed to complete medication:', error)
-      alert('복용 기록 저장에 실패했습니다.')
+      toast.error('복용 기록 저장에 실패했습니다.')
       // 에러 발생 시 다시 로드하여 원래 상태로 복구
       await loadMedicationLogs()
     }

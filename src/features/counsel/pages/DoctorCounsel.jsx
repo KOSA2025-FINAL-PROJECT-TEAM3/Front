@@ -19,7 +19,7 @@ export const DoctorCounselPage = () => {
       <div className={styles.page}>
         <header className={styles.header}>
           <h1>의사 상담</h1>
-          <p>궁금한 내용을 작성해 상담을 요청해 보세요 (모의)</p>
+          <p>궁금한 내용을 작성해 상담을 요청해 보세요</p>
         </header>
 
         <section className={styles.panel}>
@@ -37,13 +37,9 @@ export const DoctorCounselPage = () => {
 
           <div className={styles.actions}>
             <button type="button" className={styles.button} onClick={handleSubmit}>
-              상담 요청 (Mock)
+              상담 요청
             </button>
           </div>
-
-          <p className={styles.hint}>
-            실제 상담 기능은 Stage 4 이후 연동 예정입니다.
-          </p>
         </section>
       </div>
     </MainLayout>

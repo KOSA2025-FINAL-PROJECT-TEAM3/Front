@@ -27,7 +27,7 @@ export const CAREGIVER_QUICK_ACTIONS = [
   { icon: '👥', label: '가족 관리', path: ROUTE_PATHS.family },
   { icon: '💊', label: '약 관리', path: ROUTE_PATHS.medication },
   { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
-  { icon: '💬', label: '상담', path: ROUTE_PATHS.chatList },
+  { icon: '📊', label: '리포트', path: ROUTE_PATHS.adherenceReport },
 ]
 
 // 보호자 대시보드 FAB 액션
