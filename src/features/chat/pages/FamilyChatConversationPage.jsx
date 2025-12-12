@@ -397,19 +397,22 @@ export const FamilyChatConversationPage = () => {
           body: JSON.stringify(imagePayload),
         });
         
+        // [FIX] DB 저장 순서 보장 (이미지 먼저, 텍스트 나중)을 위한 지연 추가
         if (content && content.trim()) {
-             let textContent = content.startsWith("/ai ") ? content.substring(4).trim() : content;
-             if(textContent) {
-                 stompClientRef.current.publish({
-                    destination: `/app/family/${currentFamilyGroupId}`,
-                    body: JSON.stringify({
-                        familyGroupId: currentFamilyGroupId,
-                        familyMemberId: currentUserId,
-                        content: textContent,
-                        type: "TEXT"
-                    }),
-                });
-             }
+             setTimeout(() => {
+                 let textContent = content.startsWith("/ai ") ? content.substring(4).trim() : content;
+                 if(textContent) {
+                     stompClientRef.current.publish({
+                        destination: `/app/family/${currentFamilyGroupId}`,
+                        body: JSON.stringify({
+                            familyGroupId: currentFamilyGroupId,
+                            familyMemberId: currentUserId,
+                            content: textContent,
+                            type: "TEXT"
+                        }),
+                    });
+                 }
+             }, 100);
         }
       }
     } catch (err) {

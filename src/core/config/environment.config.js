@@ -65,30 +65,14 @@ export const getEnvironmentConfig = () => {
 
   // WebSocket Configuration
   const getWsBaseURL = () => {
-    const normalizeWsBaseURL = (rawUrl) => {
-      if (!rawUrl) return rawUrl
-      try {
-        const parsed = new URL(rawUrl)
-        // If only host/port provided, default to STOMP endpoint.
-        if (!parsed.pathname || parsed.pathname === '/') {
-          parsed.pathname = '/ws'
-          return parsed.toString()
-        }
-        return rawUrl
-      } catch {
-        const trimmed = rawUrl.replace(/\/$/, '')
-        return trimmed.endsWith('/ws') ? trimmed : `${trimmed}/ws`
-      }
-    }
-
     // 1. Explicit environment variable
     if (import.meta.env.VITE_WS_BASE_URL) {
-      return normalizeWsBaseURL(import.meta.env.VITE_WS_BASE_URL)
+      return import.meta.env.VITE_WS_BASE_URL
     }
 
     // 2. Development default
     if (isDevelopment) {
-      return 'ws://localhost:8080/ws'
+      return 'ws://localhost/ws'
     }
 
     // 3. Production auto-detection
@@ -105,7 +89,7 @@ export const getEnvironmentConfig = () => {
     }
 
     // Fallback
-    return 'ws://localhost:8080/ws'
+    return 'ws://localhost/ws'
   }
 
   // Frontend URL Configuration
