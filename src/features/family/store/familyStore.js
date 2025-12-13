@@ -96,9 +96,12 @@ export const useFamilyStore = create((set, get) => ({
         }
       }
 
-      // 현재 selectedGroupId가 있으면 유지, 없으면 첫 번째 그룹 자동 선택
+      // 현재 selectedGroupId가 유효하면 유지, 그렇지 않으면 첫 번째 그룹 자동 선택
       const currentGroupId = get().selectedGroupId
-      const nextSelectedGroupId = currentGroupId || summary?.groups?.[0]?.id || null
+      const groups = summary?.groups || []
+      // 삭제된 그룹 ID인 경우 무효화
+      const isValidGroupId = groups.some(g => g.id === currentGroupId)
+      const nextSelectedGroupId = isValidGroupId ? currentGroupId : (groups[0]?.id || null)
 
       const nextState = {
         familyGroups: summary?.groups || [],
@@ -264,6 +267,25 @@ export const useFamilyStore = create((set, get) => ({
         error: null,
       }))
       return group
+    }),
+
+  // 그룹 삭제 (해산)
+  deleteGroup: async (groupId) =>
+    withLoading(set, async () => {
+      await familyApiClient.deleteGroup(groupId)
+      const { selectedGroupId, familyGroups } = get()
+      const remainingGroups = familyGroups.filter(g => g.id !== groupId)
+      // 삭제된 그룹이 선택된 그룹이었으면 첫 번째 그룹으로 전환
+      const nextSelectedGroupId = selectedGroupId === groupId
+        ? (remainingGroups[0]?.id || null)
+        : selectedGroupId
+      set({
+        familyGroups: remainingGroups,
+        selectedGroupId: nextSelectedGroupId,
+        // 삭제된 그룹의 멤버 정보도 클리어
+        members: nextSelectedGroupId ? (remainingGroups.find(g => g.id === nextSelectedGroupId)?.members || []) : [],
+        error: null,
+      })
     }),
 
   // 그룹 선택

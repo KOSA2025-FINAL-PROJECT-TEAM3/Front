@@ -28,9 +28,10 @@ export const FamilyManagementPage = () => {
     createFamilyGroup,
     removeMember,
     updateMemberRole,
+    deleteGroup,
     loading,
     error,
-    fetchFamily: refetchFamily
+    refetchFamily,
   } = useFamilyStore()
   const [currentUserRole, setCurrentUserRole] = useState(null)
   const onlineMemberIds = []
@@ -323,9 +324,8 @@ export const FamilyManagementPage = () => {
                   } else if (confirmModal.type === 'dissolve') {
                     setDissolving(true)
                     try {
-                      await familyApiClient.deleteGroup(familyGroup.id)
+                      await deleteGroup(familyGroup.id)
                       toast.success('그룹이 해산되었습니다.')
-                      await refetchFamily?.()
                     } catch (error) {
                       toast.error('그룹 해산에 실패했습니다. 다시 시도해 주세요.')
                       logger.warn('[FamilyManagement] dissolve failed', error)
