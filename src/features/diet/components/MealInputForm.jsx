@@ -131,10 +131,18 @@ export const MealInputForm = ({
     }
   }
 
+  // Check if food is recognized
+  const isNotFood = analysisResult?.isFood === false || foodName === '알 수 없음'
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!foodName.trim()) {
       alert('음식 이름을 입력해주세요.')
+      return
+    }
+    // Prevent submission if not recognized as food
+    if (isNotFood) {
+      alert('음식으로 인식되지 않아 등록할 수 없습니다.')
       return
     }
     const mealData = {
@@ -313,12 +321,20 @@ export const MealInputForm = ({
               </Button>
             )}
 
+            {/* Warning when isFood is false */}
+            {isNotFood && (
+              <Typography variant="body2" color="error" sx={{ width: '100%', textAlign: 'center' }}>
+                ⚠️ 음식으로 인식되지 않아 등록할 수 없습니다.
+              </Typography>
+            )}
+
             <Button
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
               size="large"
+              disabled={isNotFood}
               sx={{ borderRadius: 3, py: 1.5, boxShadow: 2 }}
             >
               {isEditing ? '식단 수정 완료' : '식단 추가하기'}
