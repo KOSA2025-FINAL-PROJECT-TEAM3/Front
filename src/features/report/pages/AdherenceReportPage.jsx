@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/ui/BackButton'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
+import { diseaseApiClient } from '@/core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
+import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
+import { useAuthStore } from '@/features/auth/store/authStore'
 import styles from './AdherenceReportPage.module.scss'
 
 /**
@@ -14,6 +17,42 @@ export const AdherenceReportPage = () => {
   const [loading, setLoading] = useState(true)
   const [adherenceData, setAdherenceData] = useState(null)
   const [recentHistory, setRecentHistory] = useState([])
+  const { consumeAction } = useVoiceActionStore()
+  const user = useAuthStore((state) => state.user)
+
+  const handleDownloadPdf = async () => {
+    if (!user?.id) {
+      toast.error('사용자 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    try {
+      toast.info('PDF 리포트를 생성하고 있습니다...')
+      const blob = await diseaseApiClient.exportPdf(user.id)
+      
+      // Blob 다운로드 처리
+      const url = window.URL.createObjectURL(new Blob([blob]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `medication_report_${new Date().toISOString().slice(0, 10)}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      
+      toast.success('리포트 다운로드가 완료되었습니다.')
+    } catch (error) {
+      logger.error('PDF 다운로드 실패:', error)
+      toast.error('리포트 생성에 실패했습니다.')
+    }
+  }
+
+  // 음성 명령 처리 (PDF 다운로드)
+  useEffect(() => {
+    const action = consumeAction('DOWNLOAD_PDF')
+    if (action) {
+      handleDownloadPdf()
+    }
+  }, [consumeAction, user])
 
   useEffect(() => {
     const fetchAdherenceData = async () => {
@@ -106,6 +145,13 @@ export const AdherenceReportPage = () => {
         <div className={styles.headerWithBack}>
           <BackButton />
           <h1 className={styles.title}>복약 순응도 리포트</h1>
+          <button 
+            className={styles.pdfButton}
+            onClick={handleDownloadPdf}
+            aria-label="PDF 리포트 다운로드"
+          >
+            PDF 저장
+          </button>
         </div>
 
         <div className={styles.summaryCard}>

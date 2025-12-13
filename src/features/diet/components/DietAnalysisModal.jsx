@@ -173,20 +173,33 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading,
                 )}
             </DialogContent>
 
-            <DialogActions sx={{ p: 2 }}>
-                <Button onClick={onClose} color="inherit">
-                    취소
-                </Button>
-                {editedResult && (
-                    <Button
-                        onClick={handleSave}
-                        variant="contained"
-                        startIcon={<CheckIcon />}
-                        sx={{ borderRadius: 2 }}
+            <DialogActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
+                {/* Warning message when isFood is false */}
+                {editedResult && editedResult.isFood === false && (
+                    <Typography
+                        variant="body2"
+                        color="error"
+                        sx={{ width: '100%', textAlign: 'center', mb: 1 }}
                     >
-                        확인 및 저장
-                    </Button>
+                        ⚠️ 음식으로 인식되지 않아 등록할 수 없습니다.
+                    </Typography>
                 )}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', gap: 1 }}>
+                    <Button onClick={onClose} color="inherit">
+                        취소
+                    </Button>
+                    {editedResult && (
+                        <Button
+                            onClick={handleSave}
+                            variant="contained"
+                            startIcon={<CheckIcon />}
+                            sx={{ borderRadius: 2 }}
+                            disabled={editedResult.isFood === false || editedResult.foodName === '알 수 없음'}
+                        >
+                            확인 및 저장
+                        </Button>
+                    )}
+                </Box>
             </DialogActions>
         </Dialog>
     );

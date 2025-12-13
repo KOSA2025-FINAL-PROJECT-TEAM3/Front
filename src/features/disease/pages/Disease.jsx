@@ -12,6 +12,7 @@ import Modal from '@shared/components/ui/Modal'
 import { FAB } from '@shared/components/ui/FAB'
 import { Icon } from '@shared/components/ui/Icon'
 import { useDiseases } from '../hooks/useDiseases'
+import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import styles from './Disease.module.scss'
 
 export const DiseasePage = () => {
@@ -30,11 +31,31 @@ export const DiseasePage = () => {
     updateDisease,
     restoreDisease,
   } = useDiseases()
+  
+  const { consumeAction } = useVoiceActionStore()
+  
   const [showTrash, setShowTrash] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
+
+  // 음성 명령 (질병 자동 입력 및 PDF 다운로드)
+  useEffect(() => {
+    // 1. 질병 등록 자동 채우기
+    const fillAction = consumeAction('AUTO_FILL_DISEASE')
+    if (fillAction && fillAction.params?.diseaseName) {
+      setEditing({ name: fillAction.params.diseaseName })
+      setShowForm(true)
+      toast.info(`'${fillAction.params.diseaseName}' 등록 화면을 열었습니다.`)
+    }
+
+    // 2. PDF 다운로드
+    const downloadAction = consumeAction('DOWNLOAD_PDF')
+    if (downloadAction) {
+      handleExportPdf()
+    }
+  }, [consumeAction])
 
   const fabActions = [
     {
