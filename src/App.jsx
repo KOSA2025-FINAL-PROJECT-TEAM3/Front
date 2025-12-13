@@ -42,6 +42,7 @@ const MyDiseasesSettingsPage = lazy(() => import('@features/settings/pages/MyDis
 const PrivacyPolicyPage = lazy(() => import('@features/settings/pages/PrivacyPolicyPage'))
 const TermsOfServicePage = lazy(() => import('@features/settings/pages/TermsOfServicePage'))
 const MedicationManagementPage = lazy(() => import('@features/medication/pages/MedicationManagement'))
+const MedicationAddPage = lazy(() => import('@features/medication/pages/MedicationAddPage'))
 const MedicationEditPage = lazy(() => import('@features/medication/pages/MedicationEditPage'))
 const PrescriptionAddPage = lazy(() => import('@features/medication/pages/PrescriptionAddPage'))
 const PrescriptionDetailPage = lazy(() => import('@features/medication/pages/PrescriptionDetailPage'))
@@ -205,11 +206,26 @@ function App() {
                   element={<PrivateRoute element={<PrescriptionDetailPage />} />}
                 />
 
-                {/* 기존 라우트 호환성 유지 (리다이렉트) */}
+                {/* 약물 직접 등록 (복구) */}
                 <Route
                   path={ROUTE_PATHS.medicationAdd}
-                  element={<Navigate to={ROUTE_PATHS.prescriptionAdd} replace />}
+                  element={<PrivateRoute element={<MedicationAddPage />} />}
                 />
+                
+                {/* AI 음성 명령 호환성 (Legacy Path Support) */}
+                <Route
+                  path="/medication/register"
+                  element={<Navigate to={ROUTE_PATHS.medicationAdd} replace />}
+                />
+                <Route
+                  path="/report/preview"
+                  element={<Navigate to={ROUTE_PATHS.disease} replace />}
+                />
+                <Route
+                  path="/disease/register"
+                  element={<Navigate to={ROUTE_PATHS.disease} replace />}
+                />
+
                 <Route
                   path={ROUTE_PATHS.medicationEdit}
                   element={<PrivateRoute element={<MedicationEditPage />} />}

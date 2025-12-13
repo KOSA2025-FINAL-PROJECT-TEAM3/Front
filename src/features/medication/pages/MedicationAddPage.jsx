@@ -5,11 +5,13 @@ import logger from "@core/utils/logger"
  * @component MedicationAddPage
  */
 
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MedicationForm } from '@features/medication/components/MedicationForm'
 import { BackButton } from '@shared/components/ui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import styles from './MedicationAddPage.module.scss'
@@ -24,6 +26,19 @@ export const MedicationAddPage = () => {
     addMedication: state.addMedication,
     loading: state.loading,
   }))
+  
+  const { consumeAction } = useVoiceActionStore()
+  const [initialValues, setInitialValues] = useState(null)
+
+  useEffect(() => {
+    const action = consumeAction('AUTO_FILL_REGISTER')
+    if (action && action.params?.medicationName) {
+      setInitialValues({
+        name: action.params.medicationName
+      })
+      toast.info(`'${action.params.medicationName}' 정보를 자동으로 입력했습니다.`)
+    }
+  }, [consumeAction])
 
   const handleSubmit = async (formData) => {
     try {
@@ -49,6 +64,7 @@ export const MedicationAddPage = () => {
         </div>
         <div className={styles.formWrapper}>
           <MedicationForm
+            initialValues={initialValues}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
