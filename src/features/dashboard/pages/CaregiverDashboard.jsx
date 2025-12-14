@@ -86,7 +86,7 @@ export function CaregiverDashboard() {
 
   if (loading && members.length === 0) {
     return (
-      <MainLayout userName="보호자" userRole="보호자">
+      <MainLayout>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
           <Typography>가족 데이터를 불러오는 중...</Typography>
         </Container>
@@ -96,7 +96,7 @@ export function CaregiverDashboard() {
 
   if (error) {
     return (
-      <MainLayout userName="보호자" userRole="보호자">
+      <MainLayout>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
           <Typography color="error">가족 데이터를 불러오지 못했습니다. {error.message}</Typography>
         </Container>
@@ -105,7 +105,7 @@ export function CaregiverDashboard() {
   }
 
   return (
-    <MainLayout userName="보호자" userRole="보호자">
+    <MainLayout>
       <ResponsiveContainer maxWidth="lg">
         <Stack spacing={4}>
           {/* 헤더 */}

@@ -275,7 +275,7 @@ export const SeniorDashboard = () => {
   })
 
   return (
-    <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
+    <MainLayout>
       <ResponsiveContainer maxWidth="lg">
         <Stack spacing={4} sx={{ pb: 12 }}>
           {/* 헤더 */}

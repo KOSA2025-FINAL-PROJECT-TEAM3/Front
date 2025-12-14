@@ -66,7 +66,7 @@ export const SeniorDashboard = () => {
   })
 
   return (
-    <MainLayout userName="어르신" userRole="어르신" notificationCount={0}>
+    <MainLayout>
       <div className={styles.dashboardContent}>
         <div className={styles.titleSection}>
           <h1 className={styles.pageTitle}>오늘의 복용</h1>

@@ -83,26 +83,26 @@ export function CaregiverDashboard() {
   })
 
   if (loading && members.length === 0) {
-    return (
-      <MainLayout userName="보호자" userRole="보호자">
-        <p className={styles.stateMessage}>가족 데이터를 불러오는 중...</p>
-      </MainLayout>
-    )
+      return (
+       <MainLayout>
+          <p className={styles.stateMessage}>가족 데이터를 불러오는 중...</p>
+        </MainLayout>
+      )
   }
 
   if (error) {
-    return (
-      <MainLayout userName="보호자" userRole="보호자">
-        <p className={styles.stateMessage}>가족 데이터를 불러오지 못했습니다. {error.message}</p>
-      </MainLayout>
-    )
+      return (
+       <MainLayout>
+          <p className={styles.stateMessage}>가족 데이터를 불러오지 못했습니다. {error.message}</p>
+        </MainLayout>
+      )
   }
 
-  return (
-    <MainLayout userName="보호자" userRole="보호자">
-      <section className={styles.dashboard}>
-        <header className={styles.header}>
-          <h1>보호자 대시보드</h1>
+    return (
+     <MainLayout>
+        <section className={styles.dashboard}>
+          <header className={styles.header}>
+            <h1>보호자 대시보드</h1>
           <p>가족 구성원의 오늘 복약 상태를 빠르게 확인할 수 있습니다.</p>
         </header>
 
