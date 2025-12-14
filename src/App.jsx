@@ -9,17 +9,18 @@
  * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
-import React, { Suspense, useEffect, lazy } from 'react'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import theme from '@/styles/theme'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { ROUTE_PATHS } from '@config/routes.config'
-import { useAuth } from '@features/auth/hooks/useAuth'
-import { FamilyProvider } from '@features/family/context/FamilyContext'
-import { PrivateRoute } from './core/routing/PrivateRoute'
-import LoadingSpinner from '@shared/components/LoadingSpinner'
-import envConfig from '@config/environment.config'
+	import React, { Suspense, useEffect, useMemo, lazy } from 'react'
+	import { ThemeProvider } from '@mui/material/styles'
+	import CssBaseline from '@mui/material/CssBaseline'
+	import { createAppTheme } from '@/styles/theme'
+	import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+	import { ROUTE_PATHS } from '@config/routes.config'
+	import { useAuth } from '@features/auth/hooks/useAuth'
+	import { FamilyProvider } from '@features/family/context/FamilyContext'
+	import { PrivateRoute } from './core/routing/PrivateRoute'
+	import LoadingSpinner from '@shared/components/LoadingSpinner'
+	import envConfig from '@config/environment.config'
+	import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
 
 // Lazy-loaded page components
 const Login = lazy(() => import('@features/auth/pages/Login'))
@@ -145,12 +146,27 @@ function InviteAcceptRedirect() {
  * 메인 App 컴포넌트
  * @returns {JSX.Element}
  */
-function App() {
-  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
+	function App() {
+	  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
+	  const { customerRole, _hasHydrated } = useAuth((state) => ({
+	    customerRole: state.customerRole,
+	    _hasHydrated: state._hasHydrated,
+	  }))
+	  const { accessibilityMode, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
+	    accessibilityMode: state.accessibilityMode,
+	    ensureDefaultForRole: state.ensureDefaultForRole,
+	  }))
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+	  useEffect(() => {
+	    if (!_hasHydrated) return
+	    ensureDefaultForRole(customerRole)
+	  }, [_hasHydrated, customerRole, ensureDefaultForRole])
+
+	  const theme = useMemo(() => createAppTheme({ accessibilityMode }), [accessibilityMode])
+	
+	  return (
+	    <ThemeProvider theme={theme}>
+	      <CssBaseline />
       <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <FamilyProvider>

@@ -6,6 +6,11 @@
 
 import { createTheme } from '@mui/material/styles'
 
+export const UI_FONT_SCALES = {
+  default: 16,
+  accessibility: 18,
+}
+
 // Breakpoints: Mobile -> Tablet -> Desktop
 const breakpoints = {
   values: {
@@ -170,7 +175,16 @@ const shadows = [
 ]
 
 // Component Overrides: MUI 컴포넌트 기본 스타일 재정의
-const components = {
+const createComponents = ({ accessibilityMode }) => ({
+  MuiCssBaseline: {
+    styleOverrides: {
+      html: {
+        fontSize: accessibilityMode
+          ? `${UI_FONT_SCALES.accessibility}px`
+          : `${UI_FONT_SCALES.default}px`,
+      },
+    },
+  },
   MuiButton: {
     styleOverrides: {
       root: {
@@ -178,6 +192,7 @@ const components = {
         padding: '10px 20px',
         fontSize: '1rem',
         fontWeight: 500,
+        minHeight: 44,
       },
       contained: {
         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
@@ -219,17 +234,25 @@ const components = {
       },
     },
   },
-}
-
-// Create Theme
-const theme = createTheme({
-  breakpoints,
-  palette,
-  typography,
-  shape,
-  spacing,
-  shadows,
-  components,
+  MuiIconButton: {
+    styleOverrides: {
+      root: {
+        minWidth: 44,
+        minHeight: 44,
+      },
+    },
+  },
 })
 
-export default theme
+export const createAppTheme = ({ accessibilityMode = false } = {}) =>
+  createTheme({
+    breakpoints,
+    palette,
+    typography,
+    shape,
+    spacing,
+    shadows,
+    components: createComponents({ accessibilityMode }),
+  })
+
+export default createAppTheme()

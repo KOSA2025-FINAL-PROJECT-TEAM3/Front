@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { ProfileSection } from '../components/ProfileSection.jsx'
 import { SettingsMenu } from '../components/SettingsMenu.jsx'
+import { AccessibilitySection } from '../components/AccessibilitySection.jsx'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { SETTINGS_MENU_DEFINITIONS } from '@/constants/uiConstants'
@@ -41,6 +42,8 @@ export const SettingsPage = () => {
         </header>
 
         <ProfileSection user={user} />
+
+        <AccessibilitySection />
 
         <SettingsMenu items={items} />
       </div>
