@@ -25,11 +25,15 @@ export const AccessibilitySection = () => {
             글자와 버튼을 더 크게 표시합니다.
           </Typography>
         </Stack>
-        <Switch checked={accessibilityMode} onChange={toggleAccessibilityMode} />
+        <Switch
+          checked={accessibilityMode}
+          onChange={toggleAccessibilityMode}
+          inputProps={{ 'aria-label': '확대 모드' }}
+          slotProps={{ input: { 'aria-label': '확대 모드' } }}
+        />
       </Stack>
     </Paper>
   )
 }
 
 export default AccessibilitySection
-
