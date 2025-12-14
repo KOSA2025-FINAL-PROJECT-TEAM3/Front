@@ -244,6 +244,12 @@
 
 ---
 
+## 진행 현황 (2025-12-14)
+
+- AppShell/Navigation Spike 1차 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
+
+---
+
 부록: 관련 파일
 - 라우팅: `Front/src/App.jsx`, `Front/src/core/config/routes.config.js`
 - 레이아웃: `Front/src/shared/components/layout/MainLayout.jsx`, `AdaptiveNavigation.jsx`, `BottomNavigation.jsx`

@@ -120,3 +120,8 @@
 - 확대모드 저장/복원, 모바일 접근성(대비/타깃) 충족.
 - 주요 P0 플로우 수동 E2E 통과(복약완료/약등록/가족초대/채팅/병원검색/OCR).
 
+---
+
+## 9. 진행 현황 (Worklogs)
+
+- 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
