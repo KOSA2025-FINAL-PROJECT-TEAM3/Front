@@ -248,6 +248,7 @@
 
 - AppShell/Navigation Spike 1차 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
 - Accessibility/Theme(확대모드) 1차 반영: `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
+- Shared UI 제거 인벤토리(1차): `Front/docs/WORKLOG_2025-12-14_SHARED_UI_INVENTORY.md`
 - Settings 화면 MUI 전환(1차): `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
 - Playwright E2E Smoke(시니어/보호자): `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`
 - Phase/Task Tracker: `Front/docs/UX_MUI_REFACTOR_TASKS.md`

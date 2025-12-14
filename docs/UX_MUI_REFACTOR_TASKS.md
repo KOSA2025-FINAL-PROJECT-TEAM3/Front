@@ -9,7 +9,7 @@
 
 - [x] Workstream 1(AppShell/Navigation) — 1차 Spike 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
 - [x] Workstream 2(Accessibility/Theme) — 확대모드/토큰 정비(1차): `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
-- [ ] Workstream 3(Shared UI 제거) — `src/shared/components/ui/*` 제거 및 사용처 치환
+- [ ] Workstream 3(Shared UI 제거) — 인벤토리/치환 우선순위(1차): `Front/docs/WORKLOG_2025-12-14_SHARED_UI_INVENTORY.md`
 - [ ] Workstream 4(Feature P0) — 화면별 MUI 전환(진행중: Settings 1차): `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
 - [ ] Workstream 5(Cleanup/Docs) — Playwright 스모크(E2E) 기반 + 문서 정리(진행중): `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`
 
@@ -71,5 +71,6 @@
 
 - 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
 - 2025-12-14: Accessibility/Theme(확대모드) — `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
+- 2025-12-14: Shared UI 인벤토리(Workstream 3) — `Front/docs/WORKLOG_2025-12-14_SHARED_UI_INVENTORY.md`
 - 2025-12-14: Settings 화면 MUI 전환(1차) — `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
 - 2025-12-14: Playwright E2E Smoke(시니어/보호자) — `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`
