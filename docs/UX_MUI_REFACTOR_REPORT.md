@@ -247,6 +247,7 @@
 ## 진행 현황 (2025-12-14)
 
 - AppShell/Navigation Spike 1차 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
+- Phase/Task Tracker: `Front/docs/UX_MUI_REFACTOR_TASKS.md`
 
 ---
 

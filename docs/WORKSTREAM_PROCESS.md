@@ -125,3 +125,9 @@
 ## 9. 진행 현황 (Worklogs)
 
 - 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
+
+---
+
+## 10. Task Tracker
+
+- Phase/Workstream 체크리스트(진행 기준): `Front/docs/UX_MUI_REFACTOR_TASKS.md`
