@@ -13,7 +13,7 @@
 ## 0) 테스트 관점의 권장 전략 (Playwright 계획)
 
 ### A. UI/E2E “모킹 기반” (가장 안정적)
-- Playwright에서 `page.route('**/api/**', route => route.fulfill(...))`로 백엔드 응답을 고정.
+- Playwright에서 `page.route('**/*', ...)`를 사용하고 `pathname.startsWith('/api/')`로 필터링해 백엔드 응답을 고정(권장).
 - **외부 의존(OpenAI/MFDS/DUR/Google Vision/S3/Kafka/Redis)** 을 모두 우회 가능.
 - 이 문서의 DTO 예시 JSON을 그대로 `fulfill({ json })`에 사용.
 

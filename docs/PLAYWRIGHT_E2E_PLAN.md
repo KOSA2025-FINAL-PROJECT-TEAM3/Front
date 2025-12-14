@@ -16,7 +16,7 @@ API 요청/응답 스키마(모킹 JSON 포함)는 `Front/docs/PLAYWRIGHT_API_CO
 ## 2) 테스트 타입 분리(권장)
 
 ### A. Mock 기반 E2E (기본)
-- `page.route('**/api/**', ...)` 또는 앱의 API client 레이어를 기준으로 URL별로 응답을 고정.
+- `page.route('**/*', ...)` + `pathname.startsWith('/api/')` 필터로 URL별 응답을 고정(권장).
 - 파일 업로드/AI/외부 API(`/ocr/*`, `/diet/analyze*`, `/medications/search*`)는 무조건 모킹.
 
 ### B. Real backend 기반 E2E-lite (선택)
@@ -44,6 +44,12 @@ API 요청/응답 스키마(모킹 JSON 포함)는 `Front/docs/PLAYWRIGHT_API_CO
 ### 4.1 라우트 테이블(핵심)
 - 테스트 파일에서 URL별 핸들러를 map으로 관리합니다.
 - “상태(state)”가 필요한 경우(예: 약 등록 후 목록 반영)에는 **메모리 state**를 둡니다.
+
+주의(중요):
+- `page.route('**/api/**', ...)` 패턴은 사용하지 않습니다.
+  - Vite/React 환경에서 정적 자원 경로(`/src/**/api/**`)까지 매칭되어 모듈 로딩이 깨질 수 있습니다.
+  - 대신 `page.route('**/*')`로 받은 뒤 `resourceType(xhr|fetch|eventsource)` + `pathname.startsWith('/api/')`로 안전하게 필터링합니다.
+  - 일부 API는 trailing slash(`/api/foo/`)로 호출될 수 있어 `pathname`을 normalize하는 것이 안전합니다.
 
 권장 state 예시:
 - `medications: MedicationResponse[]`
@@ -97,4 +103,3 @@ UI가 특정 요소를 선택할 때, id 기반 상태를 유지하기 위해 �
 - Smoke + Medication + Family + Diet 시나리오가 CI에서 안정적으로 통과
 - 실패 케이스(401/403/400) 최소 1개씩 포함
 - 테스트가 외부 API/네트워크/시간에 의존하지 않음(필요 시 시간 고정)
-

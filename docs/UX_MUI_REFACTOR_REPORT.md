@@ -248,12 +248,15 @@
 
 - AppShell/Navigation Spike 1차 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
 - Accessibility/Theme(확대모드) 1차 반영: `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
+- Settings 화면 MUI 전환(1차): `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
+- Playwright E2E Smoke(시니어/보호자): `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`
 - Phase/Task Tracker: `Front/docs/UX_MUI_REFACTOR_TASKS.md`
 
 ---
 
 부록: 관련 파일
 - 라우팅: `Front/src/App.jsx`, `Front/src/core/config/routes.config.js`
-- 레이아웃: `Front/src/shared/components/layout/MainLayout.jsx`, `AdaptiveNavigation.jsx`, `BottomNavigation.jsx`
+- 레이아웃: `Front/src/shared/components/layout/MainLayout.jsx`, `AdaptiveNavigation.jsx`, `primaryNavItems.jsx`
 - 커스텀 UI: `Front/src/shared/components/ui/*`
 - 테마: `Front/src/styles/theme.js`
+- E2E: `Front/playwright.config.js`, `Front/tests/e2e/*`
