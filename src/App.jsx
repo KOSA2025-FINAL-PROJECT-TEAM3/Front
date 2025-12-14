@@ -57,7 +57,6 @@ const DiseasePage = lazy(() => import('@features/disease/pages/Disease'))
 const DiseaseDetailPage = lazy(() => import('@features/disease/pages/DiseaseDetailPage'))
 const SuspectedDiseasePage = lazy(() => import('@features/disease/pages/SuspectedDiseasePage'))
 const DiseaseRestrictionsPage = lazy(() => import('@features/disease/pages/DiseaseRestrictionsPage'))
-const DoctorChatListPage = lazy(() => import('@features/chat/pages/DoctorChatListPage'))
 const ChatConversationPage = lazy(() => import('@features/chat/pages/ChatConversationPage'))
 const FamilyChatConversationPage = lazy(() => import('@features/chat/pages/FamilyChatConversationPage'))
 const NotificationPage = lazy(() => import('@features/notification/pages/NotificationPage'))
@@ -333,7 +332,7 @@ function App() {
                 {/* 채팅 */}
                 <Route
                   path={ROUTE_PATHS.chatList}
-                  element={<PrivateRoute element={<DoctorChatListPage />} />}
+                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.familyChat} replace />} />}
                 />
                 <Route
                   path={ROUTE_PATHS.chatConversation}

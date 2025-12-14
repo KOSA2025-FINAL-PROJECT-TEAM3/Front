@@ -29,6 +29,10 @@ export const Header = () => {
     navigate(ROUTE_PATHS.notifications)
   }
 
+  const handleMoreClick = () => {
+    navigate(ROUTE_PATHS.more)
+  }
+
   // 사용자 이름 가져오기
   const userName = user?.name || user?.email?.split('@')[0] || '사용자'
 
@@ -75,16 +79,23 @@ export const Header = () => {
             </button>
           </div>
 
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              className={styles.notificationBadge}
-              onClick={handleNotificationClick}
-              aria-label={`읽지 않은 알림 ${unreadCount}개`}
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </button>
-          )}
+          <button
+            type="button"
+            className={styles.notificationBadge}
+            onClick={handleNotificationClick}
+            aria-label={unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '알림'}
+          >
+            {unreadCount > 0 ? (unreadCount > 9 ? '9+' : unreadCount) : '🔔'}
+          </button>
+
+          <button
+            type="button"
+            className={styles.moreButton}
+            onClick={handleMoreClick}
+            aria-label="더보기"
+          >
+            ⋯
+          </button>
         </div>
       </div>
     </header>

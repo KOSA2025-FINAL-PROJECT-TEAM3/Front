@@ -4,7 +4,7 @@
  * - Desktop: Sidebar (왼쪽 사이드바)
  */
 
-import { useState } from 'react'
+import { useMemo } from 'react'
 import {
   BottomNavigation,
   BottomNavigationAction,
@@ -21,29 +21,38 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom'
 import PropTypes from 'prop-types'
 
-	export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
-	  const theme = useTheme()
-	  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-	  const navigate = useNavigate()
-	  const location = useLocation()
-	  const [value, setValue] = useState(location.pathname)
-	  const useBottomNavigation = position === 'bottom' && isMobile
+export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const navigate = useNavigate()
+  const location = useLocation()
+  const useBottomNavigation = position === 'bottom' && isMobile
+
+  const activePath = useMemo(() => {
+    if (!items?.length) return ''
+    const pathname = location.pathname || ''
+
+    const matched = items.find((item) => {
+      if (!item?.path) return false
+      return pathname === item.path || pathname.startsWith(item.path + '/')
+    })
+
+    return matched?.path || items[0].path
+  }, [items, location.pathname])
 
   const handleChange = (event, newValue) => {
-    setValue(newValue)
     navigate(newValue)
   }
 
   const handleNavigate = (path) => {
-    setValue(path)
     navigate(path)
   }
 
-	// Mobile: BottomNavigation (position='bottom'일 때만)
-	if (useBottomNavigation) {
+  // Mobile: BottomNavigation (position='bottom'일 때만)
+  if (useBottomNavigation) {
     return (
       <BottomNavigation
-        value={value}
+        value={activePath}
         onChange={handleChange}
         showLabels
         sx={{
@@ -83,18 +92,19 @@ import PropTypes from 'prop-types'
         flexShrink: 0,
         '& .MuiDrawer-paper': {
           width: 240,
+          position: 'relative',
           boxSizing: 'border-box',
           borderRight: '1px solid',
           borderColor: 'divider',
         },
       }}
     >
-      <Box sx={{ overflow: 'auto', mt: 8 }}>
+      <Box sx={{ overflow: 'auto' }}>
         <List>
           {items.map((item) => (
             <ListItem key={item.path} disablePadding>
               <ListItemButton
-                selected={value === item.path}
+                selected={activePath === item.path}
                 onClick={() => handleNavigate(item.path)}
                 sx={{
                   '&.Mui-selected': {
@@ -107,7 +117,7 @@ import PropTypes from 'prop-types'
               >
                 <ListItemIcon
                   sx={{
-                    color: value === item.path ? 'primary.main' : 'text.secondary',
+                    color: activePath === item.path ? 'primary.main' : 'text.secondary',
                   }}
                 >
                   {item.icon}
@@ -116,7 +126,7 @@ import PropTypes from 'prop-types'
                   primary={item.label}
                   sx={{
                     '& .MuiTypography-root': {
-                      fontWeight: value === item.path ? 600 : 400,
+                      fontWeight: activePath === item.path ? 600 : 400,
                     },
                   }}
                 />
