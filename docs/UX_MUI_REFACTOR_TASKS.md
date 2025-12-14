@@ -8,7 +8,7 @@
 ## 현재 상태 스냅샷 (2025-12-14)
 
 - [x] Workstream 1(AppShell/Navigation) — 1차 Spike 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
-- [ ] Workstream 2(Accessibility/Theme) — 확대모드/토큰 정비
+- [x] Workstream 2(Accessibility/Theme) — 확대모드/토큰 정비(1차): `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
 - [ ] Workstream 3(Shared UI 제거) — `src/shared/components/ui/*` 제거 및 사용처 치환
 - [ ] Workstream 4(Feature P0) — 화면별 MUI 전환
 - [ ] Workstream 5(Cleanup/Docs) — Tailwind/SCSS 제거 및 문서 정리
@@ -34,7 +34,7 @@
 
 ### Phase 2. MUI Foundation 구축
 - [ ] `Front/src/styles/theme.js` 토큰 확장(타이포/간격/컬러/컴포넌트 오버라이드)
-- [ ] 접근성(확대모드) 테마 스위칭 초안 + 저장 방식 확정
+- [x] 접근성(확대모드) 테마 스위칭 초안 + 저장 방식(로컬) 확정
 - [ ] Design System 문서(`docs/DesignSystem.md`) 작성/갱신
 
 ### Phase 3. AppShell/Navigation 교체
@@ -43,7 +43,7 @@
 - [x] 레거시 `/chat` → `/chat/family` 리다이렉트
 - [x] VoiceAssistant 비노출 가드(채팅 fullScreen, OCR/식단 로그 페이지)
 - [ ] `AppShell.jsx`로 책임 분리(MainLayout 점진 제거)
-- [ ] 레거시 `BottomNavigation.jsx`/SCSS 정리(삭제 또는 완전 미사용 보장)
+- [x] 레거시 `BottomNavigation.jsx`/SCSS 정리(삭제)
 - [ ] “카메라/지도 집중 모드” 가드 보강(페이지 단위 → 컴포넌트/상태 단위)
 
 ### Phase 4. Shared UI Migration
@@ -70,4 +70,4 @@
 ## Worklogs
 
 - 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
-
+- 2025-12-14: Accessibility/Theme(확대모드) — `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`

@@ -125,6 +125,7 @@
 ## 9. 진행 현황 (Worklogs)
 
 - 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
+- 2025-12-14: Accessibility/Theme(확대모드) — `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
 
 ---
 
