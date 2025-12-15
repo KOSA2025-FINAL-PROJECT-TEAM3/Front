@@ -22,12 +22,12 @@ const breakpoints = {
   },
 }
 
-// Palette: Indigo primary + Gray background
+// Palette: Teal primary (RN prototype) + Soft blue background
 const palette = {
   primary: {
-    main: '#6366f1',      // indigo-500
-    light: '#818cf8',     // indigo-400
-    dark: '#4f46e5',      // indigo-600
+    main: '#2EC4B6',      // RN brand teal
+    light: '#5AD6CA',     // lighter teal
+    dark: '#25A094',      // darker teal
     contrastText: '#ffffff',
   },
   secondary: {
@@ -37,7 +37,7 @@ const palette = {
     contrastText: '#ffffff',
   },
   background: {
-    default: '#f9fafb',   // gray-50
+    default: '#F6FAFF',   // RN-style soft blue
     paper: '#ffffff',
   },
   text: {
@@ -131,6 +131,20 @@ const typography = {
     fontSize: '0.875rem', // 14px
     lineHeight: 1.5,
   },
+  subtitle1: {
+    fontSize: '1rem',
+    fontWeight: 600,
+    lineHeight: 1.5,
+  },
+  subtitle2: {
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    lineHeight: 1.5,
+  },
+  caption: {
+    fontSize: '0.75rem',
+    lineHeight: 1.4,
+  },
   button: {
     textTransform: 'none', // 버튼 텍스트 대문자 변환 비활성화
     fontWeight: 500,
@@ -183,6 +197,9 @@ const createComponents = ({ accessibilityMode }) => ({
           ? `${UI_FONT_SCALES.accessibility}px`
           : `${UI_FONT_SCALES.default}px`,
       },
+      body: {
+        backgroundColor: palette.background.default,
+      },
     },
   },
   MuiButton: {
@@ -214,6 +231,34 @@ const createComponents = ({ accessibilityMode }) => ({
     styleOverrides: {
       rounded: {
         borderRadius: 12,
+      },
+    },
+  },
+  MuiDialog: {
+    styleOverrides: {
+      paper: {
+        borderRadius: 16,
+      },
+    },
+  },
+  MuiAlert: {
+    styleOverrides: {
+      root: {
+        borderRadius: 12,
+      },
+    },
+  },
+  MuiListItemButton: {
+    styleOverrides: {
+      root: {
+        minHeight: 44,
+      },
+    },
+  },
+  MuiMenuItem: {
+    styleOverrides: {
+      root: {
+        minHeight: 44,
       },
     },
   },
