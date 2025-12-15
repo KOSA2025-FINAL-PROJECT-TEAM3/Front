@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
+import { Alert, Box, Chip, Paper, Stack, Typography } from '@mui/material'
 import { dietApiClient } from '@core/services/api/dietApiClient'
-import styles from './DietLogsTab.module.scss'
 
 const DietLogsTab = ({ userId }) => {
     const [logs, setLogs] = useState([])
@@ -36,12 +36,28 @@ const DietLogsTab = ({ userId }) => {
         fetchLogs()
     }, [userId])
 
-    if (loading) return <div className={styles.loading}>식단 기록을 불러오는 중...</div>
-    if (error) return <div className={styles.error}>{error}</div>
-    if (logs.length === 0) return <div className={styles.empty}>등록된 식단 기록이 없습니다.</div>
+    if (loading) {
+        return (
+            <Typography variant="body2" color="text.secondary">
+                식단 기록을 불러오는 중...
+            </Typography>
+        )
+    }
+    if (error) {
+        return <Alert severity="error">{error}</Alert>
+    }
+    if (logs.length === 0) {
+        return (
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, borderStyle: 'dashed', textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                    등록된 식단 기록이 없습니다.
+                </Typography>
+            </Paper>
+        )
+    }
 
     return (
-        <div className={styles.container}>
+        <Stack spacing={2}>
             {logs.map((log) => {
                 // Parse interactions if needed (backend might return string or json)
                 let drugInteractions = []
@@ -60,44 +76,94 @@ const DietLogsTab = ({ userId }) => {
                 }
 
                 const overallLevel = log.overallLevel || log.analysisResult?.overallLevel
+                const levelLabel = overallLevel ? getLevelLabel(overallLevel) : null
+                const levelColor =
+                    overallLevel === 'GOOD' || overallLevel === '좋음'
+                        ? 'success'
+                        : overallLevel === 'WARNING' || overallLevel === '주의'
+                            ? 'warning'
+                            : overallLevel === 'DANGER' || overallLevel === '위험' || overallLevel === '경고'
+                                ? 'error'
+                                : 'default'
 
                 return (
-                    <div key={log.id} className={styles.logCard}>
-                        <div className={styles.header}>
-                            <span className={styles.mealType}>{getMealTypeLabel(log.mealType)}</span>
-                            <span className={styles.date}>{formatDate(log.recordedAt || log.createdAt)}</span>
-                        </div>
-                        <div className={styles.content}>
-                            {log.imageUrl && (
-                                <div className={styles.imageWrapper}>
-                                    <img src={log.imageUrl} alt={log.foodName} className={styles.foodImage} />
-                                </div>
-                            )}
-                            <div className={styles.details}>
-                                <div className={styles.titleRow}>
-                                    <h3>{log.foodName}</h3>
-                                    {overallLevel && (
-                                        <span className={`${styles.statusBadge} ${styles[getLevelClass(overallLevel)]}`}>
-                                            {getLevelLabel(overallLevel)}
-                                        </span>
-                                    )}
-                                </div>
-                                {log.summary && <p className={styles.summary}>{log.summary}</p>}
+                    <Paper key={log.id} variant="outlined" sx={{ borderRadius: 4, p: 2, borderColor: 'divider' }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                            <Typography sx={{ fontWeight: 900 }}>{getMealTypeLabel(log.mealType)}</Typography>
+                            <Typography variant="caption" color="text.disabled">
+                                {formatDate(log.recordedAt || log.createdAt)}
+                            </Typography>
+                        </Stack>
 
-                                <div className={styles.interactions}>
-                                    {drugInteractions.length > 0 && (
-                                        <span className={styles.interactionChip}>💊 약물 {drugInteractions.length}</span>
-                                    )}
-                                    {diseaseInteractions.length > 0 && (
-                                        <span className={styles.interactionChip}>🏥 질병 {diseaseInteractions.length}</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            {log.imageUrl && (
+                                <Box
+                                    sx={{
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: 3,
+                                        overflow: 'hidden',
+                                        flexShrink: 0,
+                                        bgcolor: 'grey.100',
+                                    }}
+                                >
+                                    <Box component="img" src={log.imageUrl} alt={log.foodName} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                </Box>
+                            )}
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.75 }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
+                                        {log.foodName}
+                                    </Typography>
+                                    {levelLabel ? (
+                                        <Chip
+                                            label={levelLabel}
+                                            size="small"
+                                            color={levelColor}
+                                            variant={levelColor === 'default' ? 'outlined' : 'filled'}
+                                            sx={{ fontWeight: 900 }}
+                                        />
+                                    ) : null}
+                                </Stack>
+
+                                {log.summary ? (
+                                    <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                        sx={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            lineHeight: 1.4,
+                                        }}
+                                    >
+                                        {log.summary}
+                                    </Typography>
+                                ) : null}
+
+                                <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                                    {drugInteractions.length > 0 ? (
+                                        <Chip
+                                            size="small"
+                                            label={`💊 약물 ${drugInteractions.length}`}
+                                            sx={{ bgcolor: 'grey.100', border: '1px solid', borderColor: 'divider' }}
+                                        />
+                                    ) : null}
+                                    {diseaseInteractions.length > 0 ? (
+                                        <Chip
+                                            size="small"
+                                            label={`🏥 질병 ${diseaseInteractions.length}`}
+                                            sx={{ bgcolor: 'grey.100', border: '1px solid', borderColor: 'divider' }}
+                                        />
+                                    ) : null}
+                                </Stack>
+                            </Box>
+                        </Stack>
+                    </Paper>
                 )
             })}
-        </div>
+        </Stack>
     )
 }
 
@@ -109,13 +175,6 @@ const getMealTypeLabel = (type) => {
         SNACK: '간식',
     }
     return map[type] || type
-}
-
-const getLevelClass = (level) => {
-    if (level === '좋음' || level === 'GOOD') return 'GOOD'
-    if (level === '주의' || level === 'WARNING') return 'WARNING'
-    if (level === '위험' || level === '경고' || level === 'DANGER') return 'DANGER'
-    return 'default'
 }
 
 const getLevelLabel = (level) => {

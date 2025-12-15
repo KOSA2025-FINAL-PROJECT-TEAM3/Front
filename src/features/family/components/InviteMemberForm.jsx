@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { useForm, Controller } from 'react-hook-form'
-import MemberRoleSelector from './MemberRoleSelector.jsx'
-import styles from './InviteMemberForm.module.scss'
+import { Alert, Box, Button, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { MEMBER_ROLE_OPTIONS } from '@/constants/uiConstants'
 
 export const InviteMemberForm = ({ onSubmit, loading }) => {
   const {
@@ -39,57 +39,80 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* Invite Form */}
-      <form className={styles.form} onSubmit={handleSubmit(handleInvite)}>
-        {errors.root && <p className={styles.error}>{errors.root.message}</p>}
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Stack component="form" spacing={2} onSubmit={handleSubmit(handleInvite)}>
+        {errors.root ? <Alert severity="error">{errors.root.message}</Alert> : null}
 
-        <label className={styles.label}>
-          이름 <span className={styles.optional}>(선택)</span>
-          <input
-            type="text"
-            placeholder="초대할 분의 이름"
-            {...register('name', {
-              minLength: { value: 2, message: '이름은 최소 2글자 이상이어야 합니다.' },
-            })}
-            disabled={loading}
-          />
-          {errors.name && <span className={styles.fieldError}>{errors.name.message}</span>}
-        </label>
+        <TextField
+          label="이름 (선택)"
+          placeholder="초대할 분의 이름"
+          disabled={loading}
+          error={Boolean(errors.name)}
+          helperText={errors.name?.message || ''}
+          {...register('name', {
+            minLength: { value: 2, message: '이름은 최소 2글자 이상이어야 합니다.' },
+          })}
+          fullWidth
+        />
 
-        <label className={styles.label}>
-          이메일 <span className={styles.optional}>(선택 - 직접 발송용)</span>
-          <input
-            type="email"
+        <Box>
+          <TextField
+            label="이메일 (선택 - 직접 발송용)"
             placeholder="senior@example.com"
+            disabled={loading}
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message || '이메일을 입력하면 초대장이 메일로도 발송됩니다.'}
             {...register('email', {
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: '유효한 이메일을 입력해주세요.',
               },
             })}
-            disabled={loading}
+            fullWidth
           />
-          {errors.email && <span className={styles.fieldError}>{errors.email.message}</span>}
-          <p className={styles.hint}>이메일을 입력하면 초대장이 메일로도 발송됩니다.</p>
-        </label>
+        </Box>
 
         <Controller
           name="suggestedRole"
           control={control}
           render={({ field }) => (
-            <div className={styles.roleSection}>
-              <span className={styles.label}>역할</span>
-              <MemberRoleSelector value={field.value} onChange={field.onChange} disabled={loading} />
-            </div>
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                역할
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={field.value}
+                onChange={(_, nextValue) => {
+                  if (!nextValue) return
+                  field.onChange(nextValue)
+                }}
+                disabled={loading}
+                sx={{ mt: 1 }}
+                fullWidth
+              >
+                {MEMBER_ROLE_OPTIONS.map((option) => (
+                  <ToggleButton key={option.value} value={option.value} sx={{ py: 1.25 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography component="span" sx={{ fontSize: 18 }}>
+                        {option.icon}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {option.label}
+                      </Typography>
+                    </Stack>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
           )}
         />
 
-        <button type="submit" className={styles.submit} disabled={loading}>
+        <Button type="submit" variant="contained" disabled={loading} sx={{ fontWeight: 800, py: 1.25 }}>
           {loading ? '초대 중...' : '초대 링크 생성'}
-        </button>
-      </form>
-    </div>
+        </Button>
+      </Stack>
+    </Paper>
   )
 }
 
