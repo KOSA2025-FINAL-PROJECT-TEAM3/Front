@@ -5,8 +5,8 @@ import { MealInputForm } from '../components/MealInputForm'
 import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
-import { Box, TextField, Stack, Typography, Divider } from '@mui/material'
-import styles from './DietLogPage.module.scss'
+import { Box, Container, Divider, TextField, Stack, Typography } from '@mui/material'
+import { toast } from '@shared/components/toast/toastStore'
 
 export const DietLogPage = () => {
   const [meals, setMeals] = useState([])
@@ -43,11 +43,11 @@ export const DietLogPage = () => {
       setAllMeals(fetchedMeals)
     } catch (error) {
       logger.error('Failed to fetch diet logs:', error)
-      alert('식단 기록을 불러오는데 실패했습니다.')
+      toast.error('식단 기록을 불러오는데 실패했습니다.')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [toast])
 
   // 선택된 날짜에 따라 식단 필터링
   const filteredMeals = useMemo(() => {
@@ -84,7 +84,7 @@ export const DietLogPage = () => {
         fetchMeals() // Re-fetch to update the list
       } catch (error) {
         logger.error('Failed to add diet log:', error)
-        alert('식단 기록 추가에 실패했습니다.')
+        toast.error('식단 기록 추가에 실패했습니다.')
       }
     },
     [fetchMeals],
@@ -97,7 +97,7 @@ export const DietLogPage = () => {
         const message = isFuture
           ? '미래 날짜의 식단은 삭제할 수 없습니다.'
           : '과거 식단은 삭제할 수 없습니다.'
-        alert(message)
+        toast.info(message)
         return
       }
 
@@ -107,7 +107,7 @@ export const DietLogPage = () => {
           fetchMeals() // Re-fetch to update the list
         } catch (error) {
           logger.error('Failed to delete diet log:', error)
-          alert('식단 기록 삭제에 실패했습니다.')
+          toast.error('식단 기록 삭제에 실패했습니다.')
         }
       }
     },
@@ -120,7 +120,7 @@ export const DietLogPage = () => {
       const message = isFuture
         ? '미래 날짜의 식단은 수정할 수 없습니다.'
         : '과거 식단은 수정할 수 없습니다.'
-      alert(message)
+      toast.info(message)
       return
     }
     setEditingMeal(meal)
@@ -141,7 +141,7 @@ export const DietLogPage = () => {
         fetchMeals() // Re-fetch
       } catch (error) {
         logger.error('Failed to update diet log:', error)
-        alert('식단 기록 수정에 실패했습니다.')
+        toast.error('식단 기록 수정에 실패했습니다.')
       }
     },
     [fetchMeals],
@@ -149,15 +149,15 @@ export const DietLogPage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <h1>{editingMeal ? '식단 수정' : '식단 기록'}</h1>
-          <p>
-            {editingMeal
-              ? '선택한 식단을 수정하세요.'
-              : '오늘의 식단을 기록하고 관리하세요.'}
-          </p>
-        </header>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Box textAlign="center" sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            {editingMeal ? '식단 수정' : '식단 기록'}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 관리하세요.'}
+          </Typography>
+        </Box>
 
         {/* 날짜 선택기 & 날짜 표시 통합 */}
         <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
@@ -205,11 +205,13 @@ export const DietLogPage = () => {
         )}
 
         {loading ? (
-          <div className={styles.hint}>식단 기록을 불러오는 중...</div>
+          <Typography textAlign="center" color="text.secondary" sx={{ py: 3 }}>
+            식단 기록을 불러오는 중...
+          </Typography>
         ) : meals.length === 0 ? (
-          <div className={styles.hint}>
+          <Typography textAlign="center" color="text.secondary" sx={{ py: 3 }}>
             {isToday ? '오늘의 식단을 추가하세요.' : '이 날짜의 기록된 식단이 없습니다.'}
-          </div>
+          </Typography>
         ) : (
           <MealHistory
             meals={meals}
@@ -219,7 +221,7 @@ export const DietLogPage = () => {
             selectedDate={selectedDate}
           />
         )}
-      </div>
+      </Container>
     </MainLayout>
   )
 }
