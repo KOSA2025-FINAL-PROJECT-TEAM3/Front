@@ -6,6 +6,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Box, Paper, Stack, Typography } from '@mui/material'
 import { MedicationCard } from './MedicationCard'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
@@ -13,7 +14,6 @@ import { ROUTE_PATHS } from '@/core/config/routes.config'
 import { format } from 'date-fns'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
 import { toast } from '@shared/components/toast/toastStore' // [Voice]
-import styles from './MyMedicationSchedule.module.scss'
 import logger from '@core/utils/logger'
 
 // 시간대 라벨 결정
@@ -212,12 +212,16 @@ export const MyMedicationSchedule = ({
 
   if (loading) {
     return (
-      <div className={`${styles.scheduleSection} ${className}`}>
-        <h2 className={styles.sectionTitle}>{title}</h2>
-        <div className={styles.loadingState}>
-          <p>복용 일정을 불러오는 중...</p>
-        </div>
-      </div>
+      <Box className={className} sx={{ mb: 3 }}>
+        <Typography variant="h6" sx={{ fontWeight: 900, mb: 1.5 }}>
+          {title}
+        </Typography>
+        <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50', borderRadius: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            복용 일정을 불러오는 중...
+          </Typography>
+        </Paper>
+      </Box>
     )
   }
 
@@ -226,15 +230,21 @@ export const MyMedicationSchedule = ({
   }
 
   return (
-    <div className={`${styles.scheduleSection} ${className}`}>
-      <h2 className={styles.sectionTitle}>{title}</h2>
+    <Box className={className} sx={{ mb: 3 }}>
+      <Typography variant="h6" sx={{ fontWeight: 900, mb: 1.5 }}>
+        {title}
+      </Typography>
 
-      <div className={styles.medicationList}>
+      <Stack spacing={1.5}>
         {todaySchedules.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>오늘 복용할 약이 없습니다.</p>
-            <p className={styles.emptyHint}>약 관리 페이지에서 약을 등록하고 스케줄을 설정해주세요.</p>
-          </div>
+          <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', bgcolor: 'grey.50', borderRadius: 2 }}>
+            <Typography variant="body1" sx={{ fontWeight: 800 }}>
+              오늘 복용할 약이 없습니다.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+              약 관리 페이지에서 약을 등록하고 스케줄을 설정해주세요.
+            </Typography>
+          </Paper>
         ) : (
           todaySchedules.map((schedule) => (
             <MedicationCard
@@ -245,8 +255,8 @@ export const MyMedicationSchedule = ({
             />
           ))
         )}
-      </div>
-    </div>
+      </Stack>
+    </Box>
   )
 }
 

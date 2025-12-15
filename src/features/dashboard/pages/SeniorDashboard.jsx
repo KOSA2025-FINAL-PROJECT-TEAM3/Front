@@ -5,12 +5,12 @@
  */
 
 import { useMemo, useState, useEffect, useCallback } from 'react'
-import { Box, Typography, Stack } from '@mui/material'
+import { Box, Typography, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { MainLayout } from '@shared/components/layout/MainLayout'
 import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
 import { QuickActionGrid } from '../components/QuickActionGrid'
-import { FAB } from '@shared/components/ui/FAB'
+import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
 import { HeroMedicationCard } from '../components/HeroMedicationCard'
 import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
 import { TodayMedicationCheckbox } from '../components/TodayMedicationCheckbox'
@@ -33,6 +33,8 @@ const getLogScheduleId = (log) =>
   null
 
 export const SeniorDashboard = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user } = useAuth((state) => ({ user: state.user }))
   const { medications, fetchMedications } = useMedicationStore()
   const [exporting, setExporting] = useState(false)
@@ -355,7 +357,7 @@ export const SeniorDashboard = () => {
           </Box>
         </Stack>
 
-        <FAB actions={fabActions} />
+        {isMobile && <SpeedDialFab actions={fabActions} />}
       </ResponsiveContainer>
     </MainLayout>
   )

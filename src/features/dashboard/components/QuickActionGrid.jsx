@@ -12,7 +12,6 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
 import PropTypes from 'prop-types'
 
 export const QuickActionGrid = ({ actions = [] }) => {
