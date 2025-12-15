@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import classNames from 'classnames'
+import { keyframes } from '@emotion/react'
+import { Box, IconButton, Paper, Typography } from '@mui/material'
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition'
 import { useVoiceStore } from '../stores/voiceStore'
-import styles from './VoiceAssistant.module.scss'
 
 // 마이크 아이콘 (Heroicons)
 const MicIcon = () => (
@@ -18,6 +18,12 @@ const StopIcon = () => (
     </svg>
 )
 
+const pulse = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+`
+
 export const VoiceAssistant = () => {
   const { isListening, toggleVoice, processCommand } = useVoiceRecognition()
   const { transcript, feedbackMessage } = useVoiceStore()
@@ -28,12 +34,41 @@ export const VoiceAssistant = () => {
     <>
       {/* 듣고 있을 때 화면 전체를 어둡게 하고 피드백 표시 */}
       {isListening && (
-        <div className={styles.overlay}>
-          <div className={styles.feedbackBox}>
-            <h3>{feedbackMessage || "말씀해주세요..."}</h3>
-            <p>{transcript}</p>
-          </div>
-        </div>
+        <Box
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            bgcolor: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 9998,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'common.white',
+            pointerEvents: 'none',
+          }}
+        >
+          <Paper
+            sx={{
+              pointerEvents: 'none',
+              bgcolor: 'common.white',
+              color: 'text.primary',
+              px: 3.5,
+              py: 2.5,
+              borderRadius: 4,
+              textAlign: 'center',
+              minWidth: 300,
+              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+              mb: 15,
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ m: 0, mb: 1, color: 'text.secondary', fontWeight: 800 }}>
+              {feedbackMessage || '말씀해주세요...'}
+            </Typography>
+            <Typography variant="h5" sx={{ m: 0, fontWeight: 900 }}>
+              {transcript}
+            </Typography>
+          </Paper>
+        </Box>
       )}
 
       {/* [DEBUG] 음성 명령 시뮬레이션 입력창 */}
@@ -66,15 +101,24 @@ export const VoiceAssistant = () => {
         </div>
       )}
 
-      <div className={styles.voiceContainer}>
-        <button 
-          className={classNames(styles.micButton, { [styles.listening]: isListening })}
+      <Box sx={{ position: 'fixed', bottom: 80, left: 20, zIndex: 9999, display: 'flex', flexDirection: 'column' }}>
+        <IconButton
           onClick={toggleVoice}
           aria-label="음성 명령 시작"
+          sx={{
+            width: 64,
+            height: 64,
+            bgcolor: isListening ? 'error.main' : 'primary.main',
+            color: 'common.white',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            '&:hover': { bgcolor: isListening ? 'error.dark' : 'primary.dark' },
+            '& svg': { width: 32, height: 32 },
+            animation: isListening ? `${pulse} 1.5s infinite` : 'none',
+          }}
         >
           {isListening ? <StopIcon /> : <MicIcon />}
-        </button>
-      </div>
+        </IconButton>
+      </Box>
     </>
   )
 }

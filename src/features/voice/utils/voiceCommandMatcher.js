@@ -32,7 +32,6 @@ export const matchVoiceCommand = (transcript) => {
     },
     {
       keywords: ['상담', '의사', '선생님'],
-      target: ROUTE_PATHS.counsel,
       message: '상담 화면으로 연결합니다.'
     },
     {
