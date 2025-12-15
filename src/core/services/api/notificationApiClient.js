@@ -15,11 +15,10 @@ class NotificationApiClient extends ApiClient {
     }
 
     list(userId) {
-        return this.get('/', { userId })
-    }
-
-    getDetail(id) {
-        return this.get(`/${id}`)
+        if (userId) {
+            return this.get('/', { params: { userId } })
+        }
+        return this.get('/')
     }
 
     markAsRead(id) {
