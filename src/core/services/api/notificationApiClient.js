@@ -164,6 +164,21 @@ class NotificationApiClient extends ApiClient {
             }
         })
 
+        // 채팅 업데이트 알림 추가
+        this.eventSource.addEventListener('chat-update', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'chat-update' })
+                }
+            } catch (error) {
+                logger.error('Failed to parse chat-update event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
         // Handle connection errors
         this.eventSource.onerror = (error) => {
             logger.error('SSE connection error:', error)
