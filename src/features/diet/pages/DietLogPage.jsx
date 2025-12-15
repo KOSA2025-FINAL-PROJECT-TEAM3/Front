@@ -47,7 +47,7 @@ export const DietLogPage = () => {
     } finally {
       setLoading(false)
     }
-  }, [toast])
+  }, [])
 
   // 선택된 날짜에 따라 식단 필터링
   const filteredMeals = useMemo(() => {

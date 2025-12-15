@@ -1,5 +1,5 @@
 import logger from '@core/utils/logger'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
@@ -41,6 +41,26 @@ export const DiseasePage = () => {
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
 
+  const handleExportPdf = useCallback(async () => {
+    if (!userId) return
+    setExporting(true)
+    try {
+      const blob = await diseaseApiClient.exportPdf(userId)
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'diseases.pdf'
+      link.click()
+      window.URL.revokeObjectURL(url)
+      toast.success('PDF 다운로드를 시작합니다.')
+    } catch (error) {
+      logger.error('PDF 다운로드 실패', error)
+      toast.error('PDF 다운로드에 실패했습니다.')
+    } finally {
+      setExporting(false)
+    }
+  }, [userId])
+
   // 음성 명령 (질병 자동 입력 및 PDF 다운로드)
   useEffect(() => {
     // 1. 질병 등록 자동 채우기
@@ -56,7 +76,7 @@ export const DiseasePage = () => {
     if (downloadAction) {
       handleExportPdf()
     }
-  }, [consumeAction])
+  }, [consumeAction, handleExportPdf])
 
   const fabActions = [
     {
@@ -99,26 +119,6 @@ export const DiseasePage = () => {
     } catch (error) {
       logger.error('질병 삭제 실패', error)
       toast.error('삭제에 실패했습니다.')
-    }
-  }
-
-  const handleExportPdf = async () => {
-    if (!userId) return
-    setExporting(true)
-    try {
-      const blob = await diseaseApiClient.exportPdf(userId)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'diseases.pdf'
-      link.click()
-      window.URL.revokeObjectURL(url)
-      toast.success('PDF 다운로드를 시작합니다.')
-    } catch (error) {
-      logger.error('PDF 다운로드 실패', error)
-      toast.error('PDF 다운로드에 실패했습니다.')
-    } finally {
-      setExporting(false)
     }
   }
 

@@ -38,8 +38,6 @@ export const FamilyChatConversationPage = () => {
   const stompClientRef = useRef(null); 
   const prevScrollHeightRef = useRef(null);
   const observerRef = useRef(null); 
-  // [FIX] 새로고침 후 각 멤버의 첫 읽음 신호를 추적하여 중복 차감 방지
-  const processedReadSendersRef = useRef(new Set());
 
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(0);
