@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import styles from './ChatMessage.module.scss'
+import { Box, Stack, Typography } from '@mui/material'
+import CircularProgress from '@mui/material/CircularProgress'
 import ReactMarkdown from 'react-markdown' // react-markdown 라이브러리 추가
 
 /**
@@ -35,68 +36,98 @@ export const ChatMessage = ({ message, isMe, sender }) => {
   // ✅ 메시지 내 시간 필드 찾기 (createdAt 또는 timestamp 둘 다 지원)
   const timeDisplay = formatTime(message.createdAt || message.timestamp);
 
-  const messageClass = useMemo(() => {
-    return `${styles.message} ${isMe ? styles.mine : styles.theirs}`
+  const layoutDirection = useMemo(() => (isMe ? 'row-reverse' : 'row'), [isMe])
+  const metaDirection = useMemo(() => (isMe ? 'row-reverse' : 'row'), [isMe])
+  const bubbleSx = useMemo(() => {
+    if (isMe) {
+      return {
+        bgcolor: 'warning.main',
+        color: 'common.white',
+        borderBottomRightRadius: 6,
+      }
+    }
+    return {
+      bgcolor: 'grey.200',
+      color: 'text.primary',
+      borderTopLeftRadius: 6,
+    }
   }, [isMe])
 
   return (
-    <div className={messageClass}>
-      {!isMe && sender && (
-        <div className={styles.avatar}>
-          <img src={sender.profileImage} alt={sender.name} />
-        </div>
-      )}
+    <Stack direction={layoutDirection} spacing={1} alignItems="flex-end" sx={{ mb: 2 }}>
+      {!isMe && sender ? (
+        <Box
+          component="img"
+          src={sender.profileImage}
+          alt={sender.name}
+          sx={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+        />
+      ) : null}
 
-      <div className={styles.content}>
-        {!isMe && (
-          // sender가 없으면 message.memberNickname 사용 (안전장치 추가)
-          <span className={styles.senderName}>
-            {message.familyMemberId === 0 
-              ? 'AI 약사' 
-              : (sender?.name || message.memberNickname || '알 수 없음')}
-          </span>
-        )}
-        
-        <div className={styles.bubble}>
+      <Box sx={{ maxWidth: '70%', display: 'flex', flexDirection: 'column' }}>
+        {!isMe ? (
+          <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, ml: 0.5 }}>
+            {message.familyMemberId === 0 ? 'AI 약사' : (sender?.name || message.memberNickname || '알 수 없음')}
+          </Typography>
+        ) : null}
+
+        <Box
+          sx={{
+            px: 1.75,
+            py: 1.25,
+            borderRadius: 4,
+            fontSize: 14,
+            lineHeight: 1.5,
+            wordBreak: 'break-word',
+            ...bubbleSx,
+          }}
+        >
           {message.type === "IMAGE" ? (
-            <img src={message.content} alt="채팅 이미지" className={styles.chatImage} />
-          ) : message.type === "AI_LOADING" ? ( // [GEMINI-FIX] AI 로딩 메시지 타입 처리
-            <p className={`${styles.text} ${styles.aiLoadingText}`}>
-              <span className={styles.loadingDot}></span>
-              <span className={styles.loadingDot}></span>
-              <span className={styles.loadingDot}></span>
-              {message.content}
-            </p>
+            <Box
+              component="img"
+              src={message.content}
+              alt="채팅 이미지"
+              sx={{ display: 'block', maxWidth: '100%', borderRadius: 2, mt: 0.5 }}
+            />
+          ) : message.type === "AI_LOADING" ? (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <CircularProgress size={14} thickness={6} sx={{ color: 'text.secondary' }} />
+              <Typography variant="body2" sx={{ m: 0, color: 'text.secondary', fontStyle: 'italic' }}>
+                {message.content}
+              </Typography>
+            </Stack>
           ) : (
-            // [GEMINI-FIX]: 그 외의 경우 텍스트 메시지를 렌더링
             <ReactMarkdown
               components={{
-                p: ({ node, ...props }) => <p className={styles.text} {...props} />,
-                // 필요하다면 다른 HTML 요소(h1, h2, ul, li 등)에도 스타일을 적용할 수 있습니다.
-                // h1: ({ node, ...props }) => <h1 className={styles.markdownH1} {...props} />,
-                // ul: ({ node, ...props }) => <ul className={styles.markdownUl} {...props} />,
+                p: ({ node, ...props }) => (
+                  <Typography variant="body2" sx={{ m: 0, whiteSpace: 'pre-wrap', color: 'inherit' }} {...props} />
+                ),
               }}
             >
               {message.content}
             </ReactMarkdown>
           )}
-        </div>
-        
-        <div className={styles.meta}>
-          {/* 안 읽은 사람 수 (노란 숫자) */}
-          {message.unreadCount > 0 && (
-            <span className={styles.unreadCount}>{message.unreadCount}</span>
-          )}
-          
-          {/* ✅ 수정된 시간 표시 */}
-          <span className={styles.time}>{timeDisplay}</span>
-          
-          {isMe && message.isRead && (
-            <span className={styles.readStatus}>읽음</span>
-          )}
-        </div>
-      </div>
-    </div>
+        </Box>
+
+        <Stack direction={metaDirection} spacing={0.75} alignItems="flex-end" sx={{ mt: 0.5, mx: 0.5 }}>
+          {message.unreadCount > 0 ? (
+            <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 800, color: 'warning.dark' }}>
+              {message.unreadCount}
+            </Typography>
+          ) : null}
+
+          <Typography variant="caption" sx={{ fontSize: 11, color: 'text.disabled' }}>
+            {timeDisplay}
+          </Typography>
+
+          {isMe && message.isRead ? (
+            <Typography variant="caption" sx={{ fontSize: 11, color: 'success.main' }}>
+              읽음
+            </Typography>
+          ) : null}
+        </Stack>
+      </Box>
+    </Stack>
   )
 }
 

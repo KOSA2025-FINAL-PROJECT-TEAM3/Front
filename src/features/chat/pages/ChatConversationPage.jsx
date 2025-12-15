@@ -2,10 +2,12 @@ import logger from "@core/utils/logger"
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
+import { Alert, Avatar, Box, Button, CircularProgress, IconButton, Paper, Stack, Typography } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ChatMessage from '../components/ChatMessage'
 import ChatInput from '../components/ChatInput'
 import { chatApiClient } from '@/core/services/api/chatApiClient'
-import styles from './ChatConversationPage.module.scss'
+import { toast } from '@shared/components/toast/toastStore'
 
 /**
  * ChatConversationPage - 1:1 채팅 대화 페이지
@@ -20,19 +22,6 @@ export const ChatConversationPage = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState(null)
-
-  useEffect(() => {
-    loadMessages()
-  }, [roomId, loadMessages])
-
-  useEffect(() => {
-    // 새 메시지가 추가되면 스크롤을 맨 아래로
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   const loadMessages = useCallback(async () => {
     setIsLoading(true)
@@ -58,7 +47,20 @@ export const ChatConversationPage = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [roomId, setIsLoading, setError, setMessages, setCounselor])
+  }, [roomId])
+
+  useEffect(() => {
+    loadMessages()
+  }, [roomId, loadMessages])
+
+  useEffect(() => {
+    // 새 메시지가 추가되면 스크롤을 맨 아래로
+    scrollToBottom()
+  }, [messages])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const handleSendMessage = async (content) => {
     if (!content.trim() || isSending) return
@@ -73,7 +75,7 @@ export const ChatConversationPage = () => {
       // TODO: WebSocket 연동 후 구현
     } catch (err) {
       logger.error('메시지 전송 실패:', err)
-      alert('메시지 전송에 실패했습니다.')
+      toast.error('메시지 전송에 실패했습니다.')
     } finally {
       setIsSending(false)
     }
@@ -86,62 +88,81 @@ export const ChatConversationPage = () => {
   if (error) {
     return (
       <MainLayout>
-        <div className={styles.error}>
-          <p>{error}</p>
-          <button onClick={loadMessages}>다시 시도</button>
-          <button onClick={handleBack}>목록으로</button>
-        </div>
+        <Box sx={{ p: 3 }}>
+          <Alert
+            severity="error"
+            action={
+              <Stack direction="row" spacing={1}>
+                <Button color="inherit" size="small" onClick={loadMessages}>
+                  다시 시도
+                </Button>
+                <Button color="inherit" size="small" onClick={handleBack}>
+                  목록으로
+                </Button>
+              </Stack>
+            }
+          >
+            {error}
+          </Alert>
+        </Box>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout showBottomNav={false}>
-      <div className={styles.page}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: 'grey.100' }}>
         {/* 채팅 헤더 */}
-        <header className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M15 18l-6-6 6-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+        <Paper square variant="outlined" sx={{ borderLeft: 0, borderRight: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ px: 2, py: 1.5 }}>
+            <IconButton onClick={handleBack} aria-label="뒤로">
+              <ArrowBackIcon />
+            </IconButton>
 
-          {counselor && (
-            <div className={styles.counselorInfo}>
-              <img src={counselor.profileImage} alt={counselor.name} className={styles.avatar} />
-              <div className={styles.info}>
-                <h2 className={styles.name}>{counselor.name}</h2>
-                {counselor.type === 'ai_bot' && (
-                  <span className={styles.badge}>AI 챗봇</span>
-                )}
-              </div>
-            </div>
-          )}
+            {counselor ? (
+              <Stack direction="row" alignItems="center" spacing={1.25} sx={{ flex: 1, minWidth: 0 }}>
+                <Avatar src={counselor.profileImage} alt={counselor.name} />
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.1 }} noWrap>
+                    {counselor.name}
+                  </Typography>
+                  {counselor.type === 'ai_bot' ? (
+                    <Typography variant="caption" color="secondary">
+                      AI 챗봇
+                    </Typography>
+                  ) : null}
+                </Box>
+              </Stack>
+            ) : (
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, flex: 1 }}>
+                채팅
+              </Typography>
+            )}
 
-          <div className={styles.actions}>
-            {/* TODO: 메뉴 버튼 추가 */}
-          </div>
-        </header>
+            <Box />
+          </Stack>
+        </Paper>
 
         {/* 메시지 리스트 */}
-        <div className={styles.messageList}>
+        <Box sx={{ flex: 1, overflowY: 'auto', px: 2, py: 2 }}>
           {isLoading && (
-            <div className={styles.loading}>
-              <p>메시지를 불러오는 중...</p>
-            </div>
+            <Stack spacing={2} alignItems="center" sx={{ py: 6 }}>
+              <CircularProgress />
+              <Typography variant="body2" color="text.secondary">
+                메시지를 불러오는 중...
+              </Typography>
+            </Stack>
           )}
 
           {!isLoading && messages.length === 0 && (
-            <div className={styles.empty}>
-              <p>아직 메시지가 없습니다.</p>
-              <p className={styles.hint}>첫 메시지를 보내보세요!</p>
-            </div>
+            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                아직 메시지가 없습니다.
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                첫 메시지를 보내보세요!
+              </Typography>
+            </Paper>
           )}
 
           {!isLoading && messages.map((message) => {
@@ -157,13 +178,13 @@ export const ChatConversationPage = () => {
           })}
 
           <div ref={messagesEndRef} />
-        </div>
+        </Box>
 
         {/* 입력창 */}
-        <ChatInput onSend={handleSendMessage} disabled={isSending} />
+        <ChatInput onSend={handleSendMessage} disabled={isSending} allowImageUpload={false} />
 
 
-      </div>
+      </Box>
     </MainLayout>
   )
 }
