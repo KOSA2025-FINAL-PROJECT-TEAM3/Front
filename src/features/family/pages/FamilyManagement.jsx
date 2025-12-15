@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import AppDialog from '@shared/components/mui/AppDialog'
-import { Alert, Box, Button, Container, Divider, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
+import { Alert, Badge, Box, Button, Container, Divider, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -13,6 +13,7 @@ import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
 import logger from '@core/utils/logger'
+import { useUnreadBadge } from '@features/chat/hooks/useUnreadBadge'
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -20,7 +21,7 @@ export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
   const currentUserId = useAuthStore((state) => state.user?.id || state.user?.userId)
-
+  
   const {
     familyGroups,
     selectedGroupId,
@@ -33,6 +34,13 @@ export const FamilyManagementPage = () => {
     error,
     refetchFamily,
   } = useFamilyStore()
+
+  // 선택된 그룹 및 멤버 파생
+  const familyGroup = getSelectedGroup()
+  const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
+
+  const { unreadCount } = useUnreadBadge(familyGroup?.id)
+
   const [currentUserRole, setCurrentUserRole] = useState(null)
   const onlineMemberIds = []
 
@@ -46,10 +54,6 @@ export const FamilyManagementPage = () => {
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
   const [delegationModal, setDelegationModal] = useState({ open: false, memberId: null, newRole: null })
-
-  // 선택된 그룹 및 멤버 파생
-  const familyGroup = getSelectedGroup()
-  const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
 
   useEffect(() => {
     if (!members?.length || !currentUserId) {
@@ -468,20 +472,27 @@ export const FamilyManagementPage = () => {
                 {dissolving ? '해산 중...' : '그룹 해산'}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={() => {
-                if (familyGroup?.id) {
-                  const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
-                  navigate(path)
-                } else {
-                  navigate(ROUTE_PATHS.familyChat)
-                }
-              }}
+            <Badge
+              color="error"
+              overlap="circular"
+              badgeContent={unreadCount > 99 ? '99+' : unreadCount}
+              invisible={!unreadCount}
             >
-              가족 채팅
-            </Button>
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={() => {
+                  if (familyGroup?.id) {
+                    const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
+                    navigate(path)
+                  } else {
+                    navigate(ROUTE_PATHS.familyChat)
+                  }
+                }}
+              >
+                가족 채팅
+              </Button>
+            </Badge>
           </Stack>
         </Stack>
 

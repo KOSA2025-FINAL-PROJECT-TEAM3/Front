@@ -256,42 +256,22 @@ export const FamilyChatConversationPage = () => {
               const senderId = body.familyMemberId;
 
               setMessages(prevMessages => {
-                  // [FIX] 새로고침 직후 로직 보정
-                  // B가 처음 보낸 신호인데, 그게 '가장 최신 메시지'에 대한 것이라면?
-                  // -> B는 원래 다 읽고 있던 사람이다. -> 기존 메시지 카운트 깎지 말고 마킹만 한다.
-                  const isFirstEventFromSender = !processedReadSendersRef.current.has(senderId);
-                  const latestMsgId = prevMessages.length > 0 ? prevMessages[prevMessages.length - 1].id : 0;
-                  
-                  // B가 최신글(혹은 그 이상)을 읽었다고 했다면 '이미 읽은 사람'으로 간주
-                  // (약간의 오차 허용을 위해 최신글 ID와 같거나 크면 인정)
-                  const isExistingReader = isFirstEventFromSender && (readMessageId >= latestMsgId);
-
-                  if (isFirstEventFromSender) {
-                      processedReadSendersRef.current.add(senderId);
-                  }
-
                   return prevMessages.map(m => {
+                      // 해당 메시지보다 과거이거나 같은 메시지이고, 아직 안 읽은 사람이 남아있다면
                       if (m.id <= readMessageId && m.unreadCount > 0) {
-                          const readBy = m.readBy || [];
+                          // [FIX] 서버에서 받은 readMemberIds와 로컬 readBy를 합쳐서 판단
+                          const currentReadMembers = m.readMemberIds || m.readBy || [];
                           
-                          if (readBy.includes(senderId)) {
+                          // 이미 읽은 사람 목록에 포함되어 있다면? -> 중복 차감 방지!
+                          if (currentReadMembers.includes(senderId)) {
                               return m;
-                          }
-
-                          // 🔥 핵심: 이미 읽고 있던 사람(isExistingReader)의 첫 신호라면
-                          // 숫자는 깎지 말고(원래 깎여 있었을 테니), 'readBy'에만 추가해서 다음번 차감을 방어한다.
-                          if (isExistingReader) {
-                              return {
-                                  ...m,
-                                  readBy: [...readBy, senderId]
-                              };
                           }
 
                           logger.debug(`🔻 메시지(${m.id}) 숫자 감소! (읽은사람: ${senderId}) 남은 수: ${m.unreadCount - 1}`);
                           return { 
                               ...m, 
-                              unreadCount: m.unreadCount - 1,
-                              readBy: [...readBy, senderId]
+                              unreadCount: Math.max(0, m.unreadCount - 1),
+                              readMemberIds: [...currentReadMembers, senderId] // 명단에 추가
                           };
                       }
                       return m;
@@ -377,6 +357,14 @@ export const FamilyChatConversationPage = () => {
 
   const handleImageUpload = useCallback(async (file, content = "") => {
     if (!file || isSending) return;
+
+    // [FIX] 이미지 용량 제한 (5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+        alert("이미지 파일 크기는 5MB를 초과할 수 없습니다.");
+        return;
+    }
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("familyMemberId", currentUserId);
