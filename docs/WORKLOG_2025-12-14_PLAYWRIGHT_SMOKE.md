@@ -31,7 +31,13 @@
 ## 실행 방법
 
 - `Front/`에서 실행:
-  - `npm run test:e2e -- --workers=1`
+  - (npm 사용 가능 시) `npm run test:e2e -- --workers=1`
+  - (npm 불가 시) `node ./node_modules/@playwright/test/cli.js test --workers=1 --reporter=list`
+  - (정적 점검 + 스모크 한번에) `powershell -ExecutionPolicy Bypass -File Front/scripts/run-workstream5.ps1`
+
+환경/브라우저:
+- `Front/playwright.config.js`는 기본적으로 `PLAYWRIGHT_BROWSER_CHANNEL`의 값을 사용하며, 미지정 시 `msedge`를 사용합니다.
+  - 필요 시 `PLAYWRIGHT_BROWSER_CHANNEL=chrome` 또는 `chromium` 등으로 변경 가능(설치/환경에 따라 상이)
 
 ---
 
@@ -48,4 +54,3 @@
 
 - [ ] P0 시나리오 확장(약 등록/복용 완료/가족 그룹/식단) + 실패 케이스(401/403/400) 추가
 - [ ] API 모킹 라우트/fixture를 파일 구조(`fixtures/`, `routes/`)로 분리(스케일 대비)
-

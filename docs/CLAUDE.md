@@ -210,8 +210,8 @@ src/
 │
 ├── assets/                          # 정적 자원
 └── styles/                          # 전역 스타일
-    ├── base.scss
-    └── tailwind.css
+    ├── base.css
+    └── base.css
 ```
 
 ## Key Commands

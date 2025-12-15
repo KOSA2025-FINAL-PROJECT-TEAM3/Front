@@ -52,6 +52,5 @@
 
 - [ ] VoiceAssistant “카메라 오픈 상태” 기반 가드(페이지 단위가 아니라 컴포넌트/모달 단위)
 - [ ] `/chat` 리다이렉트 이후 Doctor/AI 상담 리스트 진입 경로 재배치(필요 시 `/counsel/chat` 등)
-- [ ] `AppShell.jsx` 분리(헤더/사이드바/바텀탭 책임 분리) 및 `MainLayout` 단계적 제거
-- [ ] Shared UI(`src/shared/components/ui/*`) → MUI 직접 사용 치환 착수
-
+- [x] `AppShell.jsx` 분리(헤더/사이드바/바텀탭 책임 분리) 및 `MainLayout` 단계적 제거: `Front/src/shared/components/layout/AppShell.jsx`
+- [x] Shared UI(`src/shared/components/ui/*`) → MUI 기반 컴포넌트로 치환/제거 완료: `Front/docs/WORKLOG_2025-12-15_SHARED_UI_REMOVAL.md`

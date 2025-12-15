@@ -19,6 +19,14 @@
 - `POST` `/api/reports/adherence` → `/reports/adherence` / `src\core\services\api\reportApiClient.js`
 - `GET` `/api/reports/weekly` → `/reports/weekly` / `src\core\services\api\reportApiClient.js`
 
+## 프론트에서는 엔드포인트 무조건 /api를 붙여야 함
+
+## /counsel => 의사 상담 관련이라면 필요없으니 삭제.
+
+## /auth => auth-service 레포지토리
+
+## /chat => [text](../../spring-boot/src/main/java/com/amapill/backend/domain/chat) 이거 확인 바람.
+
 ## Front → SpringBoot 미매칭(타 서비스로 추정)
 - `POST` `/counsel/submit` / `src\core\services\api\counselApiClient.js` ((미구현 또는 별도 서비스))
 - `POST` `/auth/deeplink/resolve` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
@@ -34,6 +42,8 @@
 - `GET` `/chat/rooms/{roomId}/messages` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
 - `POST` `/chat/rooms/{roomId}/messages` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
 - `PATCH` `/chat/rooms/{roomId}/messages/{messageId}/read` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
+
+
 
 ## 설정/라우팅 의심 포인트
 - 아래 클라이언트는 `baseURL` 기본값이 `localhost:8082`(core)인데 `basePath`가 `/api/...` 입니다.

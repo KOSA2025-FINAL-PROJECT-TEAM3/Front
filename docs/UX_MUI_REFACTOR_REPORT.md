@@ -35,10 +35,10 @@
 - MUI 커스텀 테마 존재: `Front/src/styles/theme.js`.
 - 그러나 실제 UI는 **3계층이 혼재**:
   1) MUI 컴포넌트(주로 대시보드/일부 페이지)
-  2) 커스텀 UI 프리미티브: `src/shared/components/ui/*` (Button/Input/Card/Modal/Tabs/FAB 등)
+  2) (정리됨) Shared UI(`src/shared/components/ui/*`)는 제거 완료 → `src/shared/components/mui/*`로 치환
   3) Tailwind + SCSS Modules
-- SCSS Modules 파일이 많음: `*.module.scss` 약 **118개**.
-- 커스텀 UI 임포트 사용량도 상당: `@shared/components/ui` 매치 **44건**.
+- (정리됨) `*.module.scss` 0건, `*.module.css` 0건.
+- (정리됨) `@shared/components/ui*` 임포트 0건.
 
 ### 1.3 레이아웃/내비게이션 현황
 - 전역 레이아웃: `src/shared/components/layout/MainLayout.jsx`.
@@ -203,7 +203,8 @@
 
 ### Phase 6. Cleanup/Hardening (1주)
 - Tailwind 의존성은 즉시 제거하고, SCSS는 **MUI 전환 후 남는 파일만 `*.module.css`로 리네임**한 뒤 `sass`를 제거한다.
-- `src/styles/tailwind.css`/`base.scss`를 정리하고 전역 스타일은 MUI CssBaseline/Theme로 통합한다.
+- `src/styles/base.css`를 정리하고 전역 스타일은 MUI CssBaseline/Theme로 통합한다.
+- (정리됨) `src/styles/tailwind.css` 삭제, `src/styles/base.scss` → `src/styles/base.css`
 - 미사용 커스텀 UI/레이아웃, DoctorChat 관련 페이지를 삭제/정리한다.
 - 접근성(확대모드), 반응형(모바일 중심), 성능 회귀 점검을 수행한다.
 
@@ -229,7 +230,9 @@
 ---
 
 ## 7. DoD / 체크리스트
-- Tailwind class 0건, `*.module.scss` 0건, 필요 시 `*.module.css`만 잔존.
+- Tailwind class 0건, `*.module.scss` 0건, `*.module.css` 0건(전부 MUI `sx`/`GlobalStyles`로 흡수).
+- 집중 모드(카메라 등)에서는 상태 기반으로 VoiceAssistant 비노출 처리.
+- 병원/약국 검색은 `/places`에서 Kakao Maps 기반으로 제공(`VITE_KAKAO_JAVASCRIPT_KEY` 필요).
 - 모든 화면이 MUI 테마 토큰/컴포넌트 기반으로 렌더링.
 - Senior 3탭 / Caregiver 4탭 내비가 AppShell에서 일관 동작.
 - VoiceAssistant는 카메라/지도 화면에서 비노출.
@@ -249,15 +252,18 @@
 - AppShell/Navigation Spike 1차 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
 - Accessibility/Theme(확대모드) 1차 반영: `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
 - Shared UI 제거 인벤토리(1차): `Front/docs/WORKLOG_2025-12-14_SHARED_UI_INVENTORY.md`
+- Shared UI 제거(완료): `Front/docs/WORKLOG_2025-12-15_SHARED_UI_REMOVAL.md`
 - Settings 화면 MUI 전환(1차): `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
 - Playwright E2E Smoke(시니어/보호자): `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`
 - Phase/Task Tracker: `Front/docs/UX_MUI_REFACTOR_TASKS.md`
+- Cleanup(Tailwind/Sass 제거): `Front/docs/WORKLOG_2025-12-15_CLEANUP_TAILWIND_SASS.md`
+- Family/Medication P0 MUI 전환(2차): `Front/docs/WORKLOG_2025-12-15_FAMILY_MEDICATION_P0_MUI.md`
 
 ---
 
 부록: 관련 파일
 - 라우팅: `Front/src/App.jsx`, `Front/src/core/config/routes.config.js`
 - 레이아웃: `Front/src/shared/components/layout/MainLayout.jsx`, `AdaptiveNavigation.jsx`, `primaryNavItems.jsx`
-- 커스텀 UI: `Front/src/shared/components/ui/*`
+- 공용 UI(MUI 기반): `Front/src/shared/components/mui/*`
 - 테마: `Front/src/styles/theme.js`
 - E2E: `Front/playwright.config.js`, `Front/tests/e2e/*`

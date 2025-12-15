@@ -50,7 +50,7 @@
 | Font | `Inter, system-ui` | `theme.fontFamily.sans` |
 | Radii | 12px / 8px | `theme.borderRadius.card`, `theme.borderRadius.control` |
 
-> 전역 스타일은 `src/styles/tailwind.css` + `src/styles/base.scss`에서 초기화하며, 레이아웃/모듈 디자인은 SCSS Modules로 구성한다.
+> 전역 스타일은 `src/styles/base.css`에서 초기화하며, 레이아웃/모듈 디자인은 CSS Modules(`*.module.css`)로 구성한다.
 
 ---
 
@@ -925,126 +925,48 @@ MyDiseasesSettingsPage
 
 ### UI 기본 컴포넌트
 
-#### Button
+> 참고: `src/shared/components/ui/*` 기반 커스텀 UI는 제거되었습니다. 기본 원칙은 **MUI 컴포넌트 직접 사용**이며,
+> 앱 공용 래퍼/유틸은 `src/shared/components/mui/*`를 사용합니다.
+
+#### AppButton
 ```jsx
-// src/shared/components/ui/Button.jsx
-<Button
-  variant="primary|secondary|danger|kakao|outline"
+// src/shared/components/mui/AppButton.jsx
+<AppButton
+  variant="primary|secondary|danger|ghost"
   size="sm|md|lg"
-  fullWidth={boolean}
-  disabled={boolean}
   loading={boolean}
-  onClick={function}
-  icon={ReactNode}
->
-  children
-</Button>
-```
-
-#### Input
-```jsx
-// src/shared/components/ui/Input.jsx
-<Input
-  type="text|password|email|number|tel|date|time"
-  placeholder={string}
-  value={string}
-  onChange={function}
-  error={string}
   disabled={boolean}
-  icon={ReactNode}
-  fullWidth={boolean}
-/>
-```
-
-#### Card
-```jsx
-// src/shared/components/ui/Card.jsx
-<Card
-  variant="default|outlined|elevated"
-  padding="sm|md|lg"
   onClick={function}
-  hoverable={boolean}
 >
   children
-</Card>
+</AppButton>
 ```
 
-#### Modal
+#### AppDialog
 ```jsx
-// src/shared/components/ui/Modal.jsx
-<Modal
+// src/shared/components/mui/AppDialog.jsx
+<AppDialog
   isOpen={boolean}
   onClose={function}
-  size="sm|md|lg|xl"
-  closeOnOverlay={boolean}
-  title={string}
+  title={string|ReactNode}
+  description={string|ReactNode}
+  footer={ReactNode}
 >
   children
-</Modal>
+</AppDialog>
 ```
 
-#### Select
+#### BackButton
 ```jsx
-// src/shared/components/ui/Select.jsx
-<Select
-  options={[{value, label}]}
-  value={string}
-  onChange={function}
-  placeholder={string}
-  error={string}
-  disabled={boolean}
-/>
+// src/shared/components/mui/BackButton.jsx
+<BackButton label="뒤로가기" />
 ```
 
-#### Badge
-```jsx
-// src/shared/components/ui/Badge.jsx
-<Badge
-  variant="primary|success|warning|danger|info"
-  size="sm|md|lg"
->
-  children
-</Badge>
-```
-
-#### Alert
-```jsx
-// src/shared/components/ui/Alert.jsx
-<Alert
-  type="success|info|warning|error"
-  title={string}
-  closable={boolean}
-  onClose={function}
->
-  children
-</Alert>
-```
-
-#### Spinner
-```jsx
-// src/shared/components/ui/Spinner.jsx
-<Spinner
-  size="sm|md|lg"
-  color="primary|secondary|white"
-/>
-```
-
-#### Toast
-```jsx
-// src/shared/components/ui/Toast.jsx
-// Usage: toast.success(message), toast.error(message)
-```
-
-#### ProgressBar
-```jsx
-// src/shared/components/ui/ProgressBar.jsx
-<ProgressBar
-  value={number} // 0-100
-  max={number}
-  color="primary|success|warning|danger"
-  showLabel={boolean}
-/>
-```
+#### 기타
+- Input/Select: MUI `TextField`, `Select`
+- Alert: MUI `Alert`
+- Spinner/Progress: MUI `CircularProgress`, `LinearProgress`
+- Toast: `src/shared/components/toast/toastStore` (toast.success/error 등)
 
 ---
 
@@ -1485,54 +1407,26 @@ MedicationCard.propTypes = {
 
 ### Button Props
 ```javascript
-// src/shared/components/ui/Button.jsx
-Button.propTypes = {
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'kakao', 'outline']),
+// src/shared/components/mui/AppButton.jsx
+AppButton.propTypes = {
+  variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'ghost']),
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  fullWidth: PropTypes.bool,
-  disabled: PropTypes.bool,
   loading: PropTypes.bool,
-  onClick: PropTypes.func,
-  icon: PropTypes.node,
-  type: PropTypes.oneOf(['button', 'submit', 'reset'])
-};
-
-Button.defaultProps = {
-  variant: 'primary',
-  size: 'md',
-  fullWidth: false,
-  disabled: false,
-  loading: false,
-  type: 'button'
-};
+  disabled: PropTypes.bool,
+  children: PropTypes.node
+}
 ```
 
 ### Card Props
-```javascript
-// src/shared/components/ui/Card.jsx
-Card.propTypes = {
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(['default', 'outlined', 'elevated']),
-  padding: PropTypes.oneOf(['sm', 'md', 'lg']),
-  onClick: PropTypes.func,
-  hoverable: PropTypes.bool
-};
-
-Card.defaultProps = {
-  variant: 'default',
-  padding: 'md',
-  hoverable: false
-};
-```
+- 공용 커스텀 Card는 제거되었으며, 화면에서는 MUI `Card`/`Paper`를 직접 사용합니다.
 
 ---
 
 ## 🎨 스타일링 가이드
 
-### SCSS Variables
-```scss
-// src/styles/variables.scss
+### Theme Tokens
+```js
+// src/styles/theme.js
 
 // Colors
 $color-primary: #4CAF50;      // Green

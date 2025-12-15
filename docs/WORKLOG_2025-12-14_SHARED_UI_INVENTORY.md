@@ -67,5 +67,4 @@
 
 - [ ] 컴포넌트별 “MUI 대체안 + props 매핑표” 작성(필요 시 호환 래퍼의 최소 기간 정의)
 - [ ] 사용처가 적은 페이지부터 치환(Errors/More 등) → 대시보드/핵심 플로우로 확장
-- [ ] 치환 완료 후 `src/shared/components/ui/*` 삭제 및 import 정리
-
+- [x] 치환 완료 후 `src/shared/components/ui/*` 삭제 및 import 정리: `Front/docs/WORKLOG_2025-12-15_SHARED_UI_REMOVAL.md`

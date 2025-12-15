@@ -114,7 +114,7 @@
 
 ## 8. 변경 원칙/DoD
 
-- Tailwind class 0건, `*.module.scss` 0건(잔존 스타일은 `*.module.css`).
+- Tailwind class 0건, `*.module.scss` 0건(스타일은 `*.module.css`로 유지).
 - 모든 화면이 MUI Theme 토큰/컴포넌트 기반.
 - Senior/Caregiver IA가 AppShell에서 일관 동작.
 - 확대모드 저장/복원, 모바일 접근성(대비/타깃) 충족.

@@ -26,7 +26,6 @@ Front/
 ├── index.html                   # HTML 엔트리
 ├── package.json                 # 의존성 정의
 ├── vite.config.js               # Vite 설정
-├── tailwind.config.js           # Tailwind CSS 설정
 ├── eslint.config.js             # ESLint 설정
 ├── nginx.conf                   # Nginx 배포 설정
 ├── docker-compose.nginx.yml     # Docker 배포 설정
@@ -209,8 +208,7 @@ src/
 │   └── react.svg
 │
 └── styles/                      # 전역 스타일
-    ├── base.scss                # 기본 스타일
-    └── tailwind.css             # Tailwind CSS
+    ├── base.css                # 기본 스타일
 ```
 
 ---
@@ -358,8 +356,8 @@ FamilyProvider
 
 ### 스타일 구조
 - **Tailwind CSS**: 유틸리티 클래스 (레이아웃, 여백, 색상)
-- **SCSS Modules**: 컴포넌트별 스타일 (*.module.scss)
-- **전역 스타일**: base.scss, tailwind.css
+- **CSS Modules**: 컴포넌트별 스타일 (`*.module.css`)
+- **전역 스타일**: `base.css`
 
 ### 디자인 토큰
 
@@ -382,7 +380,7 @@ FamilyProvider
 - **스토어**: camelCase + `Store` 접미사 + `.js` (authStore.js)
 - **서비스**: camelCase + `Service` 접미사 + `.js` (familyService.js)
 - **유틸리티**: camelCase + `.js` (formatting.js)
-- **스타일**: 컴포넌트명 + `.module.scss` (Button.module.scss)
+- **스타일**: 컴포넌트명 + `.module.css` (Button.module.css)
 
 ### 변수/함수 네이밍
 - **컴포넌트**: PascalCase (MedicationCard)
