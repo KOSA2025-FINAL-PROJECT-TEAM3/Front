@@ -1,120 +1,130 @@
-import styles from './MedicationCardInPrescription.module.scss';
+import { useMemo, useState } from 'react'
+import { Avatar, Box, Button, Card, CardActions, CardContent, Chip, Stack, Typography } from '@mui/material'
 
-export const MedicationCardInPrescription = ({ medication, intakeTimes, onEdit, onRemove }) => {
-    // 복용 시간 텍스트 생성
-    const getIntakeTimesText = () => {
-        // intakeTimeIndices가 있는 경우 (편집 모드 또는 추가된 약)
-        if (medication.intakeTimeIndices && medication.intakeTimeIndices.length > 0) {
-            const times = medication.intakeTimeIndices
-                .filter(idx => idx >= 0 && idx < intakeTimes.length)
-                .map(idx => intakeTimes[idx]);
+const DAY_LABEL = {
+  MON: '월',
+  TUE: '화',
+  WED: '수',
+  THU: '목',
+  FRI: '금',
+  SAT: '토',
+  SUN: '일',
+}
 
-            if (times.length === 0) return '시간 설정 필요';
-            return times.join(', ');
-        }
+export const MedicationCardInPrescription = ({ medication, intakeTimes = [], onEdit, onRemove }) => {
+  const [imageError, setImageError] = useState(false)
 
-        // schedules가 있는 경우 (뷰 모드 - 백엔드에서 로드된 약)
-        if (medication.schedules && medication.schedules.length > 0) {
-            const times = medication.schedules.map(schedule => schedule.time);
-            return times.join(', ');
-        }
+  const intakeTimesText = useMemo(() => {
+    if (medication.intakeTimeIndices && medication.intakeTimeIndices.length > 0) {
+      const times = medication.intakeTimeIndices
+        .filter((idx) => idx >= 0 && idx < intakeTimes.length)
+        .map((idx) => intakeTimes[idx])
 
-        // 둘 다 없으면 모든 시간
-        return '모든 시간';
-    };
+      if (times.length === 0) return '시간 설정 필요'
+      return times.join(', ')
+    }
 
-    // 요일 텍스트 생성
-    const getDaysOfWeekText = () => {
-        // daysOfWeek가 직접 있는 경우 (편집 모드)
-        let daysOfWeek = medication.daysOfWeek;
+    if (medication.schedules && medication.schedules.length > 0) {
+      const times = medication.schedules.map((schedule) => schedule.time)
+      return times.join(', ')
+    }
 
-        // schedules에서 가져오기 (뷰 모드)
-        if (!daysOfWeek && medication.schedules && medication.schedules.length > 0) {
-            daysOfWeek = medication.schedules[0].daysOfWeek;
-        }
+    return '모든 시간'
+  }, [intakeTimes, medication.intakeTimeIndices, medication.schedules])
 
-        if (!daysOfWeek) return '매일';
+  const daysOfWeekText = useMemo(() => {
+    let daysOfWeek = medication.daysOfWeek
+    if (!daysOfWeek && medication.schedules && medication.schedules.length > 0) {
+      daysOfWeek = medication.schedules[0].daysOfWeek
+    }
 
-        const days = daysOfWeek.split(',');
-        if (days.length === 7) return '매일';
+    if (!daysOfWeek) return '매일'
 
-        const dayMap = {
-            'MON': '월', 'TUE': '화', 'WED': '수', 'THU': '목', 'FRI': '금', 'SAT': '토', 'SUN': '일'
-        };
+    const days = daysOfWeek.split(',').filter(Boolean)
+    if (days.length === 7) return '매일'
 
-        return days.map(d => dayMap[d] || d).join(', ');
-    };
+    return days.map((d) => DAY_LABEL[d] || d).join(', ')
+  }, [medication.daysOfWeek, medication.schedules])
 
-    return (
-        <div className={styles.card}>
-            <div className={styles.content}>
-                <div className={styles.header}>
-                    <div className={styles.imageWrapper}>
-                        {medication.imageUrl ? (
-                            <img
-                                src={medication.imageUrl}
-                                alt={medication.name}
-                                className={styles.image}
-                                onError={(e) => {
-                                    e.target.style.display = 'none';
-                                    e.target.nextSibling.style.display = 'flex';
-                                }}
-                            />
-                        ) : null}
-                        <div
-                            className={styles.placeholder}
-                            style={{ display: medication.imageUrl ? 'none' : 'flex' }}
-                        >
-                            💊
-                        </div>
-                    </div>
-                    <div className={styles.titleInfo}>
-                        <h3>{medication.name}</h3>
-                        <p className={styles.category}>{medication.category || '분류 없음'}</p>
-                    </div>
-                </div>
+  const title = medication.name
+  const category = medication.category || '분류 없음'
+  const dosageText = medication.dosage || `${medication.dosageAmount}정`
+  const hasActions = Boolean(onEdit || onRemove)
+  const hasImage = Boolean(medication.imageUrl) && !imageError
 
-                <div className={styles.details}>
-                    <div className={styles.detailItem}>
-                        <span>복용량:</span> {medication.dosage || `${medication.dosageAmount}정`}
-                    </div>
-                    <div className={styles.detailItem}>
-                        <span>시간:</span> {getIntakeTimesText()}
-                    </div>
-                    <div className={styles.detailItem}>
-                        <span>요일:</span> {getDaysOfWeekText()}
-                    </div>
-                </div>
+  return (
+    <Card
+      variant="outlined"
+      sx={{
+        borderRadius: 3,
+        mb: 1.5,
+        transition: 'box-shadow 0.15s ease, transform 0.15s ease',
+        '&:hover': { boxShadow: 2, transform: 'translateY(-1px)' },
+      }}
+    >
+      <CardContent sx={{ pb: hasActions ? 1.5 : 2 }}>
+        <Stack direction="row" spacing={1.5} alignItems="flex-start">
+          <Avatar
+            variant="rounded"
+            src={hasImage ? medication.imageUrl : undefined}
+            alt={title}
+            sx={{ width: 48, height: 48, bgcolor: 'grey.100', border: 1, borderColor: 'divider', fontSize: 22 }}
+            imgProps={{ onError: () => setImageError(true) }}
+          >
+            💊
+          </Avatar>
 
-                {medication.notes && (
-                    <div className={styles.notes}>
-                        {medication.notes}
-                    </div>
-                )}
-            </div>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
+              {title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {category}
+            </Typography>
 
-            {(onEdit || onRemove) && (
-                <div className={styles.actions}>
-                    {onEdit && (
-                        <button
-                            className={styles.editButton}
-                            onClick={() => onEdit(medication)}
-                        >
-                            수정
-                        </button>
-                    )}
-                    {onRemove && (
-                        <button
-                            className={styles.removeButton}
-                            onClick={onRemove}
-                        >
-                            삭제
-                        </button>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+              <Chip size="small" label={`복용량: ${dosageText}`} sx={{ bgcolor: 'grey.50' }} />
+              <Chip size="small" label={`시간: ${intakeTimesText}`} sx={{ bgcolor: 'grey.50' }} />
+              <Chip size="small" label={`요일: ${daysOfWeekText}`} sx={{ bgcolor: 'grey.50' }} />
+            </Stack>
 
-export default MedicationCardInPrescription;
+            {medication.notes ? (
+              <Box
+                sx={{
+                  mt: 1,
+                  px: 1.25,
+                  py: 0.75,
+                  borderRadius: 2,
+                  bgcolor: 'warning.50',
+                  border: 1,
+                  borderColor: 'warning.200',
+                  color: 'warning.900',
+                  fontSize: 13,
+                }}
+              >
+                {medication.notes}
+              </Box>
+            ) : null}
+          </Box>
+        </Stack>
+      </CardContent>
+
+      {hasActions ? (
+        <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 1.75, pt: 0 }}>
+          {onEdit ? (
+            <Button size="small" variant="outlined" onClick={() => onEdit(medication)} sx={{ fontWeight: 900 }}>
+              수정
+            </Button>
+          ) : null}
+          {onRemove ? (
+            <Button size="small" color="error" variant="outlined" onClick={onRemove} sx={{ fontWeight: 900 }}>
+              삭제
+            </Button>
+          ) : null}
+        </CardActions>
+      ) : null}
+    </Card>
+  )
+}
+
+export default MedicationCardInPrescription

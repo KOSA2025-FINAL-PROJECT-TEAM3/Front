@@ -1,14 +1,101 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useVoiceActionStore } from '../../../features/voice/stores/voiceActionStore'; // [Voice] Zustand 스토어
-import { toast } from '@shared/components/toast/toastStore';
-import { Box, Typography, CircularProgress, Alert, Container, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { medicationApiClient } from '../../../core/services/api/medicationApiClient';
-import { medicationLogApiClient } from '../../../core/services/api/medicationLogApiClient';
-import MedicationCard from '../../../components/medication/MedicationCard';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
-import logger from '@core/utils/logger';
+import React, { useEffect, useState, useCallback } from 'react'
+import { useVoiceActionStore } from '../../../features/voice/stores/voiceActionStore' // [Voice] Zustand 스토어
+import { toast } from '@shared/components/toast/toastStore'
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Alert,
+  Container,
+  Paper,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Stack,
+  Typography,
+} from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { medicationApiClient } from '../../../core/services/api/medicationApiClient'
+import { medicationLogApiClient } from '../../../core/services/api/medicationLogApiClient'
+import { format } from 'date-fns'
+import { ko } from 'date-fns/locale'
+import logger from '@core/utils/logger'
+
+const TodayMedicationCard = ({ medication, onClick, onScheduleClick }) => {
+  const name = medication?.name || '알 수 없는 약'
+  const dosage = medication?.dosage
+  const schedules = Array.isArray(medication?.schedules) ? medication.schedules : []
+  const hasLogsToday = Boolean(medication?.hasLogsToday)
+
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        p: 2,
+        borderRadius: 2,
+        cursor: 'pointer',
+        '&:hover': { bgcolor: 'grey.50' },
+      }}
+      onClick={() => onClick?.(medication)}
+    >
+      <Stack direction="row" spacing={2} alignItems="flex-start">
+        <Avatar sx={{ bgcolor: 'grey.200', color: 'text.primary' }}>
+          {name?.charAt(0) || '약'}
+        </Avatar>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="subtitle1" fontWeight={800} noWrap>
+              {name}
+            </Typography>
+            {dosage && <Chip size="small" label={dosage} variant="outlined" />}
+          </Stack>
+
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ mt: 1, flexWrap: 'wrap' }}
+          >
+            <Chip
+              size="small"
+              label={hasLogsToday ? '복용완료' : '미복용'}
+              color={hasLogsToday ? 'success' : 'default'}
+            />
+            {schedules.length > 0 && (
+              <Chip size="small" label={`${schedules.length}회 스케줄`} />
+            )}
+          </Stack>
+
+          {schedules.length > 0 && (
+            <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px solid', borderTopColor: 'divider' }}>
+              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                {schedules.map((schedule) => (
+                  <Button
+                    key={schedule.id}
+                    type="button"
+                    size="small"
+                    variant={schedule.isTakenToday ? 'contained' : 'outlined'}
+                    color={schedule.isTakenToday ? 'success' : 'inherit'}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onScheduleClick?.(schedule)
+                    }}
+                    disabled={schedule.isTakenToday}
+                  >
+                    {schedule.time || '시간 미정'}
+                  </Button>
+                ))}
+              </Stack>
+            </Box>
+          )}
+        </Box>
+      </Stack>
+    </Paper>
+  )
+}
 
 const getTimeCategory = (dateString = null) => {
     const date = dateString ? new Date(dateString) : new Date();
@@ -333,7 +420,7 @@ const TodayMedications = () => {
                                 <AccordionDetails sx={{ pt: 0 }}>
                                     <Box display="flex" flexDirection="column" gap={2}>
                                         {medicationList.map((med) => (
-                                            <MedicationCard
+                                            <TodayMedicationCard
                                                 key={`${sectionKey}-${med.medicationId}`}
                                                 medication={{
                                                     medicationId: med.medicationId,

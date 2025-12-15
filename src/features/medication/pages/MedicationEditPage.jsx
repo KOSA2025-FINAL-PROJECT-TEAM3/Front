@@ -1,4 +1,4 @@
-import logger from "@core/utils/logger"
+import logger from '@core/utils/logger'
 /**
  * 약 편집 페이지
  * @page 10-medication-edit
@@ -9,11 +9,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MedicationForm } from '@features/medication/components/MedicationForm'
-import { BackButton } from '@shared/components/ui/BackButton'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './MedicationEditPage.module.scss'
+import { Container, Paper, Stack, Typography } from '@mui/material'
 
 /**
  * 약 편집 페이지 컴포넌트
@@ -74,27 +74,31 @@ export const MedicationEditPage = () => {
   if (!medication) {
     return (
       <MainLayout>
-        <div className={styles.container}>
-          <div className={styles.headerWithBack}>
+        <Container maxWidth="lg" sx={{ py: 3 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <BackButton />
-            <h1 className={styles.title}>약 편집</h1>
-          </div>
-          <p className={styles.placeholder}>
+            <Typography variant="h5" sx={{ fontWeight: 900 }}>
+              약 편집
+            </Typography>
+          </Stack>
+          <Typography variant="body2" color="text.secondary">
             {loading ? '약 정보를 불러오는 중...' : '약 정보를 찾을 수 없습니다.'}
-          </p>
-        </div>
+          </Typography>
+        </Container>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <div className={styles.headerWithBack}>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
           <BackButton />
-          <h1 className={styles.title}>약 편집</h1>
-        </div>
-        <div className={styles.formWrapper}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            약 편집
+          </Typography>
+        </Stack>
+        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600 }}>
           <MedicationForm
             initialValues={medication}
             onSubmit={handleSubmit}
@@ -103,8 +107,8 @@ export const MedicationEditPage = () => {
             submitLabel="수정"
             shouldResetOnSubmit={false}
           />
-        </div>
-      </div>
+        </Paper>
+      </Container>
     </MainLayout>
   )
 }
