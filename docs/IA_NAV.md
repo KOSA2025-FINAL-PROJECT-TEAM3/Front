@@ -29,8 +29,8 @@
 3) **가족** (`/family`)
    - 가족 초대/역할 관리
 
-4) **리포트** (`/reports/adherence`, `/reports/weekly`)
-   - 복약/주간 통계 확인
+4) **리포트(진입점)** (`/reports/adherence`, `/reports/weekly`)
+   - 1차 내비게이션에서 제외하고 **홈(빠른 작업/카드)**에서 강하게 진입한다.
 
 ---
 
@@ -38,4 +38,3 @@
 
 - Primary nav item 정의: `Front/src/shared/components/layout/primaryNavItems.jsx`
 - 렌더링: `Front/src/shared/components/layout/AdaptiveNavigation.jsx`
-

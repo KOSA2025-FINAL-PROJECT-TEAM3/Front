@@ -45,7 +45,7 @@
 | 홈 | `ROUTE_PATHS.seniorDashboard` / `ROUTE_PATHS.caregiverDashboard` | `activeTab='home'` |
 | 약 | `ROUTE_PATHS.medication` (+ today/add/detail) | (퀵액션/카드 진입) |
 | 가족 | `ROUTE_PATHS.family` (+ member detail) | `activeTab='family'`(guardian 조건) |
-| 리포트(보호자) | `ROUTE_PATHS.adherenceReport` / `ROUTE_PATHS.weeklyStats` | `activeTab='report'` / `activeTab='statistics'` |
+| 리포트(보호자) | `ROUTE_PATHS.adherenceReport` / `ROUTE_PATHS.weeklyStats` (홈의 빠른 작업/카드에서 진입) | `activeTab='report'` / `activeTab='statistics'` |
 | 알림 | `ROUTE_PATHS.notifications` | `activeTab='alert'` |
 | 더보기 | `ROUTE_PATHS.more` | `activeTab='more'` |
 | 채팅 | `ROUTE_PATHS.familyChat` + conversation | `activeTab='chat'` |
@@ -212,6 +212,25 @@
   - “도크/More”와 중복되지 않게, “Top task 보조”로만 남길 항목 확정
 
 ---
+
+## 6.1 결정 사항(확정)
+
+요청 근거(페르소나/목표): `Front/docs/UX_MUI_REFACTOR_REPORT.md`
+
+- Q1(Desktop primary nav): **B — Header segmented nav(상단 pill 탭) 기본**
+- Q2(Desktop 알림/더보기): **2 — 헤더 아이콘 고정(도크는 Top task만)**
+- Q3(Caregiver 리포트 진입): **2 — 도크 제외, 홈에서 강한 진입(카드/퀵액션)**
+- Q4(Primary 컬러 전환): **1 — 즉시 전환(indigo → teal `#2EC4B6`)**
+- Q5(Desktop 콘텐츠 폭): **1 — RN처럼 narrow 중심(max-width 520~640)**
+- Q6(글자 크기 컨트롤): **1 — 현행 유지(설정/접근성 모드 중심, Senior 기본 확대모드)**
+- Q7(Quick Action): **QuickActionGrid(홈 섹션) + SpeedDialFab(mobile-only, 보조 액션만)로 역할 분리**
+
+### Q7 확정 질문(작업 진행 중 마지막으로 확정 필요)
+Quick Action을 “새 UI 추가”로 확대하지 않기 위해, 아래 중 하나로만 확정한다.
+
+확정(적용됨):
+- **홈 화면 내 QuickAction 섹션**은 유지(가시적/학습 비용 낮음)
+- **SpeedDialFab는 모바일에서만 노출**하고, QuickActionGrid와 **액션이 겹치지 않도록** “보조 액션(예: PDF, 스캔 등)”만 배치
 
 ## 7) Done 정의(DoD)
 - 데스크톱에서 기본 내비가 **좌측 고정 Drawer가 아닌** bottom dock 또는 top segmented로 동작한다.
