@@ -5,8 +5,9 @@
  * - 자동으로 auth store와 notification store에서 데이터 가져옴
  */
 
-import { useNavigate } from 'react-router-dom'
-import { AppBar, Badge, Box, Button, IconButton, Stack, Toolbar, Typography } from '@mui/material'
+import { useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AppBar, Badge, Box, Button, IconButton, Stack, Tab, Tabs, Toolbar, Typography } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { useAuth } from '@features/auth/hooks/useAuth'
@@ -18,14 +19,26 @@ import { getCustomerRoleLabel } from '@features/auth/utils/roleUtils'
  * 상단 헤더 컴포넌트
  * @returns {JSX.Element} 헤더 컴포넌트
  */
-export const Header = () => {
+export const Header = ({ navItems = [] }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, customerRole, logout } = useAuth((state) => ({
     user: state.user,
     customerRole: state.customerRole,
     logout: state.logout,
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
+
+  const activeNavPath = useMemo(() => {
+    if (!navItems?.length) return ''
+    const pathname = location.pathname || ''
+    const matched = navItems.find((item) => {
+      if (!item?.path) return false
+      return pathname === item.path || pathname.startsWith(item.path + '/')
+    })
+
+    return matched?.path || navItems[0].path
+  }, [location.pathname, navItems])
 
   const handleNotificationClick = () => {
     navigate(ROUTE_PATHS.notifications)
@@ -79,7 +92,57 @@ export const Header = () => {
           </Typography>
         </Stack>
 
-        <Box sx={{ flex: 1 }} />
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', px: 2 }}>
+          {navItems?.length > 0 && (
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Box
+                sx={{
+                  bgcolor: '#F1F5F9',
+                  p: 0.5,
+                  borderRadius: 999,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  boxShadow: '0 2px 10px -4px rgba(0,0,0,0.05)',
+                }}
+              >
+                <Tabs
+                  value={activeNavPath}
+                  onChange={(_, next) => navigate(next)}
+                  variant="standard"
+                  TabIndicatorProps={{ style: { display: 'none' } }}
+                  sx={{
+                    minHeight: 40,
+                    '& .MuiTabs-flexContainer': { gap: 0.5 },
+                  }}
+                >
+                  {navItems.map((item) => (
+                    <Tab
+                      key={item.path}
+                      label={item.label}
+                      value={item.path}
+                      disableRipple
+                      sx={{
+                        minHeight: 40,
+                        minWidth: 88,
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 999,
+                        textTransform: 'none',
+                        fontWeight: 900,
+                        color: 'text.secondary',
+                        '&.Mui-selected': {
+                          bgcolor: 'common.white',
+                          color: 'primary.main',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                        },
+                      }}
+                    />
+                  ))}
+                </Tabs>
+              </Box>
+            </Box>
+          )}
+        </Box>
 
         <Stack direction="row" alignItems="center" spacing={{ xs: 1.25, md: 2.5 }}>
           <Stack

@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Box } from '@mui/material'
+import { Box, useMediaQuery, useTheme } from '@mui/material'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
@@ -26,6 +26,8 @@ export const AppShell = ({
   className,
 }) => {
   const location = useLocation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { isAuthenticated, customerRole } = useAuth((state) => ({
     isAuthenticated: state.isAuthenticated,
     customerRole: state.customerRole,
@@ -53,6 +55,8 @@ export const AppShell = ({
 
   const showVoiceAssistant = !shouldHideVoiceAssistant
 
+  const showMobileBottomNav = Boolean(showBottomNav && isMobile)
+
   return (
     <Box
       className={className}
@@ -60,14 +64,14 @@ export const AppShell = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%)',
+        background: 'linear-gradient(135deg, #F6FAFF 0%, #ffffff 100%)',
         overflow: 'hidden',
       }}
     >
-      <Header />
+      <Header navItems={navItems} />
 
       <Box sx={{ display: 'flex', flex: 1, pt: '60px', overflow: 'hidden' }}>
-        {showBottomNav && (
+        {showMobileBottomNav && (
           <nav aria-label="주요 내비게이션">
             <AdaptiveNavigation items={navItems} position="bottom" />
           </nav>
@@ -78,12 +82,12 @@ export const AppShell = ({
           sx={{
             flex: 1,
             overflowY: fullScreen ? 'hidden' : 'auto',
-            px: fullScreen ? 0 : { xs: 2, md: 2.5 },
-            py: fullScreen ? 0 : { xs: 2, md: 2.5 },
+            px: fullScreen ? 0 : { xs: 2, md: 2 },
+            py: fullScreen ? 0 : { xs: 2, md: 2 },
             width: '100%',
-            maxWidth: fullScreen ? 'none' : 1400,
+            maxWidth: fullScreen ? 'none' : { xs: '100%', md: 640 },
             mx: 'auto',
-            pb: fullScreen ? 0 : showBottomNav ? '96px' : 0,
+            pb: fullScreen ? 0 : showMobileBottomNav ? '96px' : 0,
             display: fullScreen ? 'flex' : 'block',
             flexDirection: fullScreen ? 'column' : undefined,
           }}

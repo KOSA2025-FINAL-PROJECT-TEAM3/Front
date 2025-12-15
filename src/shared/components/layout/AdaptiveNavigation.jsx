@@ -26,7 +26,6 @@ export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const navigate = useNavigate()
   const location = useLocation()
-  const useBottomNavigation = position === 'bottom' && isMobile
 
   const activePath = useMemo(() => {
     if (!items?.length) return ''
@@ -48,8 +47,9 @@ export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
     navigate(path)
   }
 
-  // Mobile: BottomNavigation (position='bottom'일 때만)
-  if (useBottomNavigation) {
+  // Bottom: Mobile only (Desktop는 Header segmented nav가 기본)
+  if (position === 'bottom') {
+    if (!isMobile) return null
     return (
       <BottomNavigation
         value={activePath}
@@ -83,7 +83,7 @@ export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
     )
   }
 
-  // Desktop: Sidebar
+  // Side: Optional Sidebar (needs explicit position='side')
   return (
     <Drawer
       variant="permanent"
