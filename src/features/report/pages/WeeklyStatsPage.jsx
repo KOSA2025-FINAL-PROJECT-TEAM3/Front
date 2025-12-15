@@ -22,20 +22,26 @@ export const WeeklyStatsPage = () => {
       try {
         setLoading(true)
 
-        // 최근 7일 데이터
-        const endDate = new Date()
-        const startDate = new Date()
-        startDate.setDate(startDate.getDate() - 7)
+        const today = new Date()
+        const dates = Array.from({ length: 7 }).map((_, index) => {
+          const date = new Date(today)
+          date.setDate(today.getDate() - (6 - index))
+          return date.toISOString().slice(0, 10)
+        })
 
-        const [dailyData, meds] = await Promise.all([
-          medicationLogApiClient.getDailyAdherence(
-            startDate.toISOString().split('T')[0],
-            endDate.toISOString().split('T')[0]
-          ),
-          medicationApiClient.list()
+        const [logsByDay, meds] = await Promise.all([
+          Promise.all(dates.map((date) => medicationLogApiClient.getByDate(date).catch(() => []))),
+          medicationApiClient.list(),
         ])
 
-        setWeeklyData(dailyData || [])
+        const dailyData = dates.map((date, index) => {
+          const logs = logsByDay[index] || []
+          const completed = logs.filter((log) => log?.completed).length
+          const total = logs.length
+          return { date, completed, total }
+        })
+
+        setWeeklyData(dailyData)
         setMedications(meds || [])
       } catch (error) {
         logger.error('주간 통계 로딩 실패:', error)
