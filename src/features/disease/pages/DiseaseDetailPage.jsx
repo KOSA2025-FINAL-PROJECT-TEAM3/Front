@@ -1,12 +1,10 @@
-import logger from "@core/utils/logger"
+import logger from '@core/utils/logger'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Card, CardBody, CardHeader } from '@shared/components/ui/Card'
-import { Button } from '@shared/components/ui/Button'
+import { Alert, Box, Button, Chip, Container, Paper, Stack, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
-import styles from './DiseaseDetailPage.module.scss'
 
 const STATUS_LABEL = {
   ACTIVE: '치료 중',
@@ -71,9 +69,11 @@ export const DiseaseDetailPage = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className={styles.page}>
-          <div className={styles.hint}>불러오는 중입니다...</div>
-        </div>
+        <Container maxWidth="md" sx={{ py: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            불러오는 중입니다...
+          </Typography>
+        </Container>
       </MainLayout>
     )
   }
@@ -81,72 +81,102 @@ export const DiseaseDetailPage = () => {
   if (!disease) {
     return (
       <MainLayout>
-        <div className={styles.page}>
-          <div className={styles.hint}>질병 정보를 찾을 수 없습니다.</div>
-          <Button variant="ghost" onClick={() => navigate('/disease')}>
-            목록으로 돌아가기
-          </Button>
-        </div>
+        <Container maxWidth="md" sx={{ py: 3 }}>
+          <Alert
+            severity="warning"
+            action={
+              <Button color="inherit" size="small" onClick={() => navigate('/disease')}>
+                목록으로
+              </Button>
+            }
+          >
+            질병 정보를 찾을 수 없습니다.
+          </Alert>
+        </Container>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <div className={styles.header}>
-          <div>
-            <p className={styles.meta}>ID: {disease.id}</p>
-            <h1>{disease.name}</h1>
-            <div className={styles.badges}>
-              {disease.isCritical && <span className={`${styles.badge} ${styles.critical}`}>중요</span>}
-              {disease.isPrivate && <span className={`${styles.badge} ${styles.private}`}>비공개</span>}
-              {disease.status && (
-                <span className={styles.badge}>{STATUS_LABEL[disease.status] ?? disease.status}</span>
-              )}
-            </div>
-          </div>
-          <div className={styles.actions}>
-            <Button variant="ghost" onClick={() => navigate('/disease')}>
-              목록
-            </Button>
-            <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-              {deleting ? '삭제 중...' : '삭제'}
-            </Button>
-          </div>
-        </div>
+      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between">
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="caption" color="text.secondary">
+                ID: {disease.id}
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5 }}>
+                {disease.name}
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+                {disease.isCritical ? <Chip label="중요" color="error" size="small" /> : null}
+                {disease.isPrivate ? <Chip label="비공개" color="default" size="small" /> : null}
+                {disease.status ? (
+                  <Chip label={STATUS_LABEL[disease.status] ?? disease.status} variant="outlined" size="small" />
+                ) : null}
+              </Stack>
+            </Box>
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button variant="outlined" onClick={() => navigate('/disease')}>
+                목록
+              </Button>
+              <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting}>
+                {deleting ? '삭제 중...' : '삭제'}
+              </Button>
+            </Stack>
+          </Stack>
+        </Paper>
 
-        <Card>
-          <CardHeader title="기본 정보" />
-          <CardBody className={styles.bodyGrid}>
-            <div>
-              <p className={styles.label}>진단일</p>
-              <p className={styles.value}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+            기본 정보
+          </Typography>
+          <Stack spacing={1.25}>
+            <Stack direction="row" justifyContent="space-between" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                진단일
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
                 {disease.isDiagnosedDateUnknown ? '날짜 모름' : formatDate(disease.diagnosedAt)}
-              </p>
-            </div>
-            <div>
-              <p className={styles.label}>상태</p>
-              <p className={styles.value}>{STATUS_LABEL[disease.status] ?? disease.status ?? '-'}</p>
-            </div>
-            <div>
-              <p className={styles.label}>생성일</p>
-              <p className={styles.value}>{formatDate(disease.createdAt, true)}</p>
-            </div>
-            <div>
-              <p className={styles.label}>수정일</p>
-              <p className={styles.value}>{formatDate(disease.updatedAt, true)}</p>
-            </div>
-          </CardBody>
-        </Card>
+              </Typography>
+            </Stack>
+            <Stack direction="row" justifyContent="space-between" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                상태
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                {STATUS_LABEL[disease.status] ?? disease.status ?? '-'}
+              </Typography>
+            </Stack>
+            <Stack direction="row" justifyContent="space-between" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                생성일
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                {formatDate(disease.createdAt, true)}
+              </Typography>
+            </Stack>
+            <Stack direction="row" justifyContent="space-between" spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                수정일
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                {formatDate(disease.updatedAt, true)}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Paper>
 
-        <Card>
-          <CardHeader title="설명" />
-          <CardBody>
-            <p className={styles.description}>{disease.description || '등록된 설명이 없습니다.'}</p>
-          </CardBody>
-        </Card>
-      </div>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+            설명
+          </Typography>
+          <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+            {disease.description || '등록된 설명이 없습니다.'}
+          </Typography>
+        </Paper>
+      </Container>
     </MainLayout>
   )
 }

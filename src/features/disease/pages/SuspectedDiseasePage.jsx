@@ -5,7 +5,7 @@
  */
 
 import MainLayout from '@shared/components/layout/MainLayout'
-import styles from './SuspectedDiseasePage.module.scss'
+import { Container, Typography } from '@mui/material'
 
 /**
  * 의심 질환 결과 페이지 컴포넌트
@@ -14,10 +14,14 @@ import styles from './SuspectedDiseasePage.module.scss'
 export const SuspectedDiseasePage = () => {
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <h1 className={styles.title}>의심 질환 결과</h1>
-        <p className={styles.placeholder}>의심 질환 결과 페이지 - 구현 예정</p>
-      </div>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 900 }}>
+          의심 질환 결과
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          의심 질환 결과 페이지 - 구현 예정
+        </Typography>
+      </Container>
     </MainLayout>
   )
 }

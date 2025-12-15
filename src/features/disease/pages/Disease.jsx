@@ -1,19 +1,20 @@
-import logger from "@core/utils/logger"
+import logger from '@core/utils/logger'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Button } from '@shared/components/ui/Button'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import DiseaseList from '../components/DiseaseList'
 import DiseaseTrash from '../components/DiseaseTrash'
 import DiseaseForm from '../components/DiseaseForm'
-import Modal from '@shared/components/ui/Modal'
-import { FAB } from '@shared/components/ui/FAB'
-import { Icon } from '@shared/components/ui/Icon'
+import AppDialog from '@shared/components/mui/AppDialog'
+import AppButton from '@shared/components/mui/AppButton'
+import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
+import AddIcon from '@mui/icons-material/Add'
+import FileDownloadIcon from '@mui/icons-material/FileDownload'
+import { Box, Container, Paper, Stack, Typography } from '@mui/material'
 import { useDiseases } from '../hooks/useDiseases'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
-import styles from './Disease.module.scss'
 
 export const DiseasePage = () => {
   const navigate = useNavigate()
@@ -60,12 +61,12 @@ export const DiseasePage = () => {
   const fabActions = [
     {
       label: '질병 추가',
-      icon: <Icon name="plus" />,
+      icon: <AddIcon />,
       onClick: () => setShowForm(true),
     },
     {
       label: exporting ? '다운로드 중...' : 'PDF 내보내기',
-      icon: <Icon name="download" />,
+      icon: <FileDownloadIcon />,
       onClick: () => !exporting && userId && handleExportPdf(),
     },
   ]
@@ -177,29 +178,39 @@ export const DiseasePage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <div>
-            <h1>질병 관리</h1>
-            <p>등록된 질병을 확인하고 삭제 시 휴지통으로 이동합니다.</p>
-          </div>
-          <div className={styles.actions}>
-            <Button variant="primary" onClick={() => setShowForm(true)}>
-              질병 추가
-            </Button>
-            <Button variant="ghost" onClick={() => setShowTrash((prev) => !prev)}>
-              {showTrash ? '목록 보기' : '휴지통'}
-            </Button>
-            <Button variant="secondary" onClick={handleRefresh}>
-              새로고침
-            </Button>
-            <Button variant="primary" onClick={handleExportPdf} disabled={exporting || !userId}>
-              {exporting ? '다운로드 중...' : 'PDF 다운로드'}
-            </Button>
-          </div>
-        </header>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mb: 2 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                질병 관리
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                등록된 질병을 확인하고 삭제 시 휴지통으로 이동합니다.
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
+              <AppButton variant="primary" onClick={() => setShowForm(true)}>
+                질병 추가
+              </AppButton>
+              <AppButton variant="ghost" onClick={() => setShowTrash((prev) => !prev)}>
+                {showTrash ? '목록 보기' : '휴지통'}
+              </AppButton>
+              <AppButton variant="secondary" onClick={handleRefresh}>
+                새로고침
+              </AppButton>
+              <AppButton variant="primary" onClick={handleExportPdf} disabled={exporting || !userId}>
+                {exporting ? '다운로드 중...' : 'PDF 다운로드'}
+              </AppButton>
+            </Stack>
+          </Stack>
+        </Paper>
 
-        {!userId && <div className={styles.hint}>로그인 정보를 확인할 수 없습니다.</div>}
+        {!userId ? (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            로그인 정보를 확인할 수 없습니다.
+          </Typography>
+        ) : null}
 
         {showTrash ? (
           <DiseaseTrash items={trash} loading={trashLoading} onEmptyTrash={handleEmptyTrash} onRestore={handleRestore} />
@@ -213,13 +224,14 @@ export const DiseasePage = () => {
           />
         )}
 
-        <FAB actions={fabActions} />
+        <SpeedDialFab actions={fabActions} />
 
-        <Modal
+        <AppDialog
           isOpen={showForm}
           title="질병 등록"
           description="필수 정보만 입력해도 등록할 수 있습니다."
           onClose={() => setShowForm(false)}
+          maxWidth="sm"
         >
           <DiseaseForm
             initialValue={editing}
@@ -230,8 +242,8 @@ export const DiseasePage = () => {
             }}
             submitting={submitting}
           />
-        </Modal>
-      </div>
+        </AppDialog>
+      </Container>
     </MainLayout>
   )
 }
