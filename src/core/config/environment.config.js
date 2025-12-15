@@ -41,7 +41,8 @@ export const getEnvironmentConfig = () => {
       return import.meta.env.VITE_API_BASE_URL
     }
 
-    const apiPort = import.meta.env.VITE_API_PORT || 8082
+    // Default to API Gateway port (front expects `/api/*` prefix).
+    const apiPort = import.meta.env.VITE_API_PORT || 8080
 
     // If behind Nginx, rely on window origin (port 80/443)
     if (useNginx && typeof window !== 'undefined') {
@@ -146,12 +147,14 @@ export const getEnvironmentConfig = () => {
     API_BASE_URL: getApiBaseURL(),
 
     // Microservice-specific URLs
-    AUTH_API_URL: getServiceURL('VITE_AUTH_API_URL', 80),
-    MEDICATION_API_URL: getServiceURL('VITE_MEDICATION_API_URL', 80),
-    FAMILY_API_URL: getServiceURL('VITE_FAMILY_API_URL', 80),
-    DIET_API_URL: getServiceURL('VITE_DIET_API_URL', 80),
-    SEARCH_API_URL: getServiceURL('VITE_SEARCH_API_URL', 80),
-    CHAT_API_URL: getServiceURL('VITE_CHAT_API_URL', 80),
+    AUTH_API_URL: getServiceURL('VITE_AUTH_API_URL', 8080),
+    MEDICATION_API_URL: getServiceURL('VITE_MEDICATION_API_URL', 8080),
+    FAMILY_API_URL: getServiceURL('VITE_FAMILY_API_URL', 8080),
+    DIET_API_URL: getServiceURL('VITE_DIET_API_URL', 8080),
+    SEARCH_API_URL: getServiceURL('VITE_SEARCH_API_URL', 8080),
+    CHAT_API_URL: getServiceURL('VITE_CHAT_API_URL', 8080),
+    NOTIFICATION_API_URL: getServiceURL('VITE_NOTIFICATION_API_URL', 8080),
+    REPORT_API_URL: getServiceURL('VITE_REPORT_API_URL', 8080),
 
     // WebSocket Configuration
     WS_BASE_URL: getWsBaseURL(),

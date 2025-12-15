@@ -1,9 +1,10 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 class MedicationLogApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_MEDICATION_API_URL || 'http://localhost:8082',
+      baseURL: envConfig.MEDICATION_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/medications/logs',
     })
   }

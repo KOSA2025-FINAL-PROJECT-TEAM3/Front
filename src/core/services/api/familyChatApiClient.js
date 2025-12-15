@@ -1,9 +1,10 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 class FamilyChatApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8080',
+      baseURL: envConfig.CHAT_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/family-chat',
     })
   }
@@ -60,5 +61,4 @@ class FamilyChatApiClient extends ApiClient {
 
 export const familyChatApiClient = new FamilyChatApiClient()
 export default FamilyChatApiClient
-
 
