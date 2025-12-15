@@ -34,7 +34,6 @@ const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyMan
 const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
 const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
 const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
-const FamilyJoin = lazy(() => import('@features/family/pages/FamilyJoin'))
 const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
 const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
 const NotificationSettingsPage = lazy(() => import('@features/settings/pages/Notifications/NotificationSettings'))
@@ -53,7 +52,6 @@ const DietLogPage = lazy(() => import('@features/diet/pages/DietLogPage'))
 const PrescriptionScanPage = lazy(() => import('@features/ocr/pages/PrescriptionScan'))
 const UnifiedSearchPage = lazy(() => import('@features/search/pages/UnifiedSearchPage'))
 const PillResultPage = lazy(() => import('@features/search/pages/PillResultPage'))
-const DoctorCounselPage = lazy(() => import('@features/counsel/pages/DoctorCounsel'))
 const DiseasePage = lazy(() => import('@features/disease/pages/Disease'))
 const DiseaseDetailPage = lazy(() => import('@features/disease/pages/DiseaseDetailPage'))
 const SuspectedDiseasePage = lazy(() => import('@features/disease/pages/SuspectedDiseasePage'))
@@ -66,7 +64,7 @@ const AdherenceReportPage = lazy(() => import('@features/report/pages/AdherenceR
 const WeeklyStatsPage = lazy(() => import('@features/report/pages/WeeklyStatsPage'))
 const MorePage = lazy(() => import('@pages/more/MorePage'))
 const DeveloperModePanel = lazy(() => import('@devtools/DeveloperModePanel'))
-const WsTestPage = lazy(() => import('@pages/WsTestPage'))
+const PlaceSearchPage = lazy(() => import('@features/places/pages/PlaceSearchPage'))
 
 import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
@@ -185,7 +183,7 @@ function InviteAcceptRedirect() {
                 <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
                 {/* 레거시 경로 호환: /invites/accept → /invites/enter 리다이렉트 (query params 보존) */}
                 <Route path="/invites/accept" element={<InviteAcceptRedirect />} />
-                <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
+                <Route path={ROUTE_PATHS.inviteAccept} element={<Navigate to={ROUTE_PATHS.inviteCodeEntry} replace />} />
 
                 {/* 보호된 페이지: 인증 필요 */}
                 <Route
@@ -293,13 +291,6 @@ function InviteAcceptRedirect() {
                   path={ROUTE_PATHS.ocrScan}
                   element={<PrivateRoute element={<PrescriptionScanPage />} />}
                 />
-
-                {/* 상담 */}
-                <Route
-                  path={ROUTE_PATHS.counsel}
-                  element={<PrivateRoute element={<DoctorCounselPage />} />}
-                />
-
                 {/* 설정 */}
                 <Route
                   path={ROUTE_PATHS.settings}
@@ -386,7 +377,11 @@ function InviteAcceptRedirect() {
                   element={<PrivateRoute element={<WeeklyStatsPage />} />}
                 />
 
-                <Route path="/ws-test" element={<WsTestPage />} />
+                {/* 병원/약국 검색(지도) */}
+                <Route
+                  path={ROUTE_PATHS.places}
+                  element={<PrivateRoute element={<PlaceSearchPage />} />}
+                />
 
                 {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}
                 <Route path={ROUTE_PATHS.root} element={<HomeRedirect />} />
