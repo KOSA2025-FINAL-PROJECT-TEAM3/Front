@@ -2,9 +2,11 @@ import { expect, test } from '@playwright/test'
 import { mockApi, setE2EAuth } from './utils/e2eSetup'
 
 test.describe('스모크(보호자)', () => {
+  let api
+
   test.beforeEach(async ({ page }) => {
     await setE2EAuth(page, { customerRole: 'CAREGIVER' })
-    await mockApi(page)
+    api = await mockApi(page)
   })
 
   test('설정 기본 렌더 + 확대모드 기본 OFF', async ({ page }) => {
@@ -22,6 +24,7 @@ test.describe('스모크(보호자)', () => {
       const stored = await page.evaluate(() => localStorage.getItem('amapill-ui-preferences-v1'))
       return stored ?? ''
     }).toContain('"accessibilityMode":false')
+
+    expect(api.unhandled).toEqual([])
   })
 })
-

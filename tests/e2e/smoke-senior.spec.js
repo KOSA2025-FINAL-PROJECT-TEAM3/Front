@@ -2,9 +2,11 @@ import { expect, test } from '@playwright/test'
 import { mockApi, setE2EAuth } from './utils/e2eSetup'
 
 test.describe('스모크(시니어)', () => {
+  let api
+
   test.beforeEach(async ({ page }) => {
     await setE2EAuth(page, { customerRole: 'SENIOR' })
-    await mockApi(page)
+    api = await mockApi(page)
   })
 
   test('대시보드 기본 렌더 + 확대모드 기본 ON', async ({ page }) => {
@@ -14,6 +16,9 @@ test.describe('스모크(시니어)', () => {
     await expect.poll(async () => {
       return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
     }).toBe('18px')
+
+    expect(api.unhandled).toEqual([])
+    expect(api.calls.some((c) => c.method === 'GET' && c.path === '/api/notifications')).toBe(true)
   })
 
   test('설정에서 확대모드 토글 OFF', async ({ page }) => {
@@ -31,5 +36,7 @@ test.describe('스모크(시니어)', () => {
 
     const stored = await page.evaluate(() => localStorage.getItem('amapill-ui-preferences-v1'))
     expect(stored).toContain('"accessibilityMode":false')
+
+    expect(api.unhandled).toEqual([])
   })
 })

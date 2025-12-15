@@ -29,26 +29,25 @@ export const setE2EAuth = async (page, { customerRole }) => {
   )
 
   await page.addInitScript(() => {
-    class MockEventSource {
-      static OPEN = 1
-      readyState = MockEventSource.OPEN
-
-      onopen = null
-      onerror = null
-
-      constructor() {
-        setTimeout(() => this.onopen?.(), 0)
-      }
-
-      close() {}
-      addEventListener() {}
+    function MockEventSource() {
+      this.readyState = 1
+      this.onopen = null
+      this.onerror = null
+      setTimeout(() => this.onopen && this.onopen(), 0)
     }
+
+    MockEventSource.OPEN = 1
+    MockEventSource.prototype.close = function close() {}
+    MockEventSource.prototype.addEventListener = function addEventListener() {}
 
     window.EventSource = MockEventSource
   })
 }
 
 export const mockApi = async (page) => {
+  const calls = []
+  const unhandled = []
+
   await page.route('**/*', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
@@ -63,6 +62,12 @@ export const mockApi = async (page) => {
     if (!isApiRequest) {
       return route.continue()
     }
+
+    calls.push({
+      method,
+      path: normalizedPath,
+      resourceType,
+    })
 
     if (resourceType === 'eventsource' && normalizedPath === '/api/notifications/subscribe') {
       return route.fulfill({
@@ -88,7 +93,17 @@ export const mockApi = async (page) => {
       return route.fulfill({ status: 200, json: [] })
     }
 
+    if (method === 'GET' && normalizedPath === '/api/family/groups') {
+      return route.fulfill({ status: 200, json: [] })
+    }
+
+    if (method === 'GET' && normalizedPath === '/api/family/invites') {
+      return route.fulfill({ status: 200, json: [] })
+    }
+
+    unhandled.push({ method, path: normalizedPath, resourceType })
     return route.fulfill({ status: 200, json: {} })
   })
-}
 
+  return { calls, unhandled }
+}

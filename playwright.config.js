@@ -1,13 +1,14 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
+const DEFAULT_BROWSER_CHANNEL = process.env.PLAYWRIGHT_BROWSER_CHANNEL || 'msedge'
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  timeout: 60_000,
+  timeout: 60000,
   expect: {
-    timeout: 10_000,
+    timeout: 10000,
   },
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
@@ -19,14 +20,13 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Edge'], channel: DEFAULT_BROWSER_CHANNEL },
     },
   ],
   webServer: {
-    command: `npm run dev -- --port ${PORT} --strictPort --host 127.0.0.1`,
+    command: `node ./node_modules/vite/bin/vite.js --port ${PORT} --strictPort --host 127.0.0.1`,
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 120000,
   },
 })
-
