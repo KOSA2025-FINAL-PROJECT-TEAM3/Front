@@ -13,6 +13,7 @@ import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
 import styles from './FamilyManagement.module.scss'
 import logger from '@core/utils/logger'
+import { useUnreadBadge } from '@features/chat/hooks/useUnreadBadge' // [GEMINI] 뱃지 훅 import
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -20,7 +21,7 @@ export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
   const currentUserId = useAuthStore((state) => state.user?.id || state.user?.userId)
-
+  
   const {
     familyGroups,
     selectedGroupId,
@@ -33,6 +34,14 @@ export const FamilyManagementPage = () => {
     error,
     refetchFamily,
   } = useFamilyStore()
+
+  // 선택된 그룹 및 멤버 파생
+  const familyGroup = getSelectedGroup()
+  const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
+
+  // [GEMINI] 선택된 가족 그룹의 안 읽은 메시지 개수 조회
+  const { unreadCount } = useUnreadBadge(familyGroup?.id);
+  
   const [currentUserRole, setCurrentUserRole] = useState(null)
   const onlineMemberIds = []
 
@@ -46,10 +55,6 @@ export const FamilyManagementPage = () => {
   const [creatingGroup, setCreatingGroup] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null)
   const [delegationModal, setDelegationModal] = useState({ open: false, memberId: null, newRole: null })
-
-  // 선택된 그룹 및 멤버 파생
-  const familyGroup = getSelectedGroup()
-  const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
 
   useEffect(() => {
     if (!members?.length || !currentUserId) {
@@ -474,9 +479,15 @@ export const FamilyManagementPage = () => {
                   navigate(ROUTE_PATHS.familyChat)
                 }
               }}
-              style={{ marginLeft: 8 }}
+              style={{ marginLeft: 8, position: 'relative' }} // [GEMINI] 뱃지 위치 잡기 위해 relative 추가
             >
               가족 채팅
+              {/* [GEMINI] 안 읽은 메시지 뱃지 */}
+              {unreadCount > 0 && (
+                <span className={styles.badge}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
           </div>
         </header>
