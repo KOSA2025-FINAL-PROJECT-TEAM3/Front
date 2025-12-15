@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { Alert, Box, Button, Chip, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
-import styles from './SymptomSearchTab.module.scss'
 import { searchApiClient } from '@core/services/api/searchApiClient'
-import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
+import AiWarningDialog from '@shared/components/mui/AiWarningDialog'
 import logger from '@core/utils/logger'
 
 export const SymptomSearchTab = () => {
@@ -166,33 +166,45 @@ export const SymptomSearchTab = () => {
   }, [results, selectedSymptom, handleSelectSymptom, isAiSearch])
 
   return (
-    <div className={styles.container}>
-      <section className={styles.searchBox}>
-        <label htmlFor="symptom-input" className={styles.label}>
+    <Stack spacing={2}>
+      <Paper
+        component="section"
+        variant="outlined"
+        sx={{ bgcolor: 'grey.50', borderRadius: 3.5, p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
           증상 입력
-        </label>
-        <input
+        </Typography>
+
+        <TextField
           id="symptom-input"
-          type="text"
-          className={styles.input}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="예) 두통, 기침, 메스꺼움"
+          size="small"
+          fullWidth
         />
-        <div className={styles.hint}>AI 검색 또는 구글 버튼을 눌러주세요. AI 정보는 참고용입니다.</div>
-        <div className={styles.actionRow}>
-          <button
+
+        <Typography variant="caption" color="text.secondary">
+          AI 검색 또는 구글 버튼을 눌러주세요. AI 정보는 참고용입니다.
+        </Typography>
+
+        <Stack direction="row" spacing={1.25} sx={{ flexWrap: 'wrap' }}>
+          <Button
             type="button"
-            className={styles.aiButton}
+            variant="contained"
+            color="secondary"
             onClick={handleAiSearch}
             disabled={!query.trim() || aiLoading}
             title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
+            sx={{ fontWeight: 900 }}
           >
             {aiLoading ? 'AI 검색 중...' : 'AI 검색'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className={styles.googleButton}
+            variant="contained"
+            color="warning"
             onClick={() => {
               const keyword = query.trim()
               if (keyword && keyword.length <= 100) {
@@ -201,91 +213,117 @@ export const SymptomSearchTab = () => {
             }}
             disabled={!query.trim() || query.trim().length > 100}
             title="구글에서 검색 (100자 이하)"
+            sx={{ fontWeight: 900 }}
           >
             🔍 구글
-          </button>
-        </div>
-        {error && <div className={styles.error}>{error}</div>}
-      </section>
+          </Button>
+        </Stack>
+
+        {error ? <Alert severity="error">{error}</Alert> : null}
+      </Paper>
 
       {/* 결과 영역 */}
-      <section className={styles.detailSection}>
-        <h2 className={styles.resultTitle}>검색 결과</h2>
-        <div className={styles.detailCard}>
-          {!selectedSymptom && !detail && (
-            <p className={styles.empty}>AI 검색 또는 구글 검색을 통해 결과를 조회해주세요.</p>
-          )}
+      <Box component="section" sx={{ mt: 1 }}>
+        <Typography variant="h6" sx={{ fontWeight: 900, mb: 1.5 }}>
+          검색 결과
+        </Typography>
 
-          {selectedSymptom && (
-            <>
-              <div className={styles.detailHeader}>
-                <div>
-                  <p className={styles.detailLabel}>선택한 증상</p>
-                  <h3 className={styles.detailName}>{selectedSymptom}</h3>
-                </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {(isAiSearch || detail?.aiGenerated) && (
-                    <span className={styles.aiBadge}>AI 생성</span>
-                  )}
-                  {detail?.severity && <span className={styles.badge}>{detail.severity}</span>}
-                </div>
-              </div>
+        <Paper
+          variant="outlined"
+          sx={{
+            borderRadius: 3,
+            p: 2.5,
+            bgcolor: 'common.white',
+            boxShadow: '0 10px 35px rgba(15, 23, 42, 0.05)',
+          }}
+        >
+          {!selectedSymptom && !detail ? (
+            <Typography variant="body2" color="text.secondary">
+              AI 검색 또는 구글 검색을 통해 결과를 조회해주세요.
+            </Typography>
+          ) : null}
 
-              {(isAiSearch || detail?.aiGenerated) && (
-                <div className={styles.noticeBox}>
-                  <span className={styles.noticeIcon} aria-hidden="true">
-                    ⚠️
-                  </span>
-                  <span>
-                    AI 생성 정보는 진단이 아니며 부정확할 수 있습니다. 정확한 판단과 치료는 반드시 의료 전문가와 상담하세요.
-                  </span>
-                </div>
-              )}
+          {selectedSymptom ? (
+            <Stack spacing={2}>
+              <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+                <Box>
+                  <Typography variant="caption" color="text.disabled">
+                    선택한 증상
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 900, mt: 0.25 }}>
+                    {selectedSymptom}
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  {(isAiSearch || detail?.aiGenerated) ? (
+                    <Chip
+                      label="AI 생성"
+                      size="small"
+                      sx={{ bgcolor: 'warning.100', color: 'warning.dark', fontWeight: 900, border: '1px solid', borderColor: 'warning.200' }}
+                    />
+                  ) : null}
+                  {detail?.severity ? (
+                    <Chip label={detail.severity} size="small" sx={{ bgcolor: 'success.100', color: 'success.dark', fontWeight: 900 }} />
+                  ) : null}
+                </Stack>
+              </Stack>
 
-              {detailLoading && (
-                <p className={styles.empty}>자세한 정보를 불러오는 중입니다...</p>
-              )}
+              {(isAiSearch || detail?.aiGenerated) ? (
+                <Alert severity="warning">
+                  AI 생성 정보는 진단이 아니며 부정확할 수 있습니다. 정확한 판단과 치료는 반드시 의료 전문가와 상담하세요.
+                </Alert>
+              ) : null}
 
-              {!detailLoading && detail && (
-                <div className={styles.detailBody}>
-                  <p className={styles.description}>{detail.description}</p>
+              {detailLoading ? (
+                <Typography variant="body2" color="text.secondary">
+                  자세한 정보를 불러오는 중입니다...
+                </Typography>
+              ) : null}
 
-                  {detail.possibleCauses?.length > 0 && (
-                    <div className={styles.detailBlock}>
-                      <p className={styles.blockTitle}>가능한 원인</p>
-                      <ul className={styles.chipList}>
+              {!detailLoading && detail ? (
+                <Stack spacing={2}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                    {detail.description}
+                  </Typography>
+
+                  {detail.possibleCauses?.length > 0 ? (
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
+                        가능한 원인
+                      </Typography>
+                      <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
                         {detail.possibleCauses.map((cause) => (
-                          <li key={cause} className={styles.chip}>
-                            {cause}
-                          </li>
+                          <Chip key={cause} label={cause} size="small" sx={{ bgcolor: 'grey.100', fontWeight: 700 }} />
                         ))}
-                      </ul>
-                    </div>
-                  )}
+                      </Stack>
+                    </Box>
+                  ) : null}
 
-                  {detail.recommendedActions?.length > 0 && (
-                    <div className={styles.detailBlock}>
-                      <p className={styles.blockTitle}>추천 조치</p>
-                      <ul className={styles.actionList}>
+                  {detail.recommendedActions?.length > 0 ? (
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
+                        추천 조치
+                      </Typography>
+                      <Box component="ul" sx={{ m: 0, pl: 2.5, color: 'text.secondary', lineHeight: 1.6 }}>
                         {detail.recommendedActions.map((action, idx) => (
                           <li key={idx}>{action}</li>
                         ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+                      </Box>
+                    </Box>
+                  ) : null}
+                </Stack>
+              ) : null}
+            </Stack>
+          ) : null}
+        </Paper>
+      </Box>
 
-      <AiWarningModal
+      <AiWarningDialog
         isOpen={warningOpen}
         onClose={() => setWarningOpen(false)}
         contextMessage={warningContext || 'AI 생성 결과는 참고용입니다. 병 증세 진단은 반드시 의사와 상담해주세요.'}
       />
-    </div>
+    </Stack>
   )
 }
 

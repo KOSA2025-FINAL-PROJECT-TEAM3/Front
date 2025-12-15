@@ -3,19 +3,32 @@
  * AI 경고 시스템 + 처방전 선택 기능 통합 버전
  */
 
-import { useEffect, useMemo, useState, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Divider,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { STORAGE_KEYS } from '@config/constants'
+import { ROUTE_PATHS } from '@config/routes.config'
+import { searchApiClient } from '@core/services/api/searchApiClient'
+import logger from '@core/utils/logger'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
-import { searchApiClient } from '@core/services/api/searchApiClient'
-import { ROUTE_PATHS } from '@config/routes.config'
-import Modal from '@shared/components/ui/Modal'
-import { AiWarningModal } from '@shared/components/ui/AiWarningModal'
+import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
+import AppDialog from '@shared/components/mui/AppDialog'
+import AiWarningDialog from '@shared/components/mui/AiWarningDialog'
 import { toast } from '@shared/components/toast/toastStore'
-import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
-import styles from './PillSearchTab.module.scss'
-import logger from '@core/utils/logger'
 
 const normalizeText = (text = '') =>
   text
@@ -33,25 +46,40 @@ const summarize = (text = '', limit = 140) => {
   return `${plain.slice(0, limit)}…`
 }
 
+const DetailBlock = ({ label, value }) => {
+  const content = normalizeText(value)
+  if (!content) return null
+
+  return (
+    <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 3, bgcolor: 'grey.50' }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 0.75 }}>
+        {label}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+        {content}
+      </Typography>
+    </Paper>
+  )
+}
+
 export const PillSearchTab = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe to state
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction)
   const { consumeAction } = useVoiceActionStore()
+
   const [itemName, setItemName] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
   const [hasSearched, setHasSearched] = useState(false)
-  
-  // AI 경고 관련 상태
+
   const [pendingAiDrug, setPendingAiDrug] = useState(null)
   const [warningOpen, setWarningOpen] = useState(false)
   const [warningContext, setWarningContext] = useState('')
   const [isAiResult, setIsAiResult] = useState(false)
-  
-  // 처방전 선택 관련 상태
+
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
   const [selectedDrug, setSelectedDrug] = useState(null)
 
@@ -74,7 +102,6 @@ export const PillSearchTab = () => {
     })
   }, [fetchMedications, medications.length])
 
-  // 실제 검색 로직 (재사용 가능)
   const executeSearch = useCallback(async (keyword) => {
     if (!keyword) {
       setError('약품명을 입력해주세요.')
@@ -96,7 +123,7 @@ export const PillSearchTab = () => {
     setIsAiResult(false)
     setLoading(true)
     setHasSearched(true)
-    
+
     try {
       const list = await searchApiClient.searchDrugs(keyword)
       setResults(Array.isArray(list) ? list : [])
@@ -131,37 +158,30 @@ export const PillSearchTab = () => {
     }
   }, [])
 
-  // 폼 제출 핸들러
   const handleSearch = (event) => {
     event?.preventDefault?.()
     executeSearch(itemName.trim())
   }
 
-  // [Voice] 자동 검색 (Zustand)
   useEffect(() => {
-    // 1. 대기 중인 액션 확인 (Reactive)
     if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
-        const type = pendingAction.params?.searchType
-        if (!type || type === 'PILL') {
-            // 2. 내 것이 확실하므로 소비(삭제)하고 실행
-            const action = consumeAction('AUTO_SEARCH')
-            if (action && action.params?.query) {
-                const keyword = action.params.query
-                setItemName(keyword)
-                executeSearch(keyword)
-            }
+      const type = pendingAction.params?.searchType
+      if (!type || type === 'PILL') {
+        const action = consumeAction('AUTO_SEARCH')
+        if (action && action.params?.query) {
+          const keyword = action.params.query
+          setItemName(keyword)
+          executeSearch(keyword)
         }
+      }
     }
   }, [pendingAction, consumeAction, executeSearch])
 
-  // 자동 검색 (location.state.autoSearch 감지)
   useEffect(() => {
     if (location.state?.autoSearch) {
       const keyword = location.state.autoSearch
-      setItemName(keyword) // 검색어 입력창에 표시
-      executeSearch(keyword) // 검색 실행
-      
-      // 중복 실행 방지 (선택 사항: state를 비우는 로직은 navigate replace 등을 써야 하므로 여기선 생략)
+      setItemName(keyword)
+      executeSearch(keyword)
     }
   }, [location.state, executeSearch])
 
@@ -184,18 +204,16 @@ export const PillSearchTab = () => {
     setHasSearched(true)
     try {
       const result = await searchApiClient.searchDrugsWithAI(keyword)
-      // AI 검색 결과를 배열로 변환
       const aiWrapped = result ? [{ ...result, aiGenerated: true }] : []
       setIsAiResult(true)
       setResults(aiWrapped)
       toast.success('AI 검색 완료! 약 정보를 확인해주세요.')
     } catch (err) {
       logger.error('AI 검색 실패', err)
-      // 백엔드 에러 메시지 또는 코드에 따른 친화적 메시지
       const errorData = err?.response?.data
       const errorCode = errorData?.code
       const errorMsg = errorData?.message
-      
+
       if (errorCode === 'SECURITY_004' || errorMsg?.includes('약물명만') || errorMsg?.includes('약품명만')) {
         setError('약물명만 입력해주세요. 예: 타이레놀, 아스피린')
         toast.error('약물명만 입력해주세요.')
@@ -217,11 +235,10 @@ export const PillSearchTab = () => {
     [hasSearched, loading, error, results],
   )
 
-  // 처방전 선택 프로세스로 진행
   const proceedToPrescriptionSelection = async (drug) => {
     setSelectedDrug(drug)
     setShowPrescriptionModal(true)
-    
+
     try {
       await fetchPrescriptions()
     } catch (err) {
@@ -237,7 +254,6 @@ export const PillSearchTab = () => {
       return
     }
 
-    // AI 생성 약품이면 경고 먼저 표시
     if (drug?.aiGenerated) {
       setPendingAiDrug(drug)
       setWarningContext('AI 생성 정보로 등록하려고 합니다. 전문가 상담을 권장합니다.')
@@ -245,11 +261,9 @@ export const PillSearchTab = () => {
       return
     }
 
-    // 일반 약품은 바로 처방전 선택으로 진행
     await proceedToPrescriptionSelection(drug)
   }
 
-  // AI 경고 확인 후 처방전 선택으로 진행
   const confirmAiRegister = () => {
     if (!pendingAiDrug) return
     setWarningOpen(false)
@@ -258,164 +272,198 @@ export const PillSearchTab = () => {
   }
 
   const handleAddToPrescription = (prescriptionId) => {
-    // 처방전 상세 페이지로 이동하면서 약 정보 전달
     navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', prescriptionId), {
-      state: { addDrug: selectedDrug }
+      state: { addDrug: selectedDrug },
     })
     setShowPrescriptionModal(false)
   }
 
   const handleCreateNewPrescription = () => {
-    // 새 처방전 등록 페이지로 이동하면서 약 정보 전달
     navigate(ROUTE_PATHS.prescriptionAdd, {
-      state: { addDrug: selectedDrug }
+      state: { addDrug: selectedDrug },
     })
     setShowPrescriptionModal(false)
   }
 
-  const renderDetailBlock = (label, value) => {
-    const content = normalizeText(value)
-    if (!content) return null
-    return (
-      <div className={styles.detailBlock} key={label}>
-        <p className={styles.detailLabel}>{label}</p>
-        <div className={styles.detailText}>
-          {content.split('\n').map((line, idx) => (
-            <p key={`${label}-${idx}`}>{line}</p>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className={styles.container}>
-      <section className={styles.searchBox}>
-        <div>
-          <h2 className={styles.title}>약품명으로 검색</h2>
-          <p className={styles.description}>모양/색상 역검색은 지원하지 않아요. 약품명을 입력해 조회해주세요.</p>
-        </div>
-        <form className={styles.searchForm} onSubmit={handleSearch}>
-          <input
-            type="text"
-            className={styles.input}
-            placeholder="약품명만 입력 (예: 타이레놀)"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            aria-label="약품명 검색어"
-          />
-          <button
-            type="submit"
-            className={styles.searchButton}
-            disabled={loading || !itemName.trim()}
-          >
-            {loading ? '검색 중...' : '검색'}
-          </button>
-          <button
-            type="button"
-            className={styles.aiSearchButton}
-            onClick={handleAISearch}
-            disabled={loading || !itemName.trim()}
-            title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
-          >
-            {loading ? '검색 중...' : 'AI 검색'}
-          </button>
-        </form>
-        <p className={styles.hint}>💡 약품명만 입력해주세요. "부작용", "효능" 등 추가 지시는 넣지 마세요.</p>
-        {error && <p className={styles.error}>{error}</p>}
-      </section>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2, borderRadius: 3, bgcolor: 'grey.50' }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 900 }}>
+            약품명으로 검색
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            모양/색상 역검색은 지원하지 않아요. 약품명을 입력해 조회해주세요.
+          </Typography>
+        </Box>
 
-      <section className={styles.resultsSection}>
-        {loading && <p className={styles.hint}>검색 중입니다...</p>}
+        <Box component="form" onSubmit={handleSearch}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
+            <TextField
+              value={itemName}
+              onChange={(e) => setItemName(e.target.value)}
+              placeholder="약품명만 입력 (예: 타이레놀)"
+              aria-label="약품명 검색어"
+              size="small"
+              fullWidth
+            />
 
-        {!loading && results.length > 0 && (
-          <div className={styles.resultList}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading || !itemName.trim()}
+              sx={{ fontWeight: 900, minWidth: 90 }}
+            >
+              {loading ? '검색 중...' : '검색'}
+            </Button>
+            <Button
+              type="button"
+              variant="contained"
+              color="secondary"
+              onClick={handleAISearch}
+              disabled={loading || !itemName.trim()}
+              title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
+              sx={{ fontWeight: 900, minWidth: 100 }}
+            >
+              {loading ? '검색 중...' : 'AI 검색'}
+            </Button>
+          </Stack>
+        </Box>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+          💡 약품명만 입력해주세요. "부작용", "효능" 등 추가 지시는 넣지 마세요.
+        </Typography>
+
+        {error ? (
+          <Alert severity="error" sx={{ mt: 1.5 }}>
+            {error}
+          </Alert>
+        ) : null}
+      </Paper>
+
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {loading ? (
+          <Typography variant="body2" color="text.secondary">
+            검색 중입니다...
+          </Typography>
+        ) : null}
+
+        {!loading && results.length > 0 ? (
+          <Stack spacing={1.5}>
             {results.map((drug) => {
-              const isAiGenerated = isAiResult || !!drug.aiGenerated
+              const isAiGenerated = isAiResult || Boolean(drug.aiGenerated)
+              const key = drug.itemSeq || drug.itemName || drug.name
 
               return (
-                <article key={drug.itemSeq || drug.itemName} className={styles.resultCard}>
-                  <div className={styles.thumbnail}>
-                    {drug.itemImage ? (
-                      <img src={drug.itemImage} alt={`${drug.itemName} 이미지`} />
-                    ) : (
-                      <div className={styles.placeholder}>💊</div>
-                    )}
-                  </div>
-                  <div className={styles.resultContent}>
-                    <div className={styles.resultHeader}>
-                      <h3 className={styles.resultTitle}>{drug.itemName}</h3>
-                      <div className={styles.headerChips}>
-                        {isAiGenerated && <span className={styles.aiBadge}>AI 생성</span>}
-                        {drug.entpName && <span className={styles.manufacturer}>{drug.entpName}</span>}
-                      </div>
-                    </div>
-                    {drug.itemSeq && <p className={styles.meta}>품목기준코드: {drug.itemSeq}</p>}
-                    {drug.efcyQesitm && (
-                      <p className={styles.summary}>{summarize(drug.efcyQesitm)}</p>
-                    )}
-                    <div className={styles.resultActions}>
-                      <button
-                        type="button"
-                        className={styles.addButton}
-                        onClick={() => handleRegisterMedication(drug)}
-                        disabled={isAiGenerated && !pendingAiDrug}
-                        title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
-                      >
-                        {isAiGenerated && !pendingAiDrug ? '처리 중...' : '처방전에 추가'}
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.detailButton}
-                        onClick={() => setSelected(drug)}
-                      >
-                        상세 보기
-                      </button>
-                    </div>
-                  </div>
-                </article>
+                <Card key={key} variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                  <CardContent sx={{ display: 'flex', gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        width: 96,
+                        height: 96,
+                        borderRadius: 3,
+                        bgcolor: 'grey.100',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {drug.itemImage ? (
+                        <Box component="img" src={drug.itemImage} alt={`${drug.itemName} 이미지`} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <Typography sx={{ fontSize: 36, color: 'text.secondary' }}>💊</Typography>
+                      )}
+                    </Box>
+
+                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                          {drug.itemName}
+                        </Typography>
+                        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 0.75 }}>
+                          {isAiGenerated ? (
+                            <Chip size="small" label="AI 생성" color="warning" sx={{ fontWeight: 900 }} />
+                          ) : null}
+                          {drug.entpName ? <Chip size="small" label={drug.entpName} variant="outlined" /> : null}
+                        </Stack>
+                      </Box>
+
+                      {drug.itemSeq ? (
+                        <Typography variant="caption" color="text.secondary">
+                          품목기준코드: {drug.itemSeq}
+                        </Typography>
+                      ) : null}
+
+                      {drug.efcyQesitm ? (
+                        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
+                          {summarize(drug.efcyQesitm)}
+                        </Typography>
+                      ) : null}
+                    </Box>
+                  </CardContent>
+
+                  <Divider />
+
+                  <CardActions sx={{ justifyContent: 'flex-end', px: 2, py: 1.25 }}>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleRegisterMedication(drug)}
+                      sx={{ fontWeight: 900 }}
+                      title={isAiGenerated ? 'AI 생성 정보는 참고용입니다.' : undefined}
+                    >
+                      처방전에 추가
+                    </Button>
+                    <Button type="button" variant="outlined" onClick={() => setSelected(drug)} sx={{ fontWeight: 900 }}>
+                      상세 보기
+                    </Button>
+                  </CardActions>
+                </Card>
               )
             })}
-          </div>
-        )}
+          </Stack>
+        ) : null}
 
-        {emptyState && <div className={styles.empty}>검색 결과가 없습니다.</div>}
-      </section>
+        {emptyState ? (
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, textAlign: 'center', color: 'text.secondary' }}>
+            검색 결과가 없습니다.
+          </Paper>
+        ) : null}
+      </Box>
 
-      {/* 약품 상세 정보 모달 */}
-      <Modal
-        isOpen={!!selected}
+      <AppDialog
+        isOpen={Boolean(selected)}
         onClose={() => setSelected(null)}
         title={selected?.itemName}
         description={selected?.entpName ? `제조사: ${selected.entpName}` : undefined}
+        maxWidth="md"
       >
-        {(isAiResult || selected?.aiGenerated) && (
-          <div className={styles.noticeBox}>
-            <span className={styles.noticeIcon} aria-hidden="true">
-              ⚠️
-            </span>
-            <span>
-              AI 생성 정보는 참고용이며 부정확할 수 있습니다. 약 정보는 반드시 약사와 상담해주세요.
-            </span>
-          </div>
-        )}
-        <div className={styles.detailMeta}>
-          {selected?.itemSeq && <span>품목코드 {selected.itemSeq}</span>}
-          {selected?.openDe && <span>공개일자 {selected.openDe}</span>}
-          {selected?.updateDe && <span>수정일자 {selected.updateDe}</span>}
-        </div>
-        <div className={styles.detailGrid}>
-          {renderDetailBlock('효능', selected?.efcyQesitm)}
-          {renderDetailBlock('사용법', selected?.useMethodQesitm)}
-          {renderDetailBlock('주의사항', selected?.atpnQesitm)}
-          {renderDetailBlock('약/음식 주의', selected?.intrcQesitm)}
-          {renderDetailBlock('부작용', selected?.seQesitm)}
-          {renderDetailBlock('보관 방법', selected?.depositMethodQesitm)}
-        </div>
-      </Modal>
+        {(isAiResult || selected?.aiGenerated) ? (
+          <Alert severity="warning" sx={{ mb: 1.5 }}>
+            AI 생성 정보는 참고용이며 부정확할 수 있습니다. 약 정보는 반드시 약사와 상담해주세요.
+          </Alert>
+        ) : null}
 
-      {/* AI 경고 모달 */}
-      <AiWarningModal
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 1.5 }}>
+          {selected?.itemSeq ? <Chip size="small" label={`품목코드 ${selected.itemSeq}`} /> : null}
+          {selected?.openDe ? <Chip size="small" label={`공개일자 ${selected.openDe}`} /> : null}
+          {selected?.updateDe ? <Chip size="small" label={`수정일자 ${selected.updateDe}`} /> : null}
+        </Stack>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 1.5 }}>
+          <DetailBlock label="효능" value={selected?.efcyQesitm} />
+          <DetailBlock label="사용법" value={selected?.useMethodQesitm} />
+          <DetailBlock label="주의사항" value={selected?.atpnQesitm} />
+          <DetailBlock label="약/음식 주의" value={selected?.intrcQesitm} />
+          <DetailBlock label="부작용" value={selected?.seQesitm} />
+          <DetailBlock label="보관 방법" value={selected?.depositMethodQesitm} />
+        </Box>
+      </AppDialog>
+
+      <AiWarningDialog
         isOpen={warningOpen}
         onClose={() => {
           setWarningOpen(false)
@@ -423,65 +471,68 @@ export const PillSearchTab = () => {
         }}
         contextMessage={warningContext || 'AI 생성 결과는 참고용입니다. 약 정보는 반드시 약사와 상담해주세요.'}
         footer={
-          <div className={styles.confirmActions}>
-            <button
-              type="button"
-              className={styles.detailButton}
+          <Stack direction="row" justifyContent="flex-end" spacing={1}>
+            <Button
+              variant="outlined"
               onClick={() => {
                 setWarningOpen(false)
                 setPendingAiDrug(null)
               }}
+              sx={{ fontWeight: 900 }}
             >
               취소
-            </button>
-            <button
-              type="button"
-              className={styles.addButton}
-              onClick={confirmAiRegister}
-              disabled={!pendingAiDrug}
-            >
+            </Button>
+            <Button variant="contained" onClick={confirmAiRegister} disabled={!pendingAiDrug} sx={{ fontWeight: 900 }}>
               계속 진행
-            </button>
-          </div>
+            </Button>
+          </Stack>
         }
       />
 
-      {/* 처방전 선택 모달 */}
-      <Modal
+      <AppDialog
         isOpen={showPrescriptionModal}
         onClose={() => setShowPrescriptionModal(false)}
         title="처방전 선택"
         description={selectedDrug ? `${selectedDrug.itemName}을(를) 추가할 처방전을 선택하세요` : undefined}
+        maxWidth="sm"
       >
-        <div className={styles.prescriptionList}>
-          {prescriptions.length === 0 && (
-            <p className={styles.emptyMessage}>등록된 처방전이 없습니다.</p>
-          )}
+        <Stack spacing={1}>
+          {prescriptions.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              등록된 처방전이 없습니다.
+            </Typography>
+          ) : null}
+
           {prescriptions.map((prescription) => (
-            <button
+            <Button
               key={prescription.id}
-              className={styles.prescriptionItem}
+              variant="outlined"
               onClick={() => handleAddToPrescription(prescription.id)}
+              sx={{ justifyContent: 'space-between', py: 1.25, px: 1.5, borderRadius: 3 }}
             >
-              <div className={styles.prescriptionInfo}>
-                <h4>{prescription.pharmacyName || '약국명 미입력'}</h4>
-                <p>{prescription.hospitalName || '병원명 미입력'}</p>
-                <span className={styles.period}>
+              <Box sx={{ textAlign: 'left' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+                  {prescription.pharmacyName || '약국명 미입력'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {prescription.hospitalName || '병원명 미입력'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
                   {prescription.startDate} ~ {prescription.endDate}
-                </span>
-              </div>
-              <span className={styles.arrow}>→</span>
-            </button>
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                →
+              </Typography>
+            </Button>
           ))}
-          <button
-            className={styles.newPrescriptionButton}
-            onClick={handleCreateNewPrescription}
-          >
+
+          <Button variant="contained" onClick={handleCreateNewPrescription} sx={{ fontWeight: 900, borderRadius: 3 }}>
             + 새 처방전 만들기
-          </button>
-        </div>
-      </Modal>
-    </div>
+          </Button>
+        </Stack>
+      </AppDialog>
+    </Box>
   )
 }
 
