@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
-import styles from './NotificationSettings.module.scss'
+import { Box, Button, Container, Paper, Stack, Switch, Typography } from '@mui/material'
 import { notificationSettingsApiClient } from '@core/services/api/notificationSettingsApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 
@@ -60,50 +60,84 @@ export const NotificationSettingsPage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <h1>알림 설정</h1>
-          <p>받고 싶은 알림과 채널을 선택하세요.</p>
-        </header>
+      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            알림 설정
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            받고 싶은 알림과 채널을 선택하세요.
+          </Typography>
+        </Box>
 
-        <section className={styles.channelList}>
-          <h2>채널</h2>
-          {[
-            { id: 'push', label: '푸시 알림', description: '앱 푸시로 알림 받기' },
-            { id: 'kakaoDeepLink', label: '카카오 딥링크', description: '카카오톡으로 딥링크 알림 받기' },
-          ].map((channel) => (
-            <label key={channel.id} className={styles.channelItem}>
-              <div>
-                <p className={styles.label}>{channel.label}</p>
-                <p className={styles.description}>{channel.description}</p>
-              </div>
-              <input type="checkbox" checked={!!settings[channel.id]} onChange={() => toggle(channel.id)} />
-            </label>
-          ))}
-        </section>
+        <Stack spacing={2}>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+              채널
+            </Typography>
+            <Stack spacing={1}>
+              {[
+                { id: 'push', label: '푸시 알림', description: '앱 푸시로 알림 받기' },
+                { id: 'kakaoDeepLink', label: '카카오 딥링크', description: '카카오톡으로 딥링크 알림 받기' },
+              ].map((channel) => (
+                <Stack
+                  key={channel.id}
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      {channel.label}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {channel.description}
+                    </Typography>
+                  </Box>
+                  <Switch checked={!!settings[channel.id]} onChange={() => toggle(channel.id)} />
+                </Stack>
+              ))}
+            </Stack>
+          </Paper>
 
-        <section className={styles.channelList}>
-          <h2>알림 종류</h2>
-          {[
-            { id: 'dietWarning', label: '식단 경고 알림', description: '식단 WARNING/DANGER 발생 시 알림/메시지' },
-            { id: 'medicationMissed', label: '미복용 알림', description: '복약 누락/지연 알림' },
-          ].map((item) => (
-            <label key={item.id} className={styles.channelItem}>
-              <div>
-                <p className={styles.label}>{item.label}</p>
-                <p className={styles.description}>{item.description}</p>
-              </div>
-              <input type="checkbox" checked={!!settings[item.id]} onChange={() => toggle(item.id)} />
-            </label>
-          ))}
-        </section>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
+              알림 종류
+            </Typography>
+            <Stack spacing={1}>
+              {[
+                { id: 'dietWarning', label: '식단 경고 알림', description: '식단 WARNING/DANGER 발생 시 알림/메시지' },
+                { id: 'medicationMissed', label: '미복용 알림', description: '복약 누락/지연 알림' },
+              ].map((item) => (
+                <Stack
+                  key={item.id}
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  spacing={2}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                      {item.label}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {item.description}
+                    </Typography>
+                  </Box>
+                  <Switch checked={!!settings[item.id]} onChange={() => toggle(item.id)} />
+                </Stack>
+              ))}
+            </Stack>
+          </Paper>
 
-        <div className={styles.actions}>
-          <button onClick={save} disabled={loading}>
-            {loading ? '저장 중...' : '저장'}
-          </button>
-        </div>
-      </div>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button variant="contained" onClick={save} disabled={loading}>
+              {loading ? '저장 중...' : '저장'}
+            </Button>
+          </Box>
+        </Stack>
+      </Container>
     </MainLayout>
   )
 }
