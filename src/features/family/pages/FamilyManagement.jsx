@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
-import Modal from '@shared/components/ui/Modal'
+import AppDialog from '@shared/components/mui/AppDialog'
+import { Alert, Badge, Box, Button, Container, Divider, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -11,9 +12,8 @@ import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
-import styles from './FamilyManagement.module.scss'
 import logger from '@core/utils/logger'
-import { useUnreadBadge } from '@features/chat/hooks/useUnreadBadge' // [GEMINI] 뱃지 훅 import
+import { useUnreadBadge } from '@features/chat/hooks/useUnreadBadge'
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -39,9 +39,8 @@ export const FamilyManagementPage = () => {
   const familyGroup = getSelectedGroup()
   const members = useMemo(() => familyGroup?.members ?? [], [familyGroup])
 
-  // [GEMINI] 선택된 가족 그룹의 안 읽은 메시지 개수 조회
-  const { unreadCount } = useUnreadBadge(familyGroup?.id);
-  
+  const { unreadCount } = useUnreadBadge(familyGroup?.id)
+
   const [currentUserRole, setCurrentUserRole] = useState(null)
   const onlineMemberIds = []
 
@@ -226,7 +225,7 @@ export const FamilyManagementPage = () => {
 
       {/* 그룹 생성 모달 */}
       {showGroupCreateModal && (
-        <Modal
+        <AppDialog
           isOpen={true}
           title="가족 그룹 만들기"
           onClose={() => {
@@ -234,20 +233,20 @@ export const FamilyManagementPage = () => {
             setGroupName('')
           }}
           footer={
-            <div className={styles.modalButtons}>
-              <button
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button
                 type="button"
-                className={styles.cancelButton}
+                variant="outlined"
                 onClick={() => {
                   setShowGroupCreateModal(false)
                   setGroupName('')
                 }}
               >
                 취소
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className={styles.inviteButton}
+                variant="contained"
                 onClick={async () => {
                   const trimmedName = groupName.trim()
                   if (!trimmedName) {
@@ -275,41 +274,44 @@ export const FamilyManagementPage = () => {
                 disabled={creatingGroup}
               >
                 {creatingGroup ? '생성 중...' : '그룹 생성'}
-              </button>
-            </div>
+              </Button>
+            </Stack>
           }
         >
-          <div className={styles.groupCreateModalContent}>
-            <p className={styles.helper}>가족 그룹을 만들어 가족을 초대하고 관리하세요.</p>
-            <input
-              type="text"
+          <Stack spacing={1.5}>
+            <Typography variant="body2" color="text.secondary">
+              가족 그룹을 만들어 가족을 초대하고 관리하세요.
+            </Typography>
+            <TextField
               value={groupName}
               placeholder="예) 우리 가족"
               onChange={(e) => setGroupName(e.target.value)}
               disabled={creatingGroup}
-              className={styles.groupNameInput}
+              autoFocus
+              fullWidth
             />
-          </div>
-        </Modal>
+          </Stack>
+        </AppDialog>
       )}
 
       {confirmModal && (
-        <Modal
+        <AppDialog
           isOpen={true}
           title={confirmModal.title}
-          onClose={confirmModal.onCancel}
+          onClose={() => setConfirmModal(null)}
           footer={
-            <div className={styles.modalButtons}>
-              <button
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <Button
                 type="button"
-                className={styles.cancelButton}
+                variant="outlined"
                 onClick={() => setConfirmModal(null)}
               >
                 취소
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className={styles.confirmButton}
+                variant="contained"
+                color="error"
                 onClick={async () => {
                   if (confirmModal.type === 'remove') {
                     const memberId = confirmModal.memberId
@@ -343,191 +345,197 @@ export const FamilyManagementPage = () => {
                 disabled={removingMemberId || dissolving}
               >
                 {removingMemberId || dissolving ? '진행 중...' : '확인'}
-              </button>
-            </div>
+              </Button>
+            </Stack>
           }
         >
-          <p>{confirmModal.message}</p>
-        </Modal>
+          <Typography variant="body2">{confirmModal.message}</Typography>
+        </AppDialog>
       )}
-      <div className={styles.page} role="region" aria-busy={loading}>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box role="region" aria-busy={loading}>
         {/* 알림 설정 모달 */}
         {showNotificationModal && (
-          <Modal
+          <AppDialog
             isOpen={showNotificationModal}
             title="가족 알림 설정"
             onClose={() => setShowNotificationModal(false)}
             footer={
-              <div className={styles.modalButtons}>
-                <button
+              <Stack direction="row" spacing={1} justifyContent="flex-end">
+                <Button
                   type="button"
-                  className={styles.cancelButton}
+                  variant="outlined"
                   onClick={() => setShowNotificationModal(false)}
                 >
                   취소
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className={styles.confirmButton}
+                  variant="contained"
                   onClick={handleSaveNotificationSettings}
                   disabled={notificationLoading}
                 >
                   {notificationLoading ? '저장 중...' : '저장'}
-                </button>
-              </div>
+                </Button>
+              </Stack>
             }
           >
-            <div className={styles.notificationSettings}>
-              <p className={styles.description}>
+            <Stack spacing={2}>
+              <Typography variant="body2" color="text.secondary">
                 이 가족 그룹에서 발생하는 알림을 카카오톡이나 앱 알림으로 받을지 설정합니다.
-              </p>
-              <div className={styles.channelList}>
-                <h3>채널</h3>
-                <label className={styles.settingItem}>
-                  <span>카카오톡 알림</span>
-                  <input
-                    type="checkbox"
-                    checked={notificationSettings.kakaoEnabled}
-                    onChange={(e) =>
-                      setNotificationSettings((prev) => ({ ...prev, kakaoEnabled: e.target.checked }))
+              </Typography>
+
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack spacing={1}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                    채널
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={notificationSettings.kakaoEnabled}
+                        onChange={(e) =>
+                          setNotificationSettings((prev) => ({ ...prev, kakaoEnabled: e.target.checked }))
+                        }
+                      />
                     }
+                    label="카카오톡 알림"
                   />
-                </label>
-              </div>
-              <div className={styles.channelList}>
-                <h3>알림 종류</h3>
-                <label className={styles.settingItem}>
-                  <span>식단 경고 알림</span>
-                  <input
-                    type="checkbox"
-                    checked={notificationSettings.dietWarningEnabled}
-                    onChange={(e) =>
-                      setNotificationSettings((prev) => ({
-                        ...prev,
-                        dietWarningEnabled: e.target.checked,
-                      }))
+                </Stack>
+              </Paper>
+
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Stack spacing={1}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                    알림 종류
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={notificationSettings.dietWarningEnabled}
+                        onChange={(e) =>
+                          setNotificationSettings((prev) => ({
+                            ...prev,
+                            dietWarningEnabled: e.target.checked,
+                          }))
+                        }
+                      />
                     }
+                    label="식단 경고 알림"
                   />
-                </label>
-                <label className={styles.settingItem}>
-                  <span>미복용 알림</span>
-                  <input
-                    type="checkbox"
-                    checked={notificationSettings.medicationMissedEnabled}
-                    onChange={(e) =>
-                      setNotificationSettings((prev) => ({
-                        ...prev,
-                        medicationMissedEnabled: e.target.checked,
-                      }))
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={notificationSettings.medicationMissedEnabled}
+                        onChange={(e) =>
+                          setNotificationSettings((prev) => ({
+                            ...prev,
+                            medicationMissedEnabled: e.target.checked,
+                          }))
+                        }
+                      />
                     }
+                    label="미복용 알림"
                   />
-                </label>
-              </div>
-            </div>
-          </Modal>
+                </Stack>
+              </Paper>
+            </Stack>
+          </AppDialog>
         )}
 
-        <header className={styles.header}>
-          <h1>가족 관리</h1>
-          {familyGroups.length > 1 && (
-            <button
-              type="button"
-              className={styles.groupSelectButton}
-              onClick={() => setShowGroupModal(true)}
-              style={{ marginRight: 'auto' }}
-            >
-              그룹 변경 ({familyGroups.findIndex((g) => g.id === selectedGroupId) + 1}/{familyGroups.length})
-            </button>
-          )}
-          <div>
-            {/* 그룹 생성 버튼 - 항상 표시 (사용자는 0개 이상의 그룹 보유 가능) */}
-            <button
-              type="button"
-              className={styles.inviteButton}
-              onClick={() => setShowGroupCreateModal(true)}
-            >
-              + 그룹 생성
-            </button>
-            <button
-              type="button"
-              className={styles.inviteButton}
-              onClick={() => navigate(ROUTE_PATHS.familyInvite)}
-              style={{ marginLeft: 8 }}
-            >
-              + 가족 초대
-            </button>
-            {familyGroup?.id &&
-              familyGroup?.ownerId?.toString?.() === currentUserId?.toString?.() && (
-                <button
-                  type="button"
-                  className={styles.dangerButton}
-                  onClick={handleDissolveGroup}
-                  style={{ marginLeft: 8 }}
-                  disabled={dissolving}
-                >
-                  {dissolving ? '해산 중...' : '그룹 해산'}
-                </button>
-              )}
-            <button
-              type="button"
-              className={styles.inviteButton}
-              onClick={() => {
-                if (familyGroup?.id) {
-                  const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
-                  navigate(path)
-                } else {
-                  navigate(ROUTE_PATHS.familyChat)
-                }
-              }}
-              style={{ marginLeft: 8, position: 'relative' }} // [GEMINI] 뱃지 위치 잡기 위해 relative 추가
-            >
-              가족 채팅
-              {/* [GEMINI] 안 읽은 메시지 뱃지 */}
-              {unreadCount > 0 && (
-                <span className={styles.badge}>
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
-            </button>
-          </div>
-        </header>
-
-        {loading ? (
-          <p className={styles.loading} role="status" aria-live="polite">
-            가족 정보를 불러오는 중입니다...
-          </p>
-        ) : error ? (
-          <div className={styles.error} role="alert">
-            <p>
-              가족 정보를 불러오지 못했습니다. {error?.message || ''}
-            </p>
-            <div className={styles.errorActions}>
-              <button
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }} sx={{ mb: 2 }}>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 900 }}>
+              가족 관리
+            </Typography>
+            {familyGroups.length > 1 ? (
+              <Button
                 type="button"
-                onClick={async () => {
-                  setRetrying(true)
-                  try {
-                    await refetchFamily()
-                    toast.success('가족 정보를 다시 불러왔습니다.')
-                  } catch (refetchError) {
-                    toast.error('가족 정보 불러오기에 실패했습니다.')
-                    logger.warn('[FamilyManagement] refetchFamily failed', refetchError)
-                  } finally {
-                    setRetrying(false)
+                variant="outlined"
+                sx={{ mt: 1 }}
+                onClick={() => setShowGroupModal(true)}
+              >
+                그룹 변경 ({familyGroups.findIndex((g) => g.id === selectedGroupId) + 1}/{familyGroups.length})
+              </Button>
+            ) : null}
+          </Box>
+
+          <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
+            <Button type="button" variant="contained" onClick={() => setShowGroupCreateModal(true)}>
+              + 그룹 생성
+            </Button>
+            <Button type="button" variant="contained" onClick={() => navigate(ROUTE_PATHS.familyInvite)}>
+              + 가족 초대
+            </Button>
+            {familyGroup?.id && familyGroup?.ownerId?.toString?.() === currentUserId?.toString?.() ? (
+              <Button type="button" color="error" variant="outlined" onClick={handleDissolveGroup} disabled={dissolving}>
+                {dissolving ? '해산 중...' : '그룹 해산'}
+              </Button>
+            ) : null}
+            <Badge
+              color="error"
+              overlap="circular"
+              badgeContent={unreadCount > 99 ? '99+' : unreadCount}
+              invisible={!unreadCount}
+            >
+              <Button
+                type="button"
+                variant="outlined"
+                onClick={() => {
+                  if (familyGroup?.id) {
+                    const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
+                    navigate(path)
+                  } else {
+                    navigate(ROUTE_PATHS.familyChat)
                   }
                 }}
-                disabled={retrying}
               >
-                {retrying ? '다시 시도 중...' : '다시 시도'}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(ROUTE_PATHS.login)}
-              >
-                로그인으로 이동
-              </button>
-            </div>
-          </div>
+                가족 채팅
+              </Button>
+            </Badge>
+          </Stack>
+        </Stack>
+
+        {loading ? (
+          <Paper variant="outlined" sx={{ p: 4 }}>
+            <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">
+              가족 정보를 불러오는 중입니다...
+            </Typography>
+          </Paper>
+        ) : error ? (
+          <Alert
+            severity="error"
+            role="alert"
+            action={
+              <Stack direction="row" spacing={1}>
+                <Button
+                  type="button"
+                  color="inherit"
+                  size="small"
+                  onClick={async () => {
+                    setRetrying(true)
+                    try {
+                      await refetchFamily()
+                      toast.success('가족 정보를 다시 불러왔습니다.')
+                    } catch (refetchError) {
+                      toast.error('가족 정보 불러오기에 실패했습니다.')
+                      logger.warn('[FamilyManagement] refetchFamily failed', refetchError)
+                    } finally {
+                      setRetrying(false)
+                    }
+                  }}
+                  disabled={retrying}
+                >
+                  {retrying ? '다시 시도 중...' : '다시 시도'}
+                </Button>
+                <Button type="button" color="inherit" size="small" onClick={() => navigate(ROUTE_PATHS.login)}>
+                  로그인으로 이동
+                </Button>
+              </Stack>
+            }
+          >
+            가족 정보를 불러오지 못했습니다. {error?.message || ''}
+          </Alert>
         ) : (
           <>
             <FamilyGroupCard group={familyGroup} memberCount={members.length} />
@@ -546,7 +554,8 @@ export const FamilyManagementPage = () => {
             />
           </>
         )}
-      </div>
+        </Box>
+      </Container>
     </MainLayout>
   )
 }

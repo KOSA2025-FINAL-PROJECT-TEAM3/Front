@@ -1,10 +1,11 @@
 ﻿import ApiClient from './ApiClient'
 import logger from '@core/utils/logger'
+import envConfig from '@config/environment.config'
 
 class FamilyApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_FAMILY_API_URL || 'http://localhost:8080',
+      baseURL: envConfig.FAMILY_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/family',  // ★ 수정됨
     })
   }

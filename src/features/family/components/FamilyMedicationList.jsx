@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, FormGroup, FormControlLabel, Switch, Button } from '@mui/material';
+import { Box, Chip, Paper, Stack, Typography, Accordion, AccordionSummary, AccordionDetails, FormGroup, FormControlLabel, Switch, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import styles from './FamilyMedicationList.module.scss';
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient';
 import { toast } from '@shared/components/toast/toastStore';
 import logger from '@core/utils/logger';
@@ -76,9 +75,13 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
 
   if (!localMeds.length) {
     return (
-      <section className={styles.empty}>
-        <p>등록된 약이 없습니다.</p>
-      </section>
+      <Paper
+        component="section"
+        variant="outlined"
+        sx={{ p: 3, borderRadius: 4, borderStyle: 'dashed', color: 'text.secondary' }}
+      >
+        <Typography variant="body2">등록된 약이 없습니다.</Typography>
+      </Paper>
     )
   }
 
@@ -132,7 +135,7 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
   };
 
   return (
-    <section className={styles.list}>
+    <Box component="section" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
         <FormGroup>
           <FormControlLabel
@@ -182,29 +185,60 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
               </Box>
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0, px: 2, pb: 2 }}>
-              <div className={styles.medListContainer}>
+              <Stack spacing={1.5} sx={{ pt: 1.5 }}>
                 {sectionMeds.map((med, idx) => (
-                  <div key={`${sectionKey}-${med.id}-${idx}`} className={styles.card}>
-                    <div className={styles.medInfo}>
-                      <h4>{med.name}</h4>
-                      <div className={styles.detailsRow}>
-                        <span className={styles.timeBadge}>{med.displayTime}</span>
-                        {med.ingredient && <span className={styles.ingredient}>{med.ingredient}</span>}
-                        {med.dosage && <span className={styles.dosage}>{med.dosage}</span>}
-                      </div>
-                      {(med.startDate || med.endDate) && (
-                        <p className={styles.period}>
+                  <Paper
+                    key={`${sectionKey}-${med.id}-${idx}`}
+                    variant="outlined"
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: 2,
+                      p: 2,
+                      bgcolor: 'common.white',
+                      borderRadius: 4,
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 900 }} noWrap>
+                        {med.name}
+                      </Typography>
+                      <Stack direction="row" spacing={1} sx={{ mt: 0.75, flexWrap: 'wrap', alignItems: 'center' }}>
+                        <Chip
+                          label={med.displayTime}
+                          size="small"
+                          sx={{
+                            bgcolor: 'success.50',
+                            color: 'success.dark',
+                            fontSize: 12,
+                            fontWeight: 900,
+                            borderRadius: 1,
+                          }}
+                        />
+                        {med.ingredient ? (
+                          <Typography variant="caption" color="text.secondary">
+                            {med.ingredient}
+                          </Typography>
+                        ) : null}
+                        {med.dosage ? (
+                          <Typography variant="caption" color="text.secondary">
+                            {med.dosage}
+                          </Typography>
+                        ) : null}
+                      </Stack>
+                      {(med.startDate || med.endDate) ? (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                           {formatDate(med.startDate)} ~ {formatDate(med.endDate)}
-                        </p>
-                      )}
-                    </div>
-                    <div className={styles.statusSection}>
-                      <span
-                        className={styles.status}
-                        style={{ color: getStatusColor(med.active) }}
-                      >
+                        </Typography>
+                      ) : null}
+                    </Box>
+
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 900, color: getStatusColor(med.active) }}>
                         {getStatusLabel(med.active)}
-                      </span>
+                      </Typography>
                       {/* Control Button */}
                       {med.prescriptionId && (
                         <Button
@@ -231,15 +265,15 @@ export const FamilyMedicationList = ({ medications = [], onUpdate }) => {
                           {med.active ? "중단" : "재개"}
                         </Button>
                       )}
-                    </div>
-                  </div>
+                    </Stack>
+                  </Paper>
                 ))}
-              </div>
+              </Stack>
             </AccordionDetails>
           </Accordion>
         );
       })}
-    </section>
+    </Box>
   )
 }
 

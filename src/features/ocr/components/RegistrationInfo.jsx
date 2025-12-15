@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './RegistrationInfo.module.scss'
+import { Alert, InputAdornment, Paper, Stack, TextField, Typography } from '@mui/material'
 
 /**
  * 등록 정보 컴포넌트 (이미지 4 하단 참고)
@@ -24,61 +24,54 @@ const RegistrationInfo = ({
   }
 
   return (
-    <div className={styles.container}>
-      <h3 className={styles.title}>등록 정보</h3>
+    <Paper sx={{ p: 2.5, borderRadius: 3, mb: 2, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+        등록 정보
+      </Typography>
 
-      <div className={styles.fields}>
-        {/* 병원 정보 */}
-        <div className={styles.field}>
-          <label>병원 정보</label>
-          <input
-            type="text"
-            className={styles.input}
-            value={hospitalName || ''}
-            onChange={(e) => onUpdate({ hospitalName: e.target.value || null })}
-            placeholder="입력하세요"
-          />
-        </div>
+      <Stack spacing={2}>
+        <TextField
+          label="병원 정보"
+          value={hospitalName || ''}
+          onChange={(e) => onUpdate({ hospitalName: e.target.value || null })}
+          placeholder="입력하세요"
+          fullWidth
+        />
 
-        {/* 약국명 */}
-        <div className={styles.field}>
-          <label>약국명</label>
-          <input
-            type="text"
-            className={styles.input}
-            value={pharmacyName}
-            onChange={(e) => onUpdate({ pharmacyName: e.target.value })}
-            placeholder="약국명"
-          />
-        </div>
+        <TextField
+          label="약국명"
+          value={pharmacyName}
+          onChange={(e) => onUpdate({ pharmacyName: e.target.value })}
+          placeholder="약국명"
+          fullWidth
+        />
 
-        {/* 수납 금액 */}
-        <div className={styles.field}>
-          <label>수납 금액</label>
-          <div className={styles.amountWrapper}>
-            <input
-              type="number"
-              className={styles.input}
-              value={paymentAmount || ''}
-              onChange={(e) => onUpdate({ paymentAmount: parseInt(e.target.value) || null })}
-              placeholder="금액 입력"
-            />
-            {paymentAmount && (
-              <span className={styles.formattedAmount}>
-                {formatCurrency(paymentAmount)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+        <TextField
+          label="수납 금액"
+          type="number"
+          value={paymentAmount || ''}
+          onChange={(e) => onUpdate({ paymentAmount: parseInt(e.target.value) || null })}
+          placeholder="금액 입력"
+          fullWidth
+          InputProps={{
+            endAdornment: paymentAmount ? (
+              <InputAdornment position="end">
+                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 900 }}>
+                  {formatCurrency(paymentAmount)}
+                </Typography>
+              </InputAdornment>
+            ) : undefined,
+            inputProps: { inputMode: 'numeric' },
+          }}
+        />
+      </Stack>
 
-      {/* 생성일 */}
-      {createdDate && (
-        <div className={styles.createdDate}>
+      {createdDate ? (
+        <Alert severity="info" sx={{ mt: 2, bgcolor: 'grey.50' }}>
           생성일 {createdDate}
-        </div>
-      )}
-    </div>
+        </Alert>
+      ) : null}
+    </Paper>
   )
 }
 

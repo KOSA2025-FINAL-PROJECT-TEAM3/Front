@@ -13,8 +13,8 @@ import {
   ListItemText,
   Divider,
 } from '@mui/material'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
-import { StatusBadge } from '@shared/components/ui/StatusBadge'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
+import { StatusBadge } from '@shared/components/mui/StatusBadge'
 import PropTypes from 'prop-types'
 
 const TIME_SECTIONS = {

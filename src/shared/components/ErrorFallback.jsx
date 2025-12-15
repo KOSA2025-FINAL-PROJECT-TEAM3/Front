@@ -4,8 +4,8 @@
  */
 
 // import { useNavigate } from 'react-router-dom' // Removed
+import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './ErrorFallback.module.scss'
 
 export const ErrorFallback = ({ error, resetError }) => {
   // const navigate = useNavigate() // Removed
@@ -20,36 +20,60 @@ export const ErrorFallback = ({ error, resetError }) => {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <div className={styles.icon}>⚠️</div>
-        <h1 className={styles.title}>문제가 발생했습니다</h1>
-        <p className={styles.message}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 3,
+        bgcolor: 'grey.50',
+      }}
+    >
+      <Paper sx={{ maxWidth: 640, width: '100%', borderRadius: 4, p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+        <Box aria-hidden sx={{ fontSize: 40, mb: 1 }}>
+          ⚠️
+        </Box>
+        <Typography variant="h5" sx={{ fontWeight: 900 }}>
+          문제가 발생했습니다
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
           예상치 못한 오류가 발생했습니다.
           <br />
           잠시 후 다시 시도해주세요.
-        </p>
+        </Typography>
 
-        {process.env.NODE_ENV === 'development' && error && (
-          <details className={styles.errorDetails}>
-            <summary>오류 상세 정보 (개발 모드)</summary>
-            <pre className={styles.errorStack}>
+        {process.env.NODE_ENV === 'development' && error ? (
+          <Paper variant="outlined" sx={{ mt: 3, p: 2, textAlign: 'left', bgcolor: 'grey.50' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
+              오류 상세 정보 (개발 모드)
+            </Typography>
+            <Box
+              component="pre"
+              sx={{
+                m: 0,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                fontSize: 12,
+                color: 'text.secondary',
+              }}
+            >
               {error.toString()}
               {error.stack && `\n\n${error.stack}`}
-            </pre>
-          </details>
-        )}
+            </Box>
+          </Paper>
+        ) : null}
 
-        <div className={styles.actions}>
-          <button onClick={handleGoHome} className={styles.primaryButton}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 3, justifyContent: 'center' }}>
+          <Button onClick={handleGoHome} variant="contained">
             홈으로 이동
-          </button>
-          <button onClick={handleReload} className={styles.secondaryButton}>
+          </Button>
+          <Button onClick={handleReload} variant="outlined">
             페이지 새로고침
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Stack>
+      </Paper>
+    </Box>
   )
 }
 

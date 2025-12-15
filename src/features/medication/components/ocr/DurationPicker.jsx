@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from './DurationPicker.module.scss'
+import { Alert, Box, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
 
 /**
  * 복용 기간 선택 컴포넌트 (이미지 2 참고)
@@ -36,52 +36,51 @@ const DurationPicker = ({ startDate, endDate, onUpdate }) => {
   }
 
   return (
-    <div className={styles.container}>
-      {/* 헤더 */}
-      <div className={styles.header}>
-        <span className={styles.title}>
-          복용 기간 <span className={styles.duration}>{currentDay()}일차/{calculateDays()}일</span>
-        </span>
-        <div className={styles.toggleWrapper}>
-          <span>종료일</span>
-          <div className={styles.toggleSwitch}>
-            <input type="checkbox" defaultChecked id="end-date-toggle" />
-            <label htmlFor="end-date-toggle" className={styles.slider}></label>
-          </div>
-        </div>
-      </div>
+    <Paper sx={{ p: 2.5, borderRadius: 3, mb: 2, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+          복용 기간{' '}
+          <Box component="span" sx={{ color: 'success.main', fontWeight: 900, ml: 1 }}>
+            {currentDay()}일차/{calculateDays()}일
+          </Box>
+        </Typography>
 
-      {/* 날짜 입력 */}
-      <div className={styles.dateInputs}>
-        <div className={styles.dateField}>
-          <label>시작일</label>
-          <input
-            type="date"
-            className={styles.dateInput}
-            value={startDate}
-            onChange={(e) => onUpdate({ startDate: e.target.value })}
-          />
-          <span className={styles.dateDisplay}>{formatDate(startDate)}</span>
-        </div>
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.secondary' }}>
+          <Typography variant="body2">종료일</Typography>
+          <Switch defaultChecked inputProps={{ 'aria-label': '종료일 토글' }} />
+        </Stack>
+      </Stack>
 
-        <div className={styles.dateField}>
-          <label>종료일</label>
-          <input
-            type="date"
-            className={styles.dateInput}
-            value={endDate}
-            min={startDate}
-            onChange={(e) => onUpdate({ endDate: e.target.value })}
-          />
-          <span className={styles.dateDisplay}>{formatDate(endDate)}</span>
-        </div>
-      </div>
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2, mb: 2 }}>
+        <TextField
+          type="date"
+          label="시작일"
+          value={startDate}
+          onChange={(e) => onUpdate({ startDate: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          helperText={formatDate(startDate) || ' '}
+        />
+        <TextField
+          type="date"
+          label="종료일"
+          value={endDate}
+          inputProps={{ min: startDate }}
+          onChange={(e) => onUpdate({ endDate: e.target.value })}
+          InputLabelProps={{ shrink: true }}
+          helperText={formatDate(endDate) || ' '}
+        />
+      </Box>
 
-      {/* 안내 메시지 */}
-      <p className={styles.notice}>
+      <Alert severity="info" sx={{ bgcolor: 'grey.50' }}>
         새로 조정된 복용 기간을 확인해 주세요.
-      </p>
-    </div>
+      </Alert>
+    </Paper>
   )
 }
 

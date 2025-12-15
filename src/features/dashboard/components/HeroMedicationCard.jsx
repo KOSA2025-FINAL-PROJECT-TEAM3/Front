@@ -11,7 +11,7 @@ import {
   Stack,
   useTheme,
 } from '@mui/material'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import PropTypes from 'prop-types'

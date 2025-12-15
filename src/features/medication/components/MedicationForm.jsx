@@ -1,5 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
-import styles from './MedicationForm.module.css'
+import {
+  Box,
+  Button,
+  Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
+} from '@mui/material'
 
 const initialForm = {
   name: '',
@@ -14,6 +28,18 @@ const initialForm = {
   schedules: [],
 }
 
+const DAY_ORDER = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
+
+const normalizeTime = (value) => (value ? value.substring(0, 5) : '')
+
+const TIME_OPTIONS = Array.from({ length: 48 }).map((_, i) => {
+  const hour = Math.floor(i / 2)
+    .toString()
+    .padStart(2, '0')
+  const minute = i % 2 === 0 ? '00' : '30'
+  return `${hour}:${minute}`
+})
+
 export const MedicationForm = ({
   initialValues,
   onSubmit,
@@ -22,23 +48,21 @@ export const MedicationForm = ({
   onCancel,
   shouldResetOnSubmit = true,
 }) => {
-  const mergedInitial = useMemo(
-    () => {
-      const merged = {
-        ...initialForm,
-        ...(initialValues || {}),
-      }
-      // 시간 형식 정규화 (HH:mm:ss -> HH:mm)
-      if (merged.schedules) {
-        merged.schedules = merged.schedules.map((s) => ({
-          ...s,
-          time: s.time ? s.time.substring(0, 5) : '',
-        }))
-      }
-      return merged
-    },
-    [initialValues],
-  )
+  const mergedInitial = useMemo(() => {
+    const merged = {
+      ...initialForm,
+      ...(initialValues || {}),
+    }
+
+    if (merged.schedules) {
+      merged.schedules = merged.schedules.map((s) => ({
+        ...s,
+        time: normalizeTime(s.time),
+      }))
+    }
+
+    return merged
+  }, [initialValues])
 
   const [form, setForm] = useState(mergedInitial)
 
@@ -79,12 +103,11 @@ export const MedicationForm = ({
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    // 클라이언트 사이드 스케줄 중복 검증
     if (form.schedules && form.schedules.length > 0) {
-      const timeMap = {} // time -> Set<day>
+      const timeMap = {}
       for (const schedule of form.schedules) {
         if (!schedule.time || !schedule.daysOfWeek) continue
-        
+
         if (!timeMap[schedule.time]) {
           timeMap[schedule.time] = new Set()
         }
@@ -107,195 +130,203 @@ export const MedicationForm = ({
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.section}>
-        <h3>기본 정보</h3>
-        <label>
-          약 이름
-          <input
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2 }}>
+          기본 정보
+        </Typography>
+        <Stack spacing={2}>
+          <TextField
             name="name"
+            label="약 이름"
             value={form.name}
             onChange={handleChange}
             placeholder="예: Simvastatin"
             required
+            fullWidth
           />
-        </label>
-        <label>
-          성분명
-          <input
+          <TextField
             name="ingredient"
+            label="성분명"
             value={form.ingredient || ''}
             onChange={handleChange}
             placeholder="예: Simvastatin"
+            fullWidth
           />
-        </label>
-        <label>
-          용량
-          <input
+          <TextField
             name="dosage"
+            label="용량"
             value={form.dosage}
             onChange={handleChange}
             placeholder="예: 20mg"
+            fullWidth
           />
-        </label>
-      </div>
+        </Stack>
+      </Paper>
 
-      <div className={styles.section}>
-        <h3>복용 기간 및 수량</h3>
-        <div className={styles.row}>
-          <label>
-            시작일
-            <input
-              type="date"
-              name="startDate"
-              value={form.startDate || ''}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            종료일
-            <input
-              type="date"
-              name="endDate"
-              value={form.endDate || ''}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
-        <div className={styles.row}>
-          <label>
-            총 수량
-            <input
-              type="number"
-              name="quantity"
-              value={form.quantity || ''}
-              onChange={handleChange}
-            />
-          </label>
-          <label>
-            남은 수량
-            <input
-              type="number"
-              name="remaining"
-              value={form.remaining || ''}
-              onChange={handleChange}
-            />
-          </label>
-        </div>
-        <label>
-          유효기간
-          <input
+      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2 }}>
+          복용 기간 및 수량
+        </Typography>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+          <TextField
+            type="date"
+            name="startDate"
+            label="시작일"
+            value={form.startDate || ''}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            type="date"
+            name="endDate"
+            label="종료일"
+            value={form.endDate || ''}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            type="number"
+            name="quantity"
+            label="총 수량"
+            value={form.quantity || ''}
+            onChange={handleChange}
+            inputProps={{ min: 0 }}
+          />
+          <TextField
+            type="number"
+            name="remaining"
+            label="남은 수량"
+            value={form.remaining || ''}
+            onChange={handleChange}
+            inputProps={{ min: 0 }}
+          />
+          <TextField
             type="date"
             name="expiryDate"
+            label="유효기간"
             value={form.expiryDate || ''}
             onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
           />
-        </label>
-      </div>
+        </Box>
+      </Paper>
 
-      <div className={styles.section}>
-        <h3>복용 스케줄</h3>
-        {(form.schedules || []).map((schedule, index) => (
-          <div key={index} className={styles.scheduleRow}>
-            <select
-              value={schedule.time}
-              onChange={(e) => handleScheduleChange(index, 'time', e.target.value)}
-              required
-              disabled={schedule.isTakenToday}
-            >
-              <option value="">시간 선택</option>
-              {Array.from({ length: 48 }).map((_, i) => {
-                const hour = Math.floor(i / 2).toString().padStart(2, '0')
-                const minute = (i % 2) * 30 === 0 ? '00' : '30'
-                const timeStr = `${hour}:${minute}`
-                return (
-                  <option key={timeStr} value={timeStr}>
-                    {timeStr}
-                  </option>
-                )
-              })}
-            </select>
+      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+            복용 스케줄
+          </Typography>
+          <Button type="button" variant="outlined" onClick={addSchedule} sx={{ fontWeight: 900 }}>
+            + 스케줄 추가
+          </Button>
+        </Stack>
 
-            <div className={styles.daySelector}>
-              {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  className={`${styles.dayButton} ${schedule.daysOfWeek?.includes(day) ? styles.selected : ''
-                    }`}
-                  onClick={() => {
-                    const currentDays = schedule.daysOfWeek ? schedule.daysOfWeek.split(',') : []
-                    let newDays
-                    if (currentDays.includes(day)) {
-                      newDays = currentDays.filter((d) => d !== day)
-                    } else {
-                      newDays = [...currentDays, day]
-                    }
-                    // Sort days to keep order consistent (optional but good)
-                    const dayOrder = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-                    newDays.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+        {(form.schedules || []).length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            등록된 스케줄이 없습니다.
+          </Typography>
+        ) : (
+          <Stack spacing={1.5}>
+            {(form.schedules || []).map((schedule, index) => {
+              const selectedDays = schedule.daysOfWeek ? schedule.daysOfWeek.split(',').filter(Boolean) : []
+              const disabled = Boolean(schedule.isTakenToday)
 
-                    handleScheduleChange(index, 'daysOfWeek', newDays.join(','))
-                  }}
-                  disabled={schedule.isTakenToday}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
+              return (
+                <Paper key={index} variant="outlined" sx={{ p: 2, borderRadius: 2.5, bgcolor: 'grey.50' }}>
+                  <Stack spacing={1.5}>
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id={`schedule-time-${index}`}>시간</InputLabel>
+                      <Select
+                        labelId={`schedule-time-${index}`}
+                        label="시간"
+                        value={schedule.time}
+                        onChange={(e) => handleScheduleChange(index, 'time', e.target.value)}
+                        required
+                        disabled={disabled}
+                      >
+                        <MenuItem value="">시간 선택</MenuItem>
+                        {TIME_OPTIONS.map((timeStr) => (
+                          <MenuItem key={timeStr} value={timeStr}>
+                            {timeStr}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
 
-            {schedule.isTakenToday ? (
-              <span className={styles.takenBadge}>복용 완료</span>
-            ) : (
-              <button
-                type="button"
-                onClick={() => removeSchedule(index)}
-                className={styles.removeButton}
-              >
-                삭제
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addSchedule}
-          className={styles.addButton}
-        >
-          + 스케줄 추가
-        </button>
-      </div>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 900 }}>
+                        요일
+                      </Typography>
+                      <ToggleButtonGroup
+                        value={selectedDays}
+                        onChange={(_, next) => {
+                          const days = Array.isArray(next) ? next : []
+                          const ordered = [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b))
+                          handleScheduleChange(index, 'daysOfWeek', ordered.join(','))
+                        }}
+                        disabled={disabled}
+                        size="small"
+                        sx={{ mt: 1, flexWrap: 'wrap' }}
+                      >
+                        {DAY_ORDER.map((day) => (
+                          <ToggleButton key={day} value={day} sx={{ fontWeight: 900 }}>
+                            {day}
+                          </ToggleButton>
+                        ))}
+                      </ToggleButtonGroup>
+                    </Box>
 
-      <div className={styles.section}>
-        <h3>기타</h3>
-        <label>
-          메모 / 주의사항
-          <textarea
-            name="notes"
-            value={form.notes || ''}
-            onChange={handleChange}
-            placeholder="예: 식후 30분 복용"
-          />
-        </label>
-      </div>
-
-      <div className={styles.actions}>
-        {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className={styles.secondaryButton}
-            disabled={loading}
-          >
-            취소
-          </button>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      {disabled ? (
+                        <Chip label="복용 완료" size="small" color="success" sx={{ fontWeight: 900 }} />
+                      ) : (
+                        <Button type="button" color="error" variant="outlined" onClick={() => removeSchedule(index)} sx={{ fontWeight: 900 }}>
+                          삭제
+                        </Button>
+                      )}
+                      <Typography variant="caption" color="text.secondary">
+                        {selectedDays.length ? `${selectedDays.length}일 선택` : '요일 미선택'}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              )
+            })}
+          </Stack>
         )}
-        <button type="submit" disabled={loading}>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2 }}>
+          기타
+        </Typography>
+        <TextField
+          name="notes"
+          label="메모 / 주의사항"
+          value={form.notes || ''}
+          onChange={handleChange}
+          placeholder="예: 식후 30분 복용"
+          multiline
+          minRows={3}
+          fullWidth
+        />
+      </Paper>
+
+      <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
+        {onCancel ? (
+          <Button type="button" variant="outlined" onClick={onCancel} disabled={loading} sx={{ fontWeight: 900 }}>
+            취소
+          </Button>
+        ) : null}
+        <Button type="submit" variant="contained" disabled={loading} sx={{ fontWeight: 900 }}>
           {loading ? '저장 중...' : submitLabel}
-        </button>
-      </div>
-    </form>
+        </Button>
+      </Stack>
+    </Box>
   )
 }
 
 export default MedicationForm
+

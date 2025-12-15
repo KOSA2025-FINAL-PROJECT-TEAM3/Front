@@ -6,6 +6,11 @@
 
 import { createTheme } from '@mui/material/styles'
 
+export const UI_FONT_SCALES = {
+  default: 16,
+  accessibility: 18,
+}
+
 // Breakpoints: Mobile -> Tablet -> Desktop
 const breakpoints = {
   values: {
@@ -17,12 +22,12 @@ const breakpoints = {
   },
 }
 
-// Palette: Indigo primary + Gray background
+// Palette: Teal primary (RN prototype) + Soft blue background
 const palette = {
   primary: {
-    main: '#6366f1',      // indigo-500
-    light: '#818cf8',     // indigo-400
-    dark: '#4f46e5',      // indigo-600
+    main: '#2EC4B6',      // RN brand teal
+    light: '#5AD6CA',     // lighter teal
+    dark: '#25A094',      // darker teal
     contrastText: '#ffffff',
   },
   secondary: {
@@ -32,7 +37,7 @@ const palette = {
     contrastText: '#ffffff',
   },
   background: {
-    default: '#f9fafb',   // gray-50
+    default: '#F6FAFF',   // RN-style soft blue
     paper: '#ffffff',
   },
   text: {
@@ -126,6 +131,20 @@ const typography = {
     fontSize: '0.875rem', // 14px
     lineHeight: 1.5,
   },
+  subtitle1: {
+    fontSize: '1rem',
+    fontWeight: 600,
+    lineHeight: 1.5,
+  },
+  subtitle2: {
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    lineHeight: 1.5,
+  },
+  caption: {
+    fontSize: '0.75rem',
+    lineHeight: 1.4,
+  },
   button: {
     textTransform: 'none', // 버튼 텍스트 대문자 변환 비활성화
     fontWeight: 500,
@@ -170,7 +189,19 @@ const shadows = [
 ]
 
 // Component Overrides: MUI 컴포넌트 기본 스타일 재정의
-const components = {
+const createComponents = ({ accessibilityMode }) => ({
+  MuiCssBaseline: {
+    styleOverrides: {
+      html: {
+        fontSize: accessibilityMode
+          ? `${UI_FONT_SCALES.accessibility}px`
+          : `${UI_FONT_SCALES.default}px`,
+      },
+      body: {
+        backgroundColor: palette.background.default,
+      },
+    },
+  },
   MuiButton: {
     styleOverrides: {
       root: {
@@ -178,6 +209,7 @@ const components = {
         padding: '10px 20px',
         fontSize: '1rem',
         fontWeight: 500,
+        minHeight: 44,
       },
       contained: {
         boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
@@ -202,6 +234,34 @@ const components = {
       },
     },
   },
+  MuiDialog: {
+    styleOverrides: {
+      paper: {
+        borderRadius: 16,
+      },
+    },
+  },
+  MuiAlert: {
+    styleOverrides: {
+      root: {
+        borderRadius: 12,
+      },
+    },
+  },
+  MuiListItemButton: {
+    styleOverrides: {
+      root: {
+        minHeight: 44,
+      },
+    },
+  },
+  MuiMenuItem: {
+    styleOverrides: {
+      root: {
+        minHeight: 44,
+      },
+    },
+  },
   MuiChip: {
     styleOverrides: {
       root: {
@@ -219,17 +279,25 @@ const components = {
       },
     },
   },
-}
-
-// Create Theme
-const theme = createTheme({
-  breakpoints,
-  palette,
-  typography,
-  shape,
-  spacing,
-  shadows,
-  components,
+  MuiIconButton: {
+    styleOverrides: {
+      root: {
+        minWidth: 44,
+        minHeight: 44,
+      },
+    },
+  },
 })
 
-export default theme
+export const createAppTheme = ({ accessibilityMode = false } = {}) =>
+  createTheme({
+    breakpoints,
+    palette,
+    typography,
+    shape,
+    spacing,
+    shadows,
+    components: createComponents({ accessibilityMode }),
+  })
+
+export default createAppTheme()

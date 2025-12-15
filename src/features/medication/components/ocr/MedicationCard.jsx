@@ -1,5 +1,6 @@
 import React from 'react'
-import styles from './MedicationCard.module.scss'
+import { Box, Button, Divider, IconButton, Paper, Stack, TextField, Typography } from '@mui/material'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 /**
  * 개별 약물 카드 컴포넌트 (이미지 1, 3 참고)
@@ -22,119 +23,139 @@ const MedicationCard = ({
   }
 
   return (
-    <div className={styles.card}>
-      {/* 약 이미지 + 이름 + 분류 */}
-      <div className={styles.header}>
-        <div className={styles.imageWrapper}>
+    <Paper sx={{ p: 2, borderRadius: 3, mb: 1.5, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: 'grey.50',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
           {medication.imageUrl ? (
-            <img src={medication.imageUrl} alt={medication.name} className={styles.image} />
+            <Box component="img" src={medication.imageUrl} alt={medication.name} sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <div className={styles.imagePlaceholder}>💊</div>
+            <Box aria-hidden sx={{ fontSize: 32, userSelect: 'none' }}>
+              💊
+            </Box>
           )}
-        </div>
+        </Paper>
 
-        <div className={styles.info}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
           {editable ? (
-            <>
-              <input
-                type="text"
-                className={styles.nameInput}
+            <Stack spacing={1}>
+              <TextField
+                size="small"
                 value={medication.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 placeholder="약 이름"
+                fullWidth
               />
-              <input
-                type="text"
-                className={styles.categoryInput}
+              <TextField
+                size="small"
                 value={medication.category || ''}
                 onChange={(e) => handleChange('category', e.target.value)}
                 placeholder="분류 (예: 제산제)"
+                fullWidth
               />
-            </>
+            </Stack>
           ) : (
-            <>
-              <span className={styles.name}>{medication.name}</span>
-              {medication.category && (
-                <span className={styles.category}>{medication.category}</span>
-              )}
-            </>
+            <Stack spacing={0.5}>
+              <Typography sx={{ fontWeight: 900 }}>{medication.name}</Typography>
+              {medication.category ? (
+                <Typography variant="body2" color="text.secondary">
+                  {medication.category}
+                </Typography>
+              ) : null}
+            </Stack>
           )}
-        </div>
+        </Box>
 
-        {editable && (
-          <button
-            className={styles.detailBtn}
-            onClick={() => {/* 상세 페이지 이동 또는 모달 */}}
-          >
-            &gt;
-          </button>
-        )}
-      </div>
+        {editable ? (
+          <IconButton size="small" disabled aria-label="상세">
+            <ChevronRightIcon />
+          </IconButton>
+        ) : null}
+      </Stack>
 
-      {/* 복용량 | 횟수 | 일수 */}
-      <div className={styles.statsBar}>
-        <div className={styles.stat}>
-          {editable ? (
-            <input
-              type="number"
-              min="1"
-              value={medication.dosageAmount}
-              onChange={(e) => handleChange('dosageAmount', parseInt(e.target.value) || 1)}
-              className={styles.statInput}
-            />
-          ) : (
-            <span className={styles.statValue}>{medication.dosageAmount}</span>
-          )}
-          <span className={styles.statLabel}>정씩</span>
-        </div>
+      <Paper variant="outlined" sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 1.5, mb: 1.5 }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-around" spacing={1}>
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            {editable ? (
+              <TextField
+                type="number"
+                size="small"
+                value={medication.dosageAmount}
+                inputProps={{ min: 1 }}
+                onChange={(e) => handleChange('dosageAmount', parseInt(e.target.value) || 1)}
+                sx={{ width: 80 }}
+              />
+            ) : (
+              <Typography sx={{ fontWeight: 900 }}>{medication.dosageAmount}</Typography>
+            )}
+            <Typography variant="caption" color="text.secondary">
+              정씩
+            </Typography>
+          </Stack>
 
-        <div className={styles.divider} />
+          <Divider orientation="vertical" flexItem />
 
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>하루</span>
-          {editable ? (
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={medication.dailyFrequency}
-              onChange={(e) => handleChange('dailyFrequency', parseInt(e.target.value) || 1)}
-              className={styles.statInput}
-            />
-          ) : (
-            <span className={styles.statValue}>{medication.dailyFrequency}</span>
-          )}
-          <span className={styles.statLabel}>회</span>
-        </div>
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            <Typography variant="caption" color="text.secondary">
+              하루
+            </Typography>
+            {editable ? (
+              <TextField
+                type="number"
+                size="small"
+                value={medication.dailyFrequency}
+                inputProps={{ min: 1, max: 10 }}
+                onChange={(e) => handleChange('dailyFrequency', parseInt(e.target.value) || 1)}
+                sx={{ width: 80 }}
+              />
+            ) : (
+              <Typography sx={{ fontWeight: 900 }}>{medication.dailyFrequency}</Typography>
+            )}
+            <Typography variant="caption" color="text.secondary">
+              회
+            </Typography>
+          </Stack>
 
-        <div className={styles.divider} />
+          <Divider orientation="vertical" flexItem />
 
-        <div className={styles.stat}>
-          {editable ? (
-            <input
-              type="number"
-              min="1"
-              value={medication.durationDays}
-              onChange={(e) => handleChange('durationDays', parseInt(e.target.value) || 1)}
-              className={styles.statInput}
-            />
-          ) : (
-            <span className={styles.statValue}>{medication.durationDays}</span>
-          )}
-          <span className={styles.statLabel}>일분</span>
-        </div>
-      </div>
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            {editable ? (
+              <TextField
+                type="number"
+                size="small"
+                value={medication.durationDays}
+                inputProps={{ min: 1 }}
+                onChange={(e) => handleChange('durationDays', parseInt(e.target.value) || 1)}
+                sx={{ width: 80 }}
+              />
+            ) : (
+              <Typography sx={{ fontWeight: 900 }}>{medication.durationDays}</Typography>
+            )}
+            <Typography variant="caption" color="text.secondary">
+              일분
+            </Typography>
+          </Stack>
+        </Stack>
+      </Paper>
 
-      {/* 삭제 버튼 (편집 모드) */}
-      {editable && (
-        <button
-          className={styles.removeBtn}
-          onClick={() => onRemove(medication.id)}
-        >
+      {editable ? (
+        <Button fullWidth color="error" variant="outlined" onClick={() => onRemove(medication.id)} sx={{ fontWeight: 900 }}>
           삭제
-        </button>
-      )}
-    </div>
+        </Button>
+      ) : null}
+    </Paper>
   )
 }
 

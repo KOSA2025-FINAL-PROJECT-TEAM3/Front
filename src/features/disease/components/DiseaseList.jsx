@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
+import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import DiseaseCard from './DiseaseCard'
-import styles from './DiseaseList.module.scss'
 
 const FILTERS = [
   { key: 'ALL', label: '전체' },
@@ -41,36 +41,49 @@ export const DiseaseList = ({ diseases = [], loading, onSelect, onDelete, onEdit
   const emptyMessage = isFiltered ? '검색 결과가 없습니다.' : '등록된 질병이 없습니다.'
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.toolbar}>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="질병 검색"
-          className={styles.searchInput}
-          aria-label="질병 검색"
-        />
-        <div className={styles.filters}>
-          {FILTERS.map((filter) => (
-            <button
-              key={filter.key}
-              type="button"
-              onClick={() => setStatusFilter(filter.key)}
-              className={`${styles.filterButton} ${
-                statusFilter === filter.key ? styles.active : ''
-              }`}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-      </div>
+    <Stack spacing={1.5}>
+      <Paper variant="outlined" sx={{ bgcolor: 'grey.50', borderRadius: 3, p: 1.5 }}>
+        <Stack spacing={1.25}>
+          <TextField
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="질병 검색"
+            size="small"
+            fullWidth
+            inputProps={{ 'aria-label': '질병 검색' }}
+          />
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+            {FILTERS.map((filter) => {
+              const selected = statusFilter === filter.key
+              return (
+                <Button
+                  key={filter.key}
+                  type="button"
+                  variant={selected ? 'contained' : 'outlined'}
+                  size="small"
+                  onClick={() => setStatusFilter(filter.key)}
+                  sx={{ borderRadius: 999, fontWeight: 800 }}
+                >
+                  {filter.label}
+                </Button>
+              )
+            })}
+          </Stack>
+        </Stack>
+      </Paper>
 
       {loading ? (
-        <div className={styles.hint}>질병 목록을 불러오는 중입니다...</div>
+        <Typography variant="body2" color="text.secondary">
+          질병 목록을 불러오는 중입니다...
+        </Typography>
       ) : filtered.length ? (
-        <div className={styles.list}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 1.5,
+          }}
+        >
           {filtered.map((disease) => (
             <DiseaseCard
               key={disease.id}
@@ -80,11 +93,23 @@ export const DiseaseList = ({ diseases = [], loading, onSelect, onDelete, onEdit
               onEdit={onEdit}
             />
           ))}
-        </div>
+        </Box>
       ) : (
-        <div className={styles.empty}>{emptyMessage}</div>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            borderStyle: 'dashed',
+            textAlign: 'center',
+            bgcolor: 'grey.50',
+            color: 'text.secondary',
+          }}
+        >
+          {emptyMessage}
+        </Paper>
       )}
-    </div>
+    </Stack>
   )
 }
 

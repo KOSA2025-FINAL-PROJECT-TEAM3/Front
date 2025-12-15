@@ -1,9 +1,10 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 class OcrApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082',
+      baseURL: envConfig.API_BASE_URL,
       basePath: '/api/ocr',
     })
   }

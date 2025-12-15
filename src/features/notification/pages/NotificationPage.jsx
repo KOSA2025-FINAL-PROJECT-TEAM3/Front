@@ -6,11 +6,23 @@
 
 import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  Box,
+  Chip,
+  Container,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemText,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { BackButton } from '@shared/components/ui/BackButton'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './NotificationPage.module.scss'
 
 const mergeMedications = (a = [], b = []) => {
   const byId = new Map()
@@ -151,70 +163,110 @@ export const NotificationPage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <div className={styles.headerWithBack}>
-          <BackButton />
-          <h1 className={styles.title}>알림</h1>
-        </div>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <BackButton />
+            <Typography variant="h5" fontWeight={800}>
+              알림
+            </Typography>
+            <Box sx={{ flex: 1 }} />
+            {unreadCount > 0 && (
+              <Typography variant="caption" color="text.secondary">
+                읽지 않음 {unreadCount}개
+              </Typography>
+            )}
+          </Stack>
 
-        {unreadCount > 0 && (
-          <div className={styles.actions}>
-            <button type="button" className={styles.markAllButton} onClick={handleMarkAllAsRead}>
-              모두 읽음 표시
-            </button>
-          </div>
-        )}
+          {unreadCount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Chip
+                label="모두 읽음 표시"
+                color="primary"
+                variant="outlined"
+                onClick={handleMarkAllAsRead}
+              />
+            </Box>
+          )}
 
-        {loading && <p className={styles.placeholder}>알림을 불러오는 중...</p>}
+          {loading && (
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Typography color="text.secondary">알림을 불러오는 중...</Typography>
+            </Paper>
+          )}
 
-        {!loading && displayNotifications.length === 0 && (
-          <div className={styles.empty}>
-            <p className={styles.emptyIcon}>🔔</p>
-            <p className={styles.emptyText}>새로운 알림이 없습니다</p>
-          </div>
-        )}
+          {!loading && displayNotifications.length === 0 && (
+            <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: 28 }} aria-hidden="true">
+                🔔
+              </Typography>
+              <Typography fontWeight={700} sx={{ mt: 1 }}>
+                새로운 알림이 없습니다
+              </Typography>
+            </Paper>
+          )}
 
-        {!loading && displayNotifications.length > 0 && (
-          <div className={styles.notificationList}>
-            {displayNotifications.map((notification) => {
-              const isMissed = (notification.type || '').toLowerCase().includes('missed')
-              const summary = buildMissedSummary(notification)
-              const timeLabel = formatScheduledTime(notification.scheduledTime)
+          {!loading && displayNotifications.length > 0 && (
+            <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+              <List disablePadding>
+                {displayNotifications.map((notification) => {
+                  const isMissed = (notification.type || '').toLowerCase().includes('missed')
+                  const summary = buildMissedSummary(notification)
+                  const timeLabel = formatScheduledTime(notification.scheduledTime)
 
-              return (
-                <div
-                  key={notification.id}
-                  className={`${styles.notificationItem} ${!notification.read ? styles.unread : ''}`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className={styles.notificationHeader}>
-                    <span className={styles.notificationTitle}>{notification.title}</span>
-                    <button
-                      type="button"
-                      className={styles.deleteButton}
-                      onClick={(e) => handleDelete(e, notification.id)}
-                      aria-label="삭제"
+                  return (
+                    <ListItemButton
+                      key={notification.id}
+                      onClick={() => handleNotificationClick(notification)}
+                      sx={{
+                        alignItems: 'flex-start',
+                        gap: 2,
+                        borderLeft: 4,
+                        borderLeftColor: notification.read ? 'transparent' : 'primary.main',
+                      }}
                     >
-                      ✕
-                    </button>
-                  </div>
-                  <p className={styles.notificationMessage}>{renderMessage(notification)}</p>
-                  {isMissed && (summary || timeLabel) && (
-                    <div className={styles.metaRow}>
-                      {timeLabel && <span className={styles.metaPill}>{timeLabel}</span>}
-                      {summary && <span className={styles.metaPill}>{summary}</span>}
-                    </div>
-                  )}
-                  <div className={styles.notificationFooter}>
-                    <span className={styles.notificationTime}>{formatDate(notification.createdAt)}</span>
-                    {!notification.read && <span className={styles.unreadBadge}>새 알림</span>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+                      <ListItemText
+                        primary={
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <Typography fontWeight={800}>{notification.title}</Typography>
+                            {!notification.read && (
+                              <Chip size="small" label="새 알림" color="primary" />
+                            )}
+                          </Stack>
+                        }
+                        secondary={
+                          <Stack spacing={1} sx={{ mt: 0.5 }}>
+                            <Typography variant="body2" color="text.primary">
+                              {renderMessage(notification)}
+                            </Typography>
+                            {isMissed && (summary || timeLabel) && (
+                              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                                {timeLabel && <Chip size="small" label={timeLabel} />}
+                                {summary && <Chip size="small" label={summary} />}
+                              </Stack>
+                            )}
+                            <Typography variant="caption" color="text.secondary">
+                              {formatDate(notification.createdAt)}
+                            </Typography>
+                          </Stack>
+                        }
+                      />
+
+                      <IconButton
+                        edge="end"
+                        aria-label="삭제"
+                        onClick={(e) => handleDelete(e, notification.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </ListItemButton>
+                  )
+                })}
+              </List>
+            </Paper>
+          )}
+        </Stack>
+      </Container>
     </MainLayout>
   )
 }

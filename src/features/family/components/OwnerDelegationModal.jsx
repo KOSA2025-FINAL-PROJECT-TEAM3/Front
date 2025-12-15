@@ -1,6 +1,19 @@
-import React, { useState, useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
-import styles from './OwnerDelegationModal.module.scss'
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Stack,
+  Typography,
+} from '@mui/material'
 
 /**
  * 소유자 양도 모달
@@ -47,78 +60,95 @@ const OwnerDelegationModal = ({
     onClose()
   }
 
-  if (!isOpen) return null
-
   return (
-    <div className={styles.overlay} onClick={handleClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          <h3>그룹 소유자 양도</h3>
-          <button className={styles.closeBtn} onClick={handleClose}>
-            ✕
-          </button>
-        </div>
+    <Dialog open={isOpen} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ fontWeight: 900, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'common.white' }}>
+        그룹 소유자 양도
+      </DialogTitle>
 
-        <div className={styles.content}>
-          <p className={styles.description}>
-            그룹 소유자가 어르신(SENIOR) 역할로 전환하려면<br />
-            새로운 소유자를 지정해야 합니다.
-          </p>
+      <DialogContent sx={{ pt: 2.5 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', lineHeight: 1.6 }}>
+          그룹 소유자가 어르신(SENIOR) 역할로 전환하려면
+          <br />
+          새로운 소유자를 지정해야 합니다.
+        </Typography>
 
-          {eligibleMembers.length === 0 ? (
-            <div className={styles.noMembers}>
-              <p>양도 가능한 보호자(CAREGIVER)가 없습니다.</p>
-              <p className={styles.hint}>
-                다른 보호자를 그룹에 먼저 초대해주세요.
-              </p>
-            </div>
-          ) : (
-            <div className={styles.memberList}>
-              <label className={styles.label}>새 소유자 선택:</label>
+        {eligibleMembers.length === 0 ? (
+          <Alert severity="warning" sx={{ mt: 2.5 }}>
+            <Stack spacing={0.5}>
+              <Typography sx={{ fontWeight: 900 }}>양도 가능한 보호자(CAREGIVER)가 없습니다.</Typography>
+              <Typography variant="body2">다른 보호자를 그룹에 먼저 초대해주세요.</Typography>
+            </Stack>
+          </Alert>
+        ) : (
+          <Box sx={{ mt: 2.5 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
+              새 소유자 선택
+            </Typography>
+            <RadioGroup
+              value={selectedMemberId ?? ''}
+              onChange={(e) => setSelectedMemberId(e.target.value)}
+            >
               {eligibleMembers.map((member) => (
-                <div
+                <Box
                   key={member.id}
-                  className={`${styles.memberItem} ${
-                    selectedMemberId === member.id ? styles.selected : ''
-                  }`}
-                  onClick={() => setSelectedMemberId(member.id)}
+                  onClick={() => setSelectedMemberId(String(member.id))}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setSelectedMemberId(String(member.id))
+                    }
+                  }}
+                  sx={{
+                    border: '2px solid',
+                    borderColor: String(selectedMemberId) === String(member.id) ? 'primary.main' : 'divider',
+                    borderRadius: 3,
+                    px: 2,
+                    py: 1.5,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    bgcolor: String(selectedMemberId) === String(member.id) ? 'primary.50' : 'transparent',
+                    '&:hover': { borderColor: 'primary.main', bgcolor: 'grey.50' },
+                    mb: 1.25,
+                  }}
                 >
-                  <div className={styles.radio}>
-                    <input
-                      type="radio"
-                      name="newOwner"
-                      checked={selectedMemberId === member.id}
-                      onChange={() => setSelectedMemberId(member.id)}
+                  <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <FormControlLabel
+                      value={String(member.id)}
+                      control={<Radio />}
+                      label=""
+                      sx={{ m: 0 }}
                     />
-                  </div>
-                  <div className={styles.memberInfo}>
-                    <span className={styles.name}>{member.name}</span>
-                    <span className={styles.email}>{member.email}</span>
-                  </div>
-                </div>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 900 }}>{member.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {member.email}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
               ))}
-            </div>
-          )}
-        </div>
+            </RadioGroup>
+          </Box>
+        )}
+      </DialogContent>
 
-        <div className={styles.footer}>
-          <button
-            className={styles.cancelBtn}
-            onClick={handleClose}
-            disabled={isLoading}
-          >
-            취소
-          </button>
-          <button
-            className={styles.confirmBtn}
-            onClick={handleConfirm}
-            disabled={!selectedMemberId || isLoading || eligibleMembers.length === 0}
-          >
-            {isLoading ? '처리 중...' : '양도하고 역할 변경'}
-          </button>
-        </div>
-      </div>
-    </div>
+      <DialogActions sx={{ p: 2, bgcolor: 'grey.50' }}>
+        <Button onClick={handleClose} disabled={isLoading} variant="outlined">
+          취소
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          disabled={!selectedMemberId || isLoading || eligibleMembers.length === 0}
+          variant="contained"
+          sx={{ fontWeight: 900 }}
+        >
+          {isLoading ? '처리 중...' : '양도하고 역할 변경'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 

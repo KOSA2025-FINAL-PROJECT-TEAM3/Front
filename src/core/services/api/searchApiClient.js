@@ -1,14 +1,15 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 const medicationSearchClient = new ApiClient({
-  baseURL: import.meta.env.VITE_MEDICATION_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  baseURL: envConfig.MEDICATION_API_URL || envConfig.API_BASE_URL,
   basePath: '/api/medications',
 })
 
 class SearchApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_SEARCH_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:80',
+      baseURL: envConfig.SEARCH_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/search',
     })
   }

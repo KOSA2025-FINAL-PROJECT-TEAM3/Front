@@ -9,12 +9,8 @@ class ReportApiClient extends ApiClient {
         })
     }
 
-    getAdherenceReport(userId, startDate, endDate) {
-        return this.post('/adherence', { userId, startDate, endDate })
-    }
-
-    getWeeklyStats(userId) {
-        return this.get('/weekly', { userId })
+    getAdherenceReport(startDate, endDate) {
+        return this.get('/adherence', { params: { startDate, endDate } })
     }
 }
 

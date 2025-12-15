@@ -7,11 +7,11 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
 import { useForm } from 'react-hook-form'
+import { Alert, Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
-import styles from './Login.module.scss'
 
 import { useInviteStore } from '@features/family/stores/inviteStore'
 
@@ -95,85 +95,88 @@ export const Login = () => {
   }
 
   return (
-    <div className={styles.loginContainer}>
-      <div className={styles.loginBox}>
-        <div className={styles.header}>
-          <div className={styles.logo}>💊</div>
-          <h1 className={styles.title}>뭐냑? (AMA...Pill)</h1>
-          <p className={styles.subtitle}>가족이 함께 챙기는 복약 플랫폼</p>
-        </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: 3,
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%)',
+      }}
+    >
+      <Container maxWidth="sm" sx={{ maxWidth: 460 }}>
+        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3 }}>
+          <Stack spacing={3} textAlign="center">
+            <Box>
+              <Typography component="div" sx={{ fontSize: 44 }}>
+                💊
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, mt: 1 }}>
+                뭐냑? (AMA...Pill)
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                가족이 함께 챙기는 복약 플랫폼
+              </Typography>
+            </Box>
 
-        <form className={styles.form} onSubmit={handleSubmit(handleLogin)}>
-          {combinedError && (
-            <div className={styles.errorMessage}>{combinedError}</div>
-          )}
+            <Stack component="form" spacing={2} onSubmit={handleSubmit(handleLogin)}>
+              {combinedError ? <Alert severity="error">{combinedError}</Alert> : null}
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
-              이메일
-            </label>
-            <input
-              id="email"
-              type="email"
-              className={styles.input}
-              placeholder="your@email.com"
-              {...register('email', {
-                required: '이메일을 입력해 주세요',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: '유효한 이메일 형식이 아닙니다',
-                },
-              })}
-              onFocus={resetErrors}
+              <TextField
+                label="이메일"
+                type="email"
+                placeholder="your@email.com"
+                disabled={loading}
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message || ''}
+                onFocus={resetErrors}
+                {...register('email', {
+                  required: '이메일을 입력해 주세요',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: '유효한 이메일 형식이 아닙니다',
+                  },
+                })}
+                fullWidth
+              />
+
+              <TextField
+                label="비밀번호"
+                type="password"
+                placeholder="최소 6자 이상"
+                disabled={loading}
+                error={Boolean(errors.password)}
+                helperText={errors.password?.message || ''}
+                onFocus={resetErrors}
+                {...register('password', {
+                  required: '비밀번호를 입력해 주세요',
+                  minLength: { value: 6, message: '비밀번호는 최소 6자 이상이어야 합니다' },
+                })}
+                fullWidth
+              />
+
+              <Button type="submit" variant="contained" disabled={loading} sx={{ py: 1.3, fontWeight: 900 }}>
+                {loading ? '로그인 중...' : '로그인'}
+              </Button>
+            </Stack>
+
+            <Divider>또는</Divider>
+
+            <KakaoLoginButton
               disabled={loading}
+              onUnavailable={(message) => setError('root', { type: 'manual', message })}
             />
-            {errors.email && (
-              <p className={styles.fieldError}>{errors.email.message}</p>
-            )}
-          </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>
-              비밀번호
-            </label>
-            <input
-              id="password"
-              type="password"
-              className={styles.input}
-              placeholder="최소 6자 이상"
-              {...register('password', {
-                required: '비밀번호를 입력해 주세요',
-                minLength: { value: 6, message: '비밀번호는 최소 6자 이상이어야 합니다' },
-              })}
-              onFocus={resetErrors}
-              disabled={loading}
-            />
-            {errors.password && (
-              <p className={styles.fieldError}>{errors.password.message}</p>
-            )}
-          </div>
-
-          <button type="submit" className={styles.loginButton} disabled={loading}>
-            {loading ? '로그인 중...' : '로그인'}
-          </button>
-        </form>
-
-        <div className={styles.divider}>또는</div>
-
-        <KakaoLoginButton
-          className={styles.kakaoButton}
-          disabled={loading}
-          onUnavailable={(message) => setError('root', { type: 'manual', message })}
-        />
-
-        <div className={styles.signupLink}>
-          계정이 없으신가요?{' '}
-          <Link to={ROUTE_PATHS.signup} className={styles.link}>
-            회원가입
-          </Link>
-        </div>
-      </div>
-    </div>
+            <Typography variant="body2" color="text.secondary">
+              계정이 없으신가요?{' '}
+              <Link to={ROUTE_PATHS.signup} style={{ fontWeight: 800 }}>
+                회원가입
+              </Link>
+            </Typography>
+          </Stack>
+        </Paper>
+      </Container>
+    </Box>
   )
 }
 

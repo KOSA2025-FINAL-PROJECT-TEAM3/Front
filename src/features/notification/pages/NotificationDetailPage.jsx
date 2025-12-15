@@ -6,12 +6,11 @@
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
+import { Box, Chip, Container, Paper, Stack, Typography } from '@mui/material'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Card } from '@shared/components/ui/Card'
-import { BackButton } from '@shared/components/ui/BackButton'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
-import styles from './NotificationDetailPage.module.scss'
 
 const formatScheduledTime = (value) => {
   if (!value) return null
@@ -145,66 +144,100 @@ export const NotificationDetailPage = () => {
   if (!notification) {
     return (
       <MainLayout>
-        <div className={styles.container}>
-          <header className={styles.header}>
-            <BackButton />
-            <h1 className={styles.title}>알림 상세</h1>
-          </header>
-          <p className={styles.emptyText}>알림을 찾을 수 없습니다.</p>
-        </div>
+        <Container maxWidth="md" sx={{ py: 3 }}>
+          <Stack spacing={2}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <BackButton />
+              <Typography variant="h5" fontWeight={800}>
+                알림 상세
+              </Typography>
+            </Stack>
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Typography color="text.secondary">알림을 찾을 수 없습니다.</Typography>
+            </Paper>
+          </Stack>
+        </Container>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <header className={styles.header}>
-          <BackButton />
-          <h1 className={styles.title}>알림 상세</h1>
-        </header>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <BackButton />
+            <Typography variant="h5" fontWeight={800}>
+              알림 상세
+            </Typography>
+          </Stack>
 
-        <Card className={styles.contentCard}>
-          <div className={styles.metaInfo}>
-            <span className={`${styles.typeBadge} ${styles.medication}`}>
-              {getTypeBadgeText(notification.type)}
-            </span>
-            <span className={styles.date}>{formattedDate}</span>
-          </div>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+                <Chip label={getTypeBadgeText(notification.type)} color="primary" size="small" />
+                {formattedDate && (
+                  <Typography variant="caption" color="text.secondary">
+                    {formattedDate}
+                  </Typography>
+                )}
+              </Stack>
 
-          <h2 className={styles.notiTitle}>{notification.title}</h2>
+              <Typography variant="h6" fontWeight={800}>
+                {notification.title}
+              </Typography>
 
-          <div className={styles.divider} />
+              <Typography variant="body2" color="text.secondary">
+                {notification.message}
+              </Typography>
 
-          <p className={styles.bodyText}>{notification.message}</p>
+              {isMissed && (
+                <Box>
+                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+                    {timeLabel && <Chip size="small" label={`예정 시간 ${timeLabel}`} />}
+                    {summary && <Chip size="small" label={summary} />}
+                  </Stack>
 
-          {isMissed && (
-            <div className={styles.metaSection}>
-              {timeLabel && <div className={styles.metaPill}>예정 시간 {timeLabel}</div>}
-              {summary && <div className={styles.metaPill}>{summary}</div>}
-            </div>
-          )}
-
-          {isMissed && (
-            <div className={styles.listSection}>
-              <h3 className={styles.sectionTitle}>미복용 약 목록</h3>
-              {fetching && <div className={styles.subtleText}>목록을 불러오는 중...</div>}
-              {resolvedMissedMedications.length > 0 ? (
-                <ul className={styles.medList}>
-                  {resolvedMissedMedications.map((med, idx) => (
-                    <li key={`${med.medicationId || med.medicationName || idx}`} className={styles.medItem}>
-                      <div className={styles.medName}>{med.medicationName || '약'}</div>
-                      {med.dosage && <div className={styles.medDosage}>{med.dosage}</div>}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className={styles.subtleText}>표시할 미복용 약 정보가 없습니다.</div>
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+                      미복용 약 목록
+                    </Typography>
+                    {fetching && (
+                      <Typography variant="body2" color="text.secondary">
+                        목록을 불러오는 중...
+                      </Typography>
+                    )}
+                    {resolvedMissedMedications.length > 0 ? (
+                      <Stack spacing={1}>
+                        {resolvedMissedMedications.map((med, idx) => (
+                          <Paper
+                            key={`${med.medicationId || med.medicationName || idx}`}
+                            variant="outlined"
+                            sx={{ p: 1.5, borderRadius: 2 }}
+                          >
+                            <Typography fontWeight={700}>
+                              {med.medicationName || '약'}
+                            </Typography>
+                            {med.dosage && (
+                              <Typography variant="body2" color="text.secondary">
+                                {med.dosage}
+                              </Typography>
+                            )}
+                          </Paper>
+                        ))}
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        표시할 미복용 약 정보가 없습니다.
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
               )}
-            </div>
-          )}
-        </Card>
-      </div>
+            </Stack>
+          </Paper>
+        </Stack>
+      </Container>
     </MainLayout>
   )
 }

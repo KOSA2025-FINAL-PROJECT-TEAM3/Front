@@ -4,36 +4,47 @@
  */
 
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@shared/components/ui'
+import { Box, Button, Paper, Stack, Typography } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './ErrorPage.module.scss'
 
 export const ServerError = () => {
   const navigate = useNavigate()
 
   return (
-    <div className={styles.errorContainer}>
-      <div className={styles.errorContent}>
-        <h1 className={styles.errorCode}>500</h1>
-        <h2 className={styles.errorTitle}>서버 오류가 발생했습니다</h2>
-        <p className={styles.errorMessage}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 3,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      }}
+    >
+      <Paper sx={{ maxWidth: 520, width: '100%', borderRadius: 4, p: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+        <Typography sx={{ fontSize: { xs: 48, sm: 80 }, fontWeight: 900, color: '#667eea', lineHeight: 1 }}>
+          500
+        </Typography>
+        <Typography variant="h5" sx={{ fontWeight: 900, mt: 2 }}>
+          서버 오류가 발생했습니다
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
           요청을 처리하는 중 예기치 못한 오류가 발생했습니다.
           <br />
           잠시 후 다시 시도하거나 관리자에게 문의해 주세요.
-        </p>
+        </Typography>
 
-        <div className={styles.actions}>
-          <Button onClick={() => navigate(ROUTE_PATHS.root)} variant="primary">
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 3, justifyContent: 'center' }}>
+          <Button onClick={() => navigate(ROUTE_PATHS.root)} variant="contained">
             홈으로 이동
           </Button>
-          <Button onClick={() => window.location.reload()} variant="secondary">
+          <Button onClick={() => window.location.reload()} variant="outlined">
             페이지 새로고침
           </Button>
-        </div>
-      </div>
-    </div>
+        </Stack>
+      </Paper>
+    </Box>
   )
 }
 
 export default ServerError
-

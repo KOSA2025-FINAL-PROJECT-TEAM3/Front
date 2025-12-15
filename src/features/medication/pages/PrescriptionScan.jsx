@@ -1,6 +1,7 @@
 import React from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import CameraCapture from '@/features/ocr/components/CameraCapture'
+import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, Typography } from '@mui/material'
 import {
   PharmacyHeader,
   MedicationCardList,
@@ -9,7 +10,6 @@ import {
   RegistrationInfo
 } from '../components/ocr'
 import { useOcrRegistration } from '../hooks/useOcrRegistration'
-import styles from './PrescriptionScan.module.scss'
 
 /**
  * 처방전 스캔 및 약물 등록 페이지
@@ -49,38 +49,46 @@ const PrescriptionScanPage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.container}>
+      <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100', pb: 10 }}>
         {/* 에러 메시지 */}
         {error && (
-          <div className={styles.errorBanner}>
-            <span>❌ {error}</span>
-            <button onClick={() => reset()}>다시 시도</button>
-          </div>
+          <Container maxWidth="md" sx={{ pt: 2 }}>
+            <Alert
+              severity="error"
+              action={
+                <Button color="inherit" size="small" onClick={() => reset()}>
+                  다시 시도
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          </Container>
         )}
 
         {/* Step 1: 선택 화면 */}
         {step === 'select' && (
-          <div className={styles.selectStep}>
-            <h2>처방전 등록</h2>
-            <p>처방전을 촬영하거나 앨범에서 선택해주세요.</p>
-            <div className={styles.buttons}>
-              <button
-                className={styles.cameraBtn}
-                onClick={() => setStep('camera')}
-              >
-                📷 카메라 촬영
-              </button>
-              <label className={styles.galleryBtn}>
-                🖼️ 앨범에서 선택
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  hidden
-                />
-              </label>
-            </div>
-          </div>
+          <Container maxWidth="sm" sx={{ py: 6 }}>
+            <Stack spacing={3} alignItems="center" textAlign="center">
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                  처방전 등록
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  처방전을 촬영하거나 앨범에서 선택해주세요.
+                </Typography>
+              </Box>
+              <Stack spacing={2} sx={{ width: '100%', maxWidth: 420 }}>
+                <Button variant="contained" color="success" size="large" onClick={() => setStep('camera')}>
+                  📷 카메라 촬영
+                </Button>
+                <Button variant="outlined" color="success" size="large" component="label">
+                  🖼️ 앨범에서 선택
+                  <input type="file" accept="image/*" onChange={handleFileSelect} hidden />
+                </Button>
+              </Stack>
+            </Stack>
+          </Container>
         )}
 
         {/* Step 2: 카메라 */}
@@ -93,39 +101,54 @@ const PrescriptionScanPage = () => {
 
         {/* Step 3: 미리보기 */}
         {step === 'preview' && (
-          <div className={styles.previewStep}>
-            <h2>이미지 확인</h2>
-            <img src={previewUrl} alt="Preview" className={styles.previewImage} />
-            <div className={styles.actions}>
-              <button
-                className={styles.retryBtn}
-                onClick={() => setStep('select')}
-              >
-                다시 선택
-              </button>
-              <button
-                className={styles.analyzeBtn}
-                onClick={startAnalysis}
-                disabled={isLoading}
-              >
-                분석 시작
-              </button>
-            </div>
-          </div>
+          <Container maxWidth="md" sx={{ py: 2 }}>
+            <Stack spacing={2}>
+              <Typography variant="h6" sx={{ fontWeight: 900, textAlign: 'center' }}>
+                이미지 확인
+              </Typography>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Box
+                  component="img"
+                  src={previewUrl}
+                  alt="Preview"
+                  sx={{
+                    width: '100%',
+                    maxHeight: '60vh',
+                    objectFit: 'contain',
+                    borderRadius: 2,
+                  }}
+                />
+              </Paper>
+              <Stack direction="row" spacing={1.5}>
+                <Button fullWidth variant="outlined" onClick={() => setStep('select')}>
+                  다시 선택
+                </Button>
+                <Button fullWidth variant="contained" color="success" onClick={startAnalysis} disabled={isLoading}>
+                  분석 시작
+                </Button>
+              </Stack>
+            </Stack>
+          </Container>
         )}
 
         {/* Step 4: 분석 중 */}
         {step === 'analyzing' && (
-          <div className={styles.analyzingStep}>
-            <div className={styles.loader}></div>
-            <p>처방전을 분석하고 있습니다...</p>
-            <span className={styles.subText}>AI가 약물 정보를 추출 중입니다</span>
-          </div>
+          <Container maxWidth="sm" sx={{ py: 10 }}>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <CircularProgress color="success" />
+              <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                처방전을 분석하고 있습니다...
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                AI가 약물 정보를 추출 중입니다
+              </Typography>
+            </Stack>
+          </Container>
         )}
 
         {/* Step 5: 결과 편집 (메인 UI - 이미지 1~4) */}
         {step === 'edit' && (
-          <div className={styles.editStep}>
+          <Container maxWidth="md" sx={{ py: 2 }}>
             {/* 헤더: 약국명 */}
             <PharmacyHeader
               pharmacyName={formState.pharmacyName}
@@ -141,12 +164,16 @@ const PrescriptionScanPage = () => {
             />
 
             {/* 일 복용 횟수 / 시간 요약 */}
-            <div className={styles.summaryBar}>
-              <span>일 복용 횟수 <strong>{formState.intakeTimes.length}회</strong></span>
-              <span className={styles.times}>
-                {formState.intakeTimes.map(t => t.label).join(' | ')}
-              </span>
-            </div>
+            <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
+              <Stack spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  일 복용 횟수 <Box component="span" sx={{ fontWeight: 900, color: 'success.main' }}>{formState.intakeTimes.length}회</Box>
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formState.intakeTimes.map((t) => t.label).join(' | ')}
+                </Typography>
+              </Stack>
+            </Paper>
 
             {/* 복용 기간 */}
             <DurationPicker
@@ -173,32 +200,49 @@ const PrescriptionScanPage = () => {
             />
 
             {/* 하단 버튼 */}
-            <div className={styles.bottomActions}>
-              <button
-                className={styles.editBtn}
-                onClick={() => setStep('select')}
-              >
-                다시 촬영
-              </button>
-              <button
-                className={styles.registerBtn}
-                onClick={handleRegister}
-                disabled={isLoading || formState.medications.length === 0}
-              >
-                {isLoading ? '등록 중...' : '등록 완료'}
-              </button>
-            </div>
-          </div>
+            <Paper
+              elevation={6}
+              sx={{
+                position: 'sticky',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                mt: 2,
+                p: 2,
+                borderTop: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Stack direction="row" spacing={1.5}>
+                <Button fullWidth variant="outlined" onClick={() => setStep('select')}>
+                  다시 촬영
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="success"
+                  onClick={handleRegister}
+                  disabled={isLoading || formState.medications.length === 0}
+                >
+                  {isLoading ? '등록 중...' : '등록 완료'}
+                </Button>
+              </Stack>
+            </Paper>
+          </Container>
         )}
 
         {/* Step 6: 등록 중 */}
         {step === 'registering' && (
-          <div className={styles.registeringStep}>
-            <div className={styles.loader}></div>
-            <p>약물을 등록하고 있습니다...</p>
-          </div>
+          <Container maxWidth="sm" sx={{ py: 10 }}>
+            <Stack spacing={2} alignItems="center" textAlign="center">
+              <CircularProgress color="success" />
+              <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                약물을 등록하고 있습니다...
+              </Typography>
+            </Stack>
+          </Container>
         )}
-      </div>
+      </Box>
     </MainLayout>
   )
 }

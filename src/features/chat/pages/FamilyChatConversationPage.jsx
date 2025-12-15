@@ -7,9 +7,9 @@ import {
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "@shared/components/layout/MainLayout"; // MainLayout 복구
+import { Box, Button, Paper, Stack, Typography } from "@mui/material";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
-import styles from "./FamilyChatConversationPage.module.scss";
 
 import { useAuthStore } from "@/features/auth/store/authStore";
 import { useFamilyStore } from "@features/family/store/familyStore";
@@ -18,6 +18,7 @@ import logger from '@core/utils/logger';
 import envConfig from '@config/environment.config';
 
 const AI_LOADING_TEMP_ID = 'ai-loading-temp'; 
+const MESSAGE_ITEM_CLASS = "family-chat-message-item";
 
 export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
@@ -37,8 +38,6 @@ export const FamilyChatConversationPage = () => {
   const stompClientRef = useRef(null); 
   const prevScrollHeightRef = useRef(null);
   const observerRef = useRef(null); 
-  // [FIX] 새로고침 후 각 멤버의 첫 읽음 신호를 추적하여 중복 차감 방지
-  const processedReadSendersRef = useRef(new Set());
 
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(0);
@@ -214,7 +213,7 @@ export const FamilyChatConversationPage = () => {
       threshold: 0.5, 
     });
 
-    const messageElements = document.querySelectorAll(`.${styles.messageItem}`);
+    const messageElements = document.querySelectorAll(`.${MESSAGE_ITEM_CLASS}`);
     messageElements.forEach((el) => observerRef.current.observe(el));
 
     return () => {
@@ -497,27 +496,59 @@ export const FamilyChatConversationPage = () => {
   // [Fix] MainLayout 복구 (fullScreen 옵션 사용)
   return (
     <MainLayout showBottomNav={false} fullScreen={true}>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <button className={styles.backButton} onClick={handleBack}>뒤로</button>
-          <h2 className={styles.title}>{familyGroup?.name ? `${familyGroup.name} 채팅방` : '가족채팅'}</h2>
-        </header>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "#f5f5f5", position: "relative" }}>
+        <Paper square variant="outlined" sx={{ borderLeft: 0, borderRight: 0, flexShrink: 0, height: 60 }}>
+          <Stack direction="row" alignItems="center" spacing={2} sx={{ px: 2, height: "100%" }}>
+            <Button variant="text" onClick={handleBack} sx={{ px: 0, minWidth: "auto" }}>
+              뒤로
+            </Button>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+              {familyGroup?.name ? `${familyGroup.name} 채팅방` : "가족채팅"}
+            </Typography>
+          </Stack>
+        </Paper>
 
         {hasUnreadGap && (
-            <div className={styles.unreadNotice}>
-                <span>⬆️ 안 읽은 메시지가 더 있습니다</span>
-            </div>
+          <Box
+            sx={{
+              position: "absolute",
+              top: 60,
+              left: 0,
+              right: 0,
+              zIndex: 20,
+              bgcolor: "rgba(0,0,0,0.7)",
+              color: "common.white",
+              textAlign: "center",
+              py: 1,
+              cursor: "pointer",
+            }}
+          >
+            <Typography variant="body2">⬆️ 안 읽은 메시지가 더 있습니다</Typography>
+          </Box>
         )}
 
-        <div 
-            className={styles.messageList} 
-            ref={messageListRef}
-            onScroll={handleScroll}
+        <Box
+          ref={messageListRef}
+          onScroll={handleScroll}
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            p: 2,
+            display: "flex",
+            flexDirection: "column",
+            pb: 2.5,
+          }}
         >
-          {isLoadingPast && <div className={styles.loadingPast}><p>불러오는 중...</p></div>}
+          {isLoadingPast && (
+            <Box sx={{ textAlign: "center", py: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                불러오는 중...
+              </Typography>
+            </Box>
+          )}
           
           {!isInitialLoading && messages.map((m, i) => (
-            <div key={m.id || m.messageId || i} className={styles.messageItem} data-message-id={m.id}>
+            <div key={m.id || m.messageId || i} className={MESSAGE_ITEM_CLASS} data-message-id={m.id}>
                 <ChatMessage
                 message={m}
                 isMe={m.familyMemberId === currentUserId}
@@ -525,11 +556,17 @@ export const FamilyChatConversationPage = () => {
             </div>
           ))}
           
-          {isInitialLoading && <div className={styles.loading}><p>로딩중...</p></div>}
-        </div>
+          {isInitialLoading && (
+            <Box sx={{ textAlign: "center", py: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                로딩중...
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         <ChatInput onSend={handleSendMessage} disabled={isSending} />
-      </div>
+      </Box>
     </MainLayout>
   );
 };

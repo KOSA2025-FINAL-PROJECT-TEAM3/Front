@@ -1,131 +1,107 @@
 /**
  * DeveloperModePanel
- * - 개발 모드 진입/바로가기 패널 (UI는 SCSS 모듈)
+ * - 개발 모드 진입/바로가기 패널
  * - 실제 API 연동 환경에서는 단순 페이지 이동 숏컷 역할만 수행합니다.
  */
 
+import CloseIcon from '@mui/icons-material/Close'
+import { Box, Button, IconButton, List, ListItemButton, ListItemText, Popover, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './DeveloperModePanel.module.scss'
 
 const DEV_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEV_MODE !== 'false'
 
+const SHORTCUTS = [
+  { label: '어르신 대시보드', path: ROUTE_PATHS.seniorDashboard },
+  { label: '보호자 대시보드', path: ROUTE_PATHS.caregiverDashboard },
+  { label: '주간 통계 (/reports/weekly)', path: ROUTE_PATHS.weeklyStats },
+  { label: '알약 검색 결과 (/pills/result)', path: ROUTE_PATHS.pillResult },
+  { label: '의심 질환 (/disease/suspected)', path: ROUTE_PATHS.suspectedDisease },
+  { label: '질병별 제약 (/disease/restrictions)', path: ROUTE_PATHS.diseaseRestrictions },
+  { label: '내 약 관리 (설정, /settings/medications)', path: ROUTE_PATHS.myMedicationsSettings },
+  { label: '내 질병 관리 (설정, /settings/diseases)', path: ROUTE_PATHS.myDiseasesSettings },
+]
+
 export const DeveloperModePanel = () => {
-  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
 
   if (!DEV_MODE_ENABLED) return null
 
+  const open = Boolean(anchorEl)
+
   const handleShortcut = (path) => {
-    setOpen(false)
+    setAnchorEl(null)
     navigate(path)
   }
 
   return (
-    <div className={styles.container}>
-      <button
-        type="button"
-        className={styles.toggleButton}
-        onClick={() => setOpen((prev) => !prev)}
+    <Box sx={{ position: 'fixed', left: 16, bottom: 16, zIndex: 1200 }}>
+      <Button
+        variant="contained"
+        size="small"
+        onClick={(e) => setAnchorEl((prev) => (prev ? null : e.currentTarget))}
         aria-expanded={open}
+        sx={{
+          borderRadius: 999,
+          px: 2,
+          py: 1,
+          fontWeight: 900,
+          boxShadow: '0 10px 25px rgba(30, 64, 175, 0.35)',
+          bgcolor: '#1e40af',
+          '&:hover': { bgcolor: '#1e40af' },
+        }}
       >
         🧪 Dev Mode
-      </button>
+      </Button>
 
-      {open && (
-        <div className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <span>개발자 바로가기</span>
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={() => setOpen(false)}
-              aria-label="닫기"
-            >
-              ✕
-            </button>
-          </div>
-          <ul className={styles.shortcutList}>
-            {/* 대시보드 접근 */}
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.seniorDashboard)}
-              >
-                어르신 대시보드
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.caregiverDashboard)}
-              >
-                보호자 대시보드
-              </button>
-            </li>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            width: 280,
+            borderRadius: 3,
+            border: 1,
+            borderColor: 'divider',
+            overflow: 'hidden',
+            boxShadow: '0 16px 40px rgba(15, 23, 42, 0.15)',
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{
+            px: 1.75,
+            py: 1.25,
+            color: '#fff',
+            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+          }}
+        >
+          <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+            개발자 바로가기
+          </Typography>
+          <IconButton size="small" onClick={() => setAnchorEl(null)} aria-label="닫기" sx={{ color: '#bfdbfe' }}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Stack>
 
-            {/* URL 직입으로만 접근 가능한 페이지들 */}
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.weeklyStats)}
-              >
-                주간 통계 (/reports/weekly)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.pillResult)}
-              >
-                알약 검색 결과 (/pills/result)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.suspectedDisease)}
-              >
-                의심 질환 (/disease/suspected)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.diseaseRestrictions)}
-              >
-                질병별 제약 (/disease/restrictions)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.myMedicationsSettings)}
-              >
-                내 약 관리 (설정, /settings/medications)
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={styles.shortcutButton}
-                onClick={() => handleShortcut(ROUTE_PATHS.myDiseasesSettings)}
-              >
-                내 질병 관리 (설정, /settings/diseases)
-              </button>
-            </li>
-          </ul>
-        </div>
-      )}
-    </div>
+        <List dense sx={{ p: 1 }}>
+          {SHORTCUTS.map((item) => (
+            <ListItemButton key={item.path} onClick={() => handleShortcut(item.path)} sx={{ borderRadius: 2 }}>
+              <ListItemText primaryTypographyProps={{ sx: { fontSize: 14 } }} primary={item.label} />
+            </ListItemButton>
+          ))}
+        </List>
+      </Popover>
+    </Box>
   )
 }
 

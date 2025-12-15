@@ -5,7 +5,7 @@
  */
 
 import { Box, Typography, Stack, Checkbox } from '@mui/material'
-	import { RoundedCard } from '@shared/components/ui/RoundedCard'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
 	import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 	import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 	import { parseServerLocalDateTime } from '@core/utils/formatting'

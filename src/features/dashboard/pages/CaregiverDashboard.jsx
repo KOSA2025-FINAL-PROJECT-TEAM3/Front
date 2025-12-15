@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Container, Stack, Chip, IconButton, Collapse, Button } from '@mui/material'
+import { Box, Typography, Container, Stack, Chip, IconButton, Collapse, Button, useMediaQuery, useTheme } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
 import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
-import { QuickActions } from '@shared/components/ui/QuickActions'
-import { FAB } from '@shared/components/ui/FAB'
+import { QuickActionGrid } from '../components/QuickActionGrid'
+import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
 import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
-	import { familyApiClient } from '@core/services/api/familyApiClient'
-	import { toast } from '@shared/components/toast/toastStore'
-	import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-	import logger from '@core/utils/logger'
+import { familyApiClient } from '@core/services/api/familyApiClient'
+import { toast } from '@shared/components/toast/toastStore'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import logger from '@core/utils/logger'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드
@@ -23,6 +23,8 @@ import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
  */
 export function CaregiverDashboard() {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { members, loading, error, initialized, initialize } = useFamilyStore((state) => ({
     members: state.members,
     loading: state.loading,
@@ -86,7 +88,7 @@ export function CaregiverDashboard() {
 
   if (loading && members.length === 0) {
     return (
-      <MainLayout userName="보호자" userRole="보호자">
+      <MainLayout>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
           <Typography>가족 데이터를 불러오는 중...</Typography>
         </Container>
@@ -96,7 +98,7 @@ export function CaregiverDashboard() {
 
   if (error) {
     return (
-      <MainLayout userName="보호자" userRole="보호자">
+      <MainLayout>
         <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
           <Typography color="error">가족 데이터를 불러오지 못했습니다. {error.message}</Typography>
         </Container>
@@ -105,7 +107,7 @@ export function CaregiverDashboard() {
   }
 
   return (
-    <MainLayout userName="보호자" userRole="보호자">
+    <MainLayout>
       <ResponsiveContainer maxWidth="lg">
         <Stack spacing={4}>
           {/* 헤더 */}
@@ -124,7 +126,12 @@ export function CaregiverDashboard() {
             </Typography>
           </Box>
 
-          <QuickActions actions={CAREGIVER_QUICK_ACTIONS} />
+          <Box>
+            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
+              빠른 작업
+            </Typography>
+            <QuickActionGrid actions={CAREGIVER_QUICK_ACTIONS} />
+          </Box>
 
           <MyMedicationSchedule title="내 복용 일정" showEmptyState={false} />
 
@@ -147,7 +154,7 @@ export function CaregiverDashboard() {
             </Stack>
           </RoundedCard>
 
-          <FAB actions={fabActions} />
+          {isMobile && <SpeedDialFab actions={fabActions} />}
         </Stack>
       </ResponsiveContainer>
     </MainLayout>

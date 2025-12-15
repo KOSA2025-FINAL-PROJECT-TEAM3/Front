@@ -1,9 +1,9 @@
-﻿/**
+/**
  * FamilyMemberCard Component
  * - 가족 구성원의 복약 현황 카드
  */
 
-import styles from './FamilyMemberCard.module.scss'
+import { Box, Button, Divider, Paper, Stack, Typography } from '@mui/material'
 
 /**
  * @param {Object} member
@@ -21,79 +21,129 @@ export const FamilyMemberCard = ({ member, onDetail }) => {
   const { scheduled = 0, completed = 0, missed = 0 } = member.todayStatus || {}
   const complianceRate = scheduled > 0 ? Math.round((completed / scheduled) * 100) : 0
 
-  return (
-    <div className={styles.memberCard}>
-      {/* 헤더: 이름 · 기본정보 */}
-      <div className={styles.cardHeader}>
-        <div className={styles.memberInfo}>
-          <h3 className={styles.memberName}>{member.name}</h3>
-          <div className={styles.memberMeta}>
-            <span className={styles.relation}>{member.relation}</span>
-            <span className={styles.age}>{member.age}세</span>
-          </div>
-        </div>
+  const complianceBg =
+    complianceRate === 100 ? 'success.main' : complianceRate >= 50 ? 'warning.main' : 'error.main'
 
-        {/* 준수율 뱃지 */}
-        <div
-          className={styles.complianceBadge}
-          style={{
-            background:
-              complianceRate === 100
-                ? '#00b300'
-                : complianceRate >= 50
-                ? '#ff9900'
-                : '#ff6b6b',
+  return (
+    <Paper
+      sx={{
+        p: 2.5,
+        borderRadius: 3,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        transition: 'all 0.3s ease',
+        '&:hover': { boxShadow: '0 4px 16px rgba(0, 0, 0, 0.12)', transform: 'translateY(-2px)' },
+      }}
+    >
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', sm: 'flex-start' }}
+        spacing={2}
+        sx={{ mb: 2 }}
+      >
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+            {member.name}
+          </Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
+            {member.relation ? (
+              <Box
+                sx={{
+                  fontSize: 12,
+                  color: 'text.secondary',
+                  bgcolor: 'rgba(200, 200, 200, 0.12)',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1,
+                }}
+              >
+                {member.relation}
+              </Box>
+            ) : null}
+            {member.age != null ? (
+              <Typography variant="caption" color="text.secondary">
+                {member.age}세
+              </Typography>
+            ) : null}
+          </Stack>
+        </Box>
+
+        <Box
+          sx={{
+            minWidth: 70,
+            height: 70,
+            borderRadius: 2,
+            bgcolor: complianceBg,
+            color: 'common.white',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
           }}
         >
-          <span className={styles.complianceValue}>{complianceRate}%</span>
-          <span className={styles.complianceLabel}>준수율</span>
-        </div>
-      </div>
+          <Typography sx={{ fontSize: 24, fontWeight: 900, lineHeight: 1 }}>
+            {complianceRate}%
+          </Typography>
+          <Typography variant="caption" sx={{ fontSize: 11, mt: 0.25 }}>
+            준수율
+          </Typography>
+        </Box>
+      </Stack>
 
-      {/* 상태 통계 */}
-      <div className={styles.statusStats}>
-        <div className={styles.statItem}>
-          <span className={styles.statNumber}>{scheduled}</span>
-          <span className={styles.statName}>예정</span>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNumber} style={{ color: '#00b300' }}>
-            {completed}
-          </span>
-          <span className={styles.statName}>완료</span>
-        </div>
-        <div className={styles.divider} />
-        <div className={styles.statItem}>
-          <span className={styles.statNumber} style={{ color: '#ff6b6b' }}>
-            {missed}
-          </span>
-          <span className={styles.statName}>미복용</span>
-        </div>
-      </div>
-
-      {/* 복용 시간 정보 */}
-      <div className={styles.medicationTimeline}>
-        <div className={styles.timeItem}>
-          <span className={styles.timeLabel}>마지막 복용</span>
-          <span className={styles.timeValue}>{member.lastMedicationTime}</span>
-        </div>
-        <div className={styles.timeItem}>
-          <span className={styles.timeLabel}>다음 복용</span>
-          <span className={styles.timeValue}>{member.nextMedicationTime}</span>
-        </div>
-      </div>
-
-      {/* 액션 버튼 */}
-      <button
-        type="button"
-        className={styles.detailButton}
-        onClick={() => onDetail?.(member.id)}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-around"
+        sx={{ py: 1.5, mb: 2, borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider' }}
       >
+        <Stack alignItems="center" spacing={0.25} sx={{ flex: 1 }}>
+          <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'primary.main' }}>{scheduled}</Typography>
+          <Typography variant="caption" sx={{ fontSize: 11, color: 'text.disabled' }}>
+            예정
+          </Typography>
+        </Stack>
+        <Divider orientation="vertical" flexItem />
+        <Stack alignItems="center" spacing={0.25} sx={{ flex: 1 }}>
+          <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'success.main' }}>{completed}</Typography>
+          <Typography variant="caption" sx={{ fontSize: 11, color: 'text.disabled' }}>
+            완료
+          </Typography>
+        </Stack>
+        <Divider orientation="vertical" flexItem />
+        <Stack alignItems="center" spacing={0.25} sx={{ flex: 1 }}>
+          <Typography sx={{ fontSize: 18, fontWeight: 900, color: 'error.main' }}>{missed}</Typography>
+          <Typography variant="caption" sx={{ fontSize: 11, color: 'text.disabled' }}>
+            미복용
+          </Typography>
+        </Stack>
+      </Stack>
+
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="caption" color="text.disabled" sx={{ letterSpacing: 0.5 }}>
+            마지막 복용
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 800, mt: 0.25 }}>
+            {member.lastMedicationTime}
+          </Typography>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="caption" color="text.disabled" sx={{ letterSpacing: 0.5 }}>
+            다음 복용
+          </Typography>
+          <Typography variant="body2" sx={{ fontWeight: 800, mt: 0.25 }}>
+            {member.nextMedicationTime}
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Button variant="outlined" fullWidth onClick={() => onDetail?.(member.id)} sx={{ fontWeight: 800 }}>
         상세 보기
-      </button>
-    </div>
+      </Button>
+    </Paper>
   )
 }
 
 export default FamilyMemberCard
+

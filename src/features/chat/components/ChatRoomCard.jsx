@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './ChatRoomCard.module.scss'
+import { Avatar, Box, Chip, Paper, Stack, Typography } from '@mui/material'
 
 /**
  * ChatRoomCard - 채팅방 목록에서 사용되는 카드 컴포넌트
@@ -42,43 +42,116 @@ export const ChatRoomCard = ({ room }) => {
     return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
   }
 
-  const counselor = room.counselor
+  const counselor = room?.counselor || {}
   const isAiBot = counselor.type === 'ai_bot'
 
   return (
-    <div className={styles.card} onClick={handleClick}>
-      <div className={styles.avatar}>
-        <img src={counselor.profileImage} alt={counselor.name} />
-        {counselor.isOnline && <span className={styles.onlineBadge} />}
-        {isAiBot && <span className={styles.botBadge}>AI</span>}
-      </div>
+    <Paper
+      variant="outlined"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 1.5,
+        p: 2,
+        cursor: 'pointer',
+        borderRadius: 2,
+        '&:hover': { bgcolor: 'grey.50' },
+      }}
+    >
+      <Box sx={{ position: 'relative', flexShrink: 0 }}>
+        <Avatar
+          src={counselor.profileImage}
+          alt={counselor.name || '상담사'}
+          sx={{ width: 48, height: 48 }}
+        />
+        {counselor.isOnline ? (
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 1,
+              bottom: 1,
+              width: 12,
+              height: 12,
+              bgcolor: 'success.main',
+              borderRadius: '50%',
+              border: '2px solid',
+              borderColor: 'common.white',
+            }}
+          />
+        ) : null}
+        {isAiBot ? (
+          <Chip
+            label="AI"
+            size="small"
+            color="secondary"
+            sx={{
+              position: 'absolute',
+              top: -6,
+              right: -6,
+              height: 18,
+              '& .MuiChip-label': { px: 0.75, fontSize: 10, fontWeight: 800 },
+            }}
+          />
+        ) : null}
+      </Box>
 
-      <div className={styles.content}>
-        <div className={styles.header}>
-          <div className={styles.info}>
-            <h3 className={styles.name}>{counselor.name}</h3>
-            <span className={styles.hospital}>
-              {counselor.hospitalName || counselor.specialty}
-            </span>
-          </div>
-          {room.lastMessage && (
-            <span className={styles.timestamp}>{formatTimestamp(room.lastMessage.timestamp)}</span>
-          )}
-        </div>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800 }} noWrap>
+              {counselor.name || '상담'}
+            </Typography>
+            {counselor.hospitalName || counselor.specialty ? (
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {counselor.hospitalName || counselor.specialty}
+              </Typography>
+            ) : null}
+          </Stack>
+          {room?.lastMessage?.timestamp ? (
+            <Typography variant="caption" color="text.disabled" noWrap>
+              {formatTimestamp(room.lastMessage.timestamp)}
+            </Typography>
+          ) : null}
+        </Stack>
 
-        {room.lastMessage && (
-          <p className={styles.lastMessage}>
+        {room?.lastMessage?.content ? (
+          <Typography variant="body2" color="text.secondary" noWrap sx={{ mt: 0.5 }}>
             {room.lastMessage.content}
-          </p>
-        )}
-      </div>
+          </Typography>
+        ) : null}
+      </Box>
 
-      {room.unreadCount > 0 && (
-        <div className={styles.unreadBadge}>
+      {room?.unreadCount > 0 ? (
+        <Box
+          sx={{
+            flexShrink: 0,
+            alignSelf: 'center',
+            minWidth: 20,
+            height: 20,
+            px: 0.75,
+            bgcolor: 'error.main',
+            color: 'common.white',
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 12,
+            fontWeight: 800,
+          }}
+        >
           {room.unreadCount > 99 ? '99+' : room.unreadCount}
-        </div>
-      )}
-    </div>
+        </Box>
+      ) : null}
+    </Paper>
   )
 }
 

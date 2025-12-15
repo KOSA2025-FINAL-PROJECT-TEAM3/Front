@@ -11,7 +11,7 @@ import {
   Avatar,
   LinearProgress,
 } from '@mui/material'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ScheduleIcon from '@mui/icons-material/Schedule'

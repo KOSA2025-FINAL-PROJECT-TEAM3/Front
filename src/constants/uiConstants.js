@@ -16,8 +16,6 @@ export const SENIOR_QUICK_ACTIONS = [
 
 // 시니어 대시보드 FAB 액션
 export const SENIOR_FAB_ACTIONS = [
-  { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
-  { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
   { icon: '📷', label: '처방전 스캔', path: ROUTE_PATHS.ocrScan },
   { id: 'pdf_export', icon: '📄', label: 'PDF 내보내기' },
 ]
@@ -34,7 +32,6 @@ export const CAREGIVER_QUICK_ACTIONS = [
 export const CAREGIVER_FAB_ACTIONS = [
   { icon: '👥', label: '가족 초대', path: ROUTE_PATHS.familyInvite },
   { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
-  { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
   { id: 'pdf_export', icon: '📄', label: 'PDF 내보내기' },
 ]
 

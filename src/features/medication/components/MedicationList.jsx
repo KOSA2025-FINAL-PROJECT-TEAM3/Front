@@ -1,5 +1,5 @@
 import MedicationCard from './MedicationCard.jsx'
-import styles from './MedicationList.module.scss'
+import { Paper, Stack, Typography } from '@mui/material'
 
 export const MedicationList = ({
   medications = [],
@@ -9,14 +9,16 @@ export const MedicationList = ({
 }) => {
   if (!medications.length) {
     return (
-      <div className={styles.empty}>
-        <p>등록된 약이 없습니다. 약 등록 폼을 사용해 추가하세요.</p>
-      </div>
+      <Paper variant="outlined" sx={{ p: 3, borderRadius: 4, borderStyle: 'dashed', bgcolor: 'grey.50' }}>
+        <Typography variant="body2" color="text.secondary">
+          등록된 약이 없습니다. 약 등록 폼을 사용해 추가하세요.
+        </Typography>
+      </Paper>
     )
   }
 
   return (
-    <div className={styles.list}>
+    <Stack spacing={1.5}>
       {medications.map((med) => (
         <MedicationCard
           key={med.id}
@@ -26,7 +28,7 @@ export const MedicationList = ({
           onSelect={onSelect}
         />
       ))}
-    </div>
+    </Stack>
   )
 }
 
