@@ -19,8 +19,8 @@ import {
   Chip,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { RoundedCard } from '@shared/components/ui/RoundedCard'
-import { StatusBadge } from '@shared/components/ui/StatusBadge'
+import { RoundedCard } from '@shared/components/mui/RoundedCard'
+import { StatusBadge } from '@shared/components/mui/StatusBadge'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import logger from '@core/utils/logger'
 import PropTypes from 'prop-types'

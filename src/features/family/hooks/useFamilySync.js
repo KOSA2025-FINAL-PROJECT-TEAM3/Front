@@ -2,8 +2,7 @@
 
 /**
  * useFamilySync
- * - Stage 3 mock hook (Hocuspocus 없이도 동작)
- * - Stage 4에서 실제 Hocuspocus 연동 시 교체
+ * - 실시간 동기화는 현재 비활성/대기 상태이며, 설정된 WS 환경이 있을 때만 활성화 가능
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react'

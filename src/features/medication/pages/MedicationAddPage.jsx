@@ -1,18 +1,20 @@
-import logger from "@core/utils/logger"
+import logger from '@core/utils/logger'
 /**
  * 약 등록 페이지
  * @page 08-medication-add
  * @component MedicationAddPage
  */
 
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MedicationForm } from '@features/medication/components/MedicationForm'
-import { BackButton } from '@shared/components/ui/BackButton'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './MedicationAddPage.module.scss'
+import { Container, Paper, Stack, Typography } from '@mui/material'
 
 /**
  * 약 등록 페이지 컴포넌트
@@ -24,6 +26,19 @@ export const MedicationAddPage = () => {
     addMedication: state.addMedication,
     loading: state.loading,
   }))
+  
+  const { consumeAction } = useVoiceActionStore()
+  const [initialValues, setInitialValues] = useState(null)
+
+  useEffect(() => {
+    const action = consumeAction('AUTO_FILL_REGISTER')
+    if (action && action.params?.medicationName) {
+      setInitialValues({
+        name: action.params.medicationName
+      })
+      toast.info(`'${action.params.medicationName}' 정보를 자동으로 입력했습니다.`)
+    }
+  }, [consumeAction])
 
   const handleSubmit = async (formData) => {
     try {
@@ -42,21 +57,24 @@ export const MedicationAddPage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <div className={styles.headerWithBack}>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
           <BackButton />
-          <h1 className={styles.title}>약 등록</h1>
-        </div>
-        <div className={styles.formWrapper}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            약 등록
+          </Typography>
+        </Stack>
+        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600 }}>
           <MedicationForm
+            initialValues={initialValues}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             loading={loading}
             submitLabel="등록"
             shouldResetOnSubmit={false}
           />
-        </div>
-      </div>
+        </Paper>
+      </Container>
     </MainLayout>
   )
 }

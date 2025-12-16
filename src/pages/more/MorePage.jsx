@@ -5,13 +5,83 @@
  */
 
 import { useNavigate } from 'react-router-dom'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import {
+  Box,
+  Chip,
+  Container,
+  Divider,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { MenuGroup } from '@shared/components/ui/MenuGroup'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { isCaregiverRole } from '@features/auth/utils/roleUtils'
-import styles from './MorePage.module.scss'
+
+const MenuSection = ({ title, items = [] }) => {
+  if (!items.length) return null
+
+  return (
+    <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+      <List
+        disablePadding
+        subheader={
+          <ListSubheader component="div">
+            {title}
+          </ListSubheader>
+        }
+      >
+        {items.map((item, index) => {
+          const iconNode =
+            typeof item.icon === 'string' ? (
+              <Box component="span" sx={{ fontSize: 20 }}>
+                {item.icon}
+              </Box>
+            ) : (
+              item.icon
+            )
+
+          return (
+            <Box key={item.id}>
+              <ListItemButton
+                onClick={item.onClick}
+                disabled={item.disabled}
+                sx={{ py: 1.25 }}
+              >
+                <ListItemIcon sx={{ minWidth: 44 }}>
+                  {iconNode}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  secondary={item.description}
+                  primaryTypographyProps={{ fontWeight: 700 }}
+                />
+                {item.badge !== undefined && (
+                  <Chip
+                    label={item.badge}
+                    size="small"
+                    color="primary"
+                    sx={{ mr: 1 }}
+                  />
+                )}
+                <ChevronRightIcon color="action" />
+              </ListItemButton>
+              {index < items.length - 1 && <Divider />}
+            </Box>
+          )
+        })}
+      </List>
+    </Paper>
+  )
+}
 
 export const MorePage = () => {
   const navigate = useNavigate()
@@ -69,11 +139,11 @@ export const MorePage = () => {
       onClick: () => handleNavigate(ROUTE_PATHS.ocrScan),
     },
     {
-      id: 'counsel',
-      label: '의사 상담',
-      icon: '💬',
-      description: '온라인 의료 상담',
-      onClick: () => handleNavigate(ROUTE_PATHS.counsel),
+      id: 'places',
+      label: '병원/약국 검색',
+      icon: '🗺️',
+      description: '지도 기반 검색(준비 중)',
+      onClick: () => handleNavigate(ROUTE_PATHS.places),
     },
     {
       id: 'disease',
@@ -147,20 +217,28 @@ export const MorePage = () => {
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <h1>더보기</h1>
-          <p>모든 기능과 설정을 확인하세요</p>
-        </header>
+      <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 3 }}>
+        <Container maxWidth="md">
+          <Stack spacing={3}>
+            <Box>
+              <Typography variant="h4" component="h1" fontWeight={800} gutterBottom>
+                더보기
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                모든 기능과 설정을 확인하세요
+              </Typography>
+            </Box>
 
-        <div className={styles.content}>
-          <MenuGroup title="알림 및 리포트" items={notificationReportItems} />
-          <MenuGroup title="가족 관리" items={familyManagementItems} />
-          <MenuGroup title="건강 관리" items={healthManagementItems} />
-          <MenuGroup title="식단 관리" items={dietManagementItems} />
-          <MenuGroup title="계정" items={accountItems} />
-        </div>
-      </div>
+            <Stack spacing={2}>
+              <MenuSection title="알림 및 리포트" items={notificationReportItems} />
+              <MenuSection title="가족 관리" items={familyManagementItems} />
+              <MenuSection title="건강 관리" items={healthManagementItems} />
+              <MenuSection title="식단 관리" items={dietManagementItems} />
+              <MenuSection title="계정" items={accountItems} />
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
     </MainLayout>
   )
 }

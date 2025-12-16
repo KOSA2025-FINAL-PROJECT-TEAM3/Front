@@ -1,9 +1,10 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 class FamilyChatApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8080',
+      baseURL: envConfig.CHAT_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/family-chat',
     })
   }
@@ -38,6 +39,18 @@ class FamilyChatApiClient extends ApiClient {
     })
   }
 
+  // [GEMINI] 가족 그룹 채팅방의 총 안 읽은 메시지 개수 조회
+  async getUnreadCount(familyGroupId, familyMemberId) {
+    return this.get(`/rooms/${familyGroupId}/unread-count`, { params: { familyMemberId } });
+  }
+
+  // [GEMINI] 특정 사용자가 속한 모든 가족 그룹 조회
+  async getFamilyGroups() {
+    // FamilyController의 /family/groups API를 직접 호출
+    // 이 API는 userId를 SecurityContext에서 가져오므로 userId 파라미터는 제거해도 됨.
+    return this.api.get('/api/family/groups');
+  }
+
    // [GEMINI-CLI: 2025-11-29] 백엔드 API 삭제로 인한 주석 처리 (가족 생성 시 자동 처리됨)
   /*
   async createOrUpdateRoom(payload) {
@@ -60,5 +73,4 @@ class FamilyChatApiClient extends ApiClient {
 
 export const familyChatApiClient = new FamilyChatApiClient()
 export default FamilyChatApiClient
-
 

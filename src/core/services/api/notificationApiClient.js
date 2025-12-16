@@ -9,14 +9,16 @@ class NotificationApiClient extends ApiClient {
             basePath: '/api/notifications',
         })
         this.eventSource = null
+        this.reconnectTimer = null
+        this.reconnectAttempts = 0
+        this.lastSubscribeArgs = null
     }
 
     list(userId) {
-        return this.get('/', { userId })
-    }
-
-    getDetail(id) {
-        return this.get(`/${id}`)
+        if (userId) {
+            return this.get('/', { params: { userId } })
+        }
+        return this.get('/')
     }
 
     markAsRead(id) {
@@ -45,9 +47,14 @@ class NotificationApiClient extends ApiClient {
 
         // Close existing connection if any
         this.disconnect()
+        this.reconnectAttempts = 0
+        this.lastSubscribeArgs = { token, onMessage, onError }
 
         // Create new EventSource connection
         this.eventSource = new EventSource(url)
+        this.eventSource.onopen = () => {
+            this.reconnectAttempts = 0
+        }
 
         // Handle incoming messages
         this.eventSource.addEventListener('message', (event) => {
@@ -164,11 +171,27 @@ class NotificationApiClient extends ApiClient {
             }
         })
 
+        // 채팅 업데이트 알림 추가
+        this.eventSource.addEventListener('chat-update', (event) => {
+            try {
+                const data = JSON.parse(event.data)
+                if (onMessage) {
+                    onMessage({ ...data, type: 'chat-update' })
+                }
+            } catch (error) {
+                logger.error('Failed to parse chat-update event:', error)
+                if (onError) {
+                    onError(error)
+                }
+            }
+        })
+
         // Handle connection errors
         this.eventSource.onerror = (error) => {
             logger.error('SSE connection error:', error)
             if (this.eventSource.readyState === EventSource.CLOSED) {
                 logger.warn('SSE connection closed')
+                this.scheduleReconnect()
             }
             if (onError) {
                 onError(error)
@@ -178,10 +201,36 @@ class NotificationApiClient extends ApiClient {
         return this.eventSource
     }
 
+    scheduleReconnect() {
+        if (!this.lastSubscribeArgs) return
+        if (this.reconnectTimer) return
+
+        const { token, onMessage, onError } = this.lastSubscribeArgs
+        const baseDelay = 1000
+        const maxDelay = 30000
+        const delay = Math.min(maxDelay, baseDelay * Math.pow(2, this.reconnectAttempts))
+        this.reconnectAttempts += 1
+
+        this.reconnectTimer = setTimeout(() => {
+            this.reconnectTimer = null
+            try {
+                this.subscribe(token, onMessage, onError)
+            } catch (e) {
+                logger.error('SSE reconnect failed:', e)
+                this.scheduleReconnect()
+            }
+        }, delay)
+    }
+
     /**
      * Disconnect from the SSE stream
      */
     disconnect() {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer)
+            this.reconnectTimer = null
+        }
+        this.lastSubscribeArgs = null
         if (this.eventSource) {
             this.eventSource.close()
             this.eventSource = null

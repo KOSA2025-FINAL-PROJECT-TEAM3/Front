@@ -1,5 +1,5 @@
 import FamilyMemberCard from './FamilyMemberCard'
-import styles from './FamilyMemberList.module.scss'
+import { Box, Paper, Stack, Typography } from '@mui/material'
 
 export const FamilyMemberList = ({
   members = [],
@@ -16,17 +16,28 @@ export const FamilyMemberList = ({
 }) => {
   if (!members.length) {
     return (
-      <section className={styles.emptyState} aria-live="polite">
-        <p>아직 등록된 가족 구성원이 없습니다.</p>
-        <p>상단의 초대 버튼을 눌러 가족을 초대해보세요.</p>
-      </section>
+      <Paper
+        component="section"
+        variant="outlined"
+        aria-live="polite"
+        sx={{ p: 4, borderRadius: 4, borderStyle: 'dashed', textAlign: 'center', color: 'text.secondary' }}
+      >
+        <Typography variant="body1" sx={{ fontWeight: 900 }}>
+          아직 등록된 가족 구성원이 없습니다.
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 0.75 }}>
+          상단의 초대 버튼을 눌러 가족을 초대해보세요.
+        </Typography>
+      </Paper>
     )
   }
 
   return (
-    <section className={styles.listSection}>
-      <h3>가족 구성원</h3>
-      <div className={styles.list}>
+    <Box component="section" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Typography variant="h6" sx={{ m: 0, fontSize: 18, fontWeight: 900 }}>
+        가족 구성원
+      </Typography>
+      <Stack spacing={1.5}>
         {members.map((member) => (
           <FamilyMemberCard
             key={member.id}
@@ -43,8 +54,8 @@ export const FamilyMemberList = ({
             groupOwnerId={groupOwnerId}
           />
         ))}
-      </div>
-    </section>
+      </Stack>
+    </Box>
   )
 }
 

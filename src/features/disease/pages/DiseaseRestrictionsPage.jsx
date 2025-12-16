@@ -5,7 +5,7 @@
  */
 
 import MainLayout from '@shared/components/layout/MainLayout'
-import styles from './DiseaseRestrictionsPage.module.scss'
+import { Container, Typography } from '@mui/material'
 
 /**
  * 질병별 제약 사항 페이지 컴포넌트
@@ -14,10 +14,14 @@ import styles from './DiseaseRestrictionsPage.module.scss'
 export const DiseaseRestrictionsPage = () => {
   return (
     <MainLayout>
-      <div className={styles.container}>
-        <h1 className={styles.title}>질병별 제약 사항</h1>
-        <p className={styles.placeholder}>질병별 제약 사항 페이지 - 구현 예정</p>
-      </div>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        <Typography variant="h5" sx={{ fontWeight: 900 }}>
+          질병별 제약 사항
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          질병별 제약 사항 페이지 - 구현 예정
+        </Typography>
+      </Container>
     </MainLayout>
   )
 }

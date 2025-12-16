@@ -23,7 +23,6 @@ export const ROUTE_PATHS = {
   pillSearch: '/pills/search',
   pillResult: '/pills/result',
 
-  counsel: '/counsel',
 
   disease: '/disease',
   diseaseDetail: '/disease/:diseaseId',
@@ -65,6 +64,8 @@ export const ROUTE_PATHS = {
   adherenceReport: '/reports/adherence',
   weeklyStats: '/reports/weekly',
 
+  places: '/places',
+
   more: '/more',
 };
 
@@ -82,8 +83,6 @@ export const ROUTE_META = {
     ROUTE_PATHS.search,
     ROUTE_PATHS.pillSearch,
     ROUTE_PATHS.pillResult,
-
-    ROUTE_PATHS.counsel,
 
     ROUTE_PATHS.disease,
     ROUTE_PATHS.diseaseDetail,
@@ -115,6 +114,8 @@ export const ROUTE_META = {
 
     ROUTE_PATHS.adherenceReport,
     ROUTE_PATHS.weeklyStats,
+
+    ROUTE_PATHS.places,
 
     ROUTE_PATHS.more,
   ],

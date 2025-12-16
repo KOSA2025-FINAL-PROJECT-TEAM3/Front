@@ -3,8 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
 import { usePrescriptionStore } from '../store/prescriptionStore';
 import { ROUTE_PATHS } from '@config/routes.config';
-import styles from './MedicationManagement.module.scss';
-import { Box, FormGroup, FormControlLabel, Switch, Button } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  FormControlLabel,
+  Paper,
+  Stack,
+  Switch,
+  Typography,
+} from '@mui/material';
 import { toast } from '@shared/components/toast/toastStore';
 
 export const MedicationManagement = () => {
@@ -44,93 +53,123 @@ export const MedicationManagement = () => {
 
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <div className={styles.headerContent}>
-            <div>
-              <h1>약 관리</h1>
-              <p>처방전별로 약을 관리하세요.</p>
-            </div>
-            <button
-              type="button"
-              className={styles.addButton}
-              onClick={handleAddClick}
-              aria-label="약 등록"
-            >
-              <span className={styles.addIcon}>+</span>
-              <span className={styles.addLabel}>약 등록</span>
-            </button>
-          </div>
-        </header>
+      <Box sx={{ maxWidth: 800, mx: 'auto', px: 2.5, py: 2.5, pb: 10 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 900 }}>
+              약 관리
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              처방전별로 약을 관리하세요.
+            </Typography>
+          </Box>
+          <Button
+            type="button"
+            variant="contained"
+            onClick={handleAddClick}
+            aria-label="약 등록"
+            sx={{ fontWeight: 800 }}
+          >
+            + 약 등록
+          </Button>
+        </Stack>
 
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end', px: 2 }}>
-          <FormGroup>
-            <FormControlLabel
-              control={<Switch checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} size="small" />}
-              label="중단된 처방전 포함"
-              sx={{ '& .MuiFormControlLabel-label': { fontSize: '14px', color: '#666' } }}
-            />
-          </FormGroup>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                size="small"
+              />
+            }
+            label="중단된 처방전 포함"
+            sx={{ '& .MuiFormControlLabel-label': { fontSize: 14, color: 'text.secondary' } }}
+          />
         </Box>
 
-        <div className={styles.prescriptionList}>
-          {loading && <div className={styles.loading}>로딩 중...</div>}
-
-          {!loading && filteredPrescriptions.length === 0 && (
-            <div className={styles.emptyState}>
-              <p>표시할 처방전이 없습니다.</p>
-              {prescriptions.length === 0 && (
-                <button onClick={handleAddClick}>첫 약 등록하기</button>
-              )}
-            </div>
+        <Stack spacing={2}>
+          {loading && (
+            <Paper variant="outlined" sx={{ p: 4 }}>
+              <Stack spacing={2} alignItems="center">
+                <CircularProgress />
+                <Typography variant="body2" color="text.secondary">
+                  로딩 중...
+                </Typography>
+              </Stack>
+            </Paper>
           )}
 
-          {filteredPrescriptions.map((prescription) => (
-            <div
-              key={prescription.id}
-              className={styles.prescriptionCard}
-              onClick={() => handlePrescriptionClick(prescription.id)}
-            >
-              <div className={styles.cardHeader}>
-                <h3>{prescription.pharmacyName || '약국명 미입력'}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span className={`status ${prescription.active ? 'active' : 'inactive'}`}>
-                    {prescription.active ? '복용 중' : '복용 완료'}
-                  </span>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color={prescription.active ? "error" : "primary"}
-                    sx={{
-                      minWidth: 'auto',
-                      height: '24px',
-                      fontSize: '11px',
-                      padding: '0 8px',
-                      borderColor: prescription.active ? '#ffcccc' : '#cce5ff',
-                      color: prescription.active ? '#d32f2f' : '#1976d2',
-                      '&:hover': {
-                        bgcolor: prescription.active ? '#ffebee' : '#e3f2fd'
-                      }
-                    }}
-                    onClick={(e) => handleToggleActive(e, prescription)}
-                  >
-                    {prescription.active ? "중단" : "재개"}
-                  </Button>
-                </div>
-              </div>
-              <div className={styles.cardBody}>
-                <p className={styles.hospital}>{prescription.hospitalName || '병원명 미입력'}</p>
-                <p className={styles.period}>
-                  {prescription.startDate} ~ {prescription.endDate}
-                </p>
-                <div className={styles.medicationCount}>
-                  포함된 약: {prescription.medicationCount}개
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+          {!loading && filteredPrescriptions.length === 0 && (
+            <Paper variant="outlined" sx={{ p: 6, textAlign: 'center', borderStyle: 'dashed' }}>
+              <Typography variant="body1" sx={{ fontWeight: 800 }}>
+                표시할 처방전이 없습니다.
+              </Typography>
+              {prescriptions.length === 0 && (
+                <Button sx={{ mt: 2 }} variant="contained" onClick={handleAddClick}>
+                  첫 약 등록하기
+                </Button>
+              )}
+            </Paper>
+          )}
+
+          {!loading &&
+            filteredPrescriptions.map((prescription) => (
+              <Paper
+                key={prescription.id}
+                variant="outlined"
+                onClick={() => handlePrescriptionClick(prescription.id)}
+                sx={{
+                  p: 2.5,
+                  cursor: 'pointer',
+                  borderRadius: 2,
+                  '&:hover': { boxShadow: 2, borderColor: 'primary.200' },
+                }}
+              >
+                <Stack spacing={1}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                      {prescription.pharmacyName || '약국명 미입력'}
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color={prescription.active ? 'primary' : 'default'}
+                        label={prescription.active ? '복용 중' : '복용 완료'}
+                      />
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color={prescription.active ? 'error' : 'primary'}
+                        onClick={(e) => handleToggleActive(e, prescription)}
+                      >
+                        {prescription.active ? '중단' : '재개'}
+                      </Button>
+                    </Stack>
+                  </Stack>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {prescription.hospitalName || '병원명 미입력'}
+                  </Typography>
+
+                  <Typography variant="caption" color="text.secondary">
+                    {prescription.startDate} ~ {prescription.endDate}
+                  </Typography>
+
+                  <Box>
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={`포함된 약: ${prescription.medicationCount}개`}
+                      sx={{ bgcolor: 'action.hover' }}
+                    />
+                  </Box>
+                </Stack>
+              </Paper>
+            ))}
+        </Stack>
+      </Box>
     </MainLayout>
   );
 };

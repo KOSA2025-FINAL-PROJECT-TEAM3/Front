@@ -3,19 +3,31 @@
  * - 토스트 알림을 화면에 표시
  */
 
+import { Box } from '@mui/material'
 import { useToastStore } from './toastStore'
 import { Toast } from './Toast'
-import styles from './ToastContainer.module.scss'
 
 export const ToastContainer = () => {
   const toasts = useToastStore((state) => state.toasts)
 
   return (
-    <div className={styles.container}>
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 16,
+        right: 16,
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1.5,
+        pointerEvents: 'none',
+        left: { xs: 16, md: 'auto' },
+      }}
+    >
       {toasts.map((toast) => (
         <Toast key={toast.id} {...toast} />
       ))}
-    </div>
+    </Box>
   )
 }
 

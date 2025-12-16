@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
+import { Box, Button, Chip, CircularProgress, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
 import { MedicationCardInPrescription } from '../components/MedicationCardInPrescription';
 import { MedicationModal } from '../components/MedicationModal';
 import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
-import styles from './PrescriptionAddPage.module.scss'; // Reuse AddPage styles
 import logger from '@core/utils/logger';
 
 export const PrescriptionDetailPage = () => {
@@ -258,7 +258,14 @@ export const PrescriptionDetailPage = () => {
     if (loading && !currentPrescription) {
         return (
             <MainLayout>
-                <div style={{ padding: '40px', textAlign: 'center' }}>로딩 중...</div>
+                <Box sx={{ p: 5, textAlign: 'center' }}>
+                    <Stack spacing={2} alignItems="center">
+                        <CircularProgress />
+                        <Typography variant="body2" color="text.secondary">
+                            로딩 중...
+                        </Typography>
+                    </Stack>
+                </Box>
             </MainLayout>
         );
     }
@@ -266,253 +273,253 @@ export const PrescriptionDetailPage = () => {
     if (!currentPrescription || !prescriptionData) {
         return (
             <MainLayout>
-                <div style={{ padding: '40px', textAlign: 'center' }}>처방전을 찾을 수 없습니다</div>
+                <Box sx={{ p: 5, textAlign: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                        처방전을 찾을 수 없습니다
+                    </Typography>
+                </Box>
             </MainLayout>
         );
     }
 
     const displayData = isEditMode ? prescriptionData : currentPrescription;
+    const paymentValue = isEditMode
+        ? (prescriptionData.paymentAmount || '')
+        : (displayData.paymentAmount ? `${displayData.paymentAmount.toLocaleString()}원` : '');
 
     return (
         <MainLayout showBottomNav={false}>
-            <div className={styles.container}>
-                <header className={styles.header}>
-                    <h1>{isEditMode ? '처방전 수정' : displayData.pharmacyName || '처방전 상세'}</h1>
-                    <p>{isEditMode ? '처방전 정보를 수정하세요' : `${displayData.hospitalName || ''} | ${displayData.startDate} ~ ${displayData.endDate}`}</p>
-                </header>
+            <Box sx={{ maxWidth: 800, mx: 'auto', px: 2.5, py: 2.5, pb: 12 }}>
+                <Box sx={{ mb: 3 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                        {isEditMode ? '처방전 수정' : displayData.pharmacyName || '처방전 상세'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        {isEditMode
+                            ? '처방전 정보를 수정하세요'
+                            : `${displayData.hospitalName || ''} | ${displayData.startDate} ~ ${displayData.endDate}`}
+                    </Typography>
+                </Box>
 
                 {/* 처방전 기본 정보 */}
-                <section className={styles.prescriptionInfo}>
-                    <h2>처방전 정보</h2>
-                    <div className={styles.formGrid}>
-                        <label>
-                            약국명
-                            {isEditMode ? (
-                                <input
-                                    type="text"
-                                    value={prescriptionData.pharmacyName}
+                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, mb: 3 }}>
+                    <Stack spacing={2}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                            처방전 정보
+                        </Typography>
+                        <Divider />
+
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="약국명"
+                                    value={displayData.pharmacyName || ''}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         pharmacyName: e.target.value
                                     }))}
                                     placeholder="예: 청독약국"
+                                    InputProps={{ readOnly: !isEditMode }}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                                    {displayData.pharmacyName || '-'}
-                                </div>
-                            )}
-                        </label>
-
-                        <label>
-                            병원명
-                            {isEditMode ? (
-                                <input
-                                    type="text"
-                                    value={prescriptionData.hospitalName}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="병원명"
+                                    value={displayData.hospitalName || ''}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         hospitalName: e.target.value
                                     }))}
                                     placeholder="예: 서울대학교병원"
+                                    InputProps={{ readOnly: !isEditMode }}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                                    {displayData.hospitalName || '-'}
-                                </div>
-                            )}
-                        </label>
-
-                        <label>
-                            복용 시작일
-                            {isEditMode ? (
-                                <input
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="복용 시작일"
                                     type="date"
-                                    value={prescriptionData.startDate}
+                                    value={displayData.startDate}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         startDate: e.target.value
                                     }))}
-                                    required
+                                    required={isEditMode}
+                                    disabled={!isEditMode}
+                                    InputLabelProps={{ shrink: true }}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                                    {displayData.startDate}
-                                </div>
-                            )}
-                        </label>
-
-                        <label>
-                            복용 종료일
-                            {isEditMode ? (
-                                <input
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="복용 종료일"
                                     type="date"
-                                    value={prescriptionData.endDate}
+                                    value={displayData.endDate}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         endDate: e.target.value
                                     }))}
-                                    required
+                                    required={isEditMode}
+                                    disabled={!isEditMode}
+                                    InputLabelProps={{ shrink: true }}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                                    {displayData.endDate}
-                                </div>
-                            )}
-                        </label>
-
-                        <label>
-                            결제 금액
-                            {isEditMode ? (
-                                <input
-                                    type="number"
-                                    value={prescriptionData.paymentAmount || ''}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    label="결제 금액"
+                                    type={isEditMode ? 'number' : 'text'}
+                                    value={paymentValue}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         paymentAmount: parseInt(e.target.value) || null
                                     }))}
                                     placeholder="금액 입력"
+                                    InputProps={{ readOnly: !isEditMode }}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
-                                    {displayData.paymentAmount ? `${displayData.paymentAmount.toLocaleString()}원` : '-'}
-                                </div>
-                            )}
-                        </label>
-
-                        <label>
-                            메모
-                            {isEditMode ? (
-                                <textarea
-                                    value={prescriptionData.notes}
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField
+                                    label="메모"
+                                    value={displayData.notes || ''}
                                     onChange={(e) => setPrescriptionData(prev => ({
                                         ...prev,
                                         notes: e.target.value
                                     }))}
                                     placeholder="메모 입력"
-                                    rows={3}
+                                    InputProps={{ readOnly: !isEditMode }}
+                                    multiline
+                                    minRows={3}
+                                    fullWidth
                                 />
-                            ) : (
-                                <div style={{ padding: '10px', background: '#f5f5f5', borderRadius: '4px', minHeight: '60px' }}>
-                                    {displayData.notes || '-'}
-                                </div>
-                            )}
-                        </label>
-                    </div>
+                            </Grid>
+                        </Grid>
 
-                    {/* 복용 시간 설정 */}
-                    <div className={styles.intakeTimes}>
-                        <h3>복용 시간 ({displayData.intakeTimes?.length || 0})</h3>
-                        <div className={styles.timeList}>
-                            {displayData.intakeTimes?.map((time, index) => (
-                                <div key={index} className={styles.timeItem}>
-                                    {time}
-                                    {isEditMode && (
-                                        <button onClick={() => handleRemoveTime(time)}>×</button>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                        {isEditMode && (
-                            <div className={styles.addTime}>
-                                <input
-                                    type="time"
-                                    value={newTime}
-                                    onChange={(e) => setNewTime(e.target.value)}
-                                />
-                                <button onClick={handleAddTime} type="button">시간 추가</button>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                        <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                                복용 시간 ({displayData.intakeTimes?.length || 0})
+                            </Typography>
+                            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+                                {displayData.intakeTimes?.map((time) => (
+                                    <Chip
+                                        key={time}
+                                        label={time}
+                                        onDelete={isEditMode ? () => handleRemoveTime(time) : undefined}
+                                    />
+                                ))}
+                            </Stack>
+
+                            {isEditMode && (
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2 }}>
+                                    <TextField
+                                        type="time"
+                                        value={newTime}
+                                        onChange={(e) => setNewTime(e.target.value)}
+                                        size="small"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <Button type="button" variant="outlined" onClick={handleAddTime}>
+                                        시간 추가
+                                    </Button>
+                                </Stack>
+                            )}
+                        </Box>
+                    </Stack>
+                </Paper>
 
                 {/* 약 목록 */}
-                <section className={styles.medicationList}>
-                    <div className={styles.listHeader}>
-                        <h2>처방약 {displayData.medications?.length || 0}개</h2>
-                        {isEditMode && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setEditingMedicationIndex(null);
-                                    setInitialMedication(null);
-                                    setShowModal(true);
-                                }}
-                                className={styles.addButton}
-                            >
-                                + 약 추가
-                            </button>
-                        )}
-                    </div>
+                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
+                    <Stack spacing={2}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                                처방약 {displayData.medications?.length || 0}개
+                            </Typography>
+                            {isEditMode && (
+                                <Button
+                                    type="button"
+                                    variant="contained"
+                                    onClick={() => {
+                                        setEditingMedicationIndex(null);
+                                        setInitialMedication(null);
+                                        setShowModal(true);
+                                    }}
+                                >
+                                    + 약 추가
+                                </Button>
+                            )}
+                        </Stack>
+                        <Divider />
 
-                    <div className={styles.medications}>
-                        {displayData.medications?.map((medication, index) => (
-                            <MedicationCardInPrescription
-                                key={index}
-                                medication={medication}
-                                intakeTimes={displayData.intakeTimes}
-                                onEdit={isEditMode ? () => handleEditMedication(medication, index) : null}
-                                onRemove={isEditMode ? () => handleRemoveMedication(index) : null}
-                            />
-                        ))}
+                        <Stack spacing={1.5}>
+                            {displayData.medications?.map((medication, index) => (
+                                <MedicationCardInPrescription
+                                    key={index}
+                                    medication={medication}
+                                    intakeTimes={displayData.intakeTimes}
+                                    onEdit={isEditMode ? () => handleEditMedication(medication, index) : null}
+                                    onRemove={isEditMode ? () => handleRemoveMedication(index) : null}
+                                />
+                            ))}
 
-                        {displayData.medications?.length === 0 && (
-                            <div className={styles.emptyState}>
-                                <p>약을 추가해주세요</p>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                            {displayData.medications?.length === 0 && (
+                                <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderStyle: 'dashed' }}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        약을 추가해주세요
+                                    </Typography>
+                                </Paper>
+                            )}
+                        </Stack>
+                    </Stack>
+                </Paper>
 
                 {/* 저장 버튼 */}
-                <footer className={styles.footer}>
-                    {isEditMode ? (
-                        <>
-                            <button
-                                type="button"
-                                onClick={handleCancelEdit}
-                                className={styles.cancelButton}
-                                disabled={loading}
-                            >
-                                취소
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleSave}
-                                className={styles.submitButton}
-                                disabled={loading || prescriptionData.medications.length === 0}
-                            >
-                                {loading ? '저장 중...' : '저장'}
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                className={styles.cancelButton}
-                            >
-                                뒤로
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleDelete}
-                                className={styles.cancelButton}
-                                style={{ background: '#dc3545' }}
-                            >
-                                삭제
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleEdit}
-                                className={styles.submitButton}
-                            >
-                                수정
-                            </button>
-                        </>
-                    )}
-                </footer>
-            </div>
+                <Paper
+                    elevation={6}
+                    sx={{
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        p: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+                        <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
+                            {isEditMode ? (
+                                <>
+                                    <Button type="button" onClick={handleCancelEdit} variant="outlined" disabled={loading}>
+                                        취소
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={handleSave}
+                                        variant="contained"
+                                        disabled={loading || prescriptionData.medications.length === 0}
+                                    >
+                                        {loading ? '저장 중...' : '저장'}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button type="button" onClick={() => navigate(-1)} variant="outlined">
+                                        뒤로
+                                    </Button>
+                                    <Button type="button" onClick={handleDelete} color="error" variant="contained">
+                                        삭제
+                                    </Button>
+                                    <Button type="button" onClick={handleEdit} variant="contained">
+                                        수정
+                                    </Button>
+                                </>
+                            )}
+                        </Stack>
+                    </Box>
+                </Paper>
+            </Box>
 
             {/* 약 검색/수정 모달 */}
             {showModal && (

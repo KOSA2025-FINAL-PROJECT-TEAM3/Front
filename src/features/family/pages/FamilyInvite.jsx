@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Alert, Box, Button, Chip, Divider, Paper, Stack, Typography } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
-import Modal from '@shared/components/ui/Modal'
+import AppDialog from '@shared/components/mui/AppDialog'
 import { toast } from '@shared/components/toast/toastStore'
 import InviteMemberForm from '../components/InviteMemberForm.jsx'
 import { useFamily } from '../hooks/useFamily'
-import styles from './FamilyInvite.module.scss'
 import logger from '@core/utils/logger'
 import SelectedInviteDetails from '../components/SelectedInviteDetails.jsx' // Import new component
 import envConfig from '@config/environment.config' // Import environment config
@@ -175,7 +175,8 @@ export const FamilyInvitePage = () => {
   }
 
   return (
-    <Modal
+    <AppDialog
+      isOpen={true}
       title="가족 초대"
       description={
         <>
@@ -184,19 +185,20 @@ export const FamilyInvitePage = () => {
         </>
       }
       onClose={() => navigate(ROUTE_PATHS.family, { replace: true })}
+      maxWidth="md"
     >
       <>
         {!hasGroup && (
-          <div className={styles.alert}>
-            <p>가족 그룹이 없습니다. 가족 관리 페이지에서 그룹을 먼저 생성해주세요.</p>
-            <button
-              type="button"
-              onClick={() => navigate(ROUTE_PATHS.family)}
-              style={{ marginTop: 8 }}
-            >
-              가족 관리로 이동
-            </button>
-          </div>
+          <Alert
+            severity="warning"
+            action={
+              <Button color="inherit" size="small" onClick={() => navigate(ROUTE_PATHS.family)}>
+                가족 관리로 이동
+              </Button>
+            }
+          >
+            가족 그룹이 없습니다. 가족 관리 페이지에서 그룹을 먼저 생성해주세요.
+          </Alert>
         )}
 
         <InviteMemberForm onSubmit={handleSubmit} loading={submitting || !hasGroup} />
@@ -213,91 +215,145 @@ export const FamilyInvitePage = () => {
           />
         )}
 
-        <div className={styles.listSection}>
-          <h3>보낸 초대</h3>
+        <Box sx={{ mt: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            보낸 초대
+          </Typography>
           {sentInvites?.length ? (
-            <ul className={styles.inviteList}>
+            <Stack spacing={1} sx={{ mt: 1 }}>
               {sentInvites.map((invite) => {
                 const inviteId = invite.id || invite.shortCode || invite.inviteCode
+                const selectedId =
+                  latestInvite?.id || latestInvite?.shortCode || latestInvite?.inviteCode
+                const isSelected = selectedId === inviteId
+
                 return (
-                  <li
+                  <Paper
                     key={inviteId}
-                    className={`${styles.inviteItem} ${latestInvite?.id === invite.id ? styles.selected : ''}`}
+                    variant="outlined"
                     onClick={() => setLatestInvite(invite)}
-                    style={{ cursor: 'pointer' }}
+                    sx={{
+                      p: 2,
+                      cursor: 'pointer',
+                      borderColor: isSelected ? 'primary.main' : 'divider',
+                      bgcolor: isSelected ? 'primary.50' : 'background.paper',
+                      '&:hover': { borderColor: 'primary.200' },
+                    }}
                   >
-                    <div className={styles.inviteMeta}>
-                      <span className={styles.name}>{invite.inviteeName || '이름 없음'}</span>
-                      <span className={styles.email}>{invite.intendedForEmail || invite.inviteeEmail || '이메일 미지정'}</span>
-                      <span className={styles.role}>{invite.suggestedRole || '역할 미정'}</span>
-                      {invite.expiresAt && (
-                        <span className={styles.expiry}>
-                          만료 {new Date(invite.expiresAt).toLocaleString('ko-KR')}
-                        </span>
-                      )}
-                      {invite.status && <span className={styles.status}>{invite.status}</span>}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleCancel(inviteId)
-                      }}
-                      disabled={cancelingId === inviteId}
-                    >
-                      {cancelingId === inviteId ? '취소 중...' : '취소'}
-                    </button>
-                  </li>
+                    <Stack spacing={1}>
+                      <Stack direction="row" justifyContent="space-between" spacing={2}>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                            {invite.inviteeName || '이름 없음'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {invite.intendedForEmail || invite.inviteeEmail || '이메일 미지정'}
+                          </Typography>
+                        </Box>
+                        <Button
+                          type="button"
+                          color="error"
+                          variant="outlined"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleCancel(inviteId)
+                          }}
+                          disabled={cancelingId === inviteId}
+                        >
+                          {cancelingId === inviteId ? '취소 중...' : '취소'}
+                        </Button>
+                      </Stack>
+
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        <Chip
+                          size="small"
+                          label={invite.suggestedRole || '역할 미정'}
+                          color={invite.suggestedRole === 'CAREGIVER' ? 'success' : 'primary'}
+                          variant="outlined"
+                        />
+                        {invite.expiresAt ? (
+                          <Typography variant="caption" color="text.secondary">
+                            만료 {new Date(invite.expiresAt).toLocaleString('ko-KR')}
+                          </Typography>
+                        ) : null}
+                        {invite.status ? (
+                          <Chip size="small" label={invite.status} color="warning" variant="outlined" />
+                        ) : null}
+                      </Stack>
+                    </Stack>
+                  </Paper>
                 )
               })}
-            </ul>
+            </Stack>
           ) : (
-            <p className={styles.helper}>아직 보낸 초대가 없습니다.</p>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              아직 보낸 초대가 없습니다.
+            </Typography>
           )}
-        </div>
+        </Box>
 
         {receivedInvites?.length > 0 && (
-          <div className={styles.listSection}>
-            <h3>받은 초대</h3>
-            <ul className={styles.inviteList}>
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+              받은 초대
+            </Typography>
+            <Stack spacing={1} sx={{ mt: 1 }}>
               {receivedInvites.map((invite) => {
                 const inviteId = invite.id || invite.shortCode || invite.inviteCode
                 return (
-                  <li key={inviteId}>
-                    <div className={styles.inviteMeta}>
-                      <span className={styles.email}>{invite.inviterName || '보낸 사람 미상'}</span>
-                      <span className={styles.role}>{invite.groupName || '그룹 미상'}</span>
-                      {invite.expiresAt && (
-                        <span className={styles.expiry}>
-                          만료 {new Date(invite.expiresAt).toLocaleString('ko-KR')}
-                        </span>
-                      )}
-                      {invite.status && <span className={styles.status}>{invite.status}</span>}
-                    </div>
-                    <div className={styles.inviteActions}>
-                      <button
-                        type="button"
-                        onClick={() => handleAccept(invite)}
-                        disabled={acceptingId === inviteId}
-                      >
-                        {acceptingId === inviteId ? '수락 중...' : '수락'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleCancel(inviteId)}
-                        disabled={cancelingId === inviteId}
-                      >
-                        {cancelingId === inviteId ? '거절 중...' : '거절'}
-                      </button>
-                    </div>
-                  </li>
+                  <Paper key={inviteId} variant="outlined" sx={{ p: 2 }}>
+                    <Stack spacing={1}>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 900 }}>
+                          {invite.inviterName || '보낸 사람 미상'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {invite.groupName || '그룹 미상'}
+                        </Typography>
+                      </Box>
+
+                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                        {invite.expiresAt ? (
+                          <Typography variant="caption" color="text.secondary">
+                            만료 {new Date(invite.expiresAt).toLocaleString('ko-KR')}
+                          </Typography>
+                        ) : null}
+                        {invite.status ? (
+                          <Chip size="small" label={invite.status} color="warning" variant="outlined" />
+                        ) : null}
+                      </Stack>
+
+                      <Divider />
+
+                      <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                        <Button
+                          type="button"
+                          variant="contained"
+                          onClick={() => handleAccept(invite)}
+                          disabled={acceptingId === inviteId}
+                        >
+                          {acceptingId === inviteId ? '수락 중...' : '수락'}
+                        </Button>
+                        <Button
+                          type="button"
+                          color="error"
+                          variant="outlined"
+                          onClick={() => handleCancel(inviteId)}
+                          disabled={cancelingId === inviteId}
+                        >
+                          {cancelingId === inviteId ? '거절 중...' : '거절'}
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </Paper>
                 )
               })}
-            </ul>
-          </div>
+            </Stack>
+          </Box>
         )}
       </>
-    </Modal>
+    </AppDialog>
   )
 }
 

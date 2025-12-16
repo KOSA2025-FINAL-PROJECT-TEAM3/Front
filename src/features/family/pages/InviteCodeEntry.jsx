@@ -1,4 +1,3 @@
-import logger from "@core/utils/logger"
 /**
  * InviteCodeEntry.jsx
  * 통합 초대 랜딩 페이지
@@ -7,15 +6,28 @@ import logger from "@core/utils/logger"
  * - 보안 강화: 명시적 수락 필수
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { publicInviteApiClient } from '@core/services/api/publicInviteApiClient'
+import logger from '@core/utils/logger'
 import { useInviteStore } from '../stores/inviteStore'
 import { useFamily } from '../hooks/useFamily'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { toast } from '@shared/components/toast/toastStore'
-import styles from './InviteCodeEntry.module.scss'
 
 const ROLE_LABELS = {
   SENIOR: '시니어(케어 대상자)',
@@ -50,7 +62,7 @@ export const InviteCodeEntryPage = () => {
   // 1. 코드/토큰 검증
   const handleValidateCode = useCallback(async (valueToValidate = inputCode) => {
     const isLongToken = valueToValidate.length > 6
-    
+
     if (!isLongToken && valueToValidate.length !== 6) {
       setErrorMessage('6자리 초대 코드를 입력해주세요.')
       return
@@ -199,139 +211,226 @@ export const InviteCodeEntryPage = () => {
 
   if (status === 'success') {
     return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.success}>
-            <div className={styles.successIcon}>🎉</div>
-            <h2>가족에 합류했어요!</h2>
-            <p>잠시 후 대시보드로 이동합니다...</p>
-          </div>
-        </div>
-      </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          py: 3,
+          background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+        }}
+      >
+        <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
+          <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'success.50' }}>
+            <Typography component="div" sx={{ fontSize: 48, mb: 2 }}>
+              🎉
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'success.main' }}>
+              가족에 합류했어요!
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              잠시 후 대시보드로 이동합니다...
+            </Typography>
+          </Paper>
+        </Container>
+      </Box>
     )
   }
 
   // 검증 완료 상태: 초대 카드 표시
   if (status === 'validated' && inviteInfo) {
     const role = inviteInfo.suggestedRole || 'SENIOR'
-    
+    const roleColor = role === 'CAREGIVER' ? 'success' : 'primary'
+
     return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.header}>
-            <h1>가족 초대</h1>
-            <p>아래 정보를 확인하고 가족에 합류해주세요.</p>
-          </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          py: 3,
+          background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+        }}
+      >
+        <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
+          <Stack spacing={3}>
+            <Box textAlign="center">
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                가족 초대
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                아래 정보를 확인하고 가족에 합류해주세요.
+              </Typography>
+            </Box>
 
-          <div className={styles.inviteInfo}>
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>가족 그룹</span>
-              <span className={styles.infoValue}>{inviteInfo.groupName}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>초대한 사람</span>
-              <span className={styles.infoValue}>{inviteInfo.inviterName}</span>
-            </div>
-            <div className={styles.roleSection}>
-              <p>예정된 역할</p>
-              <span className={`${styles.roleBadge} ${styles[role.toLowerCase()]}`}>
-                <span className={styles.roleIcon}>{ROLE_ICONS[role]}</span>
-                {ROLE_LABELS[role] || role}
-              </span>
-            </div>
-          </div>
+            <Paper sx={{ p: 3 }}>
+              <Stack spacing={1.5}>
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    가족 그룹
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {inviteInfo.groupName}
+                  </Typography>
+                </Stack>
+                <Divider />
+                <Stack direction="row" justifyContent="space-between" spacing={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    초대한 사람
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {inviteInfo.inviterName}
+                  </Typography>
+                </Stack>
 
-          <div className={styles.authSection}>
-            {isAuthenticated ? (
-              // Case A: 로그인 상태
-              <div className={styles.loggedInState}>
-                <div className={styles.currentUser}>
-                  <p className={styles.userLabel}>현재 접속 중인 계정</p>
-                  <p className={styles.userName}>{user?.name} ({user?.email})</p>
-                </div>
-                
-                <button
-                  type="button"
-                  className={styles.acceptButton}
-                  onClick={handleAcceptInvite}
-                  disabled={status === 'accepting'}
-                >
-                  {status === 'accepting' ? '처리 중...' : '이 계정으로 수락하기'}
-                </button>
+                <Divider />
 
-                <div className={styles.logoutSection}>
-                  <p className={styles.notYouText}>본인이 아니신가요?</p>
-                  <button 
-                    type="button" 
-                    className={styles.logoutButton} 
-                    onClick={handleLogout}
-                  >
-                    로그아웃
-                  </button>
-                </div>
-              </div>
-            ) : (
-              // Case B: 비로그인 상태
-              <div className={styles.loggedOutState}>
-                <p className={styles.guideText}>초대를 수락하려면 로그인이 필요합니다.</p>
-                
-                <button type="button" className={styles.loginButton} onClick={handleGoToLogin}>
-                  로그인
-                </button>
-                <button type="button" className={styles.signupButton} onClick={handleGoToSignup}>
-                  회원가입
-                </button>
-              </div>
-            )}
-            
-            <button type="button" className={styles.cancelButton} onClick={handleReset}>
-              다른 코드 입력하기
-            </button>
-          </div>
-        </div>
-      </div>
+                <Box textAlign="center" sx={{ py: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    예정된 역할
+                  </Typography>
+                  <Chip
+                    color={roleColor}
+                    variant="filled"
+                    sx={{ mt: 1, fontWeight: 800 }}
+                    icon={
+                      <Box component="span" sx={{ fontSize: 18 }}>
+                        {ROLE_ICONS[role]}
+                      </Box>
+                    }
+                    label={ROLE_LABELS[role] || role}
+                  />
+                </Box>
+              </Stack>
+            </Paper>
+
+            <Paper sx={{ p: 3 }}>
+              <Stack spacing={2}>
+                {isAuthenticated ? (
+                  <>
+                    <Box>
+                      <Typography variant="caption" color="text.secondary">
+                        현재 접속 중인 계정
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mt: 0.5 }}>
+                        {user?.name} ({user?.email})
+                      </Typography>
+                    </Box>
+
+                    <Button
+                      type="button"
+                      variant="contained"
+                      color="success"
+                      onClick={handleAcceptInvite}
+                      disabled={status === 'accepting'}
+                      startIcon={
+                        status === 'accepting' ? <CircularProgress size={18} color="inherit" /> : null
+                      }
+                      sx={{ py: 1.5, fontWeight: 800 }}
+                    >
+                      {status === 'accepting' ? '처리 중...' : '이 계정으로 수락하기'}
+                    </Button>
+
+                    <Divider sx={{ borderStyle: 'dashed' }} />
+
+                    <Stack spacing={1} alignItems="center">
+                      <Typography variant="body2" color="text.secondary">
+                        본인이 아니신가요?
+                      </Typography>
+                      <Button type="button" color="error" variant="outlined" onClick={handleLogout}>
+                        로그아웃
+                      </Button>
+                    </Stack>
+                  </>
+                ) : (
+                  <>
+                    <Alert severity="info">초대를 수락하려면 로그인이 필요합니다.</Alert>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      onClick={handleGoToLogin}
+                      sx={{ py: 1.5, fontWeight: 800 }}
+                    >
+                      로그인
+                    </Button>
+                    <Button type="button" variant="outlined" onClick={handleGoToSignup}>
+                      회원가입
+                    </Button>
+                  </>
+                )}
+
+                <Button type="button" variant="outlined" color="inherit" onClick={handleReset}>
+                  다른 코드 입력하기
+                </Button>
+              </Stack>
+            </Paper>
+          </Stack>
+        </Container>
+      </Box>
     )
   }
 
   // 초기 상태: 코드 입력 폼
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <h1>초대 코드 입력</h1>
-          <p>가족으로부터 받은 6자리 초대 코드를 입력해주세요.</p>
-        </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        py: 3,
+        background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
+      }}
+    >
+      <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
+        <Stack spacing={3}>
+          <Box textAlign="center">
+            <Typography variant="h5" sx={{ fontWeight: 800 }}>
+              초대 코드 입력
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              가족으로부터 받은 6자리 초대 코드를 입력해주세요.
+            </Typography>
+          </Box>
 
-        <div className={styles.form}>
-          <div className={styles.inputGroup}>
-            <input
-              type="text"
-              className={styles.codeInput}
-              value={inputCode}
-              onChange={(e) => setInputCode(e.target.value.toUpperCase().slice(0, 6))}
-              placeholder="초대 코드 6자리"
-              maxLength={6}
-              disabled={status === 'validating'}
-            />
-          </div>
+          <Paper sx={{ p: 3 }}>
+            <Stack spacing={2}>
+              <TextField
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value.toUpperCase().slice(0, 6))}
+                placeholder="초대 코드 6자리"
+                disabled={status === 'validating'}
+                inputProps={{ maxLength: 6 }}
+                fullWidth
+                autoFocus
+                sx={{
+                  '& .MuiInputBase-input': {
+                    py: 1.75,
+                    fontSize: 24,
+                    fontWeight: 800,
+                    textAlign: 'center',
+                    letterSpacing: '0.5em',
+                    textTransform: 'uppercase',
+                  },
+                }}
+              />
 
-          {errorMessage && <p className={styles.error}>{errorMessage}</p>}
+              {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-          <button
-            type="button"
-            className={styles.submitButton}
-            onClick={() => handleValidateCode()}
-            disabled={inputCode.length < 6 || status === 'validating'}
-          >
-            {status === 'validating' ? '확인 중...' : '코드 확인'}
-          </button>
-        </div>
+              <Button
+                type="button"
+                variant="contained"
+                onClick={() => handleValidateCode()}
+                disabled={inputCode.length < 6 || status === 'validating'}
+                startIcon={
+                  status === 'validating' ? <CircularProgress size={18} color="inherit" /> : null
+                }
+                sx={{ py: 1.5, fontWeight: 800 }}
+              >
+                {status === 'validating' ? '확인 중...' : '코드 확인'}
+              </Button>
+            </Stack>
+          </Paper>
 
-        <button type="button" className={styles.cancelButton} onClick={() => navigate(-1)}>
-          뒤로 가기
-        </button>
-      </div>
-    </div>
+          <Button type="button" variant="outlined" color="inherit" onClick={() => navigate(-1)}>
+            뒤로 가기
+          </Button>
+        </Stack>
+      </Container>
+    </Box>
   )
 }
 

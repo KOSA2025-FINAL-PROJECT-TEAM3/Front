@@ -111,6 +111,8 @@ out/
 coverage/                                                              
 .nyc_output/                                                           
 junit.xml                                                              
+playwright-report/
+test-results/
                                                                        
 # ═══════════════════════════════════════════════════════════          
 # OS temporary files                                                   

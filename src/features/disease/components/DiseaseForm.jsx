@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Button } from '@shared/components/ui/Button'
-import styles from './DiseaseForm.module.scss'
+import { Box, Checkbox, FormControlLabel, MenuItem, Stack, TextField } from '@mui/material'
+import AppButton from '@shared/components/mui/AppButton'
 
 const STATUS_OPTIONS = [
   { value: 'ACTIVE', label: '치료 중' },
@@ -49,113 +49,102 @@ export const DiseaseForm = ({ initialValue, onSubmit, onCancel, submitting = fal
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.field}>
-        <label htmlFor="name">병명 *</label>
-        <input
-          id="name"
-          name="name"
-          value={form.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-          placeholder="예) 고혈압"
-          required
+    <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <TextField
+        id="name"
+        name="name"
+        label="병명 *"
+        value={form.name}
+        onChange={(e) => handleChange('name', e.target.value)}
+        placeholder="예) 고혈압"
+        required
+        error={Boolean(errors.name)}
+        helperText={errors.name || ' '}
+        fullWidth
+      />
+
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.25 }}>
+        <TextField
+          id="code"
+          name="code"
+          label="코드"
+          value={form.code}
+          onChange={(e) => handleChange('code', e.target.value)}
+          placeholder="예) I10"
+          fullWidth
         />
-        {errors.name && <p className={styles.error}>{errors.name}</p>}
-      </div>
+        <TextField
+          id="status"
+          name="status"
+          label="상태"
+          select
+          value={form.status}
+          onChange={(e) => handleChange('status', e.target.value)}
+          fullWidth
+        >
+          {STATUS_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
 
-      <div className={styles.fieldGroup}>
-        <div className={styles.field}>
-          <label htmlFor="code">코드</label>
-          <input
-            id="code"
-            name="code"
-            value={form.code}
-            onChange={(e) => handleChange('code', e.target.value)}
-            placeholder="예) I10"
-          />
-        </div>
-        <div className={styles.field}>
-          <label htmlFor="status">상태</label>
-          <select
-            id="status"
-            name="status"
-            value={form.status}
-            onChange={(e) => handleChange('status', e.target.value)}
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className={styles.fieldGroup}>
-        <div className={styles.field}>
-          <label htmlFor="diagnosedAt">진단일</label>
-          <input
-            id="diagnosedAt"
-            type="date"
-            name="diagnosedAt"
-            value={normalizeDate(form.diagnosedAt)}
-            onChange={(e) => handleChange('diagnosedAt', e.target.value)}
-            disabled={form.isDiagnosedDateUnknown}
-          />
-        </div>
-        <div className={styles.checkboxField}>
-          <label htmlFor="unknownDate" className={styles.checkboxLabel}>
-            <input
-              id="unknownDate"
-              type="checkbox"
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.25, alignItems: 'center' }}>
+        <TextField
+          id="diagnosedAt"
+          type="date"
+          name="diagnosedAt"
+          label="진단일"
+          value={normalizeDate(form.diagnosedAt)}
+          onChange={(e) => handleChange('diagnosedAt', e.target.value)}
+          disabled={form.isDiagnosedDateUnknown}
+          InputLabelProps={{ shrink: true }}
+          fullWidth
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
               checked={form.isDiagnosedDateUnknown}
               onChange={(e) => handleChange('isDiagnosedDateUnknown', e.target.checked)}
             />
-            날짜 모름
-          </label>
-        </div>
-      </div>
-
-      <div className={styles.fieldGroup}>
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={form.isCritical}
-            onChange={(e) => handleChange('isCritical', e.target.checked)}
-          />
-          중요 질병
-        </label>
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={form.isPrivate}
-            onChange={(e) => handleChange('isPrivate', e.target.checked)}
-          />
-          비공개
-        </label>
-      </div>
-
-      <div className={styles.field}>
-        <label htmlFor="description">설명</label>
-        <textarea
-          id="description"
-          name="description"
-          rows="3"
-          value={form.description}
-          onChange={(e) => handleChange('description', e.target.value)}
-          placeholder="증상이나 특이사항을 입력하세요."
+          }
+          label="날짜 모름"
         />
-      </div>
+      </Box>
 
-      <div className={styles.footer}>
-        <Button variant="ghost" type="button" onClick={onCancel}>
+      <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+        <FormControlLabel
+          control={<Checkbox checked={form.isCritical} onChange={(e) => handleChange('isCritical', e.target.checked)} />}
+          label="중요 질병"
+        />
+        <FormControlLabel
+          control={<Checkbox checked={form.isPrivate} onChange={(e) => handleChange('isPrivate', e.target.checked)} />}
+          label="비공개"
+        />
+      </Stack>
+
+      <TextField
+        id="description"
+        name="description"
+        label="설명"
+        value={form.description}
+        onChange={(e) => handleChange('description', e.target.value)}
+        placeholder="증상이나 특이사항을 입력하세요."
+        multiline
+        minRows={3}
+        fullWidth
+      />
+
+      <Stack direction="row" justifyContent="flex-end" spacing={1}>
+        <AppButton variant="ghost" type="button" onClick={onCancel}>
           취소
-        </Button>
-        <Button variant="primary" type="submit" disabled={!canSubmit} loading={submitting}>
+        </AppButton>
+        <AppButton variant="primary" type="submit" disabled={!canSubmit} loading={submitting}>
           {initialValue?.id ? '수정' : '등록'}
-        </Button>
-      </div>
-    </form>
+        </AppButton>
+      </Stack>
+    </Box>
   )
 }
 

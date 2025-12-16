@@ -3,7 +3,7 @@
  * - 복용 카드 컴포넌트
  */
 
-import styles from './MedicationCard.module.scss'
+import { Box, Button, Checkbox, Chip, Paper, Stack, Typography } from '@mui/material'
 
 /**
  * 복용 카드 컴포넌트
@@ -24,15 +24,18 @@ export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
   const getStatusColor = () => {
     switch (schedule.status) {
       case 'completed':
-        return '#00B300'
+        return 'success.main'
       case 'pending':
-        return '#FF9900'
+        return 'warning.main'
       case 'scheduled':
-        return '#CCCCCC'
+        return 'grey.400'
       default:
-        return '#999999'
+        return 'text.disabled'
     }
   }
+
+  const statusColor = getStatusColor()
+  const isClickable = Boolean(onCardClick && schedule.medicationId)
 
   const handleTakeMedication = (e) => {
     e.stopPropagation() // 카드 클릭 이벤트 전파 방지
@@ -55,67 +58,93 @@ export const MedicationCard = ({ schedule, onTakeMedication, onCardClick }) => {
   }
 
   return (
-    <div
-      className={`${styles.medicationCard} ${schedule.status === 'completed' ? styles.completed : ''
-        } ${schedule.isActive ? styles.active : ''} ${onCardClick ? styles.clickable : ''}`}
-      style={{ borderColor: getStatusColor() }}
-      onClick={handleCardClick}
-      role={onCardClick ? 'button' : undefined}
-      tabIndex={onCardClick ? 0 : undefined}
+    <Paper
+      variant="outlined"
+      onClick={isClickable ? handleCardClick : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (!isClickable) return
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleCardClick()
+        }
+      }}
+      sx={{
+        display: 'flex',
+        gap: 1.5,
+        p: 2,
+        borderRadius: 2,
+        borderLeft: '4px solid',
+        borderLeftColor: statusColor,
+        cursor: isClickable ? 'pointer' : 'default',
+        bgcolor: schedule.isActive ? 'grey.50' : 'common.white',
+        transition: 'box-shadow 0.2s ease, transform 0.2s ease, background-color 0.2s ease',
+        '&:hover': isClickable ? { boxShadow: 2, transform: 'translateY(-1px)' } : undefined,
+      }}
     >
       {/* 좌측: 체크박스 */}
-      <div className={styles.checkboxArea}>
-        <input
-          type="checkbox"
-          className={styles.checkbox}
+      <Box sx={{ pt: 0.25 }}>
+        <Checkbox
           checked={schedule.status === 'completed'}
           onChange={handleCheckboxClick}
           disabled={schedule.status !== 'pending' || !schedule.isCompletable}
-          style={{ cursor: schedule.status === 'pending' && schedule.isCompletable ? 'pointer' : 'default' }}
+          inputProps={{ 'aria-label': '복용 완료' }}
         />
-      </div>
+      </Box>
 
       {/* 중앙: 정보 */}
-      <div className={styles.medicationInfo}>
-        <div className={styles.timeSection}>
-          <span className={styles.time}>{schedule.time}</span>
-          <span className={styles.timeLabel}>{schedule.timeLabel}</span>
-        </div>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Stack direction="row" alignItems="baseline" spacing={1} sx={{ mb: 0.75 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 900 }} noWrap>
+            {schedule.time}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" noWrap>
+            {schedule.timeLabel}
+          </Typography>
+        </Stack>
 
-        <div className={styles.medicationList}>
+        <Stack spacing={0.25}>
           {schedule.medications.map((med, idx) => (
-            <div key={idx} className={styles.medicationItem}>
-              <span className={styles.medName}>{med.name}</span>
-              <span className={styles.medDose}>{med.dose}</span>
-            </div>
+            <Stack key={idx} direction="row" spacing={1} sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                {med.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {med.dose}
+              </Typography>
+            </Stack>
           ))}
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
       {/* 우측: 상태 버튼 */}
-      <div className={styles.actionArea}>
-        {schedule.status === 'completed' && (
-          <div className={styles.statusBadge} style={{ color: getStatusColor() }}>
-            {schedule.statusLabel}
-          </div>
-        )}
-        {schedule.status === 'pending' && (
-          <button
-            className={styles.actionButton}
+      <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+        {schedule.status === 'pending' ? (
+          <Button
+            variant="outlined"
+            size="small"
             onClick={handleTakeMedication}
             disabled={!schedule.isCompletable}
-            style={{ borderColor: getStatusColor(), color: getStatusColor() }}
+            sx={{
+              borderColor: statusColor,
+              color: statusColor,
+              fontWeight: 800,
+              '&:hover': { borderColor: statusColor },
+            }}
           >
-            {schedule.statusLabel}
-          </button>
+            {schedule.statusLabel || '복용'}
+          </Button>
+        ) : (
+          <Chip
+            label={schedule.statusLabel || schedule.status}
+            size="small"
+            variant="outlined"
+            sx={{ borderColor: statusColor, color: statusColor, fontWeight: 800 }}
+          />
         )}
-        {schedule.status === 'scheduled' && (
-          <div className={styles.statusBadge} style={{ color: getStatusColor() }}>
-            {schedule.statusLabel}
-          </div>
-        )}
-      </div>
-    </div>
+      </Box>
+    </Paper>
   )
 }
 

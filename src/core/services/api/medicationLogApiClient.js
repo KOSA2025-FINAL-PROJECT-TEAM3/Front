@@ -1,9 +1,10 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 class MedicationLogApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_MEDICATION_API_URL || 'http://localhost:8082',
+      baseURL: envConfig.MEDICATION_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/medications/logs',
     })
   }
@@ -54,8 +55,23 @@ class MedicationLogApiClient extends ApiClient {
    * @param {string} endDate - 종료 날짜 (YYYY-MM-DD)
    * @returns {Promise<Array>} 복용 기록 목록
    */
-  getByDateRange(startDate, endDate) {
-    return this.get('/', { params: { startDate, endDate } })
+  async getByDateRange(startDate, endDate) {
+    const start = new Date(`${startDate}T00:00:00`)
+    const end = new Date(`${endDate}T00:00:00`)
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+      return []
+    }
+
+    const dates = []
+    const cursor = new Date(start)
+    while (cursor <= end) {
+      dates.push(cursor.toISOString().slice(0, 10))
+      cursor.setDate(cursor.getDate() + 1)
+    }
+
+    const results = await Promise.all(dates.map((date) => this.getByDate(date).catch(() => [])))
+    return results.flat()
   }
 
   /**

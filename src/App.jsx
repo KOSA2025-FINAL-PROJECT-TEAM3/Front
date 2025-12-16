@@ -9,17 +9,18 @@
  * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
-import React, { Suspense, useEffect, lazy } from 'react'
-import { ThemeProvider } from '@mui/material/styles'
-import CssBaseline from '@mui/material/CssBaseline'
-import theme from '@/styles/theme'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { ROUTE_PATHS } from '@config/routes.config'
-import { useAuth } from '@features/auth/hooks/useAuth'
-import { FamilyProvider } from '@features/family/context/FamilyContext'
-import { PrivateRoute } from './core/routing/PrivateRoute'
-import LoadingSpinner from '@shared/components/LoadingSpinner'
-import envConfig from '@config/environment.config'
+	import React, { Suspense, useEffect, useMemo, lazy } from 'react'
+	import { ThemeProvider } from '@mui/material/styles'
+	import CssBaseline from '@mui/material/CssBaseline'
+	import { createAppTheme } from '@/styles/theme'
+	import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+	import { ROUTE_PATHS } from '@config/routes.config'
+	import { useAuth } from '@features/auth/hooks/useAuth'
+	import { FamilyProvider } from '@features/family/context/FamilyContext'
+	import { PrivateRoute } from './core/routing/PrivateRoute'
+	import LoadingSpinner from '@shared/components/LoadingSpinner'
+	import envConfig from '@config/environment.config'
+	import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
 
 // Lazy-loaded page components
 const Login = lazy(() => import('@features/auth/pages/Login'))
@@ -33,7 +34,6 @@ const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyMan
 const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
 const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
 const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
-const FamilyJoin = lazy(() => import('@features/family/pages/FamilyJoin'))
 const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
 const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
 const NotificationSettingsPage = lazy(() => import('@features/settings/pages/Notifications/NotificationSettings'))
@@ -42,6 +42,7 @@ const MyDiseasesSettingsPage = lazy(() => import('@features/settings/pages/MyDis
 const PrivacyPolicyPage = lazy(() => import('@features/settings/pages/PrivacyPolicyPage'))
 const TermsOfServicePage = lazy(() => import('@features/settings/pages/TermsOfServicePage'))
 const MedicationManagementPage = lazy(() => import('@features/medication/pages/MedicationManagement'))
+const MedicationAddPage = lazy(() => import('@features/medication/pages/MedicationAddPage'))
 const MedicationEditPage = lazy(() => import('@features/medication/pages/MedicationEditPage'))
 const PrescriptionAddPage = lazy(() => import('@features/medication/pages/PrescriptionAddPage'))
 const PrescriptionDetailPage = lazy(() => import('@features/medication/pages/PrescriptionDetailPage'))
@@ -51,12 +52,10 @@ const DietLogPage = lazy(() => import('@features/diet/pages/DietLogPage'))
 const PrescriptionScanPage = lazy(() => import('@features/ocr/pages/PrescriptionScan'))
 const UnifiedSearchPage = lazy(() => import('@features/search/pages/UnifiedSearchPage'))
 const PillResultPage = lazy(() => import('@features/search/pages/PillResultPage'))
-const DoctorCounselPage = lazy(() => import('@features/counsel/pages/DoctorCounsel'))
 const DiseasePage = lazy(() => import('@features/disease/pages/Disease'))
 const DiseaseDetailPage = lazy(() => import('@features/disease/pages/DiseaseDetailPage'))
 const SuspectedDiseasePage = lazy(() => import('@features/disease/pages/SuspectedDiseasePage'))
 const DiseaseRestrictionsPage = lazy(() => import('@features/disease/pages/DiseaseRestrictionsPage'))
-const DoctorChatListPage = lazy(() => import('@features/chat/pages/DoctorChatListPage'))
 const ChatConversationPage = lazy(() => import('@features/chat/pages/ChatConversationPage'))
 const FamilyChatConversationPage = lazy(() => import('@features/chat/pages/FamilyChatConversationPage'))
 const NotificationPage = lazy(() => import('@features/notification/pages/NotificationPage'))
@@ -65,7 +64,7 @@ const AdherenceReportPage = lazy(() => import('@features/report/pages/AdherenceR
 const WeeklyStatsPage = lazy(() => import('@features/report/pages/WeeklyStatsPage'))
 const MorePage = lazy(() => import('@pages/more/MorePage'))
 const DeveloperModePanel = lazy(() => import('@devtools/DeveloperModePanel'))
-const WsTestPage = lazy(() => import('@pages/WsTestPage'))
+const PlaceSearchPage = lazy(() => import('@features/places/pages/PlaceSearchPage'))
 
 import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
@@ -145,12 +144,27 @@ function InviteAcceptRedirect() {
  * 메인 App 컴포넌트
  * @returns {JSX.Element}
  */
-function App() {
-  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
+	function App() {
+	  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
+	  const { customerRole, _hasHydrated } = useAuth((state) => ({
+	    customerRole: state.customerRole,
+	    _hasHydrated: state._hasHydrated,
+	  }))
+	  const { accessibilityMode, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
+	    accessibilityMode: state.accessibilityMode,
+	    ensureDefaultForRole: state.ensureDefaultForRole,
+	  }))
 
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+	  useEffect(() => {
+	    if (!_hasHydrated) return
+	    ensureDefaultForRole(customerRole)
+	  }, [_hasHydrated, customerRole, ensureDefaultForRole])
+
+	  const theme = useMemo(() => createAppTheme({ accessibilityMode }), [accessibilityMode])
+	
+	  return (
+	    <ThemeProvider theme={theme}>
+	      <CssBaseline />
       <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <FamilyProvider>
@@ -169,7 +183,7 @@ function App() {
                 <Route path={ROUTE_PATHS.inviteCodeEntry} element={<InviteCodeEntryPage />} />
                 {/* 레거시 경로 호환: /invites/accept → /invites/enter 리다이렉트 (query params 보존) */}
                 <Route path="/invites/accept" element={<InviteAcceptRedirect />} />
-                <Route path={ROUTE_PATHS.inviteAccept} element={<FamilyJoin />} />
+                <Route path={ROUTE_PATHS.inviteAccept} element={<Navigate to={ROUTE_PATHS.inviteCodeEntry} replace />} />
 
                 {/* 보호된 페이지: 인증 필요 */}
                 <Route
@@ -205,11 +219,26 @@ function App() {
                   element={<PrivateRoute element={<PrescriptionDetailPage />} />}
                 />
 
-                {/* 기존 라우트 호환성 유지 (리다이렉트) */}
+                {/* 약물 직접 등록 (복구) */}
                 <Route
                   path={ROUTE_PATHS.medicationAdd}
-                  element={<Navigate to={ROUTE_PATHS.prescriptionAdd} replace />}
+                  element={<PrivateRoute element={<MedicationAddPage />} />}
                 />
+                
+                {/* AI 음성 명령 호환성 (Legacy Path Support) */}
+                <Route
+                  path="/medication/register"
+                  element={<Navigate to={ROUTE_PATHS.medicationAdd} replace />}
+                />
+                <Route
+                  path="/report/preview"
+                  element={<Navigate to={ROUTE_PATHS.disease} replace />}
+                />
+                <Route
+                  path="/disease/register"
+                  element={<Navigate to={ROUTE_PATHS.disease} replace />}
+                />
+
                 <Route
                   path={ROUTE_PATHS.medicationEdit}
                   element={<PrivateRoute element={<MedicationEditPage />} />}
@@ -262,13 +291,6 @@ function App() {
                   path={ROUTE_PATHS.ocrScan}
                   element={<PrivateRoute element={<PrescriptionScanPage />} />}
                 />
-
-                {/* 상담 */}
-                <Route
-                  path={ROUTE_PATHS.counsel}
-                  element={<PrivateRoute element={<DoctorCounselPage />} />}
-                />
-
                 {/* 설정 */}
                 <Route
                   path={ROUTE_PATHS.settings}
@@ -317,7 +339,7 @@ function App() {
                 {/* 채팅 */}
                 <Route
                   path={ROUTE_PATHS.chatList}
-                  element={<PrivateRoute element={<DoctorChatListPage />} />}
+                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.familyChat} replace />} />}
                 />
                 <Route
                   path={ROUTE_PATHS.chatConversation}
@@ -355,7 +377,11 @@ function App() {
                   element={<PrivateRoute element={<WeeklyStatsPage />} />}
                 />
 
-                <Route path="/ws-test" element={<WsTestPage />} />
+                {/* 병원/약국 검색(지도) */}
+                <Route
+                  path={ROUTE_PATHS.places}
+                  element={<PrivateRoute element={<PlaceSearchPage />} />}
+                />
 
                 {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}
                 <Route path={ROUTE_PATHS.root} element={<HomeRedirect />} />

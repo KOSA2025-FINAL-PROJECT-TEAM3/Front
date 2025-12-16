@@ -11,7 +11,7 @@ import { useInviteStore } from '@features/family/stores/inviteStore'
 import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { ROUTE_PATHS } from '@config/routes.config'
-import styles from './KakaoCallback.module.scss'
+import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 
 export const KakaoCallbackPage = () => {
   const navigate = useNavigate()
@@ -106,25 +106,44 @@ export const KakaoCallbackPage = () => {
   }, [isAuthenticated, customerRole, user, navigate])
 
   return (
-    <div className={styles.container}>
-      <div className={styles.box}>
-        <div className={styles.logo}>💊</div>
-        <h1 className={styles.title}>뭐냑? (AMA...Pill)</h1>
-        <p className={styles.status}>{status}</p>
-        {errorMessage && (
-          <>
-            <p className={styles.error}>{errorMessage}</p>
-            <button
-              type="button"
-              className={styles.backButton}
-              onClick={() => navigate(ROUTE_PATHS.login, { replace: true })}
-            >
-              로그인 화면으로 돌아가기
-            </button>
-          </>
-        )}
-      </div>
-    </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: 3,
+        background: 'linear-gradient(135deg, #f7f9fc, #eef2ff)',
+      }}
+    >
+      <Container maxWidth="sm" sx={{ maxWidth: 460 }}>
+        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3, textAlign: 'center' }}>
+          <Stack spacing={2}>
+            <Typography component="div" sx={{ fontSize: 42 }}>
+              💊
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 900 }}>
+              뭐냑? (AMA...Pill)
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {status}
+            </Typography>
+
+            {errorMessage ? (
+              <Alert
+                severity="error"
+                action={
+                  <Button color="inherit" size="small" onClick={() => navigate(ROUTE_PATHS.login, { replace: true })}>
+                    로그인 화면으로
+                  </Button>
+                }
+              >
+                {errorMessage}
+              </Alert>
+            ) : null}
+          </Stack>
+        </Paper>
+      </Container>
+    </Box>
   )
 }
 

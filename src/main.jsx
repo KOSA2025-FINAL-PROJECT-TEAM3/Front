@@ -1,8 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import './styles/tailwind.css'
-import './styles/base.scss'
+import './styles/base.css'
 import App from './App'
 import logger from '@core/utils/logger'
 import { injectStore } from '@core/interceptors/authInterceptor'
@@ -38,4 +37,3 @@ createRoot(rootElement).render(
     </QueryClientProvider>
   </StrictMode>
 )
-

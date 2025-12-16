@@ -146,7 +146,7 @@ hotfix/#20-payment-error-recovery-kim
 | 폴더명 | lowercase | `components`, `hooks`, `utils` |
 | 컴포넌트 파일 | PascalCase | `Button.jsx`, `UserCard.jsx` |
 | 유틸리티 파일 | camelCase | `validation.js`, `formatting.js` |
-| CSS Module | camelCase + `.module.scss` | `Button.module.scss` |
+| CSS Module | camelCase + `.module.css` | `Button.module.css` |
 
 ### 코드 포맷팅
 
@@ -226,7 +226,7 @@ export const getUserData = async (userId) => {
  */
 
 import classNames from 'classnames'
-import styles from './Button.module.scss'
+import styles from './Button.module.css'
 
 /**
  * 재사용 가능한 버튼 컴포넌트
@@ -262,9 +262,9 @@ export default Button
 components/
 ├── common/          # 재사용 가능한 기본 컴포넌트
 │   ├── Button.jsx
-│   ├── Button.module.scss
+│   ├── Button.module.css
 │   ├── Input.jsx
-│   ├── Input.module.scss
+│   ├── Input.module.css
 │   └── index.js
 ├── layout/          # 레이아웃 컴포넌트
 │   ├── Header.jsx
@@ -275,8 +275,8 @@ components/
 
 ### Tailwind + SCSS 사용 원칙
 
-- 전역 토큰과 공통 유틸리티는 `tailwind.config.js`와 `src/styles/tailwind.css`에서 정의한다.
-- 레이아웃/상세 스타일은 `.module.scss` 안에서 작성하되, 반복되는 여백·색상은 Tailwind utility 클래스를 우선 사용한다.
+- 전역 토큰은 MUI Theme(`src/styles/theme.js`)에서 정의하고, 기본 리셋/베이스 스타일은 `src/styles/base.css`에서 관리한다.
+- 레이아웃/상세 스타일은 `.module.css` 안에서 작성한다. (Tailwind는 제거됨)
 - 한 컴포넌트에서 Tailwind 클래스를 쓰는 경우, `className`에 utility를 바로 적고 SCSS 변수/믹스인은 캡슐화가 필요한 부분(애니메이션, 복잡한 상태)에만 사용한다.
 - SCSS 모듈 클래스는 `styles.container`처럼 네임스페이스화하고, Tailwind utility를 함께 사용할 때는 `classNames(styles.container, 'flex gap-4')` 패턴을 따른다.
 

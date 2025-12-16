@@ -5,19 +5,23 @@
  * - 자동으로 auth store와 notification store에서 데이터 가져옴
  */
 
-import { useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { AppBar, Badge, Box, Button, IconButton, Stack, Tab, Tabs, Toolbar, Typography } from '@mui/material'
+import NotificationsIcon from '@mui/icons-material/Notifications'
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { getCustomerRoleLabel } from '@features/auth/utils/roleUtils'
-import styles from './Header.module.scss'
 
 /**
  * 상단 헤더 컴포넌트
  * @returns {JSX.Element} 헤더 컴포넌트
  */
-export const Header = () => {
+export const Header = ({ navItems = [] }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, customerRole, logout } = useAuth((state) => ({
     user: state.user,
     customerRole: state.customerRole,
@@ -25,8 +29,23 @@ export const Header = () => {
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
 
+  const activeNavPath = useMemo(() => {
+    if (!navItems?.length) return ''
+    const pathname = location.pathname || ''
+    const matched = navItems.find((item) => {
+      if (!item?.path) return false
+      return pathname === item.path || pathname.startsWith(item.path + '/')
+    })
+
+    return matched?.path || navItems[0].path
+  }, [location.pathname, navItems])
+
   const handleNotificationClick = () => {
     navigate(ROUTE_PATHS.notifications)
+  }
+
+  const handleMoreClick = () => {
+    navigate(ROUTE_PATHS.more)
   }
 
   // 사용자 이름 가져오기
@@ -36,33 +55,120 @@ export const Header = () => {
   const roleLabel = getCustomerRoleLabel(customerRole)
 
   return (
-    <header className={styles.header}>
-      <div className={styles.headerContainer}>
-        {/* 좌측: 로고 및 앱 이름 */}
-        <div 
-          className={styles.logoSection} 
+    <AppBar
+      position="fixed"
+      elevation={0}
+      sx={{
+        height: 60,
+        bgcolor: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid',
+        borderBottomColor: 'rgba(200, 200, 200, 0.2)',
+        color: 'text.primary',
+        zIndex: 101,
+      }}
+    >
+      <Toolbar sx={{ height: 60, px: { xs: 2, md: 7.5 }, maxWidth: 1400, width: '100%', mx: 'auto' }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1.5}
           onClick={() => navigate(ROUTE_PATHS.root)}
-          style={{ cursor: 'pointer' }}
           role="button"
           tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              navigate(ROUTE_PATHS.root)
+            }
+          }}
+          sx={{ cursor: 'pointer' }}
         >
-          <div className={styles.logoIcon}>💊</div>
-          <span className={styles.appName}>뭐냑? (AMA...Pill)</span>
-        </div>
+          <Box aria-hidden sx={{ fontSize: { xs: 24, md: 32 }, display: 'flex', alignItems: 'center' }}>
+            💊
+          </Box>
+          <Typography sx={{ fontSize: { xs: 18, md: 24 }, fontWeight: 900, letterSpacing: -0.5 }}>
+            뭐냑? (AMA...Pill)
+          </Typography>
+        </Stack>
 
-        {/* 우측: 사용자 정보 및 알림 */}
-        <div className={styles.rightSection}>
-          <div 
-            className={styles.userInfo}
+        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', px: 2 }}>
+          {navItems?.length > 0 && (
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <Box
+                sx={{
+                  bgcolor: '#F1F5F9',
+                  p: 0.5,
+                  borderRadius: 999,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  boxShadow: '0 2px 10px -4px rgba(0,0,0,0.05)',
+                }}
+              >
+                <Tabs
+                  value={activeNavPath}
+                  onChange={(_, next) => navigate(next)}
+                  variant="standard"
+                  TabIndicatorProps={{ style: { display: 'none' } }}
+                  sx={{
+                    minHeight: 40,
+                    '& .MuiTabs-flexContainer': { gap: 0.5 },
+                  }}
+                >
+                  {navItems.map((item) => (
+                    <Tab
+                      key={item.path}
+                      label={item.label}
+                      value={item.path}
+                      disableRipple
+                      sx={{
+                        minHeight: 40,
+                        minWidth: 88,
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 999,
+                        textTransform: 'none',
+                        fontWeight: 900,
+                        color: 'text.secondary',
+                        '&.Mui-selected': {
+                          bgcolor: 'common.white',
+                          color: 'primary.main',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                        },
+                      }}
+                    />
+                  ))}
+                </Tabs>
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        <Stack direction="row" alignItems="center" spacing={{ xs: 1.25, md: 2.5 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
             onClick={() => navigate(ROUTE_PATHS.settingsProfile)}
-            style={{ cursor: 'pointer' }}
             role="button"
             tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                navigate(ROUTE_PATHS.settingsProfile)
+              }
+            }}
+            sx={{ cursor: 'pointer' }}
           >
-            <span className={styles.userName}>{userName} 님</span>
-            <span className={styles.userRole}>({roleLabel})</span>
-            <button 
-              className={styles.logoutBtn} 
+            <Typography sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 800 }}>
+              {userName} 님
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 10, md: 12 }, color: 'text.secondary' }}>
+              ({roleLabel})
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
               onClick={async (e) => {
                 e.stopPropagation()
                 if (window.confirm('로그아웃 하시겠습니까?')) {
@@ -70,24 +176,49 @@ export const Header = () => {
                   navigate(ROUTE_PATHS.login, { replace: true })
                 }
               }}
+              sx={{ borderRadius: 999, fontWeight: 800 }}
             >
               로그아웃
-            </button>
-          </div>
+            </Button>
+          </Stack>
 
-          {unreadCount > 0 && (
-            <button
-              type="button"
-              className={styles.notificationBadge}
-              onClick={handleNotificationClick}
-              aria-label={`읽지 않은 알림 ${unreadCount}개`}
+          <IconButton
+            onClick={handleNotificationClick}
+            aria-label={unreadCount > 0 ? `읽지 않은 알림 ${unreadCount}개` : '알림'}
+            sx={{
+              width: { xs: 24, md: 28 },
+              height: { xs: 24, md: 28 },
+              bgcolor: 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)',
+              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)',
+              color: 'common.white',
+              boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)',
+              '&:hover': { bgcolor: 'transparent', background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%)' },
+            }}
+          >
+            <Badge
+              color="error"
+              overlap="circular"
+              badgeContent={unreadCount > 0 ? (unreadCount > 9 ? '9+' : unreadCount) : null}
             >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </button>
-          )}
-        </div>
-      </div>
-    </header>
+              <NotificationsIcon sx={{ fontSize: { xs: 16, md: 18 } }} />
+            </Badge>
+          </IconButton>
+
+          <IconButton
+            onClick={handleMoreClick}
+            aria-label="더보기"
+            sx={{
+              width: { xs: 24, md: 28 },
+              height: { xs: 24, md: 28 },
+              bgcolor: 'rgba(0, 0, 0, 0.06)',
+              '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.1)' },
+            }}
+          >
+            <MoreHorizIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+          </IconButton>
+        </Stack>
+      </Toolbar>
+    </AppBar>
   )
 }
 

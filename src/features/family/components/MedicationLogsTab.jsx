@@ -1,6 +1,23 @@
 import { useEffect, useState, useCallback } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '@mui/material'
 import { familyApiClient } from '@core/services/api/familyApiClient'
-import styles from './MedicationLogsTab.module.scss'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import logger from '@core/utils/logger'
 
@@ -128,17 +145,20 @@ export const MedicationLogsTab = ({ userId }) => {
 
   if (loading) {
     return (
-      <section className={styles.logsTab}>
-        <p className={styles.loading}>복약 기록을 불러오는 중입니다...</p>
-      </section>
+      <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+        <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="center">
+          <CircularProgress size={18} />
+          <Typography variant="body2" color="text.secondary">
+            복약 기록을 불러오는 중입니다...
+          </Typography>
+        </Stack>
+      </Paper>
     )
   }
 
   if (error) {
     return (
-      <section className={styles.logsTab}>
-        <p className={styles.error}>{error}</p>
-      </section>
+      <Alert severity="error">{error}</Alert>
     )
   }
 
@@ -147,153 +167,146 @@ export const MedicationLogsTab = ({ userId }) => {
     : ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
 
   return (
-    <section className={styles.logsTab}>
-      <div className={styles.header}>
-        <h3>복약 기록</h3>
-        {statistics && (
-          <div className={styles.stats}>
-            <span className={styles.stat}>
-              <strong style={{ color: '#00B300' }}>{statistics.completedToday || 0}</strong>
-              <small>완료</small>
-            </span>
-            <span className={styles.stat}>
-              <strong style={{ color: '#FF9900' }}>{statistics.pendingToday || 0}</strong>
-              <small>예정</small>
-            </span>
-            <span className={styles.stat}>
-              <strong style={{ color: '#FF0000' }}>{statistics.missedToday || 0}</strong>
-              <small>미복용</small>
-            </span>
-          </div>
-        )}
-      </div>
+    <Stack component="section" spacing={2.5} sx={{ py: 2 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ flexWrap: 'wrap' }}>
+        <Typography variant="h6" sx={{ fontWeight: 900 }}>
+          복약 기록
+        </Typography>
+        {statistics ? (
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+            <Chip label={`완료 ${statistics.completedToday || 0}`} sx={{ bgcolor: 'success.50', color: 'success.dark', fontWeight: 900 }} />
+            <Chip label={`예정 ${statistics.pendingToday || 0}`} sx={{ bgcolor: 'warning.50', color: 'warning.dark', fontWeight: 900 }} />
+            <Chip label={`미복용 ${statistics.missedToday || 0}`} sx={{ bgcolor: 'error.50', color: 'error.dark', fontWeight: 900 }} />
+          </Stack>
+        ) : null}
+      </Stack>
 
-      <div className={styles.filters}>
-        <input
-          type="date"
-          value={filters.date}
-          onChange={handleDateChange}
-          className={styles.filterInput}
-        />
-        <select
-          value={filters.status}
-          onChange={handleStatusChange}
-          className={styles.filterSelect}
-        >
-          <option value="">상태 선택 (전체)</option>
-          <option value="completed">완료</option>
-          <option value="missed">미복용</option>
-          <option value="pending">예정</option>
-        </select>
-        <button
-          type="button"
-          className={styles.sortButton}
-          onClick={handleSortToggle}
-          style={{
-            marginLeft: 'auto',
-            padding: '6px 12px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: '#fff',
-            cursor: 'pointer',
-            fontSize: '14px',
-            color: '#666'
-          }}
-        >
-          {sortOrder === 'desc' ? '최신순 (밤→아침)' : '과거순 (아침→밤)'}
-        </button>
-      </div>
+      <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+        <Stack direction="row" spacing={1.5} sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+          <TextField type="date" value={filters.date} onChange={handleDateChange} size="small" InputLabelProps={{ shrink: true }} />
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel id="med-log-status-label">상태</InputLabel>
+            <Select
+              labelId="med-log-status-label"
+              value={filters.status}
+              label="상태"
+              onChange={handleStatusChange}
+            >
+              <MenuItem value="">전체</MenuItem>
+              <MenuItem value="completed">완료</MenuItem>
+              <MenuItem value="missed">미복용</MenuItem>
+              <MenuItem value="pending">예정</MenuItem>
+            </Select>
+          </FormControl>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="outlined" onClick={handleSortToggle} sx={{ fontWeight: 900 }}>
+            {sortOrder === 'desc' ? '최신순 (밤→아침)' : '과거순 (아침→밤)'}
+          </Button>
+        </Stack>
+      </Paper>
 
       {logs.length === 0 ? (
-        <p className={styles.empty}>복약 기록이 없습니다.</p>
+        <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', bgcolor: 'grey.50' }}>
+          <Typography variant="body2" color="text.secondary">
+            복약 기록이 없습니다.
+          </Typography>
+        </Paper>
       ) : (
-        <div className={styles.accordionContainer}>
+        <Stack spacing={1.5}>
           {SECTION_ORDER.map((sectionKey) => {
             const SECTION_LABELS = {
               MORNING: { label: '아침', sub: '05:00 - 11:00' },
               LUNCH: { label: '점심', sub: '11:00 - 17:00' },
               DINNER: { label: '저녁', sub: '17:00 - 21:00' },
-              NIGHT: { label: '취침 전', sub: '21:00 - 05:00' }
-            };
+              NIGHT: { label: '취침 전', sub: '21:00 - 05:00' },
+            }
 
-            const sectionLogs = logs.filter(log => getTimeCategory(log.scheduledTime) === sectionKey);
-            if (sectionLogs.length === 0) return null;
+            const sectionLogs = logs.filter((log) => getTimeCategory(log.scheduledTime) === sectionKey)
+            if (sectionLogs.length === 0) return null
 
-            // Sort logs by time
             sectionLogs.sort((a, b) => {
-              const dateA = new Date(a.scheduledTime);
-              const dateB = new Date(b.scheduledTime);
-              return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-            });
+              const dateA = new Date(a.scheduledTime)
+              const dateB = new Date(b.scheduledTime)
+              return sortOrder === 'desc' ? dateB - dateA : dateA - dateB
+            })
 
-            const isExpanded = expandedSections[sectionKey];
+            const expanded = Boolean(expandedSections[sectionKey])
 
             return (
-              <div key={sectionKey} className={styles.accordion}>
-                <div
-                  className={styles.accordionHeader}
-                  onClick={() => toggleSection(sectionKey)}
-                >
-                  <div className={styles.headerTitle}>
-                    <strong>{SECTION_LABELS[sectionKey].label}</strong>
-                    <span>{SECTION_LABELS[sectionKey].sub}</span>
-                  </div>
-                  <ExpandMoreIcon
-                    className={`${styles.accordionIcon} ${isExpanded ? styles.expanded : ''}`}
-                  />
-                </div>
+              <Accordion
+                key={sectionKey}
+                expanded={expanded}
+                onChange={() => toggleSection(sectionKey)}
+                disableGutters
+                elevation={0}
+                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden', '&:before': { display: 'none' } }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ bgcolor: 'common.white' }}>
+                  <Stack direction="row" spacing={1} alignItems="baseline">
+                    <Typography sx={{ fontWeight: 900 }}>{SECTION_LABELS[sectionKey].label}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {SECTION_LABELS[sectionKey].sub}
+                    </Typography>
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0, bgcolor: 'common.white', borderTop: '1px solid', borderColor: 'divider' }}>
+                  {sectionLogs.map((log, index) => {
+                    const scheduledTime = new Date(log.scheduledTime)
+                    const completedTime = log.completedTime ? new Date(log.completedTime) : null
+                    const time = scheduledTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                    const date = scheduledTime.toLocaleDateString('ko-KR')
+                    const statusColor = getStatusColor(log.status)
 
-                {isExpanded && (
-                  <div className={styles.accordionContent}>
-                    <ul className={styles.logsList}>
-                      {sectionLogs.map((log, index) => {
-                        const scheduledTime = new Date(log.scheduledTime)
-                        const completedTime = log.completedTime ? new Date(log.completedTime) : null
-                        const time = scheduledTime.toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-                        const date = scheduledTime.toLocaleDateString('ko-KR')
+                    return (
+                      <Box
+                        key={`${log.id}-${index}`}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 2,
+                          px: 2,
+                          py: 1.5,
+                          borderLeft: '4px solid',
+                          borderLeftColor: statusColor,
+                          borderBottom: index === sectionLogs.length - 1 ? 'none' : '1px solid',
+                          borderBottomColor: 'grey.100',
+                        }}
+                      >
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="caption" color="text.disabled">
+                            {date}
+                          </Typography>
+                          <Stack direction="row" spacing={1.25} alignItems="center" sx={{ mt: 0.25, flexWrap: 'wrap' }}>
+                            <Typography variant="body2" sx={{ fontWeight: 900, color: 'text.secondary' }}>
+                              {time}
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                              {log.medicationName || '알 수 없는 약'}
+                            </Typography>
+                          </Stack>
+                        </Box>
 
-                        return (
-                          <li
-                            key={`${log.id}-${index}`}
-                            className={styles.logRow}
-                            style={{ borderLeftColor: getStatusColor(log.status) }}
-                          >
-                            <div className={styles.logInfo}>
-                              <span className={styles.date}>{date}</span>
-                              <span className={styles.time}>{time}</span>
-                              <span className={styles.medicationName}>{log.medicationName || '알 수 없는 약'}</span>
-                            </div>
-                            <div className={styles.logDetails}>
-                              {completedTime && (
-                                <span className={styles.completedTime}>
-                                  {completedTime.toLocaleTimeString('ko-KR', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </span>
-                              )}
-                              <span
-                                className={styles.status}
-                                style={{ color: getStatusColor(log.status) }}
-                              >
-                                {getStatusLabel(log.status)}
-                              </span>
-                            </div>
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            );
+                        <Stack direction="row" spacing={1.25} alignItems="center" sx={{ flexShrink: 0 }}>
+                          {completedTime ? (
+                            <Typography variant="caption" color="text.secondary">
+                              {completedTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            </Typography>
+                          ) : null}
+                          <Typography variant="body2" sx={{ fontWeight: 900, color: statusColor, minWidth: 64, textAlign: 'right' }}>
+                            {getStatusLabel(log.status)}
+                          </Typography>
+                        </Stack>
+                      </Box>
+                    )
+                  })}
+                </AccordionDetails>
+              </Accordion>
+            )
           })}
-        </div>
+        </Stack>
       )}
-    </section>
+    </Stack>
   )
 }
 

@@ -1,4 +1,5 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
 /**
  * Chat API Client
@@ -12,7 +13,7 @@ import ApiClient from './ApiClient'
 class ChatApiClient extends ApiClient {
   constructor() {
     super({
-      baseURL: import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8082',
+      baseURL: envConfig.CHAT_API_URL || envConfig.API_BASE_URL,
       basePath: '/api/chat',
     })
   }

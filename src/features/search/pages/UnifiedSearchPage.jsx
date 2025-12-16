@@ -5,12 +5,11 @@
  */
 
 import { useEffect, useState } from 'react'
+import { Box, Container, Tab, Tabs, Typography } from '@mui/material'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Tabs } from '@shared/components/ui/Tabs'
 import { SymptomSearchTab } from '@features/search/components/SymptomSearchTab'
 import { PillSearchTab } from '@features/search/components/PillSearchTab'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore' // [Voice]
-import styles from './UnifiedSearchPage.module.scss'
 
 /**
  * 통합 검색 페이지 컴포넌트
@@ -19,6 +18,7 @@ import styles from './UnifiedSearchPage.module.scss'
 export const UnifiedSearchPage = () => {
   const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
   const [initialTab, setInitialTab] = useState('symptom')
+  const [activeTab, setActiveTab] = useState('symptom')
 
   useEffect(() => {
     // 실시간으로 대기 중인 액션 감지하여 탭 전환
@@ -32,32 +32,47 @@ export const UnifiedSearchPage = () => {
     }
   }, [pendingAction])
 
-  const tabs = [
-    {
-      id: 'symptom',
-      label: '증상 검색',
-      content: <SymptomSearchTab />,
-    },
-    {
-      id: 'pill',
-      label: '알약 검색',
-      content: <PillSearchTab />,
-    },
-  ]
+  useEffect(() => {
+    setActiveTab(initialTab)
+  }, [initialTab])
 
-  // initialTab이 변경되면 Tabs를 다시 렌더링하도록 key를 부여
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'pill':
+        return <PillSearchTab />
+      case 'symptom':
+      default:
+        return <SymptomSearchTab />
+    }
+  }
+
   return (
     <MainLayout>
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <h1>검색</h1>
-          <p>증상이나 알약을 검색하여 정보를 확인하세요.</p>
-        </header>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h5" sx={{ fontWeight: 900 }}>
+            검색
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            증상이나 알약을 검색하여 정보를 확인하세요.
+          </Typography>
+        </Box>
 
-        <div className={styles.tabsContainer}>
-          <Tabs key={initialTab} tabs={tabs} defaultTab={initialTab} />
-        </div>
-      </div>
+        <Box>
+          <Tabs
+            value={activeTab}
+            onChange={(_, nextValue) => setActiveTab(nextValue)}
+            aria-label="검색 탭"
+          >
+            <Tab value="symptom" label="증상 검색" />
+            <Tab value="pill" label="알약 검색" />
+          </Tabs>
+
+          <Box sx={{ pt: 2 }}>
+            {renderTabContent()}
+          </Box>
+        </Box>
+      </Container>
     </MainLayout>
   )
 }

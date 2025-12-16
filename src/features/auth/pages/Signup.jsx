@@ -6,12 +6,12 @@
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { USER_ROLES } from '@config/constants'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { Alert, Box, Button, Container, Paper, Radio, RadioGroup, FormControlLabel, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useInviteStore } from '@features/family/stores/inviteStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
-import styles from './Signup.module.scss'
 
 const DEFAULT_USER_ROLE = 'ROLE_USER'
 
@@ -46,6 +46,7 @@ export const Signup = () => {
     register,
     handleSubmit,
     watch,
+    control,
     setError,
     clearErrors,
     formState: { errors },
@@ -119,130 +120,144 @@ export const Signup = () => {
   }
 
   return (
-    <div className={styles.signupContainer}>
-      <div className={styles.signupBox}>
-        <div className={styles.header}>
-          <div className={styles.logo}>💊</div>
-          <h1 className={styles.title}>뭐냑? (AMA...Pill)</h1>
-          <p className={styles.subtitle}>새 계정 만들기</p>
-        </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: 3,
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%)',
+      }}
+    >
+      <Container maxWidth="sm" sx={{ maxWidth: 460 }}>
+        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3 }}>
+          <Stack spacing={3} textAlign="center">
+            <Box>
+              <Typography component="div" sx={{ fontSize: 44 }}>
+                💊
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, mt: 1 }}>
+                뭐냑? (AMA...Pill)
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                새 계정 만들기
+              </Typography>
+            </Box>
 
-        <form className={styles.form} onSubmit={handleSubmit(handleSignup)}>
-          {combinedError && <div className={styles.errorMessage}>{combinedError}</div>}
+            <Stack component="form" spacing={2} onSubmit={handleSubmit(handleSignup)}>
+              {combinedError ? <Alert severity="error">{combinedError}</Alert> : null}
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>이메일</label>
-            <input
-              id="email"
-              type="email"
-              className={styles.input}
-              placeholder="your@email.com"
-              {...register('email', {
-                required: '이메일을 입력해 주세요',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: '유효한 이메일 형식이 아닙니다',
-                },
-              })}
-              onFocus={handleFocus}
-              disabled={loading}
-            />
-            {errors.email && <p className={styles.fieldError}>{errors.email.message}</p>}
-          </div>
+              <TextField
+                label="이메일"
+                type="email"
+                placeholder="your@email.com"
+                disabled={loading}
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message || ''}
+                onFocus={handleFocus}
+                {...register('email', {
+                  required: '이메일을 입력해 주세요',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: '유효한 이메일 형식이 아닙니다',
+                  },
+                })}
+                fullWidth
+              />
 
-          <div className={styles.formGroup}>
-            <label htmlFor="name" className={styles.label}>이름</label>
-            <input
-              id="name"
-              type="text"
-              className={styles.input}
-              placeholder="홍길동"
-              {...register('name', {
-                required: '이름을 입력해 주세요',
-                minLength: { value: 2, message: '이름은 최소 2자 이상이어야 합니다' },
-              })}
-              onFocus={handleFocus}
-              disabled={loading}
-            />
-            {errors.name && <p className={styles.fieldError}>{errors.name.message}</p>}
-          </div>
+              <TextField
+                label="이름"
+                placeholder="홍길동"
+                disabled={loading}
+                error={Boolean(errors.name)}
+                helperText={errors.name?.message || ''}
+                onFocus={handleFocus}
+                {...register('name', {
+                  required: '이름을 입력해 주세요',
+                  minLength: { value: 2, message: '이름은 최소 2자 이상이어야 합니다' },
+                })}
+                fullWidth
+              />
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>비밀번호</label>
-            <input
-              id="password"
-              type="password"
-              className={styles.input}
-              placeholder="최소 6자 이상"
-              {...register('password', {
-                required: '비밀번호를 입력해 주세요',
-                minLength: { value: 6, message: '비밀번호는 최소 6자 이상이어야 합니다' },
-              })}
-              onFocus={handleFocus}
-              disabled={loading}
-            />
-            {errors.password && <p className={styles.fieldError}>{errors.password.message}</p>}
-          </div>
+              <TextField
+                label="비밀번호"
+                type="password"
+                placeholder="최소 6자 이상"
+                disabled={loading}
+                error={Boolean(errors.password)}
+                helperText={errors.password?.message || ''}
+                onFocus={handleFocus}
+                {...register('password', {
+                  required: '비밀번호를 입력해 주세요',
+                  minLength: { value: 6, message: '비밀번호는 최소 6자 이상이어야 합니다' },
+                })}
+                fullWidth
+              />
 
-          <div className={styles.formGroup}>
-            <label htmlFor="passwordConfirm" className={styles.label}>비밀번호 확인</label>
-            <input
-              id="passwordConfirm"
-              type="password"
-              className={styles.input}
-              placeholder="비밀번호를 다시 입력해 주세요"
-              {...register('passwordConfirm', {
-                required: '비밀번호를 다시 입력해 주세요',
-                validate: (value) => value === passwordValue || '비밀번호가 일치하지 않습니다',
-              })}
-              onFocus={handleFocus}
-              disabled={loading}
-            />
-            {errors.passwordConfirm && (
-              <p className={styles.fieldError}>{errors.passwordConfirm.message}</p>
-            )}
-          </div>
+              <TextField
+                label="비밀번호 확인"
+                type="password"
+                placeholder="비밀번호를 다시 입력해 주세요"
+                disabled={loading}
+                error={Boolean(errors.passwordConfirm)}
+                helperText={errors.passwordConfirm?.message || ''}
+                onFocus={handleFocus}
+                {...register('passwordConfirm', {
+                  required: '비밀번호를 다시 입력해 주세요',
+                  validate: (value) => value === passwordValue || '비밀번호가 일치하지 않습니다',
+                })}
+                fullWidth
+              />
 
-          <div className={styles.formGroup}>
-            <span className={styles.label}>역할 선택</span>
-            {isInviteSignup && (
-              <p className={styles.inviteInfo}>
-                초대 링크를 통해 가입하시면 역할이 자동으로 설정됩니다.
-              </p>
-            )}
-            <div className={styles.roleButtons}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  value={USER_ROLES.SENIOR}
-                  {...register('customerRole')}
-                  disabled={loading || isInviteSignup}
+              <Box textAlign="left">
+                <Typography variant="caption" color="text.secondary">
+                  역할 선택
+                </Typography>
+                {isInviteSignup ? (
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    초대 링크를 통해 가입하시면 역할이 자동으로 설정됩니다.
+                  </Alert>
+                ) : null}
+
+                <Controller
+                  name="customerRole"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      sx={{ mt: 1 }}
+                    >
+                      <FormControlLabel
+                        value={USER_ROLES.SENIOR}
+                        control={<Radio disabled={loading || isInviteSignup} />}
+                        label="어르신(부모)"
+                      />
+                      <FormControlLabel
+                        value={USER_ROLES.CAREGIVER}
+                        control={<Radio disabled={loading || isInviteSignup} />}
+                        label="보호자(자녀)"
+                      />
+                    </RadioGroup>
+                  )}
                 />
-                <span className={styles.radioButton}>어르신(부모)</span>
-              </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  value={USER_ROLES.CAREGIVER}
-                  {...register('customerRole')}
-                  disabled={loading || isInviteSignup}
-                />
-                <span className={styles.radioButton}>보호자(자녀)</span>
-              </label>
-            </div>
-          </div>
+              </Box>
 
-          <button type="submit" className={styles.signupButton} disabled={loading}>
-            {loading ? '가입 중...' : '회원가입'}
-          </button>
-        </form>
+              <Button type="submit" variant="contained" disabled={loading} sx={{ py: 1.3, fontWeight: 900 }}>
+                {loading ? '가입 중...' : '회원가입'}
+              </Button>
+            </Stack>
 
-        <div className={styles.loginLink}>
-          이미 계정이 있으신가요?{' '}
-          <Link to={ROUTE_PATHS.login} className={styles.link}>로그인</Link>
-        </div>
-      </div>
-    </div>
+            <Typography variant="body2" color="text.secondary">
+              이미 계정이 있으신가요?{' '}
+              <Link to={ROUTE_PATHS.login} style={{ fontWeight: 800 }}>
+                로그인
+              </Link>
+            </Typography>
+          </Stack>
+        </Paper>
+      </Container>
+    </Box>
   )
 }
 

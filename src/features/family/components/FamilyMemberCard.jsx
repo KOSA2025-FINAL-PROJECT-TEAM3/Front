@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types'
-import styles from './FamilyMemberCard.module.scss'
+import { Avatar, Box, Button, IconButton, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material'
+import SettingsIcon from '@mui/icons-material/Settings'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 const roleLabels = {
   SENIOR: '어르신(부모)',
@@ -20,7 +22,7 @@ export const FamilyMemberCard = ({
   groupOwnerId,
   canManageNotifications,
 }) => {
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false)
+  const [roleAnchorEl, setRoleAnchorEl] = useState(null)
 
   if (!member) return null
   const initials = member.name?.[0] ?? 'U'
@@ -48,75 +50,127 @@ export const FamilyMemberCard = ({
 
   const handleRoleToggle = () => {
     if (!canChangeRole || isRoleChanging) return
-    setShowRoleDropdown(false)
+    setRoleAnchorEl(null)
     onRoleChange?.(member.id, oppositeRole)
   }
 
   return (
-    <div className={styles.card}>
-      <div className={styles.avatarWrapper}>
-        <div className={styles.avatar} style={{ backgroundColor: member.avatarColor || '#c7d2fe' }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        bgcolor: 'common.white',
+        borderRadius: 3.5,
+        p: 2,
+        borderColor: 'divider',
+      }}
+    >
+      <Box sx={{ position: 'relative', flexShrink: 0 }}>
+        <Avatar
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: 3,
+            bgcolor: member.avatarColor || '#c7d2fe',
+            color: 'text.primary',
+            fontSize: 18,
+            fontWeight: 900,
+          }}
+        >
           {initials}
-        </div>
-        {isOnline && <span className={styles.onlineDot} aria-label="온라인" />}
-      </div>
-      <div className={styles.info}>
-        <div className={styles.topRow}>
-          <span className={styles.name}>{member.name}</span>
-          <div className={styles.roleContainer}>
-            {canChangeRole && onRoleChange ? (
-              <button
+        </Avatar>
+        {isOnline ? (
+          <Box
+            aria-label="온라인"
+            sx={{
+              position: 'absolute',
+              right: -2,
+              bottom: -2,
+              width: 14,
+              height: 14,
+              borderRadius: '50%',
+              border: '2px solid',
+              borderColor: 'common.white',
+              bgcolor: 'success.main',
+              boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.25)',
+            }}
+          />
+        ) : null}
+      </Box>
+
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5, flexWrap: 'wrap' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
+            {member.name}
+          </Typography>
+
+          {canChangeRole && onRoleChange ? (
+            <>
+              <Button
                 type="button"
-                className={styles.roleButton}
-                onClick={() => setShowRoleDropdown(!showRoleDropdown)}
+                size="small"
+                variant="outlined"
+                endIcon={<ExpandMoreIcon fontSize="small" />}
+                onClick={(e) => setRoleAnchorEl(e.currentTarget)}
                 disabled={isRoleChanging}
                 title="역할 변경"
+                sx={{ borderRadius: 999, fontWeight: 900 }}
               >
                 {isRoleChanging ? '변경 중...' : roleLabels[currentRole] || currentRole}
-                <span className={styles.dropdownArrow}>▼</span>
-              </button>
-            ) : (
-              <span className={styles.role}>{roleLabels[currentRole] || currentRole}</span>
-            )}
-            {showRoleDropdown && (
-              <div className={styles.roleDropdown}>
-                <button type="button" onClick={handleRoleToggle}>
+              </Button>
+              <Menu
+                anchorEl={roleAnchorEl}
+                open={Boolean(roleAnchorEl)}
+                onClose={() => setRoleAnchorEl(null)}
+              >
+                <MenuItem onClick={handleRoleToggle}>
                   {roleLabels[oppositeRole]}(으)로 변경
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-        <p className={styles.meta}>가입일: {joinedDate}</p>
-        <p className={styles.meta}>{member.email}</p>
-      </div>
-      <div className={styles.actions}>
-        <button type="button" className={styles.detailButton} onClick={() => onDetail?.(member.id)}>
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button type="button" size="small" variant="outlined" disabled sx={{ borderRadius: 999, fontWeight: 900 }}>
+              {roleLabels[currentRole] || currentRole}
+            </Button>
+          )}
+        </Stack>
+
+        <Typography variant="body2" color="text.secondary">
+          가입일: {joinedDate}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {member.email}
+        </Typography>
+      </Box>
+
+      <Stack spacing={1} sx={{ flexShrink: 0, alignItems: 'flex-end' }}>
+        <Button size="small" variant="outlined" onClick={() => onDetail?.(member.id)} sx={{ fontWeight: 900 }}>
           상세
-        </button>
-        {canOpenSettings && (
-          <button
-            type="button"
-            className={styles.settingsButton}
-            onClick={() => onSettings?.(member.userId)}
-            title="알림 설정"
-          >
-            ⚙️
-          </button>
-        )}
-        {showRemove && (
-          <button
-            type="button"
-            className={styles.removeButton}
+        </Button>
+
+        {canOpenSettings ? (
+          <IconButton size="small" onClick={() => onSettings?.(member.userId)} title="알림 설정" aria-label="알림 설정">
+            <SettingsIcon fontSize="small" />
+          </IconButton>
+        ) : null}
+
+        {showRemove ? (
+          <Button
+            size="small"
+            color="error"
+            variant="contained"
             onClick={() => onRemove?.(member.id)}
             disabled={isRemoving}
             aria-busy={isRemoving}
+            sx={{ fontWeight: 900 }}
           >
             {isRemoving ? `${removeLabel} 중...` : removeLabel}
-          </button>
-        )}
-      </div>
-    </div>
+          </Button>
+        ) : null}
+      </Stack>
+    </Paper>
   )
 }
 

@@ -1,5 +1,7 @@
 import React from 'react'
-import styles from './IntakeTimePicker.module.scss'
+import { Box, Button, IconButton, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import NotificationsIcon from '@mui/icons-material/Notifications'
 
 /**
  * 복용 시간 선택 컴포넌트 (이미지 2, 4 참고)
@@ -26,76 +28,95 @@ const IntakeTimePicker = ({
   }
 
   return (
-    <div className={styles.container}>
-      {/* 헤더 */}
-      <div className={styles.header}>
-        <span className={styles.title}>
-          하루 복용 횟수 <span className={styles.count}>{intakeTimes.length}회</span>
-        </span>
-        {hasAlarmToggle && (
-          <div className={styles.alarmToggle}>
-            <span>알림</span>
-            <div className={styles.toggleSwitch}>
-              <input type="checkbox" defaultChecked id="global-alarm" />
-              <label htmlFor="global-alarm" className={styles.slider}></label>
-            </div>
-          </div>
-        )}
-      </div>
+    <Paper sx={{ p: 2.5, borderRadius: 3, mb: 2, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        spacing={2}
+        sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+          하루 복용 횟수{' '}
+          <Box component="span" sx={{ color: 'success.main', fontWeight: 900 }}>
+            {intakeTimes.length}회
+          </Box>
+        </Typography>
+        {hasAlarmToggle ? (
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.secondary' }}>
+            <Typography variant="body2">알림</Typography>
+            <Switch defaultChecked inputProps={{ 'aria-label': '알림 토글' }} />
+          </Stack>
+        ) : null}
+      </Stack>
 
-      {/* 시간 슬롯 리스트 */}
-      <div className={styles.timeList}>
+      <Stack spacing={1.5} sx={{ mb: 2 }}>
         {intakeTimes.map((slot, index) => (
-          <div key={slot.index} className={styles.timeSlot}>
-            <span className={styles.slotNumber}>{index + 1}회</span>
+          <Paper key={slot.index} variant="outlined" sx={{ p: 1.5, borderRadius: 2, bgcolor: 'grey.50' }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ flexWrap: 'wrap' }}>
+              <Typography variant="body2" sx={{ fontWeight: 900, color: 'text.secondary', minWidth: 44 }}>
+                {index + 1}회
+              </Typography>
 
-            <div className={styles.timeInputWrapper}>
-              <input
-                type="time"
-                className={styles.timeInput}
-                value={slot.time}
-                onChange={(e) => onUpdate(index, {
-                  time: e.target.value,
-                  label: formatTimeLabel(e.target.value)
-                })}
-              />
-              <span className={styles.timeLabel}>{slot.label}</span>
-            </div>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1, minWidth: 220 }}>
+                <TextField
+                  type="time"
+                  size="small"
+                  value={slot.time}
+                  onChange={(e) =>
+                    onUpdate(index, {
+                      time: e.target.value,
+                      label: formatTimeLabel(e.target.value),
+                    })
+                  }
+                  sx={{ minWidth: 140 }}
+                />
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  {slot.label}
+                </Typography>
+              </Stack>
 
-            {/* 삭제 버튼 */}
-            {intakeTimes.length > 1 && (
-              <button
-                className={styles.removeBtn}
-                onClick={() => onRemove(index)}
-                aria-label="시간 삭제"
-              >
-                ✕
-              </button>
-            )}
+              {intakeTimes.length > 1 ? (
+                <IconButton size="small" onClick={() => onRemove(index)} aria-label="시간 삭제">
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              ) : null}
 
-            {/* 알림 아이콘 */}
-            {hasAlarmToggle && (
-              <button
-                className={`${styles.alarmBtn} ${slot.hasAlarm ? styles.active : ''}`}
-                onClick={() => onUpdate(index, { hasAlarm: !slot.hasAlarm })}
-                aria-label={slot.hasAlarm ? '알림 끄기' : '알림 켜기'}
-              >
-                🔔
-              </button>
-            )}
-          </div>
+              {hasAlarmToggle ? (
+                <IconButton
+                  size="small"
+                  onClick={() => onUpdate(index, { hasAlarm: !slot.hasAlarm })}
+                  aria-label={slot.hasAlarm ? '알림 끄기' : '알림 켜기'}
+                  sx={{
+                    color: slot.hasAlarm ? 'success.main' : 'text.disabled',
+                    bgcolor: slot.hasAlarm ? 'rgba(0, 200, 83, 0.08)' : 'transparent',
+                    border: '1px solid',
+                    borderColor: slot.hasAlarm ? 'success.200' : 'divider',
+                  }}
+                >
+                  <NotificationsIcon fontSize="small" />
+                </IconButton>
+              ) : null}
+            </Stack>
+          </Paper>
         ))}
-      </div>
+      </Stack>
 
-      {/* 복용 횟수 추가 버튼 */}
-      <button
-        className={styles.addBtn}
+      <Button
+        variant="outlined"
         onClick={onAdd}
         disabled={intakeTimes.length >= 10}
+        fullWidth
+        sx={{
+          py: 1.5,
+          borderStyle: 'dashed',
+          borderRadius: 2,
+          fontWeight: 900,
+        }}
       >
         복용 횟수 추가
-      </button>
-    </div>
+      </Button>
+    </Paper>
   )
 }
 

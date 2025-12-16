@@ -4,9 +4,8 @@
  * - Requires: VITE_KAKAO_CLIENT_ID, VITE_KAKAO_REDIRECT_URI
  */
 
-import classNames from 'classnames'
+import { Box, Button } from '@mui/material'
 import { STORAGE_KEYS } from '@config/constants'
-import styles from './KakaoLoginButton.module.scss'
 import { ROUTE_PATHS } from '@config/routes.config'
 
 const KAKAO_AUTH_BASE = 'https://kauth.kakao.com/oauth/authorize'
@@ -35,7 +34,7 @@ export const KakaoLoginButton = ({
       const msg = '카카오 OAuth 환경 변수가 설정되지 않았습니다.'
       if (typeof onUnavailable === 'function') {
         onUnavailable(msg)
-      } else {
+      } else if (typeof window !== 'undefined') {
         window.alert(msg)
       }
       return
@@ -53,19 +52,59 @@ export const KakaoLoginButton = ({
       state,
     })
     const authUrl = `${KAKAO_AUTH_BASE}?${params.toString()}`
-    window.location.href = authUrl
+    if (typeof window !== 'undefined') window.location.href = authUrl
   }
 
   return (
-    <button
+    <Button
       type="button"
-      className={classNames(styles.kakaoButton, className)}
+      className={className}
       onClick={handleClick}
       disabled={disabled}
+      fullWidth
+      variant="contained"
+      disableElevation
+      startIcon={
+        <Box
+          aria-hidden
+          sx={{
+            width: 22,
+            height: 22,
+            borderRadius: '50%',
+            bgcolor: 'rgba(0,0,0,0.1)',
+            color: '#381e1f',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 900,
+            fontSize: 14,
+            lineHeight: 1,
+          }}
+        >
+          K
+        </Box>
+      }
+      sx={{
+        bgcolor: '#FEE500',
+        color: '#381e1f',
+        borderRadius: 2,
+        py: 1.5,
+        fontWeight: 800,
+        textTransform: 'none',
+        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.08)',
+        '&:hover': {
+          bgcolor: '#FDD835',
+          transform: 'translateY(-1px)',
+          boxShadow: '0 10px 22px rgba(0, 0, 0, 0.12)',
+        },
+        '&:disabled': {
+          opacity: 0.6,
+          boxShadow: 'none',
+        },
+      }}
     >
-      <span className={styles.icon}>K</span>
       {label}
-    </button>
+    </Button>
   )
 }
 
