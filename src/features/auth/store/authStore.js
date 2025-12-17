@@ -170,6 +170,12 @@ export const useAuthStore = create(
           get().setAuthData(response)
         }),
 
+      reactivate: async (token) =>
+        withLoading(set, async () => {
+          const response = await authApiClient.reactivate(token)
+          get().setAuthData(response)
+        }),
+
       selectRole: async (selectedRole) =>
         withLoading(set, async () => {
           const token = get().token
@@ -231,6 +237,17 @@ export const useAuthStore = create(
         // clearAuthState가 initialState(loading: false 포함)로 완전 리셋
         get().clearAuthState()
       },
+
+      withdraw: async () =>
+        withLoading(set, async () => {
+          try {
+            await userApiClient.deleteMe()
+            get().clearAuthState()
+          } catch (error) {
+            logger.error('회원 탈퇴 실패:', error)
+            throw error
+          }
+        }),
     }),
     {
       name: 'amapill-auth-storage-v2',
