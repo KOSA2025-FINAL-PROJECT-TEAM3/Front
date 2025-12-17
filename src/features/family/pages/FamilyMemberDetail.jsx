@@ -9,15 +9,21 @@ import { useFamilyMemberDetail } from '../hooks/useFamilyMemberDetail'
 import MedicationLogsTab from '../components/MedicationLogsTab.jsx'
 import MedicationDetailTab from '../components/MedicationDetailTab.jsx'
 import DietLogsTab from '../components/DietLogsTab.jsx'
+import { useFamilyStore } from '../store/familyStore'
 
 export const FamilyMemberDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { familyLoading, familyInitialized } = useFamilyStore((state) => ({
+    familyLoading: state.loading,
+    familyInitialized: state.initialized,
+  }))
   const { data, isLoading, error } = useFamilyMemberDetail(id)
   const [activeTab, setActiveTab] = useState('medications')
 
   const member = data?.member
   const medications = data?.medications ?? []
+  const pageLoading = familyLoading || !familyInitialized || isLoading
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -42,7 +48,7 @@ export const FamilyMemberDetailPage = () => {
           가족 관리로 돌아가기
         </Button>
 
-        {isLoading && (
+        {pageLoading && (
           <Paper variant="outlined" sx={{ mt: 2, p: 4 }}>
             <Stack spacing={2} alignItems="center">
               <CircularProgress />
@@ -52,12 +58,12 @@ export const FamilyMemberDetailPage = () => {
             </Stack>
           </Paper>
         )}
-        {error ? <Alert severity="error" sx={{ mt: 2 }}>구성원 정보를 불러오지 못했습니다. 다시 시도해 주세요.</Alert> : null}
-        {!isLoading && !error && !member && (
+        {!pageLoading && error ? <Alert severity="error" sx={{ mt: 2 }}>구성원 정보를 불러오지 못했습니다. 다시 시도해 주세요.</Alert> : null}
+        {!pageLoading && !error && !member && (
           <Alert severity="warning" sx={{ mt: 2 }}>구성원을 찾을 수 없습니다.</Alert>
         )}
 
-        {member && (
+        {!pageLoading && member && (
           <>
             <MemberProfileCard member={member} />
 
@@ -78,10 +84,10 @@ export const FamilyMemberDetailPage = () => {
                   <FamilyMedicationList medications={medications} />
                 )}
                 {activeTab === 'medication-logs' && (
-                  <MedicationLogsTab userId={parseInt(id)} />
+                  <MedicationLogsTab userId={Number(member.userId)} />
                 )}
                 {activeTab === 'logs' && (
-                  <DietLogsTab userId={parseInt(id)} />
+                  <DietLogsTab userId={Number(member.userId)} />
                 )}
                 {activeTab === 'detail' && (
                   <MedicationDetailTab userId={member.userId} medications={medications} />

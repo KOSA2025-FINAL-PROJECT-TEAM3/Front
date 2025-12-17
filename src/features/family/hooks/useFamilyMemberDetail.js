@@ -9,10 +9,11 @@ import { familyApiClient } from '@core/services/api/familyApiClient'
 export const useFamilyMemberDetail = (memberId) => {
   const members = useFamilyStore((state) => state.members || [])
   const familyGroups = useFamilyStore((state) => state.familyGroups || [])
+  const initialized = useFamilyStore((state) => state.initialized)
 
   return useQuery({
     queryKey: ['family', 'member', memberId],
-    enabled: Boolean(memberId),
+    enabled: Boolean(memberId) && initialized,
     staleTime: 60 * 1000,
     queryFn: async () => {
       // 1. 현재 선택된 그룹의 members에서 먼저 찾기
