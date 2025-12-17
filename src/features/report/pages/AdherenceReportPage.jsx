@@ -4,7 +4,6 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/mui/BackButton'
 import { Box, Button, Chip, Container, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
-import { reportApiClient } from '@/core/services/api/reportApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { useAuthStore } from '@/features/auth/store/authStore'
@@ -23,118 +22,24 @@ export const AdherenceReportPage = () => {
   const handleDownloadPdf = useCallback(async () => {
     try {
       toast.info('리포트를 생성하고 있습니다...')
-
-      const endDate = new Date()
-      const startDate = new Date()
-      startDate.setDate(endDate.getDate() - 30)
-
-      const startDateStr = startDate.toISOString().slice(0, 10)
-      const endDateStr = endDate.toISOString().slice(0, 10)
-
-      const report = await reportApiClient.getAdherenceReport(startDateStr, endDateStr)
-
-      const printable = window.open('', '_blank', 'noopener,noreferrer')
-      if (!printable) {
-        toast.error('팝업이 차단되어 PDF 출력을 시작할 수 없습니다.')
-        return
-      }
-
-      const title = '복약 순응도 리포트'
-      const overall = Math.round((report?.overallAdherence ?? 0) * 10) / 10
-      const items = Array.isArray(report?.medications) ? report.medications : []
-      const generatedAt = new Date().toLocaleString('ko-KR')
-      const userLabel = report?.userName || user?.name || user?.email || '사용자'
-
-      const rows = items
-        .map((item) => {
-          const rate = Math.round((item?.adherenceRate ?? 0) * 10) / 10
-          const scheduled = item?.totalScheduled ?? 0
-          const completed = item?.completed ?? 0
-          const name = (item?.medicationName || '').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-          return `
-            <tr>
-              <td>${name}</td>
-              <td class="num">${completed}</td>
-              <td class="num">${scheduled}</td>
-              <td class="num">${rate}%</td>
-            </tr>
-          `
-        })
-        .join('')
-
-      printable.document.open()
-      printable.document.write(`<!doctype html>
-        <html lang="ko">
-          <head>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>${title}</title>
-            <style>
-              :root { color-scheme: light; }
-              body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 32px; color: #111; }
-              h1 { font-size: 22px; margin: 0 0 6px; }
-              .meta { color: #555; font-size: 12px; margin-bottom: 18px; }
-              .summary { display: flex; gap: 18px; align-items: baseline; margin: 18px 0 22px; }
-              .pill { display: inline-flex; gap: 8px; align-items: baseline; padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; }
-              .label { color: #666; font-size: 12px; }
-              .value { font-weight: 800; font-size: 18px; }
-              table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-              th, td { border-bottom: 1px solid #eee; padding: 10px 8px; text-align: left; font-size: 13px; }
-              th { background: #fafafa; font-weight: 700; }
-              td.num { text-align: right; font-variant-numeric: tabular-nums; }
-              .footer { margin-top: 18px; color: #666; font-size: 11px; }
-              @media print { body { margin: 0; } }
-            </style>
-          </head>
-          <body>
-            <h1>${title}</h1>
-            <div class="meta">${userLabel} · 기간 ${startDateStr} ~ ${endDateStr} · 생성 ${generatedAt}</div>
-
-            <div class="summary">
-              <div class="pill">
-                <div>
-                  <div class="label">전체 순응도</div>
-                  <div class="value">${overall}%</div>
-                </div>
-              </div>
-              <div class="pill">
-                <div>
-                  <div class="label">약 개수</div>
-                  <div class="value">${items.length}개</div>
-                </div>
-              </div>
-            </div>
-
-            <h2 style="font-size: 14px; margin: 0 0 6px;">약별 순응도</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>약 이름</th>
-                  <th class="num">완료</th>
-                  <th class="num">총 예정</th>
-                  <th class="num">순응도</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rows || '<tr><td colspan="4" style="color:#666;">데이터가 없습니다.</td></tr>'}
-              </tbody>
-            </table>
-
-            <div class="footer">브라우저 인쇄 기능으로 “PDF로 저장”을 선택하면 파일로 저장할 수 있습니다.</div>
-          </body>
-        </html>`)
-      printable.document.close()
-
-      setTimeout(() => {
-        printable.focus()
-        printable.print()
-        printable.close()
-      }, 150)
+      const blob = await medicationLogApiClient.getAdherenceSummaryPdf()
+      
+      // Blob 다운로드 처리
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `adherence_report_${new Date().toISOString().slice(0, 10)}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('리포트가 다운로드되었습니다.')
     } catch (error) {
       logger.error('PDF 다운로드 실패:', error)
       toast.error('리포트 생성에 실패했습니다')
     }
-  }, [user])
+  }, [])
 
   // 음성 명령 처리 (PDF 다운로드)
   useEffect(() => {
@@ -149,8 +54,8 @@ export const AdherenceReportPage = () => {
       try {
         setLoading(true)
 
-        // 최근 30일 순응도 요약
-        const summary = await medicationLogApiClient.getAdherenceSummary(30)
+        // 복약 순응도 요약 (7/30/365일)
+        const summary = await medicationLogApiClient.getAdherenceSummary()
 
         // 최근 14일 일별 순응도
         const endDate = new Date()
@@ -212,17 +117,21 @@ export const AdherenceReportPage = () => {
   const insights = useMemo(() => {
     if (!adherenceData) return []
     const lines = []
-    if ((adherenceData.overall || 0) >= 80) {
+    const last30DaysRate = adherenceData.last30Days?.rate || 0
+    const last7DaysRate = adherenceData.last7Days?.rate || 0
+    const streakDays = adherenceData.streak || 0
+
+    if (last30DaysRate >= 80) {
       lines.push('지난 한 달간 꾸준히 복용하고 있습니다.')
-    } else if ((adherenceData.overall || 0) >= 50) {
+    } else if (last30DaysRate >= 50) {
       lines.push('복약 순응도를 높이기 위해 알림 설정을 활용해보세요.')
     } else {
       lines.push('복약 누락이 많습니다. 규칙적인 복용이 중요합니다.')
     }
-    if ((adherenceData.streak || 0) >= 7) {
-      lines.push(`연속 ${adherenceData.streak}일 복용 중입니다.`)
+    if (streakDays >= 7) {
+      lines.push(`연속 ${streakDays}일 복용 중입니다.`)
     }
-    if ((adherenceData.thisWeek || 0) < (adherenceData.thisMonth || 0)) {
+    if (last7DaysRate < last30DaysRate) {
       lines.push('이번 주 순응도가 낮습니다. 주말 복약에 특히 주의하세요.')
     }
     return lines
@@ -274,7 +183,7 @@ export const AdherenceReportPage = () => {
               </Typography>
               <Stack direction="row" spacing={2} alignItems="baseline">
                 <Typography variant="h4" fontWeight={900}>
-                  {adherenceData.overall || 0}%
+                  {adherenceData.last30Days?.rate || 0}%
                 </Typography>
                 <Typography color="text.secondary">전체 복약 순응도</Typography>
               </Stack>
@@ -282,18 +191,18 @@ export const AdherenceReportPage = () => {
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 1 }}>
                 <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    이번 주
+                    최근 7일
                   </Typography>
                   <Typography fontWeight={900} sx={{ mt: 0.25 }}>
-                    {adherenceData.thisWeek || 0}%
+                    {adherenceData.last7Days?.rate || 0}%
                   </Typography>
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    이번 달
+                    최근 30일
                   </Typography>
                   <Typography fontWeight={900} sx={{ mt: 0.25 }}>
-                    {adherenceData.thisMonth || 0}%
+                    {adherenceData.last30Days?.rate || 0}%
                   </Typography>
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>

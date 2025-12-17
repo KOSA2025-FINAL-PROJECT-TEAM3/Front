@@ -67,6 +67,9 @@ class AuthApiClient extends ApiClient {
   }
 
   logout(token) {
+    if (!token) {
+      return Promise.resolve({ success: true })
+    }
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,

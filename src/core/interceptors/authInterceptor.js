@@ -54,7 +54,8 @@ export const attachAuthInterceptor = (axiosInstance) => {
         error.response?.status === 401 &&
         !originalRequest._retry &&
         !originalRequest.url?.includes('/login') &&
-        !originalRequest.url?.includes('/refresh')
+        !originalRequest.url?.includes('/refresh') &&
+        !originalRequest.url?.includes('/logout')
       ) {
         originalRequest._retry = true
 
@@ -71,21 +72,29 @@ export const attachAuthInterceptor = (axiosInstance) => {
               },
             )
 
-            const { accessToken: newToken } = response.data
+            const { accessToken: newToken, refreshToken: newRefreshToken } = response.data || {}
 
             if (newToken) {
-              // 1. 스토리지 갱신
+              // 1. 스토리지 갱신 (Refresh Token 회전 대응)
               window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
+              if (newRefreshToken) {
+                window.localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken)
+              }
 
               // 2. 스토어 상태 갱신 (소켓 재연결 등을 위해)
               if (store) {
-                store.getState().setAuthData({ 
-                    ...store.getState(),
-                    token: newToken 
+                const current = store.getState()
+                current.setAuthData({
+                  user: current.user,
+                  accessToken: newToken,
+                  refreshToken: newRefreshToken ?? current.refreshToken,
+                  customerRole: current.customerRole,
+                  userRole: current.userRole,
                 })
               }
 
               // 3. 실패했던 요청의 헤더 갱신 및 재시도
+              originalRequest.headers = originalRequest.headers || {}
               originalRequest.headers.Authorization = `Bearer ${newToken}`
               return axiosInstance(originalRequest)
             }
