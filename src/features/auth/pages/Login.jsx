@@ -55,8 +55,9 @@ export const Login = () => {
     ? decodeURIComponent(searchParams.get('redirect'))
     : null // null로 원복
 
-  const { login, loading, error, clearError } = useAuth((state) => ({
+  const { login, reactivate, loading, error, clearError } = useAuth((state) => ({
     login: state.login,
+    reactivate: state.reactivate,
     loading: state.loading,
     error: state.error,
     clearError: state.clearError,
@@ -80,6 +81,38 @@ export const Login = () => {
       await login(formData.email, formData.password)
       navigateAfterAuthentication(navigate, redirectPath)
     } catch (err) {
+      // 403 Forbidden & Reactivation Token 존재 시 복구 프로세스 진행
+      const res = err.response
+      if (res?.status === 403 && res?.data?.reactivationToken) {
+        const deactivatedAt = res.data.deactivatedAt || '날짜 정보 없음'
+        const confirmReactivate = window.confirm(
+          `해당 계정은 ${deactivatedAt}에 탈퇴 처리되었습니다.\n계정을 복구하고 다시 활성화하시겠습니까?`
+        )
+
+        if (confirmReactivate) {
+          try {
+            await reactivate(res.data.reactivationToken)
+            alert('계정이 성공적으로 복구되었습니다.')
+            navigateAfterAuthentication(navigate, redirectPath)
+            return
+          } catch (reactivateErr) {
+            console.error(reactivateErr)
+            setError('root', {
+              type: 'server',
+              message: '계정 복구 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+            })
+            return
+          }
+        } else {
+            // 복구 거절 시
+            setError('root', {
+                type: 'server',
+                message: '탈퇴한 계정입니다.',
+            })
+            return
+        }
+      }
+
       setError('root', {
         type: 'server',
         message: err.message || '로그인에 실패했습니다.',

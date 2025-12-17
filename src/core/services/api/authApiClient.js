@@ -95,7 +95,12 @@ class AuthApiClient extends ApiClient {
 
     return this.post('/deeplink/resolve', payload, undefined, { mockResponse })
   }
+
+  reactivate(token) {
+    return this.post('/users/reactivate', { token })
+  }
 }
+
 
 export const authApiClient = new AuthApiClient()
 export { AuthApiClient }

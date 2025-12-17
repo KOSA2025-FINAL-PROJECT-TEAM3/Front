@@ -10,9 +10,10 @@ import EditIcon from '@mui/icons-material/Edit'
 export const ProfileEditPage = () => {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
-  const { user, updateUser } = useAuth((state) => ({ 
+  const { user, updateUser, withdraw } = useAuth((state) => ({ 
     user: state.user, 
-    updateUser: state.updateUser 
+    updateUser: state.updateUser,
+    withdraw: state.withdraw 
   }))
 
   const [isLoading, setIsLoading] = useState(false)
@@ -55,6 +56,19 @@ export const ProfileEditPage = () => {
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click()
+  }
+
+  const handleWithdraw = async () => {
+    if (window.confirm('정말 탈퇴하시겠습니까?\n탈퇴 시 계정은 비활성화되며, 14일 후 영구 삭제됩니다.')) {
+      try {
+        await withdraw()
+        toast.success('회원 탈퇴가 완료되었습니다.')
+        navigate('/') // 로그인 페이지 등으로 이동
+      } catch (error) {
+        console.error(error)
+        toast.error('회원 탈퇴 처리에 실패했습니다.')
+      }
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -172,6 +186,17 @@ export const ProfileEditPage = () => {
             </Stack>
           </Stack>
         </Paper>
+
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <Button
+            color="error"
+            variant="text"
+            onClick={handleWithdraw}
+            sx={{ textDecoration: 'underline' }}
+          >
+            회원탈퇴
+          </Button>
+        </Box>
       </Container>
     </MainLayout>
   )
