@@ -75,12 +75,24 @@ class MedicationLogApiClient extends ApiClient {
   }
 
   /**
-   * 복약 순응도 요약 조회
-   * @param {number} days - 최근 며칠 (기본: 30)
+   * 복약 순응도 요약 조회 (v2)
    * @returns {Promise<Object>} 순응도 요약 데이터
+   * @returns {Object} response.all - 전체 기간 통계 { rate, scheduled, completed }
+   * @returns {Object} response.last7Days - 최근 7일 통계 { rate, scheduled, completed }
+   * @returns {Object} response.last30Days - 최근 30일 통계 { rate, scheduled, completed }
+   * @returns {Object} response.last365Days - 최근 365일 통계 { rate, scheduled, completed }
+   * @returns {number} response.streak - 연속 복용 일수
    */
-  getAdherenceSummary(days = 30) {
-    return this.get('/adherence/summary', { params: { days } })
+  getAdherenceSummary() {
+    return this.get('/adherence/summary')
+  }
+
+  /**
+   * 복약 순응도 리포트 PDF 다운로드
+   * @returns {Promise<Blob>} PDF 파일 Blob
+   */
+  getAdherenceSummaryPdf() {
+    return this.get('/adherence/summary/pdf', { responseType: 'blob' })
   }
 
   /**
