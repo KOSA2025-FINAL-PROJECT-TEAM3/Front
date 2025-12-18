@@ -8,7 +8,6 @@ import {
   Chip,
   CircularProgress,
   Alert,
-  Container,
   Paper,
   Accordion,
   AccordionSummary,
@@ -22,6 +21,10 @@ import { medicationLogApiClient } from '../../../core/services/api/medicationLog
 import { format } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import logger from '@core/utils/logger'
+import MainLayout from '@shared/components/layout/MainLayout'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 const TodayMedicationCard = ({ medication, onClick, onScheduleClick }) => {
   const name = medication?.name || '알 수 없는 약'
@@ -255,18 +258,31 @@ const TodayMedications = () => {
 
     if (loading) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-                <CircularProgress />
-            </Box>
-        );
+            <MainLayout>
+                <PageStack>
+                    <PageHeader leading={<BackButton />} title="오늘의 복약" subtitle="오늘의 복약 기록을 불러오는 중..." />
+                    <Paper variant="outlined" sx={{ p: 4 }}>
+                        <Stack spacing={2} alignItems="center">
+                            <CircularProgress />
+                            <Typography variant="body2" color="text.secondary">
+                                로딩 중...
+                            </Typography>
+                        </Stack>
+                    </Paper>
+                </PageStack>
+            </MainLayout>
+        )
     }
 
     if (error) {
         return (
-            <Container maxWidth="sm" sx={{ mt: 4 }}>
-                <Alert severity="error">{error}</Alert>
-            </Container>
-        );
+            <MainLayout>
+                <PageStack>
+                    <PageHeader leading={<BackButton />} title="오늘의 복약" subtitle="오늘의 복약 기록을 불러오지 못했습니다." />
+                    <Alert severity="error">{error}</Alert>
+                </PageStack>
+            </MainLayout>
+        )
     }
     // 로그를 시간대별 -> 약별로 그룹화
     const groupedLogs = logs.reduce((acc, log) => {
@@ -323,125 +339,125 @@ const TodayMedications = () => {
     const completionRate = totalScheduled > 0 ? totalCompleted / totalScheduled : 0;
 
     return (
-        <Container maxWidth="md" sx={{ py: 4 }}>
-            <Box mb={4}>
-                <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-                    오늘의 복약
-                </Typography>
-                <Typography variant="subtitle1" color="text.secondary">
-                    {format(new Date(), 'M월 d일 (EEE)', { locale: ko })}
-                </Typography>
-            </Box>
+        <MainLayout>
+            <PageStack>
+                <PageHeader
+                    leading={<BackButton />}
+                    title="오늘의 복약"
+                    subtitle={format(new Date(), 'M월 d일 (EEE)', { locale: ko })}
+                />
 
-            <Paper elevation={0} sx={{ p: 3, mb: 4, bgcolor: '#f8f9fa', borderRadius: 2 }}>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box>
-                        <Typography variant="h6" gutterBottom>
-                            복용 현황
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            총 {totalScheduled}회 중 {totalCompleted}회 복용 완료
-                        </Typography>
-                    </Box>
-                    <Box position="relative" display="inline-flex">
-                        <CircularProgress
-                            variant="determinate"
-                            value={completionRate * 100}
-                            size={60}
-                            thickness={4}
-                            sx={{ color: completionRate === 1 ? 'success.main' : 'primary.main' }}
-                        />
-                        <Box
-                            top={0}
-                            left={0}
-                            bottom={0}
-                            right={0}
-                            position="absolute"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <Typography variant="caption" component="div" color="text.secondary">
-                                {Math.round(completionRate * 100)}%
+                <Paper variant="outlined" sx={{ p: 3, bgcolor: 'action.hover', borderRadius: 3 }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                        <Box>
+                            <Typography variant="h6" gutterBottom fontWeight={900}>
+                                복용 현황
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                총 {totalScheduled}회 중 {totalCompleted}회 복용 완료
                             </Typography>
                         </Box>
-                    </Box>
-                </Box>
-            </Paper>
-
-            <Box>
-                {logs.length === 0 ? (
-                    <Typography textAlign="center" color="text.secondary" py={4}>
-                        오늘 예정된 복약 스케줄이 없습니다.
-                    </Typography>
-                ) : (
-                    SECTION_ORDER.map(sectionKey => {
-                        const sectionData = groupedLogs[sectionKey];
-                        if (!sectionData) return null;
-
-                        const medicationList = Object.values(sectionData)
-                            .map(med => ({
-                                ...med,
-                                schedules: med.schedules.sort((a, b) =>
-                                    (a.scheduledTime || '').localeCompare(b.scheduledTime || '')
-                                )
-                            }))
-                            .sort((a, b) => a.medicationName.localeCompare(b.medicationName));
-
-                        if (medicationList.length === 0) return null;
-
-                        return (
-                            <Accordion
-                                key={sectionKey}
-                                expanded={!!expanded[sectionKey]}
-                                onChange={handleAccordionChange(sectionKey)}
-                                disableGutters
-                                elevation={0}
-                                sx={{
-                                    mb: 2,
-                                    border: '1px solid #e0e0e0',
-                                    borderRadius: '8px !important',
-                                    '&:before': { display: 'none' }
-                                }}
+                        <Box position="relative" display="inline-flex">
+                            <CircularProgress
+                                variant="determinate"
+                                value={completionRate * 100}
+                                size={60}
+                                thickness={4}
+                                sx={{ color: completionRate === 1 ? 'success.main' : 'primary.main' }}
+                            />
+                            <Box
+                                top={0}
+                                left={0}
+                                bottom={0}
+                                right={0}
+                                position="absolute"
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
                             >
-                                <AccordionSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    sx={{ bgcolor: '#fff', borderRadius: '8px' }}
+                                <Typography variant="caption" component="div" color="text.secondary">
+                                    {Math.round(completionRate * 100)}%
+                                </Typography>
+                            </Box>
+                        </Box>
+                    </Box>
+                </Paper>
+
+                <Box>
+                    {logs.length === 0 ? (
+                        <Typography textAlign="center" color="text.secondary" py={4}>
+                            오늘 예정된 복약 스케줄이 없습니다.
+                        </Typography>
+                    ) : (
+                        SECTION_ORDER.map(sectionKey => {
+                            const sectionData = groupedLogs[sectionKey];
+                            if (!sectionData) return null;
+
+                            const medicationList = Object.values(sectionData)
+                                .map(med => ({
+                                    ...med,
+                                    schedules: med.schedules.sort((a, b) =>
+                                        (a.scheduledTime || '').localeCompare(b.scheduledTime || '')
+                                    )
+                                }))
+                                .sort((a, b) => a.medicationName.localeCompare(b.medicationName));
+
+                            if (medicationList.length === 0) return null;
+
+                            return (
+                                <Accordion
+                                    key={sectionKey}
+                                    expanded={!!expanded[sectionKey]}
+                                    onChange={handleAccordionChange(sectionKey)}
+                                    disableGutters
+                                    elevation={0}
+                                    sx={{
+                                        mb: 2,
+                                        border: '1px solid',
+                                        borderColor: 'divider',
+                                        borderRadius: '12px !important',
+                                        '&:before': { display: 'none' }
+                                    }}
                                 >
-                                    <Box display="flex" alignItems="baseline">
-                                        <Typography variant="h6" fontWeight="bold" mr={1}>
-                                            {SECTION_LABELS[sectionKey].label}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            {SECTION_LABELS[sectionKey].sub}
-                                        </Typography>
-                                    </Box>
-                                </AccordionSummary>
-                                <AccordionDetails sx={{ pt: 0 }}>
-                                    <Box display="flex" flexDirection="column" gap={2}>
-                                        {medicationList.map((med) => (
-                                            <TodayMedicationCard
-                                                key={`${sectionKey}-${med.medicationId}`}
-                                                medication={{
-                                                    medicationId: med.medicationId,
-                                                    name: med.medicationName,
-                                                    dosage: med.dosage,
-                                                    schedules: med.schedules,
-                                                    hasLogsToday: med.schedules.some(s => s.isTakenToday)
-                                                }}
-                                                onClick={handleMedicationClick}
-                                                onScheduleClick={handleScheduleClick}
-                                            />
-                                        ))}
-                                    </Box>
-                                </AccordionDetails>
-                            </Accordion>
-                        );
-                    })
-                )}
-            </Box>
-        </Container>
-    );
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMoreIcon />}
+                                        sx={{ bgcolor: 'background.paper', borderRadius: '12px' }}
+                                    >
+                                        <Box display="flex" alignItems="baseline">
+                                            <Typography variant="h6" fontWeight={900} mr={1}>
+                                                {SECTION_LABELS[sectionKey].label}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                {SECTION_LABELS[sectionKey].sub}
+                                            </Typography>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails sx={{ pt: 0 }}>
+                                        <Box display="flex" flexDirection="column" gap={2}>
+                                            {medicationList.map((med) => (
+                                                <TodayMedicationCard
+                                                    key={`${sectionKey}-${med.medicationId}`}
+                                                    medication={{
+                                                        medicationId: med.medicationId,
+                                                        name: med.medicationName,
+                                                        dosage: med.dosage,
+                                                        schedules: med.schedules,
+                                                        hasLogsToday: med.schedules.some(s => s.isTakenToday)
+                                                    }}
+                                                    onClick={handleMedicationClick}
+                                                    onScheduleClick={handleScheduleClick}
+                                                />
+                                            ))}
+                                        </Box>
+                                    </AccordionDetails>
+                                </Accordion>
+                            );
+                        })
+                    )}
+                </Box>
+            </PageStack>
+        </MainLayout>
+    )
 };
 
 export default TodayMedications;

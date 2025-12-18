@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const formatDate = (value) => {
   if (!value) return '정보 없음'
@@ -56,31 +57,35 @@ export const MedicationDetailModal = ({
       PaperProps={{ sx: { borderRadius: 4, bgcolor: 'grey.50' } }}
     >
       <DialogTitle sx={{ pb: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
-          <Box>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 1 }}>
+          <IconButton aria-label="뒤로" onClick={() => onClose?.()}>
+            <ArrowBackIcon />
+          </IconButton>
+
+          <Box sx={{ minWidth: 0 }}>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 900 }}>
               {medication.updatedAt ? '최근 수정' : '등록일'} · {formatDate(medication.updatedAt || medication.createdAt)}
             </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 900, mt: 0.5 }}>
-              {medication.name}
-            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, minWidth: 0 }}>
+              <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                {medication.name}
+              </Typography>
+              <Chip
+                label={medication.active ? '복용 중' : '일시중지'}
+                size="small"
+                color={medication.active ? 'success' : 'default'}
+                sx={{ fontWeight: 900 }}
+              />
+            </Stack>
             <Typography variant="body2" color="text.secondary">
               {medication.dosage || '용량 정보 없음'}
             </Typography>
           </Box>
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Chip
-              label={medication.active ? '복용 중' : '일시중지'}
-              size="small"
-              color={medication.active ? 'success' : 'default'}
-              sx={{ fontWeight: 900 }}
-            />
-            <IconButton onClick={() => onClose?.()} aria-label="닫기">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
-        </Stack>
+          <IconButton onClick={() => onClose?.()} aria-label="닫기">
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 0 }}>
