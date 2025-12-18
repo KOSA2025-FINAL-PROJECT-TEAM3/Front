@@ -9,7 +9,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import {
   Box,
   Chip,
-  Container,
   Divider,
   List,
   ListItemButton,
@@ -21,10 +20,14 @@ import {
   Typography,
 } from '@mui/material'
 import MainLayout from '@shared/components/layout/MainLayout'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { isCaregiverRole } from '@features/auth/utils/roleUtils'
+import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 
 const MenuSection = ({ title, items = [] }) => {
   if (!items.length) return null
@@ -90,6 +93,7 @@ export const MorePage = () => {
     logout: state.logout,
   }))
   const unreadCount = useNotificationStore((state) => state.unreadCount)
+  const openSearchOverlay = useSearchOverlayStore((state) => state.open)
 
   const isCaregiver = isCaregiverRole(customerRole)
 
@@ -132,6 +136,27 @@ export const MorePage = () => {
   // 건강 관리 그룹
   const healthManagementItems = [
     {
+      id: 'searchOverlay',
+      label: '통합 검색',
+      icon: '🔍',
+      description: '증상 · 알약 검색',
+      onClick: () => openSearchOverlay('pill'),
+    },
+    {
+      id: 'medication',
+      label: '약 관리',
+      icon: '💊',
+      description: '처방전 목록 · 약 등록',
+      onClick: () => handleNavigate(ROUTE_PATHS.medication),
+    },
+    {
+      id: 'medicationToday',
+      label: '오늘 복약',
+      icon: '⏰',
+      description: '오늘 복약 체크 · 기록',
+      onClick: () => handleNavigate(ROUTE_PATHS.medicationToday),
+    },
+    {
       id: 'ocrScan',
       label: '처방전 스캔',
       icon: '📸',
@@ -156,6 +181,13 @@ export const MorePage = () => {
 
   // 가족 관리 그룹
   const familyManagementItems = [
+    {
+      id: 'familyChat',
+      label: '가족 채팅',
+      icon: '💬',
+      description: '가족과 대화',
+      onClick: () => handleNavigate(ROUTE_PATHS.familyChat),
+    },
     {
       id: 'inviteCodeEntry',
       label: '초대 코드 입력',
@@ -217,28 +249,17 @@ export const MorePage = () => {
 
   return (
     <MainLayout>
-      <Box sx={{ bgcolor: 'grey.50', minHeight: '100vh', py: 3 }}>
-        <Container maxWidth="md">
-          <Stack spacing={3}>
-            <Box>
-              <Typography variant="h4" component="h1" fontWeight={800} gutterBottom>
-                더보기
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                모든 기능과 설정을 확인하세요
-              </Typography>
-            </Box>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="더보기" subtitle="모든 기능과 설정을 확인하세요" />
 
-            <Stack spacing={2}>
-              <MenuSection title="알림 및 리포트" items={notificationReportItems} />
-              <MenuSection title="가족 관리" items={familyManagementItems} />
-              <MenuSection title="건강 관리" items={healthManagementItems} />
-              <MenuSection title="식단 관리" items={dietManagementItems} />
-              <MenuSection title="계정" items={accountItems} />
-            </Stack>
-          </Stack>
-        </Container>
-      </Box>
+        <Stack spacing={2}>
+          <MenuSection title="알림 및 리포트" items={notificationReportItems} />
+          <MenuSection title="가족 관리" items={familyManagementItems} />
+          <MenuSection title="건강 관리" items={healthManagementItems} />
+          <MenuSection title="식단 관리" items={dietManagementItems} />
+          <MenuSection title="계정" items={accountItems} />
+        </Stack>
+      </PageStack>
     </MainLayout>
   )
 }
