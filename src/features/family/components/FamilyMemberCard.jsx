@@ -132,14 +132,25 @@ export const FamilyMemberCard = ({
                   type="button"
                   size="small"
                   variant="outlined"
-                  endIcon={<ExpandMoreIcon fontSize="small" />}
+                  endIcon={<ExpandMoreIcon sx={{ fontSize: { xs: 14, md: 18 } }} />}
                   onClick={(e) => {
                     e.stopPropagation()
                     setRoleAnchorEl(e.currentTarget)
                   }}
                   disabled={isRoleChanging}
                   title="역할 변경"
-                  sx={{ borderRadius: 999, fontWeight: 900 }}
+                  sx={{ 
+                    borderRadius: 999, 
+                    fontWeight: 900,
+                    fontSize: { xs: 10, md: 14 },
+                    px: { xs: 1, md: 1.5 },
+                    py: { xs: 0.25, md: 0.5 },
+                    minWidth: { xs: 'auto', md: 100 },
+                    maxWidth: { xs: 90, md: 'none' },
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
                 >
                   {isRoleChanging ? '변경 중...' : roleLabels[currentRole] || currentRole}
                 </Button>

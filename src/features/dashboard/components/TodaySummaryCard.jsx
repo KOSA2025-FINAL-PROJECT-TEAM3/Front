@@ -12,7 +12,7 @@ export const TodaySummaryCard = ({ takenCount = 0, totalCount = 0, onClick }) =>
       onClick={onClick}
       variant="outlined"
       sx={{
-        p: 2.5,
+        p: { xs: 1.5, md: 2.5 },
         borderRadius: 3,
         textAlign: 'left',
         ...(onClick
@@ -23,26 +23,26 @@ export const TodaySummaryCard = ({ takenCount = 0, totalCount = 0, onClick }) =>
           : null),
       }}
     >
-      <Stack spacing={1.25}>
+      <Stack spacing={{ xs: 0.75, md: 1.25 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900, fontSize: { xs: 13, md: 16 } }}>
             오늘 요약
           </Typography>
-          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'primary.main' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'primary.main', fontSize: { xs: 13, md: 14 } }}>
             {percent}%
           </Typography>
         </Stack>
 
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700, fontSize: { xs: 11, md: 14 } }}>
             복용 완료 {safeTaken} / {safeTotal}
           </Typography>
           <LinearProgress
             variant="determinate"
             value={percent}
             sx={{
-              mt: 1,
-              height: 10,
+              mt: { xs: 0.5, md: 1 },
+              height: { xs: 6, md: 10 },
               borderRadius: 999,
               bgcolor: '#E2E8F0',
               '& .MuiLinearProgress-bar': {

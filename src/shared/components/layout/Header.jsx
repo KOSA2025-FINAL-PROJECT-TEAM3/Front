@@ -164,11 +164,11 @@ export const Header = ({ navItems = [] }) => {
           )}
         </Box>
 
-        <Stack direction="row" alignItems="center" spacing={{ xs: 1.25, md: 2.5 }}>
+        <Stack direction="row" alignItems="center" spacing={{ xs: 0.75, md: 2.5 }}>
           <Stack
             direction="row"
             alignItems="center"
-            spacing={1}
+            spacing={{ xs: 0.5, md: 1 }}
             onClick={() => navigate(ROUTE_PATHS.settings)}
             role="button"
             tabIndex={0}
@@ -178,29 +178,46 @@ export const Header = ({ navItems = [] }) => {
                 navigate(ROUTE_PATHS.settings)
               }
             }}
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: 'pointer', maxWidth: { xs: 100, md: 'none' } }}
           >
-            <Typography sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 800 }}>
+            <Typography 
+              sx={{ 
+                fontSize: { xs: 11, md: 14 }, 
+                fontWeight: 800,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: { xs: 60, md: 'none' }
+              }}
+            >
               {userName} 님
             </Typography>
-            <Typography sx={{ fontSize: { xs: 10, md: 12 }, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: { xs: 10, md: 12 }, color: 'text.secondary', display: { xs: 'none', md: 'block' } }}>
               ({roleLabel})
             </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={async (e) => {
-                e.stopPropagation()
-                if (window.confirm('로그아웃 하시겠습니까?')) {
-                  await logout()
-                  navigate(ROUTE_PATHS.login, { replace: true })
-                }
-              }}
-              sx={{ borderRadius: 999, fontWeight: 800 }}
-            >
-              로그아웃
-            </Button>
           </Stack>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={async (e) => {
+              e.stopPropagation()
+              if (window.confirm('로그아웃 하시겠습니까?')) {
+                await logout()
+                navigate(ROUTE_PATHS.login, { replace: true })
+              }
+            }}
+            sx={{ 
+              borderRadius: 999, 
+              fontWeight: 800,
+              minWidth: { xs: 28, md: 'auto' },
+              px: { xs: 0.75, md: 2 },
+              py: { xs: 0.25, md: 0.5 },
+              fontSize: { xs: 10, md: 14 }
+            }}
+          >
+            <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>로그아웃</Box>
+            <Box component="span" sx={{ display: { xs: 'inline', md: 'none' }, fontSize: 12 }}>⎋</Box>
+          </Button>
 
           <IconButton
             onClick={handleNotificationClick}

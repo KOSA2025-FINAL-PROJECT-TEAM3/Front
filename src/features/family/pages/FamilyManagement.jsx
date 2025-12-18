@@ -476,7 +476,18 @@ export const FamilyManagementPage = () => {
             </Stack>
           }
           right={
-            <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: { xs: 0.5, md: 1 },
+              justifyContent: { xs: 'flex-start', md: 'flex-end' },
+              '& .MuiButton-root': {
+                fontSize: { xs: 11, md: 14 },
+                px: { xs: 1, md: 2 },
+                py: { xs: 0.5, md: 0.75 },
+                minWidth: { xs: 'auto', md: 64 }
+              }
+            }}>
               <Button type="button" variant="outlined" onClick={() => setShowGroupCreateModal(true)} sx={{ fontWeight: 900 }}>
                 + 그룹 생성
               </Button>
@@ -509,7 +520,7 @@ export const FamilyManagementPage = () => {
                   가족 채팅
                 </Button>
               </Badge>
-            </Stack>
+            </Box>
           }
         />
 

@@ -131,10 +131,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       color: { bg: '#F1F5F9', fg: '#475569' },
       onClick: () => {
         if (exporting) return
-        if (!isCaregiver) {
-          toast.info('보호자 전용 기능입니다.')
-          return
-        }
         handleExportPdf()
       },
     },
@@ -199,7 +195,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       <Box
         sx={{
           position: 'fixed',
-          right: 20,
+          right: { xs: 12, md: 20 },
           bottom: { xs: bottom, md: 40 },
           zIndex: 2101,
           display: 'flex',
