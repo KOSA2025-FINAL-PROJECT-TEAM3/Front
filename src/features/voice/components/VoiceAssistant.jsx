@@ -101,7 +101,16 @@ export const VoiceAssistant = () => {
         </div>
       )}
 
-      <Box sx={{ position: 'fixed', bottom: 80, left: 20, zIndex: 9999, display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: { xs: 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + var(--bottom-dock-gap))', md: 80 },
+          left: 20,
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <IconButton
           onClick={toggleVoice}
           aria-label="음성 명령 시작"
