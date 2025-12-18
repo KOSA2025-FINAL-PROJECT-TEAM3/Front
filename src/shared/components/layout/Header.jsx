@@ -48,6 +48,11 @@ export const Header = ({ navItems = [] }) => {
     navigate(ROUTE_PATHS.more)
   }
 
+  const hasMoreNav = useMemo(
+    () => navItems.some((item) => item?.path === ROUTE_PATHS.more),
+    [navItems],
+  )
+
   // 사용자 이름 가져오기
   const userName = user?.name || user?.email?.split('@')[0] || '사용자'
 
@@ -59,16 +64,31 @@ export const Header = ({ navItems = [] }) => {
       position="fixed"
       elevation={0}
       sx={{
-        height: 60,
-        bgcolor: 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(20px)',
+        height: {
+          xs: 'calc(64px + var(--safe-area-top))',
+          md: 'calc(72px + var(--safe-area-top))',
+        },
+        pt: 'var(--safe-area-top)',
+        bgcolor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(16px)',
         borderBottom: '1px solid',
-        borderBottomColor: 'rgba(200, 200, 200, 0.2)',
+        borderBottomColor: 'divider',
         color: 'text.primary',
         zIndex: 101,
+        boxShadow: '0 2px 10px -4px rgba(0,0,0,0.05)',
       }}
     >
-      <Toolbar sx={{ height: 60, px: { xs: 2, md: 7.5 }, maxWidth: 1400, width: '100%', mx: 'auto' }}>
+      <Toolbar
+        sx={{
+          minHeight: { xs: 64, md: 72 },
+          height: { xs: 64, md: 72 },
+          px: { xs: 2.5, md: 3 },
+          width: '100%',
+          maxWidth: 1400,
+          mx: 'auto',
+          position: 'relative',
+        }}
+      >
         <Stack
           direction="row"
           alignItems="center"
@@ -204,18 +224,20 @@ export const Header = ({ navItems = [] }) => {
             </Badge>
           </IconButton>
 
-          <IconButton
-            onClick={handleMoreClick}
-            aria-label="더보기"
-            sx={{
-              width: { xs: 24, md: 28 },
-              height: { xs: 24, md: 28 },
-              bgcolor: 'rgba(0, 0, 0, 0.06)',
-              '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.1)' },
-            }}
-          >
-            <MoreHorizIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-          </IconButton>
+          {!hasMoreNav ? (
+            <IconButton
+              onClick={handleMoreClick}
+              aria-label="더보기"
+              sx={{
+                width: { xs: 24, md: 28 },
+                height: { xs: 24, md: 28 },
+                bgcolor: 'rgba(0, 0, 0, 0.06)',
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.1)' },
+              }}
+            >
+              <MoreHorizIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+            </IconButton>
+          ) : null}
         </Stack>
       </Toolbar>
     </AppBar>

@@ -32,7 +32,7 @@ export const RoundedCard = ({
     <Card
       elevation={elevation}
       sx={{
-        borderRadius: { xs: 3, sm: 4 }, // 12px → 16px
+        borderRadius: 3,
         overflow: 'hidden',
         ...sx,
       }}
@@ -64,4 +64,3 @@ RoundedCard.propTypes = {
 }
 
 export default RoundedCard
-
