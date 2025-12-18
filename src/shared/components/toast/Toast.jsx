@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { keyframes } from '@emotion/react'
 import { Box, IconButton, Paper, Typography } from '@mui/material'
 import { useToastStore } from './toastStore'
+import logger from '@core/utils/logger'
 
 const ICONS = {
   success: '✓',
@@ -25,7 +26,7 @@ const slideOut = keyframes`
   to { transform: translateX(400px); opacity: 0; }
 `
 
-export const Toast = ({ id, type, message }) => {
+export const Toast = ({ id, type, message, onClick }) => {
   const [isExiting, setIsExiting] = useState(false)
   const removeToast = useToastStore((state) => state.removeToast)
 
@@ -50,6 +51,17 @@ export const Toast = ({ id, type, message }) => {
     }, 300) // 애니메이션 시간
   }
 
+  const handlePaperClick = (e) => {
+    // 닫기 버튼(IconButton)을 클릭한 경우는 제외
+    if (e.target.closest('button')) return
+
+    if (onClick) {
+      logger.debug('Toast clicked, executing onClick handler')
+      onClick()
+    }
+    handleClose()
+  }
+
   useEffect(() => {
     // 자동 닫기 애니메이션 시작
     const timer = setTimeout(() => {
@@ -62,7 +74,7 @@ export const Toast = ({ id, type, message }) => {
   return (
     <Paper
       role="alert"
-      onClick={handleClose}
+      onClick={handlePaperClick}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -71,13 +83,18 @@ export const Toast = ({ id, type, message }) => {
         py: 1.5,
         bgcolor: 'common.white',
         borderRadius: 2,
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-        minWidth: { xs: 'auto', md: 300 },
+        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)', // 더 선명한 그림자
+        minWidth: { xs: 'auto', md: 320 },
         maxWidth: { xs: 'calc(100vw - 2rem)', md: 500 },
         pointerEvents: 'auto',
-        cursor: 'pointer',
-        borderLeft: '4px solid',
+        cursor: onClick ? 'pointer' : 'default',
+        borderLeft: '5px solid', // 더 두꺼운 테두리
         borderLeftColor: tone.border,
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': onClick ? {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 12px 20px rgba(0, 0, 0, 0.2)',
+        } : {},
         animation: `${isExiting ? slideOut : slideIn} 0.3s ${isExiting ? 'ease-in' : 'ease-out'} forwards`,
       }}
     >

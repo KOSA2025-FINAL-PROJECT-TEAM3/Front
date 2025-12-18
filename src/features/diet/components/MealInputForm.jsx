@@ -1,3 +1,6 @@
+import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@core/config/routes.config'
+import { toast } from '@shared/components/toast/toastStore'
 import { useState, useEffect, useRef } from 'react'
 import { MEAL_TYPES, MEAL_TYPE_LABELS } from '@config/constants'
 import { dietApiClient } from '@core/services/api/dietApiClient'
@@ -24,8 +27,10 @@ export const MealInputForm = ({
   autoFillData, // [Voice] New prop
   initialAnalysisResult,
 }) => {
+  const navigate = useNavigate()
   const dietCameraRef = useRef(null)
   const dietJobs = useNotificationStore((state) => state.dietJobs)
+  const setDietAnalyzing = useNotificationStore((state) => state.setDietAnalyzing)
   const dietJobsRef = useRef({})
   const [mealType, setMealType] = useState(MEAL_TYPES.BREAKFAST)
   const [foodName, setFoodName] = useState('')
@@ -202,23 +207,28 @@ export const MealInputForm = ({
       setIsModalOpen(true)
     }
 
-    setIsLoading(true)
-    setIsModalOpen(true)
-
+    // 분석 시작 (비동기)
     try {
-      lastRequestRef.current = { type: 'image', file, mealType, foodName: '' }
-      // 이미지 분석 Job: 식사구분 + 이미지 (음식 이름은 빈 문자열로 GPT가 인식)
+      setDietAnalyzing(true)
+      
+      // 이미지 분석 Job: 식사구분 + 이미지
       const jobResp = extractPayload(await dietApiClient.startAnalysisJob(file, mealType, ''))
       const jobId = jobResp.jobId
-      currentJobIdRef.current = jobId
-      const result = await pollAnalysisJob(jobId)
-      setAnalysisResult(result)
-      setAnalysisError(null)
+      
+      logger.info('Diet Analysis Job Started:', jobId)
+      toast.success('식단 분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
+      
+      // 메인 화면으로 이동 (또는 현재 화면 유지)
+      // 식단은 보통 연속해서 올리지 않으므로 메인으로 가는게 자연스러울 수 있음
+      navigate(ROUTE_PATHS.root)
+      
     } catch (error) {
-      logger.error('Failed to analyze image:', error)
-      setAnalysisError(error.message || '이미지 분석에 실패했습니다.')
+      logger.error('Failed to start diet analysis:', error)
+      toast.error(error.message || '식단 분석 요청에 실패했습니다.')
+      setDietAnalyzing(false)
     } finally {
       setIsLoading(false)
+      setIsModalOpen(false) // 모달 닫기 (비동기라 필요 없음)
     }
   }
 
@@ -228,24 +238,22 @@ export const MealInputForm = ({
       return
     }
 
-    setIsLoading(true)
-    setIsModalOpen(true)
-
     try {
-      lastRequestRef.current = { type: 'text', mealType, foodName }
-      // 텍스트 분석 Job: 식사구분 + 음식 이름 (이미지 없음)
+      setDietAnalyzing(true)
+      
+      // 텍스트 분석 Job: 식사구분 + 음식 이름
       const jobResp = extractPayload(await dietApiClient.startAnalysisJob(null, mealType, foodName))
       const jobId = jobResp.jobId
-      currentJobIdRef.current = jobId
-      const result = await pollAnalysisJob(jobId)
-      logger.debug('[MealInputForm] Analysis result received:', result)
-      setAnalysisResult(result)
-      setAnalysisError(null)
+      
+      logger.info('Diet Text Analysis Job Started:', jobId)
+      toast.success('음식 분석이 시작되었습니다. 잠시만 기다려주세요.')
+      
+      navigate(ROUTE_PATHS.root)
+
     } catch (error) {
       logger.error('Failed to analyze food:', error)
-      setAnalysisError(error.message || '음식 분석에 실패했습니다.')
-    } finally {
-      setIsLoading(false)
+      toast.error(error.message || '음식 분석 요청에 실패했습니다.')
+      setDietAnalyzing(false)
     }
   }
 

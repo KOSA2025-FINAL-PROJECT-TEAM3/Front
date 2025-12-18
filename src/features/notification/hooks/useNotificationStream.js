@@ -12,8 +12,9 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
 import { toast } from '@shared/components/toast/toastStore'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { fromOCRResponse } from '@/types/ocr.types'
 
 const PUBLIC_PATHS = new Set([
   ROUTE_PATHS.login,
@@ -27,10 +28,15 @@ const PUBLIC_PATHS = new Set([
 export const useNotificationStream = (onNotification) => {
   const token = useAuthStore((state) => state.token)
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const user = useAuthStore((state) => state.user) // 사용자 정보 가져오기
+  const userId = user?.id || user?.userId
   const addRealtimeNotification = useNotificationStore((state) => state.addRealtimeNotification)
   const setDietJobResult = useNotificationStore((state) => state.setDietJobResult)
   const setOcrJobResult = useNotificationStore((state) => state.setOcrJobResult)
+  const setOcrScanning = useNotificationStore((state) => state.setOcrScanning)
+  const setDietAnalyzing = useNotificationStore((state) => state.setDietAnalyzing)
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     // SSE 연결 조건: 인증되었고 토큰이 있어야 함, 그리고 public 페이지가 아니어야 함
@@ -71,16 +77,92 @@ export const useNotificationStream = (onNotification) => {
           break
         case 'diet.job.done':
           setDietJobResult(data)
+          setDietAnalyzing(false) // 분석 완료 - 전역 로딩 상태 해제
+          
           if (data.status === 'DONE') {
-            toast.success('식단 분석이 완료되었습니다')
+            const result = data.result || (data.job && data.job.result)
+            logger.info('Diet 분석 완료 알림 수신:', result)
+
+            // 알림 목록에 추가
+            addRealtimeNotification({
+              id: `diet-${data.jobId}`,
+              type: 'diet.job.done',
+              title: '식단 분석 완료',
+              message: '식단 분석이 완료되었습니다. 결과를 확인하려면 클릭하세요.',
+              createdAt: new Date().toISOString(),
+              read: false,
+              result: result
+            })
+
+            toast.success('식단 분석이 완료되었습니다. 여기를 클릭하여 확인하세요!', {
+              duration: 10000,
+              onClick: () => {
+                navigate(ROUTE_PATHS.dietLog, {
+                  state: {
+                    initialAnalysisResult: result
+                  }
+                })
+              }
+            })
           } else if (data.status === 'FAILED') {
             toast.error(`식단 분석 실패: ${data.error || '오류 발생'}`)
           }
           break
         case 'ocr.job.done':
           setOcrJobResult(data)
+          setOcrScanning(false) // 분석 완료 - 전역 로딩 상태 해제
           if (data.status === 'DONE') {
-            toast.success('OCR 처리가 완료되었습니다')
+            const result = data.result
+            logger.info('OCR 분석 완료 알림 수신:', result)
+
+            // 알림 목록에 추가 (휘발성 방지)
+            addRealtimeNotification({
+              id: `ocr-${data.jobId}`,
+              type: 'ocr.job.done',
+              title: 'OCR 분석 완료',
+              message: '처방전 분석이 완료되었습니다. 결과를 확인하려면 클릭하세요.',
+              createdAt: new Date().toISOString(),
+              read: false,
+              result: result // NotificationPage에서 이동할 때 사용할 데이터 포함
+            })
+
+            // 안전 장치: 사용자 ID별로 jobId만 백업 (데이터는 Redis에서 가져옴)
+            if (userId && data.jobId) {
+              try {
+                localStorage.setItem(`ocr_result_${userId}`, JSON.stringify({
+                  timestamp: Date.now(),
+                  userId: userId,
+                  jobId: data.jobId // 번호표만 저장
+                }))
+              } catch (e) {
+                console.error('OCR 결과 백업 실패', e)
+              }
+            }
+
+            toast.success('처방전 분석이 완료되었습니다. 여기를 클릭하여 확인하세요!', {
+              duration: 10000,
+              onClick: () => {
+                logger.debug('분석 완료 알림 클릭됨. 결과 데이터:', result)
+                if (result && result.medications) {
+                  const medications = fromOCRResponse(result.medications)
+                  // 약 등록 페이지로 이동하며 데이터 전달
+                  navigate(ROUTE_PATHS.prescriptionAdd, {
+                    state: {
+                      ocrData: {
+                        medications,
+                        hospitalName: result.hospitalName || result.clinicName || '',
+                        pharmacyName: result.pharmacyName || '',
+                        startDate: result.prescribedDate || new Date().toISOString().split('T')[0]
+                      }
+                    }
+                  })
+                } else {
+                  logger.warn('OCR 결과 데이터가 비어있습니다.')
+                  toast.error('추출된 약물 정보가 없습니다. 수동으로 등록해주세요.')
+                  navigate(ROUTE_PATHS.prescriptionAdd)
+                }
+              }
+            })
           } else if (data.status === 'FAILED') {
             toast.error(`OCR 처리 실패: ${data.error || '오류 발생'}`)
           }

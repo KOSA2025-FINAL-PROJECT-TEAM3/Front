@@ -38,6 +38,11 @@ export const useNotificationStore = create((set) => ({
   error: null,
   dietJobs: {},
   ocrJobs: {},
+  isOcrScanning: false, // OCR 분석 진행 중 여부
+  isDietAnalyzing: false, // 식단 분석 진행 중 여부
+
+  setOcrScanning: (isScanning) => set({ isOcrScanning: isScanning }),
+  setDietAnalyzing: (isAnalyzing) => set({ isDietAnalyzing: isAnalyzing }),
 
   setDietJobResult: (payload) => {
     set((state) => ({
