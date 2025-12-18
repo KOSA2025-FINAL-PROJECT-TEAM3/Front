@@ -90,7 +90,7 @@ export const DiseaseForm = ({ initialValue, onSubmit, onCancel, submitting = fal
         </TextField>
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.25, alignItems: 'center' }}>
+      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexWrap: 'wrap' }}>
         <TextField
           id="diagnosedAt"
           type="date"
@@ -100,27 +100,28 @@ export const DiseaseForm = ({ initialValue, onSubmit, onCancel, submitting = fal
           onChange={(e) => handleChange('diagnosedAt', e.target.value)}
           disabled={form.isDiagnosedDateUnknown}
           InputLabelProps={{ shrink: true }}
-          fullWidth
+          sx={{ minWidth: 160, flex: 1 }}
         />
         <FormControlLabel
           control={
             <Checkbox
+              size="small"
               checked={form.isDiagnosedDateUnknown}
               onChange={(e) => handleChange('isDiagnosedDateUnknown', e.target.checked)}
             />
           }
           label="날짜 모름"
+          sx={{ whiteSpace: 'nowrap' }}
         />
-      </Box>
-
-      <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
         <FormControlLabel
-          control={<Checkbox checked={form.isCritical} onChange={(e) => handleChange('isCritical', e.target.checked)} />}
+          control={<Checkbox size="small" checked={form.isCritical} onChange={(e) => handleChange('isCritical', e.target.checked)} />}
           label="중요 질병"
+          sx={{ whiteSpace: 'nowrap' }}
         />
         <FormControlLabel
-          control={<Checkbox checked={form.isPrivate} onChange={(e) => handleChange('isPrivate', e.target.checked)} />}
+          control={<Checkbox size="small" checked={form.isPrivate} onChange={(e) => handleChange('isPrivate', e.target.checked)} />}
           label="비공개"
+          sx={{ whiteSpace: 'nowrap' }}
         />
       </Stack>
 

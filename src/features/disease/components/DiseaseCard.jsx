@@ -103,23 +103,22 @@ export const DiseaseCard = ({ disease, onSelect, onDelete, onEdit }) => {
         </Typography>
       </Box>
 
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-        <Typography variant="caption" color="text.secondary" noWrap>
-          최근 업데이트: {formatDate(disease?.updatedAt || disease?.createdAt)}
-        </Typography>
-        <Stack direction="row" spacing={1}>
-          {disease?.canEdit ? (
-            <AppButton variant="secondary" size="sm" onClick={handleEdit}>
-              수정
-            </AppButton>
-          ) : null}
-          <AppButton variant="ghost" size="sm" onClick={handleDelete}>
-            삭제
+      <Typography variant="caption" color="text.secondary">
+        최근 업데이트: {formatDate(disease?.updatedAt || disease?.createdAt)}
+      </Typography>
+
+      <Stack direction="row" spacing={1} sx={{ '& > *': { flex: 1 } }}>
+        {disease?.canEdit ? (
+          <AppButton variant="secondary" size="sm" onClick={handleEdit}>
+            수정
           </AppButton>
-          <AppButton variant="primary" size="sm" onClick={handleSelect}>
-            상세
-          </AppButton>
-        </Stack>
+        ) : null}
+        <AppButton variant="ghost" size="sm" onClick={handleDelete}>
+          삭제
+        </AppButton>
+        <AppButton variant="primary" size="sm" onClick={handleSelect}>
+          상세
+        </AppButton>
       </Stack>
     </Paper>
   )

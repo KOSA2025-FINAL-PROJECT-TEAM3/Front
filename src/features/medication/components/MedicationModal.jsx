@@ -11,6 +11,7 @@ import {
   List,
   ListItemButton,
   ListItemText,
+  Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -195,7 +196,7 @@ export const MedicationModal = ({
                 variant="contained"
                 onClick={handleSearch}
                 disabled={searching}
-                sx={{ fontWeight: 900, minWidth: 90 }}
+                sx={{ fontWeight: 900, minWidth: 90, whiteSpace: 'nowrap' }}
               >
                 {searching ? '검색중...' : '검색'}
               </Button>
@@ -204,7 +205,7 @@ export const MedicationModal = ({
                 color="secondary"
                 onClick={handleAISearch}
                 disabled={searching}
-                sx={{ fontWeight: 900, minWidth: 100 }}
+                sx={{ fontWeight: 900, minWidth: 100, whiteSpace: 'nowrap' }}
               >
                 {searching ? 'AI검색중...' : 'AI 검색'}
               </Button>

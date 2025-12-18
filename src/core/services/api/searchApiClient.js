@@ -29,7 +29,7 @@ class SearchApiClient extends ApiClient {
   searchDrugsWithAI(itemName) {
     const query = (itemName || '').trim()
     const params = { itemName: query }
-    return medicationSearchClient.get('/search/ai', { params })
+    return medicationSearchClient.get('/search/ai', { params, timeout: 30000 })
   }
 }
 

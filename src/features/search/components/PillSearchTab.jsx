@@ -325,30 +325,26 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
       </Box>
 
       <Box component="form" onSubmit={handleSearch}>
-        <Stack spacing={1}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
-            <TextField
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              placeholder="약품명만 입력 (예: 타이레놀)"
-              aria-label="약품명 검색어"
-              size="small"
-              fullWidth
-              autoFocus={autoFocus}
-            />
+        <Stack spacing={1.5}>
+          <TextField
+            value={itemName}
+            onChange={(e) => setItemName(e.target.value)}
+            placeholder="약품명만 입력 (예: 타이레놀)"
+            aria-label="약품명 검색어"
+            size="small"
+            fullWidth
+            autoFocus={autoFocus}
+          />
 
+          <Stack direction="row" spacing={1} sx={{ '& > *': { flex: 1 } }}>
             <Button
               type="submit"
               variant="contained"
               disabled={loading || !itemName.trim()}
-              sx={{ fontWeight: 900, minWidth: 96 }}
-              fullWidth
+              sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
             >
               {loading ? '검색 중...' : '검색'}
             </Button>
-          </Stack>
-
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="stretch">
             <Button
               type="button"
               variant="outlined"
@@ -356,8 +352,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
               onClick={handleAISearch}
               disabled={loading || !itemName.trim()}
               title="AI 기능은 정확하지 않습니다. 약은 약사와, 병 증세 진단은 의사와 상담하셔야 합니다."
-              sx={{ fontWeight: 900, minWidth: 120 }}
-              fullWidth
+              sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
             >
               {loading ? '검색 중...' : 'AI 검색'}
             </Button>
@@ -366,8 +361,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
                 type="button"
                 variant="outlined"
                 onClick={() => onOpenOcr()}
-                sx={{ fontWeight: 900, minWidth: 120 }}
-                fullWidth
+                sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
                 startIcon={<CameraAltIcon />}
               >
                 OCR 약봉투
