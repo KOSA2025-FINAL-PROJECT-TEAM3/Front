@@ -14,16 +14,6 @@ class SearchApiClient extends ApiClient {
     })
   }
 
-  suggestSymptoms(query) {
-    const q = (query || '').trim()
-    return medicationSearchClient.get('/search/symptoms', { params: { query: q } })
-  }
-
-  getSymptomDetail(symptomName) {
-    const name = (symptomName || '').trim()
-    return medicationSearchClient.get(`/search/symptoms/${encodeURIComponent(name)}`)
-  }
-
   searchSymptomsWithAI(query) {
     const name = (query || '').trim()
     return medicationSearchClient.get('/search/symptoms/ai', { params: { query: name } })

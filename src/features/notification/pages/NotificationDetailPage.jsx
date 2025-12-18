@@ -6,11 +6,15 @@
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Chip, Container, Paper, Stack, Typography } from '@mui/material'
+import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/mui/BackButton'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
+
+const normalizeTypeKey = (value) => String(value || '').toLowerCase().replace(/\./g, '_')
 
 const formatScheduledTime = (value) => {
   if (!value) return null
@@ -98,12 +102,16 @@ export const NotificationDetailPage = () => {
   )
 
   const getTypeBadgeText = (type) => {
-    switch (type) {
-      case 'medication.logged':
+    const typeKey = normalizeTypeKey(type)
+    switch (typeKey) {
+      case 'medication_logged':
         return '복용 알림'
-      case 'medication.missed':
-      case 'medication.missed.aggregated':
+      case 'medication_missed':
         return '미복용 알림'
+      case 'diet_warning':
+        return '식단 경고'
+      case 'invite_accepted':
+        return '초대 알림'
       default:
         return '알림'
     }
@@ -144,100 +152,86 @@ export const NotificationDetailPage = () => {
   if (!notification) {
     return (
       <MainLayout>
-        <Container maxWidth="md" sx={{ py: 3 }}>
-          <Stack spacing={2}>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <BackButton />
-              <Typography variant="h5" fontWeight={800}>
-                알림 상세
-              </Typography>
-            </Stack>
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography color="text.secondary">알림을 찾을 수 없습니다.</Typography>
-            </Paper>
-          </Stack>
-        </Container>
+        <PageStack>
+          <PageHeader leading={<BackButton />} title="알림 상세" />
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography color="text.secondary">알림을 찾을 수 없습니다.</Typography>
+          </Paper>
+        </PageStack>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Stack spacing={2}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <BackButton />
-            <Typography variant="h5" fontWeight={800}>
-              알림 상세
-            </Typography>
-          </Stack>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="알림 상세" />
 
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={1.5}>
-              <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
-                <Chip label={getTypeBadgeText(notification.type)} color="primary" size="small" />
-                {formattedDate && (
-                  <Typography variant="caption" color="text.secondary">
-                    {formattedDate}
-                  </Typography>
-                )}
-              </Stack>
-
-              <Typography variant="h6" fontWeight={800}>
-                {notification.title}
-              </Typography>
-
-              <Typography variant="body2" color="text.secondary">
-                {notification.message}
-              </Typography>
-
-              {isMissed && (
-                <Box>
-                  <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
-                    {timeLabel && <Chip size="small" label={`예정 시간 ${timeLabel}`} />}
-                    {summary && <Chip size="small" label={summary} />}
-                  </Stack>
-
-                  <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
-                      미복용 약 목록
-                    </Typography>
-                    {fetching && (
-                      <Typography variant="body2" color="text.secondary">
-                        목록을 불러오는 중...
-                      </Typography>
-                    )}
-                    {resolvedMissedMedications.length > 0 ? (
-                      <Stack spacing={1}>
-                        {resolvedMissedMedications.map((med, idx) => (
-                          <Paper
-                            key={`${med.medicationId || med.medicationName || idx}`}
-                            variant="outlined"
-                            sx={{ p: 1.5, borderRadius: 2 }}
-                          >
-                            <Typography fontWeight={700}>
-                              {med.medicationName || '약'}
-                            </Typography>
-                            {med.dosage && (
-                              <Typography variant="body2" color="text.secondary">
-                                {med.dosage}
-                              </Typography>
-                            )}
-                          </Paper>
-                        ))}
-                      </Stack>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        표시할 미복용 약 정보가 없습니다.
-                      </Typography>
-                    )}
-                  </Box>
-                </Box>
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Stack spacing={1.5}>
+            <Stack direction="row" spacing={1} alignItems="center" useFlexGap flexWrap="wrap">
+              <Chip label={getTypeBadgeText(notification.type)} color="primary" size="small" />
+              {formattedDate && (
+                <Typography variant="caption" color="text.secondary">
+                  {formattedDate}
+                </Typography>
               )}
             </Stack>
-          </Paper>
-        </Stack>
-      </Container>
+
+            <Typography variant="h6" fontWeight={800}>
+              {notification.title}
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+              {notification.message}
+            </Typography>
+
+            {isMissed && (
+              <Box>
+                <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
+                  {timeLabel && <Chip size="small" label={`예정 시간 ${timeLabel}`} />}
+                  {summary && <Chip size="small" label={summary} />}
+                </Stack>
+
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" fontWeight={800} sx={{ mb: 1 }}>
+                    미복용 약 목록
+                  </Typography>
+                  {fetching && (
+                    <Typography variant="body2" color="text.secondary">
+                      목록을 불러오는 중...
+                    </Typography>
+                  )}
+                  {resolvedMissedMedications.length > 0 ? (
+                    <Stack spacing={1}>
+                      {resolvedMissedMedications.map((med, idx) => (
+                        <Paper
+                          key={`${med.medicationId || med.medicationName || idx}`}
+                          variant="outlined"
+                          sx={{ p: 1.5, borderRadius: 2 }}
+                        >
+                          <Typography fontWeight={700}>
+                            {med.medicationName || '약'}
+                          </Typography>
+                          {med.dosage && (
+                            <Typography variant="body2" color="text.secondary">
+                              {med.dosage}
+                            </Typography>
+                          )}
+                        </Paper>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      표시할 미복용 약 정보가 없습니다.
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+            )}
+          </Stack>
+        </Paper>
+      </PageStack>
     </MainLayout>
   )
 }

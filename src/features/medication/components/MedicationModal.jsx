@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import {
   Box,
   Button,
@@ -10,7 +11,6 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Stack,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -30,6 +30,7 @@ export const MedicationModal = ({
   initialMedication = null,
   mode = 'add',
 }) => {
+  const [step, setStep] = useState(mode === 'edit' ? 'detail' : 'search')
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [selectedMedication, setSelectedMedication] = useState(initialMedication)
@@ -54,6 +55,7 @@ export const MedicationModal = ({
     if (!initialMedication) return
 
     setSelectedMedication(initialMedication)
+    setStep('detail')
     setMedicationDetails({
       dosageAmount: initialMedication.dosageAmount || 1,
       intakeTimeIndices: initialMedication.intakeTimeIndices || intakeTimes.map((_, i) => i),
@@ -112,6 +114,7 @@ export const MedicationModal = ({
       daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
       notes: '',
     })
+    setStep('detail')
   }
 
   const handleSubmit = () => {
@@ -148,18 +151,31 @@ export const MedicationModal = ({
       PaperProps={{ sx: { borderRadius: 4 } }}
     >
       <DialogTitle sx={{ pb: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-          <Typography variant="h6" sx={{ fontWeight: 900 }}>
-            {mode === 'edit' ? '약 정보 수정' : '약 검색'}
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 1 }}>
+          <IconButton
+            aria-label="뒤로"
+            onClick={() => {
+              if (mode === 'add' && step === 'detail') {
+                setStep('search')
+                setSelectedMedication(null)
+                return
+              }
+              onClose?.()
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ fontWeight: 900, textAlign: 'center' }}>
+            {mode === 'edit' ? '약 정보 수정' : step === 'search' ? '약 검색' : '복용 정보 입력'}
           </Typography>
           <IconButton aria-label="닫기" onClick={() => onClose?.()}>
             <CloseIcon />
           </IconButton>
-        </Stack>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 0 }}>
-        {mode === 'add' ? (
+        {mode === 'add' && step === 'search' ? (
           <Box sx={{ mb: 2 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 1.5 }}>
               <TextField
@@ -210,10 +226,16 @@ export const MedicationModal = ({
                 )
               })}
             </List>
+
+            {!searching && searchResults.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                약 이름을 검색하거나 AI 검색을 사용해보세요.
+              </Typography>
+            ) : null}
           </Box>
         ) : null}
 
-        {selectedMedication ? (
+        {step === 'detail' && selectedMedication ? (
           <Box sx={{ p: 2, borderRadius: 3, border: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1.5 }}>
               {selectedMedication.itemName || selectedMedication.name} 복용 정보
@@ -296,7 +318,7 @@ export const MedicationModal = ({
           </Box>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            {mode === 'add' ? '검색 결과에서 약을 선택하세요.' : '수정할 약 정보가 없습니다.'}
+            {mode === 'add' ? (step === 'search' ? '검색 결과에서 약을 선택하세요.' : null) : '수정할 약 정보가 없습니다.'}
           </Typography>
         )}
       </DialogContent>
@@ -305,7 +327,12 @@ export const MedicationModal = ({
         <Button variant="outlined" onClick={() => onClose?.()} sx={{ fontWeight: 900 }}>
           닫기
         </Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={!selectedMedication} sx={{ fontWeight: 900 }}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={!selectedMedication || step !== 'detail'}
+          sx={{ fontWeight: 900 }}
+        >
           {mode === 'edit' ? '수정 완료' : '등록'}
         </Button>
       </DialogActions>

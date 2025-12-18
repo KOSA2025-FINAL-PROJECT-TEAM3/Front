@@ -1,4 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import {
   Box,
   Dialog,
@@ -15,6 +16,7 @@ export const AppDialog = ({
   title,
   description,
   onClose,
+  onBack,
   children,
   footer,
   maxWidth = 'sm',
@@ -22,6 +24,7 @@ export const AppDialog = ({
   ...props
 }) => {
   const resolvedOpen = Boolean(open ?? isOpen)
+  const handleBack = onBack || onClose
 
   return (
     <Dialog
@@ -32,17 +35,26 @@ export const AppDialog = ({
       {...props}
     >
       {(title || onClose) && (
-        <DialogTitle sx={{ pr: onClose ? 6 : 3 }}>
-          {title}
-          {onClose && (
-            <IconButton
-              aria-label="닫기"
-              onClick={onClose}
-              sx={{ position: 'absolute', right: 8, top: 8 }}
-            >
-              <CloseIcon />
-            </IconButton>
-          )}
+        <DialogTitle sx={{ px: 1.25, py: 1.25 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center' }}>
+            {handleBack ? (
+              <IconButton aria-label="뒤로" onClick={handleBack}>
+                <ArrowBackIcon />
+              </IconButton>
+            ) : (
+              <Box sx={{ width: 48 }} />
+            )}
+
+            <Box sx={{ textAlign: 'center', fontWeight: 900, px: 1 }}>{title}</Box>
+
+            {onClose ? (
+              <IconButton aria-label="닫기" onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            ) : (
+              <Box sx={{ width: 48 }} />
+            )}
+          </Box>
         </DialogTitle>
       )}
 
@@ -66,6 +78,7 @@ AppDialog.propTypes = {
   title: PropTypes.node,
   description: PropTypes.node,
   onClose: PropTypes.func,
+  onBack: PropTypes.func,
   children: PropTypes.node,
   footer: PropTypes.node,
   maxWidth: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
@@ -73,4 +86,3 @@ AppDialog.propTypes = {
 }
 
 export default AppDialog
-

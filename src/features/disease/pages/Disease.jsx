@@ -12,9 +12,12 @@ import AppButton from '@shared/components/mui/AppButton'
 import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
 import AddIcon from '@mui/icons-material/Add'
 import FileDownloadIcon from '@mui/icons-material/FileDownload'
-import { Box, Container, Paper, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import { useDiseases } from '../hooks/useDiseases'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const DiseasePage = () => {
   const navigate = useNavigate()
@@ -178,17 +181,12 @@ export const DiseasePage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mb: 2 }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h5" sx={{ fontWeight: 900 }}>
-                질병 관리
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                등록된 질병을 확인하고 삭제 시 휴지통으로 이동합니다.
-              </Typography>
-            </Box>
+      <PageStack>
+        <PageHeader
+          leading={<BackButton />}
+          title="질병 관리"
+          subtitle="등록된 질병을 확인하고, 삭제 시 휴지통으로 이동합니다."
+          right={
             <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
               <AppButton variant="primary" onClick={() => setShowForm(true)}>
                 질병 추가
@@ -203,11 +201,11 @@ export const DiseasePage = () => {
                 {exporting ? '다운로드 중...' : 'PDF 다운로드'}
               </AppButton>
             </Stack>
-          </Stack>
-        </Paper>
+          }
+        />
 
         {!userId ? (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary">
             로그인 정보를 확인할 수 없습니다.
           </Typography>
         ) : null}
@@ -243,7 +241,7 @@ export const DiseasePage = () => {
             submitting={submitting}
           />
         </AppDialog>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

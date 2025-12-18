@@ -9,15 +9,17 @@ import RestaurantIcon from '@mui/icons-material/Restaurant'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import PropTypes from 'prop-types'
+import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 
 export const LargeActionButtons = () => {
   const navigate = useNavigate()
+  const openSearchOverlay = useSearchOverlayStore((state) => state.open)
 
   const buttons = [
     {
       label: '약품 검색',
       icon: <SearchIcon sx={{ fontSize: 40 }} />,
-      path: ROUTE_PATHS.search,
+      onClick: () => openSearchOverlay('pill'),
       color: 'primary',
     },
     {
@@ -35,7 +37,7 @@ export const LargeActionButtons = () => {
           key={index}
           variant="contained"
           color={button.color}
-          onClick={() => navigate(button.path)}
+          onClick={() => (button.onClick ? button.onClick() : navigate(button.path))}
           sx={{
             flex: 1,
             py: 4,

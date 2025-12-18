@@ -9,6 +9,10 @@ import AppDialog from '@shared/components/mui/AppDialog'
 import AppButton from '@shared/components/mui/AppButton'
 import DiseaseForm from '@features/disease/components/DiseaseForm'
 import PhoneIcon from '@mui/icons-material/Phone'
+import MainLayout from '@shared/components/layout/MainLayout'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 const CATEGORY = {
   hospital: { label: '병원', code: 'HP8' },
@@ -624,292 +628,278 @@ export const PlaceSearchPage = () => {
   const selectedCategoryLabel = useMemo(() => CATEGORY[tab].label, [tab])
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Paper variant="outlined" sx={{ p: 2.5, borderRadius: 3 }}>
-        <Stack spacing={0.75}>
-          <Typography variant="h6" sx={{ fontWeight: 900 }}>
-            병원/약국 검색(지도)
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Kakao Maps 기반 주변 {selectedCategoryLabel} 검색
-          </Typography>
+    <MainLayout>
+      <>
+        <PageStack>
+          <PageHeader leading={<BackButton />} title="병원/약국" subtitle={`Kakao Maps 기반 주변 ${selectedCategoryLabel} 검색`} />
+
           {!kakaoKey ? (
             <Alert severity="warning">
               `VITE_KAKAO_JAVASCRIPT_KEY`가 필요합니다. (`Front/.env.template` 참고)
             </Alert>
           ) : null}
-        </Stack>
-      </Paper>
 
-      <Paper variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden' }}>
-        <Tabs value={tab} onChange={(_, next) => setTab(next)} variant="fullWidth">
-          <Tab value="hospital" label="병원" />
-          <Tab value="pharmacy" label="약국" />
-        </Tabs>
-        <Divider />
+          <Paper variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <Tabs value={tab} onChange={(_, next) => setTab(next)} variant="fullWidth">
+              <Tab value="hospital" label="병원" />
+              <Tab value="pharmacy" label="약국" />
+            </Tabs>
+            <Divider />
 
-        <Box sx={{ p: 2 }}>
-          <Stack spacing={1.5}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-              <TextField
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="이름/주소 키워드 검색"
-                size="small"
-                fullWidth
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    searchByKeyword()
-                  }
-                }}
-              />
-              <Button
-                variant="contained"
-                onClick={searchByKeyword}
-                disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
-                sx={{ fontWeight: 900, minWidth: 110 }}
-              >
-                검색
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={searchByCategory}
-                disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
-                sx={{ fontWeight: 900, minWidth: 140 }}
-              >
-                현재 지도 위치 중심으로 찾기
-              </Button>
-            </Stack>
+            <Box sx={{ p: 2 }}>
+              <Stack spacing={1.5}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                  <TextField
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="이름/주소 키워드 검색"
+                    size="small"
+                    fullWidth
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        searchByKeyword()
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={searchByKeyword}
+                    disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
+                    sx={{ fontWeight: 900, minWidth: 110 }}
+                  >
+                    검색
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={searchByCategory}
+                    disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
+                    sx={{ fontWeight: 900, minWidth: 140 }}
+                  >
+                    현재 지도 위치 중심으로 찾기
+                  </Button>
+                </Stack>
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center">
-              <Button
-                variant="outlined"
-                onClick={requestLocation}
-                disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
-                sx={{ fontWeight: 900 }}
-              >
-                내 위치로 이동
-              </Button>
-              {tab === 'hospital' ? (
-                <Button
-                  variant="contained"
-                  onClick={openDiseaseKeywordPicker}
-                  disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
-                  sx={{ fontWeight: 900 }}
-                >
-                  내 질환 기반 추천
-                </Button>
-              ) : null}
-              {coords ? (
-                <Chip
-                  size="small"
-                  label={`현재 위치: ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`}
-                  sx={{ fontWeight: 700 }}
-                />
-              ) : null}
-              {centerCoords ? (
-                <Chip size="small" label={`이 위치 중심 탐색: ${centerCoords.lat.toFixed(5)}, ${centerCoords.lng.toFixed(5)}`} />
-              ) : null}
-              {tab === 'hospital' && recommendationKeywords.length > 0 ? (
-                <Chip
-                  size="small"
-                  label={`추천 키워드: ${recommendationKeywords.slice(0, 3).join(', ')}${recommendationKeywords.length > 3 ? '…' : ''}`}
-                />
-              ) : null}
-              {status === 'loadingSdk' ? (
-                <Chip size="small" label="지도 로딩 중..." />
-              ) : status === 'searching' ? (
-                <Chip size="small" label="검색 중..." />
-              ) : isRecommending ? (
-                <Chip size="small" label="추천 중..." />
-              ) : null}
-            </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center">
+                  <Button
+                    variant="outlined"
+                    onClick={requestLocation}
+                    disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
+                    sx={{ fontWeight: 900 }}
+                  >
+                    내 위치로 이동
+                  </Button>
+                  {tab === 'hospital' ? (
+                    <Button
+                      variant="contained"
+                      onClick={openDiseaseKeywordPicker}
+                      disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
+                      sx={{ fontWeight: 900 }}
+                    >
+                      내 질환 기반 추천
+                    </Button>
+                  ) : null}
+                  {coords ? <Chip size="small" label={`현재 위치: ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`} /> : null}
+                  {centerCoords ? (
+                    <Chip size="small" label={`이 위치 중심 탐색: ${centerCoords.lat.toFixed(5)}, ${centerCoords.lng.toFixed(5)}`} />
+                  ) : null}
+                  {tab === 'hospital' && recommendationKeywords.length > 0 ? (
+                    <Chip
+                      size="small"
+                      label={`추천 키워드: ${recommendationKeywords.slice(0, 3).join(', ')}${recommendationKeywords.length > 3 ? '…' : ''}`}
+                    />
+                  ) : null}
+                  {status === 'loadingSdk' ? (
+                    <Chip size="small" label="지도 로딩 중..." />
+                  ) : status === 'searching' ? (
+                    <Chip size="small" label="검색 중..." />
+                  ) : isRecommending ? (
+                    <Chip size="small" label="추천 중..." />
+                  ) : null}
+                </Stack>
 
-            {error ? <Alert severity={status === 'error' ? 'error' : 'warning'}>{error}</Alert> : null}
+                {error ? <Alert severity={status === 'error' ? 'error' : 'warning'}>{error}</Alert> : null}
 
-            <Box
-              sx={{
-                width: '100%',
-                height: 320,
-                borderRadius: 3,
-                overflow: 'hidden',
-                bgcolor: 'grey.100',
-                border: 1,
-                borderColor: 'divider',
-                position: 'relative',
-              }}
-            >
-              <Box ref={containerRef} sx={{ width: '100%', height: '100%' }} />
-              <Box
-                sx={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 0.75,
-                }}
-              >
                 <Box
                   sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 999,
-                    bgcolor: 'warning.main',
-                    border: '2px solid white',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.18)',
-                  }}
-                />
-                <Box
-                  sx={{
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 999,
-                    bgcolor: 'rgba(0,0,0,0.65)',
-                    color: 'white',
-                    fontSize: 12,
-                    fontWeight: 900,
-                    lineHeight: 1,
+                    width: '100%',
+                    height: 320,
+                    borderRadius: 3,
+                    overflow: 'hidden',
+                    bgcolor: 'grey.100',
+                    border: 1,
+                    borderColor: 'divider',
+                    position: 'relative',
                   }}
                 >
-                  이 위치 중심 탐색
-                </Box>
-              </Box>
-            </Box>
-
-            <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
-                결과 ({results.length})
-              </Typography>
-              <Stack spacing={1}>
-                {results.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    검색 결과가 없습니다.
-                  </Typography>
-                ) : (
-                  results.slice(0, 30).map((item) => (
-                    <Paper
-                      key={item.id}
-                      variant="outlined"
-                      sx={{ p: 1.5, borderRadius: 2.5, cursor: 'pointer', '&:hover': { bgcolor: 'grey.50' } }}
-                      onClick={() => {
-                        const lat = Number(item.y)
-                        const lng = Number(item.x)
-                        if (Number.isFinite(lat) && Number.isFinite(lng)) {
-                          setCenter(lat, lng)
-                        }
+                  <Box ref={containerRef} sx={{ width: '100%', height: '100%' }} />
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: '50%',
+                      top: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      pointerEvents: 'none',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 0.75,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 999,
+                        bgcolor: 'warning.main',
+                        border: '2px solid white',
+                        boxShadow: '0 2px 10px rgba(0,0,0,0.18)',
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 999,
+                        bgcolor: 'rgba(0,0,0,0.65)',
+                        color: 'white',
+                        fontSize: 12,
+                        fontWeight: 900,
+                        lineHeight: 1,
                       }}
                     >
-                      <Stack spacing={0.25}>
-                        <Typography sx={{ fontWeight: 900 }}>{item.place_name}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {getAddress(item)}
-                        </Typography>
-                        {item.phone ? (
-                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                            <Typography variant="caption" color="text.secondary" noWrap>
-                              {item.phone}
+                      이 위치 중심 탐색
+                    </Box>
+                  </Box>
+                </Box>
+
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
+                    결과 ({results.length})
+                  </Typography>
+                  <Stack spacing={1}>
+                    {results.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        검색 결과가 없습니다.
+                      </Typography>
+                    ) : (
+                      results.slice(0, 30).map((item) => (
+                        <Paper
+                          key={item.id}
+                          variant="outlined"
+                          sx={{ p: 1.5, borderRadius: 3, cursor: 'pointer', '&:hover': { bgcolor: 'grey.50' } }}
+                          onClick={() => {
+                            const lat = Number(item.y)
+                            const lng = Number(item.x)
+                            if (Number.isFinite(lat) && Number.isFinite(lng)) {
+                              setCenter(lat, lng)
+                            }
+                          }}
+                        >
+                          <Stack spacing={0.25}>
+                            <Typography sx={{ fontWeight: 900 }}>{item.place_name}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {getAddress(item)}
                             </Typography>
-                            <AppButton
-                              variant="secondary"
-                              size="sm"
-                              component="a"
-                              href={`tel:${sanitizeTelHref(item.phone)}`}
-                              onClick={(e) => e.stopPropagation()}
-                              startIcon={<PhoneIcon fontSize="small" />}
-                              sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
-                            >
-                              전화
-                            </AppButton>
+                            {item.phone ? (
+                              <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
+                                <Typography variant="caption" color="text.secondary" noWrap>
+                                  {item.phone}
+                                </Typography>
+                                <AppButton
+                                  variant="secondary"
+                                  size="sm"
+                                  component="a"
+                                  href={`tel:${sanitizeTelHref(item.phone)}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  startIcon={<PhoneIcon fontSize="small" />}
+                                  sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
+                                >
+                                  전화
+                                </AppButton>
+                              </Stack>
+                            ) : null}
                           </Stack>
-                        ) : null}
-                      </Stack>
-                    </Paper>
-                  ))
-                )}
+                        </Paper>
+                      ))
+                    )}
+                  </Stack>
+                  {results.length > 30 ? (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                      목록은 최대 30개까지 표시합니다(지도에는 전체 결과가 표시될 수 있음).
+                    </Typography>
+                  ) : null}
+                </Box>
               </Stack>
-              {results.length > 30 ? (
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                  목록은 최대 30개까지 표시합니다(지도에는 전체 결과가 표시될 수 있음).
-                </Typography>
-              ) : null}
             </Box>
-          </Stack>
-        </Box>
-      </Paper>
+          </Paper>
+        </PageStack>
 
-      <AppDialog
-        isOpen={showKeywordPicker}
-        title="내 질환 기반 추천"
-        description="등록된 질환명에서 추천 검색에 사용할 키워드를 선택하세요. (예: 고혈압, 고지혈증)"
-        onClose={() => setShowKeywordPicker(false)}
-        maxWidth="sm"
-      >
-        <Stack spacing={1.25}>
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            {keywordOptions.map((keyword) => {
-              const selected = selectedKeywords.includes(keyword)
-              return (
-                <Chip
-                  key={keyword}
-                  label={keyword}
-                  clickable
-                  onClick={() => {
-                    setSelectedKeywords((prev) =>
-                      prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword],
-                    )
-                  }}
-                  color={selected ? 'primary' : 'default'}
-                  variant={selected ? 'filled' : 'outlined'}
-                  sx={{ fontWeight: 800 }}
-                />
-              )
-            })}
-          </Stack>
+        <AppDialog
+          isOpen={showKeywordPicker}
+          title="내 질환 기반 추천"
+          description="등록된 질환명에서 추천 검색에 사용할 키워드를 선택하세요. (예: 고혈압, 고지혈증)"
+          onClose={() => setShowKeywordPicker(false)}
+          maxWidth="sm"
+        >
+          <Stack spacing={1.25}>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              {keywordOptions.map((keyword) => {
+                const selected = selectedKeywords.includes(keyword)
+                return (
+                  <Chip
+                    key={keyword}
+                    label={keyword}
+                    clickable
+                    onClick={() => {
+                      setSelectedKeywords((prev) =>
+                        prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword],
+                      )
+                    }}
+                    color={selected ? 'primary' : 'default'}
+                    variant={selected ? 'filled' : 'outlined'}
+                    sx={{ fontWeight: 800 }}
+                  />
+                )
+              })}
+            </Stack>
 
-          <Stack direction="row" spacing={1} justifyContent="flex-end">
-            <AppButton variant="ghost" onClick={() => setShowKeywordPicker(false)}>
-              취소
-            </AppButton>
-            <AppButton
-              variant="secondary"
-              onClick={() => setSelectedKeywords(keywordOptions.slice(0, 6))}
-              disabled={keywordOptions.length === 0}
-            >
-              기본 선택
-            </AppButton>
-            <AppButton
-              variant="primary"
-              loading={isRecommending}
-              onClick={async () => {
-                setShowKeywordPicker(false)
-                await runHospitalRecommendationSearch(selectedKeywords)
-              }}
-            >
-              추천 검색
-            </AppButton>
+            <Stack direction="row" spacing={1} justifyContent="flex-end">
+              <AppButton variant="ghost" onClick={() => setShowKeywordPicker(false)}>
+                취소
+              </AppButton>
+              <AppButton
+                variant="secondary"
+                onClick={() => setSelectedKeywords(keywordOptions.slice(0, 6))}
+                disabled={keywordOptions.length === 0}
+              >
+                기본 선택
+              </AppButton>
+              <AppButton
+                variant="primary"
+                loading={isRecommending}
+                onClick={async () => {
+                  setShowKeywordPicker(false)
+                  await runHospitalRecommendationSearch(selectedKeywords)
+                }}
+              >
+                추천 검색
+              </AppButton>
+            </Stack>
           </Stack>
-        </Stack>
-      </AppDialog>
+        </AppDialog>
 
-      <AppDialog
-        isOpen={showDiseaseForm}
-        title="질환 추가"
-        description="등록된 질환이 없어 추천을 할 수 없습니다. 질환을 추가해주세요."
-        onClose={() => setShowDiseaseForm(false)}
-        maxWidth="sm"
-      >
-        <DiseaseForm
-          onSubmit={handleSubmitDisease}
-          onCancel={() => setShowDiseaseForm(false)}
-          submitting={diseaseSubmitting}
-        />
-      </AppDialog>
-    </Box>
+        <AppDialog
+          isOpen={showDiseaseForm}
+          title="질환 추가"
+          description="등록된 질환이 없어 추천을 할 수 없습니다. 질환을 추가해주세요."
+          onClose={() => setShowDiseaseForm(false)}
+          maxWidth="sm"
+        >
+          <DiseaseForm onSubmit={handleSubmitDisease} onCancel={() => setShowDiseaseForm(false)} submitting={diseaseSubmitting} />
+        </AppDialog>
+      </>
+    </MainLayout>
   )
 }
 

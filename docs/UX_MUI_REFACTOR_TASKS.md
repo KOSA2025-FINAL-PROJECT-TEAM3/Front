@@ -5,10 +5,10 @@
 
 ---
 
-## 현재 상태 스냅샷 (2025-12-15)
+## 현재 상태 스냅샷 (2025-12-16)
 
 - [x] Workstream 1(AppShell/Navigation) — 1차 Spike 반영: `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
-- [x] Workstream 2(Accessibility/Theme) — 확대모드/토큰 정비(1차): `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
+- [x] Workstream 2(Accessibility/Theme) — 글자 크기(3단계) 기반 토큰 정비(확대모드 → font scale level): `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
 - [x] Workstream 3(Shared UI 제거) — 제거 완료: `Front/docs/WORKLOG_2025-12-15_SHARED_UI_REMOVAL.md`
 - [x] Workstream 4(Feature P0) — 화면별 MUI 전환(완료: Settings 1차 + Family/Medication/Search/OCR/Devtools + Places placeholder):
   - `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
@@ -41,14 +41,14 @@
 
 ### Phase 2. MUI Foundation 구축
 - [x] `Front/src/styles/theme.js` 토큰 확장(타이포/간격/컬러/컴포넌트 오버라이드)
-- [x] 접근성(확대모드) 테마 스위칭 초안 + 저장 방식(로컬) 확정
+- [x] 접근성(글자 크기 3단계) 테마 스위칭 초안 + 저장 방식(로컬) 확정
 - [x] Design System 문서(`docs/DesignSystem.md`) 작성/갱신
 
 ### Phase 3. AppShell/Navigation 교체
 - [x] `AdaptiveNavigation` 표준 1차 내비로 통합(모바일 BottomNav + 데스크톱 Sidebar)
 - [x] Role 기반 Primary Nav 기본 세트 구현(Senior 3 / Caregiver 4)
 - [x] 레거시 `/chat` → `/chat/family` 리다이렉트
-- [x] VoiceAssistant 비노출 가드(채팅 fullScreen, OCR/식단 로그 페이지)
+- [x] VoiceAssistant 비노출 가드(채팅 `/chat*`, 처방전 `/prescriptions*`, OCR/식단 로그, focus-mode 활성 시)
 - [x] `AppShell.jsx`로 책임 분리(MainLayout 점진 제거): `Front/src/shared/components/layout/AppShell.jsx`
 - [x] 레거시 `BottomNavigation.jsx`/SCSS 정리(삭제)
 - [x] “카메라/지도 집중 모드” 가드 보강(페이지 단위 → 컴포넌트/상태 단위)
@@ -65,6 +65,7 @@
   - [x] `Front/src/features/dashboard/components/FamilyMemberCard.jsx`
 - [x] Prescriptions/Medication UI 전환
   - [x] `Front/src/features/medication/pages/MedicationManagement.jsx`
+  - [x] `Front/src/features/medication/pages/TodayMedications.jsx`
   - [x] `Front/src/features/medication/pages/PrescriptionAddPage.jsx`
   - [x] `Front/src/features/medication/pages/PrescriptionDetailPage.jsx`
   - [x] `Front/src/features/medication/pages/MedicationAddPage.jsx`
@@ -135,7 +136,7 @@
 ## Worklogs
 
 - 2025-12-14: AppShell/Navigation Spike — `Front/docs/WORKLOG_2025-12-14_APP_SHELL_NAV_SPIKE.md`
-- 2025-12-14: Accessibility/Theme(확대모드) — `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
+- 2025-12-14: Accessibility/Theme(글자 크기/확대모드) — `Front/docs/WORKLOG_2025-12-14_A11Y_THEME.md`
 - 2025-12-14: Shared UI 인벤토리(Workstream 3) — `Front/docs/WORKLOG_2025-12-14_SHARED_UI_INVENTORY.md`
 - 2025-12-14: Settings 화면 MUI 전환(1차) — `Front/docs/WORKLOG_2025-12-14_SETTINGS_MUI.md`
 - 2025-12-14: Playwright E2E Smoke(시니어/보호자) — `Front/docs/WORKLOG_2025-12-14_PLAYWRIGHT_SMOKE.md`

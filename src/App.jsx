@@ -33,6 +33,9 @@ const KakaoCallbackPage = lazy(() => import('@features/auth/pages/KakaoCallback'
 const FamilyManagementPage = lazy(() => import('@features/family/pages/FamilyManagement'))
 const FamilyInvitePage = lazy(() => import('@features/family/pages/FamilyInvite'))
 const FamilyMemberDetailPage = lazy(() => import('@features/family/pages/FamilyMemberDetail'))
+const FamilyMemberMedicationPage = lazy(() => import('@features/family/pages/FamilyMemberMedicationPage'))
+const FamilyMemberDietPage = lazy(() => import('@features/family/pages/FamilyMemberDietPage'))
+const FamilyMemberDiseasePage = lazy(() => import('@features/family/pages/FamilyMemberDiseasePage'))
 const InviteCodeEntryPage = lazy(() => import('@features/family/pages/InviteCodeEntry'))
 const SettingsPage = lazy(() => import('@features/settings/pages/Settings'))
 const ProfileEditPage = lazy(() => import('@features/settings/pages/Profile/ProfileEdit'))
@@ -56,7 +59,6 @@ const DiseasePage = lazy(() => import('@features/disease/pages/Disease'))
 const DiseaseDetailPage = lazy(() => import('@features/disease/pages/DiseaseDetailPage'))
 const SuspectedDiseasePage = lazy(() => import('@features/disease/pages/SuspectedDiseasePage'))
 const DiseaseRestrictionsPage = lazy(() => import('@features/disease/pages/DiseaseRestrictionsPage'))
-const ChatConversationPage = lazy(() => import('@features/chat/pages/ChatConversationPage'))
 const FamilyChatConversationPage = lazy(() => import('@features/chat/pages/FamilyChatConversationPage'))
 const NotificationPage = lazy(() => import('@features/notification/pages/NotificationPage'))
 const NotificationDetailPage = lazy(() => import('@features/notification/pages/NotificationDetailPage'))
@@ -150,8 +152,8 @@ function InviteAcceptRedirect() {
 	    customerRole: state.customerRole,
 	    _hasHydrated: state._hasHydrated,
 	  }))
-	  const { accessibilityMode, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
-	    accessibilityMode: state.accessibilityMode,
+	  const { fontScaleLevel, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
+	    fontScaleLevel: state.fontScaleLevel,
 	    ensureDefaultForRole: state.ensureDefaultForRole,
 	  }))
 
@@ -160,7 +162,7 @@ function InviteAcceptRedirect() {
 	    ensureDefaultForRole(customerRole)
 	  }, [_hasHydrated, customerRole, ensureDefaultForRole])
 
-	  const theme = useMemo(() => createAppTheme({ accessibilityMode }), [accessibilityMode])
+	  const theme = useMemo(() => createAppTheme({ fontScaleLevel }), [fontScaleLevel])
 	
 	  return (
 	    <ThemeProvider theme={theme}>
@@ -334,6 +336,18 @@ function InviteAcceptRedirect() {
                   path={ROUTE_PATHS.familyMemberDetail}
                   element={<PrivateRoute element={<FamilyMemberDetailPage />} />}
                 />
+                <Route
+                  path={ROUTE_PATHS.familyMemberMedication}
+                  element={<PrivateRoute element={<FamilyMemberMedicationPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.familyMemberDiet}
+                  element={<PrivateRoute element={<FamilyMemberDietPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.familyMemberDisease}
+                  element={<PrivateRoute element={<FamilyMemberDiseasePage />} />}
+                />
 
 
                 {/* 채팅 */}
@@ -343,7 +357,7 @@ function InviteAcceptRedirect() {
                 />
                 <Route
                   path={ROUTE_PATHS.chatConversation}
-                  element={<PrivateRoute element={<ChatConversationPage />} />}
+                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.familyChat} replace />} />}
                 />
 
                 <Route

@@ -4,6 +4,9 @@ import { AccessibilitySection } from '../components/AccessibilitySection.jsx'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { SETTINGS_MENU_DEFINITIONS } from '@/constants/uiConstants'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 import {
   Avatar,
   Box,
@@ -45,17 +48,10 @@ export const SettingsPage = () => {
 
   return (
     <MainLayout>
-      <Box sx={{ pb: 2 }}>
-        <Stack spacing={2.5}>
-          <Box>
-            <Typography variant="h4" component="h1" fontWeight={800}>
-              설정
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              계정 · 알림 · 개인정보 설정을 관리하세요.
-            </Typography>
-          </Box>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="설정" subtitle="계정 · 알림 · 개인정보 설정을 관리하세요." />
 
+        <Stack spacing={2.5}>
           <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <Avatar sx={{ width: 44, height: 44, fontWeight: 800 }}>{initials}</Avatar>
@@ -92,7 +88,7 @@ export const SettingsPage = () => {
             </List>
           </Paper>
         </Stack>
-      </Box>
+      </PageStack>
     </MainLayout>
   )
 }

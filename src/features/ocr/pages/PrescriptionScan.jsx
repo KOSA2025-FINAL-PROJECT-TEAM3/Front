@@ -1,7 +1,7 @@
 import React from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import CameraCapture from '../components/CameraCapture'
-import { Alert, Box, Button, CircularProgress, Container, Paper, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from '@mui/material'
 import {
   PharmacyHeader,
   MedicationCardList,
@@ -10,6 +10,10 @@ import {
   RegistrationInfo
 } from '../components'
 import { useOcrRegistration } from '../hooks/useOcrRegistration'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import BackButton from '@shared/components/mui/BackButton'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * 처방전 스캔 및 약물 등록 페이지
@@ -23,6 +27,7 @@ import { useOcrRegistration } from '../hooks/useOcrRegistration'
  * 6. registering: 등록 중
  */
 const PrescriptionScanPage = () => {
+  const navigate = useNavigate()
   const {
     // 상태
     step,
@@ -47,12 +52,27 @@ const PrescriptionScanPage = () => {
     reset
   } = useOcrRegistration()
 
+  const handleBack = () => {
+    if (step !== 'select') {
+      setStep('select')
+      return
+    }
+    navigate(-1)
+  }
+
   return (
-    <MainLayout>
-      <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100', pb: 10 }}>
-        {/* 에러 메시지 */}
-        {error && (
-          <Container maxWidth="md" sx={{ pt: 2 }}>
+    <MainLayout showBottomNav={false} fullScreen={step === 'camera'}>
+      {step === 'camera' ? (
+        <CameraCapture onCapture={handleCameraCapture} onCancel={() => setStep('select')} />
+      ) : (
+        <PageStack>
+          <PageHeader
+            title="처방전 등록"
+            subtitle="처방전을 촬영하거나 앨범에서 선택해 등록할 수 있어요."
+            leading={<BackButton onClick={handleBack} />}
+          />
+
+          {error && (
             <Alert
               severity="error"
               action={
@@ -63,21 +83,10 @@ const PrescriptionScanPage = () => {
             >
               {error}
             </Alert>
-          </Container>
-        )}
+          )}
 
-        {/* Step 1: 선택 화면 */}
-        {step === 'select' && (
-          <Container maxWidth="sm" sx={{ py: 6 }}>
-            <Stack spacing={3} alignItems="center" textAlign="center">
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 900 }}>
-                  처방전 등록
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  처방전을 촬영하거나 앨범에서 선택해주세요.
-                </Typography>
-              </Box>
+          {step === 'select' && (
+            <Stack spacing={3} alignItems="center" textAlign="center" sx={{ py: { xs: 3, md: 5 } }}>
               <Stack spacing={2} sx={{ width: '100%', maxWidth: 420 }}>
                 <Button variant="contained" color="success" size="large" onClick={() => setStep('camera')}>
                   📷 카메라 촬영
@@ -88,20 +97,9 @@ const PrescriptionScanPage = () => {
                 </Button>
               </Stack>
             </Stack>
-          </Container>
-        )}
+          )}
 
-        {/* Step 2: 카메라 */}
-        {step === 'camera' && (
-          <CameraCapture
-            onCapture={handleCameraCapture}
-            onCancel={() => setStep('select')}
-          />
-        )}
-
-        {/* Step 3: 미리보기 */}
-        {step === 'preview' && (
-          <Container maxWidth="md" sx={{ py: 2 }}>
+          {step === 'preview' && (
             <Stack spacing={2}>
               <Typography variant="h6" sx={{ fontWeight: 900, textAlign: 'center' }}>
                 이미지 확인
@@ -128,13 +126,10 @@ const PrescriptionScanPage = () => {
                 </Button>
               </Stack>
             </Stack>
-          </Container>
-        )}
+          )}
 
-        {/* Step 4: 분석 중 */}
-        {step === 'analyzing' && (
-          <Container maxWidth="sm" sx={{ py: 10 }}>
-            <Stack spacing={2} alignItems="center" textAlign="center">
+          {step === 'analyzing' && (
+            <Stack spacing={2} alignItems="center" textAlign="center" sx={{ py: { xs: 7, md: 9 } }}>
               <CircularProgress color="success" />
               <Typography variant="body1" sx={{ fontWeight: 800 }}>
                 처방전을 분석하고 있습니다...
@@ -143,106 +138,97 @@ const PrescriptionScanPage = () => {
                 AI가 약물 정보를 추출 중입니다
               </Typography>
             </Stack>
-          </Container>
-        )}
+          )}
 
-        {/* Step 5: 결과 편집 (메인 UI - 이미지 1~4) */}
-        {step === 'edit' && (
-          <Container maxWidth="md" sx={{ py: 2 }}>
-            {/* 헤더: 약국명 */}
-            <PharmacyHeader
-              pharmacyName={formState.pharmacyName}
-              onNameChange={(name) => updateFormState({ pharmacyName: name })}
-            />
+          {step === 'edit' && (
+            <Box>
+              <PharmacyHeader
+                pharmacyName={formState.pharmacyName}
+                onNameChange={(name) => updateFormState({ pharmacyName: name })}
+              />
 
-            {/* 약물 목록 카드 */}
-            <MedicationCardList
-              medications={formState.medications}
-              onUpdate={updateMedication}
-              onRemove={removeMedication}
-              onAdd={addMedication}
-            />
+              <MedicationCardList
+                medications={formState.medications}
+                onUpdate={updateMedication}
+                onRemove={removeMedication}
+                onAdd={addMedication}
+              />
 
-            {/* 일 복용 횟수 / 시간 요약 */}
-            <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-              <Stack spacing={1}>
-                <Typography variant="body2" color="text.secondary">
-                  일 복용 횟수 <Box component="span" sx={{ fontWeight: 900, color: 'success.main' }}>{formState.intakeTimes.length}회</Box>
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {formState.intakeTimes.map((t) => t.label).join(' | ')}
-                </Typography>
-              </Stack>
-            </Paper>
+              <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
+                <Stack spacing={1}>
+                  <Typography variant="body2" color="text.secondary">
+                    일 복용 횟수{' '}
+                    <Box component="span" sx={{ fontWeight: 900, color: 'success.main' }}>
+                      {formState.intakeTimes.length}회
+                    </Box>
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formState.intakeTimes.map((t) => t.label).join(' | ')}
+                  </Typography>
+                </Stack>
+              </Paper>
 
-            {/* 복용 기간 */}
-            <DurationPicker
-              startDate={formState.startDate}
-              endDate={formState.endDate}
-              onUpdate={updateFormState}
-            />
+              <DurationPicker startDate={formState.startDate} endDate={formState.endDate} onUpdate={updateFormState} />
 
-            {/* 복용 시간 상세 설정 */}
-            <IntakeTimePicker
-              intakeTimes={formState.intakeTimes}
-              onUpdate={updateIntakeTime}
-              onAdd={addIntakeTime}
-              onRemove={removeIntakeTime}
-            />
+              <IntakeTimePicker
+                intakeTimes={formState.intakeTimes}
+                onUpdate={updateIntakeTime}
+                onAdd={addIntakeTime}
+                onRemove={removeIntakeTime}
+              />
 
-            {/* 등록 정보 */}
-            <RegistrationInfo
-              hospitalName={formState.hospitalName}
-              pharmacyName={formState.pharmacyName}
-              paymentAmount={formState.paymentAmount}
-              onUpdate={updateFormState}
-              createdDate={new Date().toLocaleDateString('ko-KR').replace(/\./g, '.').slice(0, -1)}
-            />
+              <RegistrationInfo
+                hospitalName={formState.hospitalName}
+                pharmacyName={formState.pharmacyName}
+                paymentAmount={formState.paymentAmount}
+                onUpdate={updateFormState}
+                createdDate={new Date().toLocaleDateString('ko-KR').replace(/\./g, '.').slice(0, -1)}
+              />
 
-            {/* 하단 버튼 */}
-            <Paper
-              elevation={6}
-              sx={{
-                position: 'sticky',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                mt: 2,
-                p: 2,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-              }}
-            >
-              <Stack direction="row" spacing={1.5}>
-                <Button fullWidth variant="outlined" onClick={() => setStep('select')}>
-                  다시 촬영
-                </Button>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="success"
-                  onClick={handleRegister}
-                  disabled={isLoading || formState.medications.length === 0}
-                >
-                  {isLoading ? '등록 중...' : '등록 완료'}
-                </Button>
-              </Stack>
-            </Paper>
-          </Container>
-        )}
+              <Paper
+                elevation={6}
+                sx={{
+                  position: 'sticky',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  mt: 2,
+                  p: 2,
+                  pb: 'calc(var(--safe-area-bottom) + 16px)',
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'rgba(255,255,255,0.95)',
+                  backdropFilter: 'blur(16px)',
+                }}
+              >
+                <Stack direction="row" spacing={1.5}>
+                  <Button fullWidth variant="outlined" onClick={() => setStep('select')}>
+                    다시 촬영
+                  </Button>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="success"
+                    onClick={handleRegister}
+                    disabled={isLoading || formState.medications.length === 0}
+                  >
+                    {isLoading ? '등록 중...' : '등록 완료'}
+                  </Button>
+                </Stack>
+              </Paper>
+            </Box>
+          )}
 
-        {/* Step 6: 등록 중 */}
-        {step === 'registering' && (
-          <Container maxWidth="sm" sx={{ py: 10 }}>
-            <Stack spacing={2} alignItems="center" textAlign="center">
+          {step === 'registering' && (
+            <Stack spacing={2} alignItems="center" textAlign="center" sx={{ py: { xs: 7, md: 9 } }}>
               <CircularProgress color="success" />
               <Typography variant="body1" sx={{ fontWeight: 800 }}>
                 약물을 등록하고 있습니다...
               </Typography>
             </Stack>
-          </Container>
-        )}
-      </Box>
+          )}
+        </PageStack>
+      )}
     </MainLayout>
   )
 }

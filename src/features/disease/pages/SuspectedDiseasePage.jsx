@@ -5,7 +5,10 @@
  */
 
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Container, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import BackButton from '@shared/components/mui/BackButton'
 
 /**
  * 의심 질환 결과 페이지 컴포넌트
@@ -14,14 +17,12 @@ import { Container, Typography } from '@mui/material'
 export const SuspectedDiseasePage = () => {
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 900 }}>
-          의심 질환 결과
-        </Typography>
+      <PageStack>
+        <PageHeader title="의심 질환 결과" leading={<BackButton />} />
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           의심 질환 결과 페이지 - 구현 예정
         </Typography>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

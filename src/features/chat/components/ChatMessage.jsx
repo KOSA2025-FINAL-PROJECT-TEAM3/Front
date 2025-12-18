@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, Stack, Typography } from '@mui/material'
+import { Avatar, Box, Stack, Typography } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import ReactMarkdown from 'react-markdown' // react-markdown 라이브러리 추가
 
@@ -41,30 +41,51 @@ export const ChatMessage = ({ message, isMe, sender }) => {
   const bubbleSx = useMemo(() => {
     if (isMe) {
       return {
-        bgcolor: 'warning.main',
+        bgcolor: '#2EC4B6',
         color: 'common.white',
-        borderBottomRightRadius: 6,
+        borderRadius: 18,
+        borderTopRightRadius: 6,
       }
     }
     return {
-      bgcolor: 'grey.200',
-      color: 'text.primary',
+      bgcolor: 'common.white',
+      color: '#0F172A',
+      border: '1px solid',
+      borderColor: 'divider',
+      borderRadius: 18,
       borderTopLeftRadius: 6,
     }
   }, [isMe])
 
   return (
     <Stack direction={layoutDirection} spacing={1} alignItems="flex-end" sx={{ mb: 2 }}>
-      {!isMe && sender ? (
-        <Box
-          component="img"
-          src={sender.profileImage}
-          alt={sender.name}
-          sx={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
-        />
+      {!isMe ? (
+        sender?.profileImage ? (
+          <Box
+            component="img"
+            src={sender.profileImage}
+            alt={sender.name}
+            sx={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+          />
+        ) : (
+          <Avatar
+            sx={{
+              width: 32,
+              height: 32,
+              fontSize: 14,
+              bgcolor: 'common.white',
+              border: '1px solid',
+              borderColor: 'divider',
+              color: 'text.secondary',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+            }}
+          >
+            {message.familyMemberId === 0 ? '🤖' : '👴'}
+          </Avatar>
+        )
       ) : null}
 
-      <Box sx={{ maxWidth: '70%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ maxWidth: { xs: '80%', md: '70%' }, display: 'flex', flexDirection: 'column' }}>
         {!isMe ? (
           <Typography variant="caption" sx={{ color: 'text.secondary', mb: 0.5, ml: 0.5 }}>
             {message.familyMemberId === 0 ? 'AI 약사' : (sender?.name || message.memberNickname || '알 수 없음')}
@@ -75,8 +96,7 @@ export const ChatMessage = ({ message, isMe, sender }) => {
           sx={{
             px: 1.75,
             py: 1.25,
-            borderRadius: 4,
-            fontSize: 14,
+            fontSize: 15,
             lineHeight: 1.5,
             wordBreak: 'break-word',
             ...bubbleSx,
@@ -111,7 +131,7 @@ export const ChatMessage = ({ message, isMe, sender }) => {
 
         <Stack direction={metaDirection} spacing={0.75} alignItems="flex-end" sx={{ mt: 0.5, mx: 0.5 }}>
           {message.unreadCount > 0 ? (
-            <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 800, color: 'warning.dark' }}>
+            <Typography variant="caption" sx={{ fontSize: 10, fontWeight: 900, color: '#0F766E' }}>
               {message.unreadCount}
             </Typography>
           ) : null}

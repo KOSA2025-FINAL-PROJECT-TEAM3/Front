@@ -51,35 +51,58 @@ export const AdaptiveNavigation = ({ items, position = 'bottom' }) => {
   if (position === 'bottom') {
     if (!isMobile) return null
     return (
-      <BottomNavigation
-        value={activePath}
-        onChange={handleChange}
-        showLabels
+      <Box
         sx={{
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
           zIndex: 1000,
-          borderTop: '1px solid',
-          borderColor: 'divider',
-          boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
+          pb: 'var(--safe-area-bottom)',
+          px: 1.5,
+          pointerEvents: 'none',
         }}
       >
-        {items.map((item) => (
-          <BottomNavigationAction
-            key={item.path}
-            label={item.label}
-            value={item.path}
-            icon={item.icon}
-            sx={{
-              '&.Mui-selected': {
-                color: 'primary.main',
-              },
-            }}
-          />
-        ))}
-      </BottomNavigation>
+        <BottomNavigation
+          value={activePath}
+          onChange={handleChange}
+          showLabels
+          sx={{
+            pointerEvents: 'auto',
+            mx: 'auto',
+            maxWidth: 480,
+            height: 'var(--bottom-dock-height)',
+            bgcolor: 'rgba(255,255,255,0.95)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderBottom: 0,
+            borderRadius: '20px 20px 0 0',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.03)',
+          }}
+        >
+          {items.map((item) => (
+            <BottomNavigationAction
+              key={item.path}
+              label={item.label}
+              value={item.path}
+              icon={item.icon}
+              sx={{
+                minWidth: 64,
+                px: 0,
+                '& .MuiBottomNavigationAction-label': {
+                  fontSize: 11,
+                  fontWeight: 800,
+                },
+                color: '#94A3B8',
+                '&.Mui-selected': {
+                  color: 'primary.main',
+                },
+              }}
+            />
+          ))}
+        </BottomNavigation>
+      </Box>
     )
   }
 

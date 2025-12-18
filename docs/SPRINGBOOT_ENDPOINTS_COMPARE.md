@@ -1,60 +1,38 @@
 # Spring Boot Controller 엔드포인트 ↔ Front API 비교 리포트
 
-작성일: 2025-12-15 07:54
+Last updated: 2025-12-17
 
 ## 스캔 범위
-- Backend: `spring-boot/src/main/java/**/**Controller.java` (18 files)
-- Front: `Front/src/core/services/api/*ApiClient.js` (16 files)
+- Backend: `spring-boot/src/main/java/**/**Controller.java` (19 files)
+- Front: `Front/src/core/services/api/*ApiClient.js` (15 files)
 
-## 요약
-- Backend 추출 엔드포인트(중복 제거): 83
-- Front 추출 엔드포인트(중복 제거, 클라이언트 기준): 85
-- Front → SpringBoot 미매칭(전체): 17
-  - 타 서비스로 추정(인증/채팅 등): 14
-  - SpringBoot 불일치(검증 필요): 3
-- SpringBoot → Front 미사용(참고): 15
+## 결론(연결 안 된 것)
 
-## Front → SpringBoot 불일치(검증 필요)
-- `GET` `/api/notifications/{id}` → `/notifications/{id}` / `src\core\services\api\notificationApiClient.js`
-- `POST` `/api/reports/adherence` → `/reports/adherence` / `src\core\services\api\reportApiClient.js`
-- `GET` `/api/reports/weekly` → `/reports/weekly` / `src\core\services\api\reportApiClient.js`
+### 1) Front에서 호출하지만 spring-boot Controller에 없는 엔드포인트
+- (현재 없음) SymptomSearch는 `GET /medications/search/symptoms/ai`만 사용하도록 정리
 
-## 프론트에서는 엔드포인트 무조건 /api를 붙여야 함
+### 2) Gateway 라우팅은 있는데 spring-boot에 Controller가 없는 케이스(실제로는 404)
+- (의도적으로 제거) `/api/chat/**` (1:1/상담 채팅 기능은 원래 없음, `family-chat`만 유지)
 
-## /counsel => 의사 상담 관련이라면 필요없으니 삭제.
+### 3) spring-boot가 아닌 서비스(정상)
+- `/api/auth/**`는 `auth-service(8081)`로 라우팅됨(게이트웨이 dev 설정 기준) → spring-boot에 없어도 정상
 
-## /auth => auth-service 레포지토리
+## 참고: `/api` prefix 규칙
+- spring-boot(8082)는 `server.servlet.context-path=/`로 동작하며, 컨트롤러 매핑도 `/diet`, `/medications`처럼 **`/api`가 없음**.
+- Front는 기본적으로 API Gateway(8080)를 기본값으로 사용하며(`Front/src/core/services/api/ApiClient.js`), Gateway가 `StripPrefix=1`로 `/api`를 제거한 뒤 spring-boot로 라우팅하는 구조임.
 
-## /chat => [text](../../spring-boot/src/main/java/com/amapill/backend/domain/chat) 이거 확인 바람.
+## Front → SpringBoot 미매칭(정리)
 
-## Front → SpringBoot 미매칭(타 서비스로 추정)
-- `POST` `/counsel/submit` / `src\core\services\api\counselApiClient.js` ((미구현 또는 별도 서비스))
-- `POST` `/auth/deeplink/resolve` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/kakao-login` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/login` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/logout` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/refresh` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/select-role` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `POST` `/auth/signup` / `src\core\services\api\authApiClient.js` (auth-service/게이트웨이(인증))
-- `GET` `/chat/rooms` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-- `POST` `/chat/rooms` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-- `DELETE` `/chat/rooms/{roomId}` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-- `GET` `/chat/rooms/{roomId}/messages` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-- `POST` `/chat/rooms/{roomId}/messages` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-- `PATCH` `/chat/rooms/{roomId}/messages/{messageId}/read` / `src\core\services\api\chatApiClient.js` (별도 채팅 서비스/게이트웨이)
-
-
+- `/api/auth/**`
+  - Gateway(dev): `8081`로 라우팅(auth-service) → spring-boot에 없어도 정상
+- `/api/chat/**`
+  - 결정: **비노출/리다이렉트**로 정리(라우팅도 제거)
+- `/api/family/invites?groupId=...`
+  - spring-boot는 `GET /family/invites` + optional `groupId`를 제공(`FamilyInviteController`) → 정상(정적 스캔에서 query-string 때문에 false positive 가능)
 
 ## 설정/라우팅 의심 포인트
-- 아래 클라이언트는 `baseURL` 기본값이 `localhost:8082`(core)인데 `basePath`가 `/api/...` 입니다.
-  - core(8082)는 `server.servlet.context-path=/` 이므로 `/api` prefix가 없으면 정상입니다.
-  - 운영/로컬에서 gateway(8080)로 우회한다면 괜찮지만, 기본값으로는 404 위험이 있습니다.
-  - `src\core\services\api\chatApiClient.js`: baseURL `import.meta.env.VITE_CHAT_API_URL||'http://localhost:8082'` / basePath `/api/chat`
-  - `src\core\services\api\counselApiClient.js`: baseURL `import.meta.env.VITE_API_BASE_URL||'http://localhost:8082'` / basePath `/api/counsel`
-  - `src\core\services\api\dietApiClient.js`: baseURL `import.meta.env.VITE_DIET_API_URL||'http://localhost:8082'` / basePath `/api/diet`
-  - `src\core\services\api\medicationApiClient.js`: baseURL `import.meta.env.VITE_MEDICATION_API_URL||'http://localhost:8082'` / basePath `/api/medications`
-  - `src\core\services\api\medicationLogApiClient.js`: baseURL `import.meta.env.VITE_MEDICATION_API_URL||'http://localhost:8082'` / basePath `/api/medications/logs`
-  - `src\core\services\api\ocrApiClient.js`: baseURL `import.meta.env.VITE_API_BASE_URL||'http://localhost:8082'` / basePath `/api/ocr`
+- Gateway(dev) 기준 `/api/**` 요청은 `StripPrefix=1`로 `/`로 변환되어 spring-boot(8082)로 전달됨.
+- 로컬에서 `VITE_API_BASE_URL=http://localhost:8082`처럼 **spring-boot를 직접 찍으면** Front의 `/api/*` 호출은 404가 될 수 있음(게이트웨이 우회).
 
 ## SpringBoot → Front 미사용(참고)
 - `GET` `/family-chat/rooms/{familyGroupId}/messages/search` / `src\main\java\com\amapill\backend\domain\chat\api\FamilyChatRestController.java`
@@ -78,6 +56,7 @@
 ### `src\main\java\com\amapill\backend\domain\chat\api\FamilyChatRestController.java`
 - `GET` `/family-chat/rooms/{familyGroupId}/init` (gateway: `/api/family-chat/rooms/{familyGroupId}/init`)
 - `GET` `/family-chat/rooms/{familyGroupId}/messages` (gateway: `/api/family-chat/rooms/{familyGroupId}/messages`)
+- `GET` `/family-chat/rooms/{familyGroupId}/unread-count` (gateway: `/api/family-chat/rooms/{familyGroupId}/unread-count`)
 - `POST` `/family-chat/rooms/{familyGroupId}/messages` (gateway: `/api/family-chat/rooms/{familyGroupId}/messages`)
 - `POST` `/family-chat/rooms/{familyGroupId}/messages/image` (gateway: `/api/family-chat/rooms/{familyGroupId}/messages/image`)
 - `GET` `/family-chat/rooms/{familyGroupId}/messages/search` (gateway: `/api/family-chat/rooms/{familyGroupId}/messages/search`)
@@ -207,21 +186,6 @@
 - `POST` `/api/auth/refresh` (controller compare: `/auth/refresh`)
 - `POST` `/api/auth/select-role` (controller compare: `/auth/select-role`)
 - `POST` `/api/auth/signup` (controller compare: `/auth/signup`)
-
-### `src\core\services\api\chatApiClient.js`
-- basePath: `/api/chat`
-- baseURL(표현식): `import.meta.env.VITE_CHAT_API_URL || 'http://localhost:8082'`
-- `GET` `/api/chat/rooms` (controller compare: `/chat/rooms`)
-- `POST` `/api/chat/rooms` (controller compare: `/chat/rooms`)
-- `DELETE` `/api/chat/rooms/{roomId}` (controller compare: `/chat/rooms/{roomId}`)
-- `GET` `/api/chat/rooms/{roomId}/messages` (controller compare: `/chat/rooms/{roomId}/messages`)
-- `POST` `/api/chat/rooms/{roomId}/messages` (controller compare: `/chat/rooms/{roomId}/messages`)
-- `PATCH` `/api/chat/rooms/{roomId}/messages/{messageId}/read` (controller compare: `/chat/rooms/{roomId}/messages/{messageId}/read`)
-
-### `src\core\services\api\counselApiClient.js`
-- basePath: `/api/counsel`
-- baseURL(표현식): `import.meta.env.VITE_API_BASE_URL || 'http://localhost:8082'`
-- `POST` `/api/counsel/submit` (controller compare: `/counsel/submit`)
 
 ### `src\core\services\api\dietApiClient.js`
 - basePath: `/api/diet`

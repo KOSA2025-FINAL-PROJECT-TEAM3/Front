@@ -11,6 +11,7 @@ export const attachErrorInterceptor = (axiosInstance) =>
     (error) => {
       const status = error?.response?.status
       const code = error?.response?.data?.code
+      const requestUrl = error?.config?.url || ''
 
       if (code === 'SECURITY_001') {
         toast.warning(error?.response?.data?.message || '부적절한 요청이 감지되었습니다. 반복 시 서비스 이용이 제한될 수 있습니다.')
@@ -20,7 +21,7 @@ export const attachErrorInterceptor = (axiosInstance) =>
         toast.error('일시적인 서비스 오류입니다. 잠시 후 다시 시도해주세요.')
       }
 
-      if (status === 401) {
+      if (status === 401 && !String(requestUrl).includes('/api/auth/refresh')) {
         // Auth 상태 완전 정리 (Dual Storage 불일치 방지)
         useAuthStore.getState().clearAuthState()
         redirectToLogin()
@@ -30,4 +31,3 @@ export const attachErrorInterceptor = (axiosInstance) =>
   )
 
 export default attachErrorInterceptor
-

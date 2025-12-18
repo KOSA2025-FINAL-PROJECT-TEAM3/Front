@@ -2,14 +2,18 @@ import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@mui/material'
 import PropTypes from 'prop-types'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMediaQuery, useTheme } from '@mui/material'
 
 export const SpeedDialFab = ({
   actions = [],
   ariaLabel = '빠른 작업',
+  avoidBottomDock = true,
   sx,
   ...props
 }) => {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [open, setOpen] = useState(false)
 
   const handleActionClick = (action) => {
@@ -31,7 +35,11 @@ export const SpeedDialFab = ({
       onClose={() => setOpen(false)}
       sx={{
         position: 'fixed',
-        bottom: 16,
+        bottom: isMobile
+          ? avoidBottomDock
+            ? 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + var(--bottom-dock-gap))'
+            : 'calc(var(--safe-area-bottom) + var(--bottom-dock-gap))'
+          : 16,
         right: 16,
         ...sx,
       }}
@@ -63,8 +71,8 @@ SpeedDialFab.propTypes = {
     })
   ),
   ariaLabel: PropTypes.string,
+  avoidBottomDock: PropTypes.bool,
   sx: PropTypes.object,
 }
 
 export default SpeedDialFab
-

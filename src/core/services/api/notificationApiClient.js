@@ -25,8 +25,16 @@ class NotificationApiClient extends ApiClient {
         return this.patch(`/${id}/read`)
     }
 
+    markAllAsRead() {
+        return this.patch('/read-all')
+    }
+
     deleteNotification(id) {
         return this.delete(`/${id}`)
+    }
+
+    deleteAll() {
+        return this.delete('')
     }
 
     /**

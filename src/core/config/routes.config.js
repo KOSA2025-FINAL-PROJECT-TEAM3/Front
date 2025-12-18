@@ -45,13 +45,16 @@ export const ROUTE_PATHS = {
   family: '/family',
   familyInvite: '/family/invites',
   familyMemberDetail: '/family/member/:id',
+  familyMemberMedication: '/family/member/:id/medication',
+  familyMemberDiet: '/family/member/:id/diet',
+  familyMemberDisease: '/family/member/:id/disease',
 
   inviteAccept: '/invites/start',
   inviteCodeEntry: '/invites/enter', // 통합 초대 랜딩 페이지 (코드/토큰 모두 처리)
   inviteLanding: '/invites/enter', // ✅ InviteCodeEntry로 통합 (레거시 호환)
 
   chatList: '/chat',
-  chatConversation: '/chat/:roomId',
+  chatConversation: '/chat/:roomId', // Legacy (1:1 chat not supported) - redirect to family chat
 
   // ⭐ roomId 기반 라우트 (정답)
   familyChat: '/chat/family',
@@ -103,9 +106,12 @@ export const ROUTE_META = {
     ROUTE_PATHS.family,
     ROUTE_PATHS.familyInvite,
     ROUTE_PATHS.familyMemberDetail,
+    ROUTE_PATHS.familyMemberMedication,
+    ROUTE_PATHS.familyMemberDiet,
+    ROUTE_PATHS.familyMemberDisease,
 
     ROUTE_PATHS.chatList,
-    ROUTE_PATHS.chatConversation,
+    ROUTE_PATHS.familyChat,
     ROUTE_PATHS.familyChatConversation,
     ROUTE_PATHS.familyChatByGroup,
 

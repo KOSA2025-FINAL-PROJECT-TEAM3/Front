@@ -7,8 +7,29 @@
 import { createTheme } from '@mui/material/styles'
 
 export const UI_FONT_SCALES = {
+  level1: 16, // 표준(100%)
+  level2: 18, // 크게(112.5%)
+  level3: 20, // 더 크게(125%)
   default: 16,
   accessibility: 18,
+}
+
+const clampFontScaleLevel = (value) => {
+  const normalized = Number(value)
+  if (!Number.isFinite(normalized)) return null
+  return Math.max(1, Math.min(3, Math.round(normalized)))
+}
+
+const resolveFontScaleLevel = ({ fontScaleLevel, accessibilityMode }) => {
+  const normalized = clampFontScaleLevel(fontScaleLevel)
+  if (normalized) return normalized
+  return accessibilityMode ? 2 : 1
+}
+
+const fontSizePxByLevel = (level) => {
+  if (level === 3) return UI_FONT_SCALES.level3
+  if (level === 2) return UI_FONT_SCALES.level2
+  return UI_FONT_SCALES.level1
 }
 
 // Breakpoints: Mobile -> Tablet -> Desktop
@@ -30,6 +51,7 @@ const palette = {
     dark: '#25A094',      // darker teal
     contrastText: '#ffffff',
   },
+  divider: '#E2E8F0',     // RN border/divider
   secondary: {
     main: '#f59e0b',      // amber-500
     light: '#fbbf24',     // amber-400
@@ -41,8 +63,8 @@ const palette = {
     paper: '#ffffff',
   },
   text: {
-    primary: '#111827',   // gray-900
-    secondary: '#6b7280', // gray-500
+    primary: '#0F172A',   // slate-900 (RN prototype)
+    secondary: '#475569', // slate-600
   },
   success: {
     main: '#10b981',      // green-500
@@ -83,45 +105,51 @@ const typography = {
   ].join(','),
   h1: {
     fontSize: '2.5rem',   // 40px
-    fontWeight: 700,
+    fontWeight: 900,
     lineHeight: 1.2,
+    letterSpacing: -0.8,
     '@media (max-width:600px)': {
       fontSize: '2rem',   // 32px (Mobile)
     },
   },
   h2: {
     fontSize: '2rem',     // 32px
-    fontWeight: 600,
+    fontWeight: 900,
     lineHeight: 1.3,
+    letterSpacing: -0.7,
     '@media (max-width:600px)': {
       fontSize: '1.75rem', // 28px (Mobile)
     },
   },
   h3: {
     fontSize: '1.75rem', // 28px
-    fontWeight: 600,
+    fontWeight: 900,
     lineHeight: 1.4,
+    letterSpacing: -0.6,
     '@media (max-width:600px)': {
       fontSize: '1.5rem', // 24px (Mobile)
     },
   },
   h4: {
     fontSize: '1.5rem',  // 24px
-    fontWeight: 600,
+    fontWeight: 800,
     lineHeight: 1.4,
+    letterSpacing: -0.5,
     '@media (max-width:600px)': {
       fontSize: '1.25rem', // 20px (Mobile)
     },
   },
   h5: {
     fontSize: '1.25rem', // 20px
-    fontWeight: 500,
+    fontWeight: 800,
     lineHeight: 1.5,
+    letterSpacing: -0.4,
   },
   h6: {
     fontSize: '1.125rem', // 18px
-    fontWeight: 500,
+    fontWeight: 800,
     lineHeight: 1.5,
+    letterSpacing: -0.3,
   },
   body1: {
     fontSize: '1rem',    // 16px
@@ -133,13 +161,15 @@ const typography = {
   },
   subtitle1: {
     fontSize: '1rem',
-    fontWeight: 600,
+    fontWeight: 800,
     lineHeight: 1.5,
+    letterSpacing: -0.2,
   },
   subtitle2: {
     fontSize: '0.875rem',
-    fontWeight: 600,
+    fontWeight: 800,
     lineHeight: 1.5,
+    letterSpacing: -0.2,
   },
   caption: {
     fontSize: '0.75rem',
@@ -147,13 +177,13 @@ const typography = {
   },
   button: {
     textTransform: 'none', // 버튼 텍스트 대문자 변환 비활성화
-    fontWeight: 500,
+    fontWeight: 800,
   },
 }
 
 // Shape: 둥근 모서리 강조 (프로토타입 스타일)
 const shape = {
-  borderRadius: 12, // 기본 12px (rounded-xl 느낌)
+  borderRadius: 8, // sx의 숫자 borderRadius(예: 3=24px)와 RN 감성(20~24px)을 맞추기 위한 베이스
 }
 
 // Spacing: 8px 기반 (MUI default)
@@ -189,13 +219,23 @@ const shadows = [
 ]
 
 // Component Overrides: MUI 컴포넌트 기본 스타일 재정의
-const createComponents = ({ accessibilityMode }) => ({
+const createComponents = ({ fontScaleLevel, accessibilityMode }) => {
+  const resolvedLevel = resolveFontScaleLevel({ fontScaleLevel, accessibilityMode })
+  const fontSizePx = fontSizePxByLevel(resolvedLevel)
+
+  return ({
   MuiCssBaseline: {
     styleOverrides: {
+      ':root': {
+        '--safe-area-top': 'env(safe-area-inset-top, 0px)',
+        '--safe-area-right': 'env(safe-area-inset-right, 0px)',
+        '--safe-area-bottom': 'env(safe-area-inset-bottom, 0px)',
+        '--safe-area-left': 'env(safe-area-inset-left, 0px)',
+        '--bottom-dock-height': '72px',
+        '--bottom-dock-gap': '16px',
+      },
       html: {
-        fontSize: accessibilityMode
-          ? `${UI_FONT_SCALES.accessibility}px`
-          : `${UI_FONT_SCALES.default}px`,
+        fontSize: `${fontSizePx}px`,
       },
       body: {
         backgroundColor: palette.background.default,
@@ -205,7 +245,7 @@ const createComponents = ({ accessibilityMode }) => ({
   MuiButton: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: 999,
         padding: '10px 20px',
         fontSize: '1rem',
         fontWeight: 500,
@@ -222,29 +262,45 @@ const createComponents = ({ accessibilityMode }) => ({
   MuiCard: {
     styleOverrides: {
       root: {
-        borderRadius: 16, // rounded-2xl
-        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        borderRadius: 24,
+        border: `1px solid ${palette.divider}`,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       },
     },
   },
   MuiPaper: {
     styleOverrides: {
       rounded: {
-        borderRadius: 12,
+        borderRadius: 24,
       },
     },
   },
   MuiDialog: {
     styleOverrides: {
       paper: {
-        borderRadius: 16,
+        borderRadius: 24,
       },
     },
   },
   MuiAlert: {
     styleOverrides: {
       root: {
-        borderRadius: 12,
+        borderRadius: 24,
+      },
+    },
+  },
+  MuiChip: {
+    styleOverrides: {
+      root: {
+        borderRadius: 999,
+        fontWeight: 800,
+      },
+    },
+  },
+  MuiOutlinedInput: {
+    styleOverrides: {
+      root: {
+        borderRadius: 20,
       },
     },
   },
@@ -262,19 +318,11 @@ const createComponents = ({ accessibilityMode }) => ({
       },
     },
   },
-  MuiChip: {
-    styleOverrides: {
-      root: {
-        borderRadius: 8,
-        fontWeight: 500,
-      },
-    },
-  },
   MuiTextField: {
     styleOverrides: {
       root: {
         '& .MuiOutlinedInput-root': {
-          borderRadius: 12,
+          borderRadius: 20,
         },
       },
     },
@@ -287,17 +335,25 @@ const createComponents = ({ accessibilityMode }) => ({
       },
     },
   },
-})
+  })
+}
 
-export const createAppTheme = ({ accessibilityMode = false } = {}) =>
-  createTheme({
+export const createAppTheme = ({ fontScaleLevel, accessibilityMode = false } = {}) => {
+  const resolvedLevel = resolveFontScaleLevel({ fontScaleLevel, accessibilityMode })
+  const htmlFontSize = fontSizePxByLevel(resolvedLevel)
+
+  return createTheme({
     breakpoints,
     palette,
-    typography,
+    typography: {
+      ...typography,
+      htmlFontSize,
+    },
     shape,
     spacing,
     shadows,
-    components: createComponents({ accessibilityMode }),
+    components: createComponents({ fontScaleLevel: resolvedLevel, accessibilityMode }),
   })
+}
 
 export default createAppTheme()

@@ -14,7 +14,6 @@ import {
   Button,
   Chip,
   CircularProgress,
-  Container,
   Divider,
   Paper,
   Stack,
@@ -28,6 +27,7 @@ import { useInviteStore } from '../stores/inviteStore'
 import { useFamily } from '../hooks/useFamily'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { toast } from '@shared/components/toast/toastStore'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 const ROLE_LABELS = {
   SENIOR: '시니어(케어 대상자)',
@@ -209,55 +209,69 @@ export const InviteCodeEntryPage = () => {
 
   // --- Render Steps ---
 
-  if (status === 'success') {
-    return (
-      <Box
-        sx={{
-          minHeight: '100vh',
+  const InviteShell = ({ children }) => (
+    <Stack spacing={2}>
+      <Stack direction="row" justifyContent="flex-start">
+        <BackButton label="뒤로" />
+      </Stack>
+      {children}
+    </Stack>
+  )
+
+		  if (status === 'success') {
+	    return (
+	      <Box
+	        sx={{
+	          minHeight: '100vh',
           py: 3,
+          px: { xs: 2.5, sm: 3 },
           background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
-        }}
-      >
-        <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
-          <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'success.50' }}>
-            <Typography component="div" sx={{ fontSize: 48, mb: 2 }}>
-              🎉
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: 'success.main' }}>
-              가족에 합류했어요!
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              잠시 후 대시보드로 이동합니다...
-            </Typography>
-          </Paper>
-        </Container>
-      </Box>
-    )
-  }
+	        }}
+	      >
+	        <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto' }}>
+	          <InviteShell>
+	            <Paper sx={{ p: 3, textAlign: 'center', bgcolor: 'success.50' }}>
+	              <Typography component="div" sx={{ fontSize: 48, mb: 2 }}>
+	                🎉
+	              </Typography>
+	              <Typography variant="h6" sx={{ fontWeight: 800, color: 'success.main' }}>
+	                가족에 합류했어요!
+	              </Typography>
+	              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+	                잠시 후 대시보드로 이동합니다...
+	              </Typography>
+	            </Paper>
+	          </InviteShell>
+	        </Box>
+	      </Box>
+	    )
+	  }
 
   // 검증 완료 상태: 초대 카드 표시
   if (status === 'validated' && inviteInfo) {
     const role = inviteInfo.suggestedRole || 'SENIOR'
     const roleColor = role === 'CAREGIVER' ? 'success' : 'primary'
 
-    return (
-      <Box
-        sx={{
-          minHeight: '100vh',
+	    return (
+	      <Box
+	        sx={{
+	          minHeight: '100vh',
           py: 3,
+          px: { xs: 2.5, sm: 3 },
           background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
-        }}
-      >
-        <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
-          <Stack spacing={3}>
-            <Box textAlign="center">
-              <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                가족 초대
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                아래 정보를 확인하고 가족에 합류해주세요.
-              </Typography>
-            </Box>
+	        }}
+	      >
+	        <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto' }}>
+	          <InviteShell>
+	            <Stack spacing={3}>
+	              <Box textAlign="center">
+	                <Typography variant="h5" sx={{ fontWeight: 800 }}>
+	                  가족 초대
+	                </Typography>
+	                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+	                  아래 정보를 확인하고 가족에 합류해주세요.
+	                </Typography>
+	              </Box>
 
             <Paper sx={{ p: 3 }}>
               <Stack spacing={1.5}>
@@ -360,11 +374,12 @@ export const InviteCodeEntryPage = () => {
                 </Button>
               </Stack>
             </Paper>
-          </Stack>
-        </Container>
-      </Box>
-    )
-  }
+	            </Stack>
+	          </InviteShell>
+	        </Box>
+	      </Box>
+	    )
+	  }
 
   // 초기 상태: 코드 입력 폼
   return (
@@ -372,64 +387,61 @@ export const InviteCodeEntryPage = () => {
       sx={{
         minHeight: '100vh',
         py: 3,
+        px: { xs: 2.5, sm: 3 },
         background: 'linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%)',
       }}
     >
-      <Container maxWidth="sm" sx={{ maxWidth: 420 }}>
-        <Stack spacing={3}>
-          <Box textAlign="center">
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>
-              초대 코드 입력
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              가족으로부터 받은 6자리 초대 코드를 입력해주세요.
-            </Typography>
-          </Box>
+      <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto' }}>
+        <InviteShell>
+          <Stack spacing={3}>
+            <Box textAlign="center">
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                초대 코드 입력
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                가족으로부터 받은 6자리 초대 코드를 입력해주세요.
+              </Typography>
+            </Box>
 
-          <Paper sx={{ p: 3 }}>
-            <Stack spacing={2}>
-              <TextField
-                value={inputCode}
-                onChange={(e) => setInputCode(e.target.value.toUpperCase().slice(0, 6))}
-                placeholder="초대 코드 6자리"
-                disabled={status === 'validating'}
-                inputProps={{ maxLength: 6 }}
-                fullWidth
-                autoFocus
-                sx={{
-                  '& .MuiInputBase-input': {
-                    py: 1.75,
-                    fontSize: 24,
-                    fontWeight: 800,
-                    textAlign: 'center',
-                    letterSpacing: '0.5em',
-                    textTransform: 'uppercase',
-                  },
-                }}
-              />
+            <Paper sx={{ p: 3 }}>
+              <Stack spacing={2}>
+                <TextField
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value.toUpperCase().slice(0, 6))}
+                  placeholder="초대 코드 6자리"
+                  disabled={status === 'validating'}
+                  inputProps={{ maxLength: 6 }}
+                  fullWidth
+                  autoFocus
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      py: 1.75,
+                      fontSize: 24,
+                      fontWeight: 800,
+                      textAlign: 'center',
+                      letterSpacing: '0.5em',
+                      textTransform: 'uppercase',
+                    },
+                  }}
+                />
 
-              {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+                {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-              <Button
-                type="button"
-                variant="contained"
-                onClick={() => handleValidateCode()}
-                disabled={inputCode.length < 6 || status === 'validating'}
-                startIcon={
-                  status === 'validating' ? <CircularProgress size={18} color="inherit" /> : null
-                }
-                sx={{ py: 1.5, fontWeight: 800 }}
-              >
-                {status === 'validating' ? '확인 중...' : '코드 확인'}
-              </Button>
-            </Stack>
-          </Paper>
-
-          <Button type="button" variant="outlined" color="inherit" onClick={() => navigate(-1)}>
-            뒤로 가기
-          </Button>
-        </Stack>
-      </Container>
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={() => handleValidateCode()}
+                  disabled={inputCode.length < 6 || status === 'validating'}
+                  startIcon={status === 'validating' ? <CircularProgress size={18} color="inherit" /> : null}
+                  sx={{ py: 1.5, fontWeight: 800 }}
+                >
+                  {status === 'validating' ? '확인 중...' : '코드 확인'}
+                </Button>
+              </Stack>
+            </Paper>
+          </Stack>
+        </InviteShell>
+      </Box>
     </Box>
   )
 }

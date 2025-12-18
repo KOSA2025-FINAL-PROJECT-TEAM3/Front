@@ -14,7 +14,7 @@ export const ToastContainer = () => {
     <Box
       sx={{
         position: 'fixed',
-        top: 16,
+        top: 'calc(var(--safe-area-top) + 16px)',
         right: 16,
         zIndex: 9999,
         display: 'flex',

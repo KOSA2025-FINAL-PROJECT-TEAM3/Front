@@ -14,7 +14,9 @@ import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
-import { Container, Paper, Stack, Typography } from '@mui/material'
+import { Paper } from '@mui/material'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
 
 /**
  * 약 등록 페이지 컴포넌트
@@ -57,14 +59,9 @@ export const MedicationAddPage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="lg" sx={{ py: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-          <BackButton />
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            약 등록
-          </Typography>
-        </Stack>
-        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600 }}>
+      <PageStack>
+        <PageHeader title="약 등록" leading={<BackButton />} />
+        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600, width: '100%', mx: 'auto' }}>
           <MedicationForm
             initialValues={initialValues}
             onSubmit={handleSubmit}
@@ -74,7 +71,7 @@ export const MedicationAddPage = () => {
             shouldResetOnSubmit={false}
           />
         </Paper>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

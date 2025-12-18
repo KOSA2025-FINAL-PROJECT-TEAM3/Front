@@ -4,6 +4,7 @@ import { authApiClient } from '@core/services/api/authApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { toast } from '@shared/components/toast/toastStore'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 const resolveFallbackPath = (user) => {
   const role = user?.customerRole || user?.userRole
@@ -30,6 +31,9 @@ const LoadingView = ({ message }) => (
     color: '#374151',
     fontSize: '16px'
   }}>
+    <div style={{ width: '100%', maxWidth: 520, padding: '0 16px', display: 'flex', justifyContent: 'flex-start' }}>
+      <BackButton label="뒤로" />
+    </div>
     <div className="loader" style={{
       width: '40px',
       height: '40px',
@@ -58,6 +62,9 @@ const ErrorView = ({ onRetry }) => (
     color: '#991b1b',
     fontSize: '16px'
   }}>
+    <div style={{ width: '100%', maxWidth: 520, padding: '0 16px', display: 'flex', justifyContent: 'flex-start' }}>
+      <BackButton label="뒤로" />
+    </div>
     <p>딥링크 인증에 실패했습니다.</p>
     <button
       onClick={onRetry}
