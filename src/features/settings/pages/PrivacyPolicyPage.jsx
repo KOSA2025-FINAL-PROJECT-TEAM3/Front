@@ -1,15 +1,17 @@
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Container, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Divider, Paper, Stack, Typography } from '@mui/material'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const PrivacyPolicyPage = () => {
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
-        <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 2 }}>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="개인정보 처리방침" />
+
+        <Paper variant="outlined" sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
           <Stack spacing={2}>
-            <Typography variant="h5" sx={{ fontWeight: 900 }}>
-              개인정보 처리방침
-            </Typography>
             <Divider />
 
             <Stack spacing={2}>
@@ -34,7 +36,7 @@ export const PrivacyPolicyPage = () => {
             </Stack>
           </Stack>
         </Paper>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

@@ -5,7 +5,10 @@
  */
 
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Container, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import BackButton from '@shared/components/mui/BackButton'
 
 /**
  * 내 약 관리 (설정) 페이지 컴포넌트
@@ -14,14 +17,12 @@ import { Container, Typography } from '@mui/material'
 export const MyMedicationsSettingsPage = () => {
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 900 }}>
-          내 약 관리 (설정)
-        </Typography>
+      <PageStack>
+        <PageHeader title="내 약 관리 (설정)" leading={<BackButton />} />
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           내 약 관리 (설정) 페이지 - 구현 예정
         </Typography>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

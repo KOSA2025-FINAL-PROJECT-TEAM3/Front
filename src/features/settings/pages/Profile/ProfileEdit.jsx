@@ -1,21 +1,17 @@
 import MainLayout from '@shared/components/layout/MainLayout'
 import { PROFILE_EDIT_FIELDS } from '@/constants/uiConstants'
-import { Box, Button, Container, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Button, Paper, Stack, TextField } from '@mui/material'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const ProfileEditPage = () => {
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            프로필 편집
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            연락처 정보를 최신 상태로 유지하세요.
-          </Typography>
-        </Box>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="프로필 편집" subtitle="연락처 정보를 최신 상태로 유지하세요." />
 
-        <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }} component="form">
+        <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }} component="form">
           <Stack spacing={2}>
             {PROFILE_EDIT_FIELDS.map((field) => (
               <TextField
@@ -39,7 +35,7 @@ export const ProfileEditPage = () => {
             </Stack>
           </Stack>
         </Paper>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }
