@@ -279,6 +279,14 @@ export function CaregiverDashboard() {
     loadRecentHistory().catch(() => {})
   }, [loadRecentHistory])
 
+  const adherenceRate = useMemo(() => {
+    if (!weeklyStats?.length) return 0
+    const completed = weeklyStats.filter((d) => d.status === 'completed').length
+    return Math.round((completed / weeklyStats.length) * 100)
+  }, [weeklyStats])
+
+  const activeRoleLabel = activeSenior?.role === 'CAREGIVER' ? '보호자' : '어르신'
+
   if (loading && groupMembers.length === 0) {
     return (
       <MainLayout>
@@ -298,13 +306,6 @@ export function CaregiverDashboard() {
       </MainLayout>
     )
   }
-
-  const adherenceRate = useMemo(() => {
-    const completed = weeklyStats.filter((d) => d.status === 'completed').length
-    return Math.round((completed / weeklyStats.length) * 100)
-  }, [weeklyStats])
-
-  const activeRoleLabel = activeSenior?.role === 'CAREGIVER' ? '보호자' : '어르신'
 
   return (
     <MainLayout>

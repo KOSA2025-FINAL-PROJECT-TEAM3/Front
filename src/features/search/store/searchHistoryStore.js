@@ -38,7 +38,7 @@ export const useSearchHistoryStore = create(
           const t = normalizeTerm(term)
           if (!t) return state
 
-          const entry = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, term: t, ts: Date.now() }
+          const entry = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, mode: m, term: t, ts: Date.now() }
           const next = dedupeAndLimit([entry, ...(state.history || [])], 12)
           return {
             history: next,

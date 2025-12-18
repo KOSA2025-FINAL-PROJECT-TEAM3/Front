@@ -66,7 +66,7 @@ const logoutFallback = () => {
   window.location.href = '/login'
 }
 
-const performRefresh = async (axiosInstance) => {
+const performRefresh = async () => {
   if (refreshPromise) return refreshPromise
 
   const refreshToken = window.localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
@@ -90,7 +90,7 @@ const performRefresh = async (axiosInstance) => {
       }
       applyTokenToStore(newToken, newRefreshToken ?? refreshToken)
       return newToken
-    } catch (e) {
+    } catch {
       // refresh 실패: 상위에서 logout 처리
       return null
     } finally {
@@ -125,7 +125,7 @@ export const attachAuthInterceptor = (axiosInstance) => {
 
       // JWT 만료(또는 임박) 시, 요청 전에 refresh 시도
       if (token && isJwtExpiredOrNearExpiry(token)) {
-        const newToken = await performRefresh(axiosInstance)
+        const newToken = await performRefresh()
         token = newToken || null
       }
 
@@ -163,7 +163,7 @@ export const attachAuthInterceptor = (axiosInstance) => {
       ) {
         originalRequest._retry = true
 
-        const newToken = await performRefresh(axiosInstance)
+        const newToken = await performRefresh()
         if (newToken) {
           originalRequest.headers = originalRequest.headers || {}
           originalRequest.headers.Authorization = `Bearer ${newToken}`
