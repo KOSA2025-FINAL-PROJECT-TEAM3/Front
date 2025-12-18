@@ -169,13 +169,13 @@ export const Header = ({ navItems = [] }) => {
             direction="row"
             alignItems="center"
             spacing={1}
-            onClick={() => navigate(ROUTE_PATHS.settingsProfile)}
+            onClick={() => navigate(ROUTE_PATHS.settings)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                navigate(ROUTE_PATHS.settingsProfile)
+                navigate(ROUTE_PATHS.settings)
               }
             }}
             sx={{ cursor: 'pointer' }}

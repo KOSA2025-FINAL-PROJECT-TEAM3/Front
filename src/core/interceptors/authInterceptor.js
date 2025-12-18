@@ -50,7 +50,7 @@ const applyTokenToStore = (newToken, refreshToken) => {
   const state = store.getState?.() || {}
   const user = state.user || null
   const customerRole = state.customerRole || null
-  const nextRefresh = state.refreshToken || refreshToken || null
+  const nextRefresh = refreshToken || state.refreshToken || null
 
   state.setAuthData?.({
     user,
@@ -81,11 +81,14 @@ const performRefresh = async (axiosInstance) => {
         { headers: { 'Content-Type': 'application/json' } },
       )
 
-      const { accessToken: newToken } = response.data || {}
+      const { accessToken: newToken, refreshToken: newRefreshToken } = response.data || {}
       if (!newToken) return null
 
       window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
-      applyTokenToStore(newToken, refreshToken)
+      if (newRefreshToken) {
+        window.localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken)
+      }
+      applyTokenToStore(newToken, newRefreshToken ?? refreshToken)
       return newToken
     } catch (e) {
       // refresh 실패: 상위에서 logout 처리
@@ -155,7 +158,8 @@ export const attachAuthInterceptor = (axiosInstance) => {
         error.response?.status === 401 &&
         !originalRequest._retry &&
         !originalRequest.url?.includes('/login') &&
-        !originalRequest.url?.includes('/refresh')
+        !originalRequest.url?.includes('/refresh') &&
+        !originalRequest.url?.includes('/logout')
       ) {
         originalRequest._retry = true
 

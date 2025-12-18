@@ -39,6 +39,10 @@ import { toast } from '@shared/components/toast/toastStore'
 export const FamilyMemberDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { familyLoading, familyInitialized } = useFamilyStore((state) => ({
+    familyLoading: state.loading,
+    familyInitialized: state.initialized,
+  }))
   const { data, isLoading, error } = useFamilyMemberDetail(id)
   const [activeTab, setActiveTab] = useState('medications')
   const familyGroups = useFamilyStore((state) => state.familyGroups) || []
@@ -58,6 +62,7 @@ export const FamilyMemberDetailPage = () => {
   const member = data?.member
   const medications = data?.medications ?? []
   const targetUserId = member?.userId ? Number(member.userId) : null
+  const pageLoading = familyLoading || !familyInitialized || isLoading
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -210,7 +215,7 @@ export const FamilyMemberDetailPage = () => {
           }
         />
 
-        {isLoading && (
+        {pageLoading && (
           <Paper variant="outlined" sx={{ p: 4 }}>
             <Stack spacing={2} alignItems="center">
               <CircularProgress />
@@ -220,12 +225,12 @@ export const FamilyMemberDetailPage = () => {
             </Stack>
           </Paper>
         )}
-        {error ? <Alert severity="error">구성원 정보를 불러오지 못했습니다. 다시 시도해 주세요.</Alert> : null}
-        {!isLoading && !error && !member && (
-          <Alert severity="warning">구성원을 찾을 수 없습니다.</Alert>
-        )}
+        {!pageLoading && error ? (
+          <Alert severity="error">구성원 정보를 불러오지 못했습니다. 다시 시도해 주세요.</Alert>
+        ) : null}
+        {!pageLoading && !error && !member ? <Alert severity="warning">구성원을 찾을 수 없습니다.</Alert> : null}
 
-        {member && (
+        {!pageLoading && member && (
           <>
             <MemberProfileCard member={member} />
 

@@ -67,6 +67,9 @@ class AuthApiClient extends ApiClient {
   }
 
   logout(token) {
+    if (!token) {
+      return Promise.resolve({ success: true })
+    }
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -95,7 +98,12 @@ class AuthApiClient extends ApiClient {
 
     return this.post('/deeplink/resolve', payload, undefined, { mockResponse })
   }
+
+  reactivate(token) {
+    return this.post('/users/reactivate', { token })
+  }
 }
+
 
 export const authApiClient = new AuthApiClient()
 export { AuthApiClient }

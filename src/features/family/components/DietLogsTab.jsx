@@ -14,6 +14,7 @@ const DietLogsTab = ({ userId }) => {
             if (!userId) return
             try {
                 setLoading(true)
+                setError(null)
                 const data = await dietApiClient.getDietLogs({ userId })
                 const logArray = Array.isArray(data) ? data : []
 
@@ -27,7 +28,13 @@ const DietLogsTab = ({ userId }) => {
                 setLogs(logArray)
             } catch (err) {
                 console.error('Failed to fetch diet logs:', err)
-                setError('식단 기록을 불러오지 못했습니다.')
+                const status = err?.response?.status
+                if (status === 401 || status === 403) {
+                    setError('식단 기록 조회 권한이 없습니다.')
+                } else {
+                    setError('식단 기록을 불러오지 못했습니다.')
+                }
+                setLogs([])
             } finally {
                 setLoading(false)
             }

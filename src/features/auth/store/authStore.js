@@ -9,6 +9,7 @@ import logger from '@core/utils/logger'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authApiClient } from '@core/services/api/authApiClient'
+import { userApiClient } from '@core/services/api/userApiClient'
 import { STORAGE_KEYS } from '@config/constants'
 
 const initialState = {
@@ -169,6 +170,12 @@ export const useAuthStore = create(
           get().setAuthData(response)
         }),
 
+      reactivate: async (token) =>
+        withLoading(set, async () => {
+          const response = await authApiClient.reactivate(token)
+          get().setAuthData(response)
+        }),
+
       selectRole: async (selectedRole) =>
         withLoading(set, async () => {
           const token = get().token
@@ -184,6 +191,41 @@ export const useAuthStore = create(
       // Alias for selectRole (체크리스트 호환성)
       updateUserRole: async (selectedRole) => get().selectRole(selectedRole),
 
+      updateUser: async (data) =>
+        withLoading(set, async () => {
+          let updatedUser = null
+
+          // 1. 이미지가 있으면 먼저 업로드 (이미지 변경)
+          if (data.profileImageFile) {
+            const imageResponse = await userApiClient.uploadProfileImage(data.profileImageFile)
+            // imageResponse가 user 객체를 반환한다고 가정 (백엔드 로직에 따름)
+            updatedUser = imageResponse 
+          }
+
+          // 2. 텍스트 정보 업데이트 (이름, 전화번호 등)
+          // 이미지만 바꾼 경우 텍스트 업데이트 생략 가능하지만, 
+          // 안전하게 텍스트 정보도 같이 보냄 (또는 data에서 file 제외하고 보냄)
+          const { profileImageFile, ...textData } = data
+          
+          // 텍스트 데이터가 변경된 게 있으면 호출
+          if (Object.keys(textData).length > 0) {
+             updatedUser = await userApiClient.updateMe(textData)
+          }
+
+          // 기존 토큰 등은 유지하고 user 정보만 업데이트
+          const currentUser = get().user
+          // updatedUser가 없으면(둘 다 실행 안됨?) 기존 유지
+          const finalUser = updatedUser || currentUser
+          
+          const newUserState = { ...currentUser, ...finalUser }
+          
+          get().setAuthData({
+            ...get(), // 기존 토큰 및 상태 유지
+            user: newUserState
+          })
+          return newUserState
+        }),
+
       logout: async () => {
         set({ loading: true, error: null })
         const token = get().token
@@ -195,6 +237,17 @@ export const useAuthStore = create(
         // clearAuthState가 initialState(loading: false 포함)로 완전 리셋
         get().clearAuthState()
       },
+
+      withdraw: async () =>
+        withLoading(set, async () => {
+          try {
+            await userApiClient.deleteMe()
+            get().clearAuthState()
+          } catch (error) {
+            logger.error('회원 탈퇴 실패:', error)
+            throw error
+          }
+        }),
     }),
     {
       name: 'amapill-auth-storage-v2',
