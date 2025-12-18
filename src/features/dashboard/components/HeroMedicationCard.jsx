@@ -105,25 +105,37 @@ export const HeroMedicationCard = ({
         )}
 
         {onConfirm && (
-          <Button
-            variant="contained"
-            size="large"
+          <Box
+            component="div"
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
               e.stopPropagation()
               onConfirm()
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.stopPropagation()
+                onConfirm()
+              }
+            }}
             sx={{
               mt: 2,
+              py: 1.5,
+              px: 3,
               bgcolor: 'white',
               color: 'primary.main',
               fontWeight: 600,
+              borderRadius: 2,
+              textAlign: 'center',
+              cursor: 'pointer',
               '&:hover': {
                 bgcolor: 'rgba(255, 255, 255, 0.9)',
               },
             }}
           >
             ✓ 복용 완료하기
-          </Button>
+          </Box>
         )}
       </Stack>
     </RoundedCard>
