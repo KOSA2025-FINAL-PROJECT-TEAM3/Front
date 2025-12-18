@@ -4,10 +4,13 @@ import {
   useRef,
   useCallback,
   useLayoutEffect,
+  useMemo,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "@shared/components/layout/MainLayout"; // MainLayout 복구
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Paper, Stack, Typography } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded'
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 
@@ -16,23 +19,71 @@ import { useFamilyStore } from "@features/family/store/familyStore";
 import { familyChatApiClient } from "@/core/services/api/familyChatApiClient";
 import logger from '@core/utils/logger';
 import envConfig from '@config/environment.config';
+import { ROUTE_PATHS } from '@config/routes.config'
 
 const AI_LOADING_TEMP_ID = 'ai-loading-temp'; 
 const MESSAGE_ITEM_CLASS = "family-chat-message-item";
 
+const toPositiveIntOrNull = (value) => {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+
+  const raw = String(value).trim();
+  const direct = Number.parseInt(raw, 10);
+  if (Number.isFinite(direct) && direct > 0) return direct;
+
+  const match = raw.match(/(\d+)$/);
+  if (!match) return null;
+  const extracted = Number.parseInt(match[1], 10);
+  return Number.isFinite(extracted) && extracted > 0 ? extracted : null;
+};
+
 export const FamilyChatConversationPage = () => {
   const navigate = useNavigate();
-  const { familyGroupId } = useParams();
-  const currentFamilyGroupId = Number(familyGroupId) || 1;
+  const { familyGroupId: familyGroupIdParam } = useParams();
 
   // [Safety] Store 데이터가 없을 수 있으므로 안전하게 접근
   const familyGroups = useFamilyStore((state) => state.familyGroups) || [];
-  const familyGroup = familyGroups.find(g => g.id === currentFamilyGroupId);
+  const selectedGroupId = useFamilyStore((state) => state.selectedGroupId);
+
+  const resolvedFamilyGroupId = useMemo(() => {
+    const fromParam = toPositiveIntOrNull(familyGroupIdParam);
+    if (fromParam) return fromParam;
+
+    const fromStore = toPositiveIntOrNull(selectedGroupId);
+    if (fromStore) return fromStore;
+
+    return toPositiveIntOrNull(familyGroups?.[0]?.id);
+  }, [familyGroupIdParam, selectedGroupId, familyGroups]);
+
+  const familyGroup = useMemo(() => {
+    if (!resolvedFamilyGroupId) return null;
+    return familyGroups.find((g) => toPositiveIntOrNull(g.id) === resolvedFamilyGroupId) || null;
+  }, [familyGroups, resolvedFamilyGroupId]);
 
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
   const memberNickname = useAuthStore((state) => state.user?.name || '익명');
-  const currentUserId = user?.id ? Number(user.id) : user?.userId ? Number(user.userId) : 1;
+  const currentUserId = toPositiveIntOrNull(user?.id ?? user?.userId);
+
+  const currentFamilyMemberId = useMemo(() => {
+    if (!resolvedFamilyGroupId || !currentUserId) return null;
+    const group = familyGroups.find((g) => toPositiveIntOrNull(g.id) === resolvedFamilyGroupId);
+    const myMember = group?.members?.find((m) => toPositiveIntOrNull(m.userId) === currentUserId);
+    return toPositiveIntOrNull(myMember?.id);
+  }, [familyGroups, resolvedFamilyGroupId, currentUserId]);
+
+  // /chat/family 는 alias로 취급 → 실제 그룹 라우트로 정규화
+  useEffect(() => {
+    if (familyGroupIdParam) return;
+    if (!resolvedFamilyGroupId) return;
+    navigate(
+      ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(resolvedFamilyGroupId)),
+      { replace: true }
+    );
+  }, [familyGroupIdParam, resolvedFamilyGroupId, navigate]);
 
   const messageListRef = useRef(null);
   const stompClientRef = useRef(null); 
@@ -55,33 +106,37 @@ export const FamilyChatConversationPage = () => {
 
   // [3] 읽음 신호 (Observer) - 호이스팅 문제 해결을 위해 위로 이동
   const sendReadReceipt = useCallback((messageId) => {
+      if (!resolvedFamilyGroupId || !currentFamilyMemberId) return;
       if (!stompClientRef.current || !stompClientRef.current.connected) return;
       if (messageId <= currentUserLastReadMessageId) return;
 
       setCurrentUserLastReadMessageId(messageId);
 
       const payload = {
-          familyGroupId: currentFamilyGroupId,
-          familyMemberId: currentUserId,
+          familyGroupId: resolvedFamilyGroupId,
+          familyMemberId: currentFamilyMemberId,
           content: String(messageId), 
           type: "READ" 
       };
 
       stompClientRef.current.publish({
-          destination: `/app/family/${currentFamilyGroupId}/read`,
+          destination: `/app/family/${resolvedFamilyGroupId}/read`,
           body: JSON.stringify(payload)
       });
-  }, [currentFamilyGroupId, currentUserId, currentUserLastReadMessageId]);
+  }, [resolvedFamilyGroupId, currentFamilyMemberId, currentUserLastReadMessageId]);
 
   // [1] 초기 데이터 로드
   const loadInitialData = useCallback(async () => {
-    if (!token) return;
+    if (!token || !resolvedFamilyGroupId || !currentFamilyMemberId) return;
     try {
       isFetchingRef.current = true;
       setIsInitialLoading(true);
       
       // API 호출 실패 시에도 화면이 죽지 않도록 try-catch 내부 처리
-      const response = await familyChatApiClient.getInitialChatRoomData(currentFamilyGroupId, currentUserId);
+      const response = await familyChatApiClient.getInitialChatRoomData(
+        resolvedFamilyGroupId,
+        currentFamilyMemberId
+      );
       
       const initialMessages = response?.messages || [];
       const lastReadId = response?.currentUserLastReadMessageId || 0;
@@ -104,7 +159,7 @@ export const FamilyChatConversationPage = () => {
       isFetchingRef.current = false;
       setIsInitialLoading(false);
     }
-  }, [currentFamilyGroupId, currentUserId, token]);
+  }, [resolvedFamilyGroupId, currentFamilyMemberId, token]);
 
   // [FIX] 메시지 목록이 갱신되었을 때, 가장 최신 메시지를 읽음 처리하는 효과 추가
   useEffect(() => {
@@ -122,7 +177,7 @@ export const FamilyChatConversationPage = () => {
 
   // [2] 추가 메시지 로드 (스크롤 업)
   const loadMoreMessages = useCallback(async (pageNum) => {
-    if (!hasMore || !token) return;
+    if (!hasMore || !token || !resolvedFamilyGroupId) return;
     if (isFetchingRef.current) return;
 
     try {
@@ -131,7 +186,7 @@ export const FamilyChatConversationPage = () => {
       
       await new Promise((r) => setTimeout(r, 300));
 
-      const res = await familyChatApiClient.getMessages(currentFamilyGroupId, pageNum, 50);
+      const res = await familyChatApiClient.getMessages(resolvedFamilyGroupId, pageNum, 50);
       const data = res?.messages || res || [];
 
       if (data.length === 0) {
@@ -151,7 +206,7 @@ export const FamilyChatConversationPage = () => {
       isFetchingRef.current = false;
       setIsLoadingPast(false);
     }
-  }, [currentFamilyGroupId, hasMore, token]);
+  }, [resolvedFamilyGroupId, hasMore, token]);
 
   // 스크롤 위치 조정
   useLayoutEffect(() => {
@@ -172,10 +227,10 @@ export const FamilyChatConversationPage = () => {
   }, [messages, isLoadingPast, page, isInitialLoading]);
 
   useEffect(() => {
-    if (token) {
+    if (token && resolvedFamilyGroupId && currentFamilyMemberId) {
       loadInitialData();
     }
-  }, [token, loadInitialData]);
+  }, [token, resolvedFamilyGroupId, currentFamilyMemberId, loadInitialData]);
 
   const handleScroll = useCallback((e) => {
     const target = e.target;
@@ -223,7 +278,7 @@ export const FamilyChatConversationPage = () => {
 
   // [4] WebSocket
   const connectWebSocket = useCallback(async () => {
-    if (!token) return;
+    if (!token || !resolvedFamilyGroupId || !currentFamilyMemberId) return;
     if (stompClientRef.current?.active || stompClientRef.current?.connected) return;
 
     try {
@@ -240,13 +295,13 @@ export const FamilyChatConversationPage = () => {
 
       client.onConnect = () => {
         logger.debug("✅ WebSocket Connected!");
-        client.subscribe(`/topic/family/${currentFamilyGroupId}`, (msg) => {
+        client.subscribe(`/topic/family/${resolvedFamilyGroupId}`, (msg) => {
           const body = JSON.parse(msg.body);
 
           if (body.type === "READ") {
-              logger.debug("📩 READ 이벤트 수신:", body, "내 ID:", currentUserId);
+              logger.debug("📩 READ 이벤트 수신:", body, "내 ID:", currentFamilyMemberId);
               
-              if (body.familyMemberId === currentUserId) {
+              if (body.familyMemberId === currentFamilyMemberId) {
                   return;
               }
 
@@ -283,7 +338,7 @@ export const FamilyChatConversationPage = () => {
             // 클로저 문제 해결을 위해 스토어에서 직접 최신 상태 조회
             if (!body.memberNickname) {
                 const currentGroups = useFamilyStore.getState().familyGroups || [];
-                const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+                const currentGroup = currentGroups.find(g => g.id == resolvedFamilyGroupId);
                 
                 if (currentGroup?.members) {
                     const sender = currentGroup.members.find(m => m.id == body.familyMemberId);
@@ -307,7 +362,7 @@ export const FamilyChatConversationPage = () => {
             // [FIX] 클로저 문제 해결: 스토어에서 최신 멤버 수 조회
             let currentMemberCount = 1;
             const currentGroups = useFamilyStore.getState().familyGroups || [];
-            const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+            const currentGroup = currentGroups.find(g => g.id == resolvedFamilyGroupId);
             if (currentGroup?.members?.length) {
                 currentMemberCount = currentGroup.members.length;
             }
@@ -344,7 +399,7 @@ export const FamilyChatConversationPage = () => {
     } catch (err) {
       logger.error("WS 로드 실패:", err);
     }
-  }, [currentFamilyGroupId, token, currentUserId, wsEndpoint]); 
+  }, [resolvedFamilyGroupId, token, currentFamilyMemberId, wsEndpoint]); 
 
   const disconnectWebSocket = () => {
     if (stompClientRef.current) {
@@ -355,6 +410,7 @@ export const FamilyChatConversationPage = () => {
 
   const handleImageUpload = useCallback(async (file, content = "") => {
     if (!file || isSending) return;
+    if (!resolvedFamilyGroupId || !currentFamilyMemberId) return;
 
     // [FIX] 이미지 용량 제한 (5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
@@ -365,71 +421,72 @@ export const FamilyChatConversationPage = () => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("familyMemberId", currentUserId);
+    formData.append("familyMemberId", currentFamilyMemberId);
     if (content) formData.append("content", content);
 
     setIsSending(true);
     try {
-      const imageUrl = await familyChatApiClient.uploadImage(currentFamilyGroupId, formData);
+      const imageUrl = await familyChatApiClient.uploadImage(resolvedFamilyGroupId, formData);
 
       if (stompClientRef.current?.connected) {
         const imagePayload = {
-          familyGroupId: currentFamilyGroupId,
-          familyMemberId: currentUserId,
+          familyGroupId: resolvedFamilyGroupId,
+          familyMemberId: currentFamilyMemberId,
           content: imageUrl,
           type: "IMAGE"
         };
         stompClientRef.current.publish({
-          destination: `/app/family/${currentFamilyGroupId}`,
+          destination: `/app/family/${resolvedFamilyGroupId}`,
           body: JSON.stringify(imagePayload),
         });
         
         // [FIX] DB 저장 순서 보장 (이미지 먼저, 텍스트 나중)을 위한 지연 추가
         if (content && content.trim()) {
-             setTimeout(() => {
-                 let textContent = content.startsWith("/ai ") ? content.substring(4).trim() : content;
-                 if(textContent) {
-                     stompClientRef.current.publish({
-                        destination: `/app/family/${currentFamilyGroupId}`,
-                        body: JSON.stringify({
-                            familyGroupId: currentFamilyGroupId,
-                            familyMemberId: currentUserId,
-                            content: textContent,
-                            type: "TEXT"
-                        }),
-                    });
-                 }
-             }, 100);
-        }
-      }
+	             setTimeout(() => {
+	                 let textContent = content.startsWith("/ai ") ? content.substring(4).trim() : content;
+	                 if(textContent) {
+	                     stompClientRef.current.publish({
+	                        destination: `/app/family/${resolvedFamilyGroupId}`,
+	                        body: JSON.stringify({
+	                            familyGroupId: resolvedFamilyGroupId,
+	                            familyMemberId: currentFamilyMemberId,
+	                            content: textContent,
+	                            type: "TEXT"
+	                        }),
+	                    });
+	                 }
+	             }, 100);
+	        }
+	      }
     } catch (err) {
       logger.error("이미지 전송 오류", err);
     } finally {
       setIsSending(false);
     }
-  }, [currentFamilyGroupId, currentUserId, isSending]);
+  }, [resolvedFamilyGroupId, currentFamilyMemberId, isSending]);
 
   const handleSendMessage = useCallback(async (content, file) => {
     if (file) { await handleImageUpload(file, content); return; }
     if (!content?.trim() || !stompClientRef.current?.connected) return;
+    if (!resolvedFamilyGroupId || !currentFamilyMemberId) return;
 
     const payload = {
-      familyGroupId: currentFamilyGroupId,
-      familyMemberId: currentUserId,
+      familyGroupId: resolvedFamilyGroupId,
+      familyMemberId: currentFamilyMemberId,
       content,
       type: "TEXT"
     };
     setIsSending(true);
     try {
       stompClientRef.current.publish({
-        destination: `/app/family/${currentFamilyGroupId}`,
+        destination: `/app/family/${resolvedFamilyGroupId}`,
         body: JSON.stringify(payload),
       });
       
       // [FIX] 클로저 문제 해결: 스토어에서 최신 멤버 수 조회
       let currentMemberCount = 1;
       const currentGroups = useFamilyStore.getState().familyGroups || [];
-      const currentGroup = currentGroups.find(g => g.id === currentFamilyGroupId);
+      const currentGroup = currentGroups.find(g => g.id == resolvedFamilyGroupId);
       if (currentGroup?.members?.length) {
           currentMemberCount = currentGroup.members.length;
       }
@@ -468,10 +525,10 @@ export const FamilyChatConversationPage = () => {
     } finally {
       setIsSending(false);
     }
-  }, [currentFamilyGroupId, currentUserId, memberNickname, handleImageUpload]);
+  }, [resolvedFamilyGroupId, currentFamilyMemberId, memberNickname, handleImageUpload]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !resolvedFamilyGroupId || !currentFamilyMemberId) return;
 
     connectWebSocket();
 
@@ -489,22 +546,54 @@ export const FamilyChatConversationPage = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       disconnectWebSocket();
     };
-  }, [token, connectWebSocket]);
+  }, [token, resolvedFamilyGroupId, currentFamilyMemberId, connectWebSocket]);
 
   const handleBack = () => navigate(-1);
+  const isCaregiver = (user?.customerRole || user?.customer_role || '').toString().toUpperCase() === 'CAREGIVER'
+  const quickChips = isCaregiver
+    ? ['약 드셨나요? 💊', '식사 하셨나요? 🍚', '어디 편찮으신가요? 🏥', '전화 가능하세요? 📞']
+    : ['약 먹었어요 💊', '밥 먹었어요 🍚', '몸이 좀 안좋아요 🤒', '전화 해주세요 📞']
+  const memberCount = familyGroup?.members?.length || 0
 
   // [Fix] MainLayout 복구 (fullScreen 옵션 사용)
   return (
     <MainLayout showBottomNav={false} fullScreen={true}>
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", bgcolor: "#f5f5f5", position: "relative" }}>
-        <Paper square variant="outlined" sx={{ borderLeft: 0, borderRight: 0, flexShrink: 0, height: 60 }}>
-          <Stack direction="row" alignItems="center" spacing={2} sx={{ px: 2, height: "100%" }}>
-            <Button variant="text" onClick={handleBack} sx={{ px: 0, minWidth: "auto" }}>
-              뒤로
-            </Button>
-            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
-              {familyGroup?.name ? `${familyGroup.name} 채팅방` : "가족채팅"}
-            </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          bgcolor: "#F6FAFF",
+          position: "relative",
+        }}
+      >
+        <Paper square variant="outlined" sx={{ borderLeft: 0, borderRight: 0, flexShrink: 0 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ px: 2, py: 1.5 }}>
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ minWidth: 0 }}>
+              <IconButton aria-label="뒤로" onClick={handleBack} sx={{ ml: -0.5 }}>
+                <ArrowBackIcon />
+              </IconButton>
+              <Box sx={{ minWidth: 0 }}>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
+                    {familyGroup?.name ? `${familyGroup.name} 채팅방` : "가족 채팅"}
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={memberCount ? `${memberCount}명` : '...'}
+                    sx={{ bgcolor: "#F1F5F9", color: "#64748B", fontWeight: 800 }}
+                  />
+                </Stack>
+              </Box>
+            </Stack>
+
+            <IconButton
+              aria-label="가족 구성원"
+              onClick={() => navigate(ROUTE_PATHS.family)}
+              sx={{ color: "#94A3B8" }}
+            >
+              <PeopleRoundedIcon />
+            </IconButton>
           </Stack>
         </Paper>
 
@@ -512,18 +601,20 @@ export const FamilyChatConversationPage = () => {
           <Box
             sx={{
               position: "absolute",
-              top: 60,
+              top: 64,
               left: 0,
               right: 0,
               zIndex: 20,
-              bgcolor: "rgba(0,0,0,0.7)",
+              bgcolor: "rgba(15, 23, 42, 0.72)",
               color: "common.white",
               textAlign: "center",
               py: 1,
               cursor: "pointer",
             }}
           >
-            <Typography variant="body2">⬆️ 안 읽은 메시지가 더 있습니다</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 800 }}>
+              ⬆️ 안 읽은 메시지가 더 있습니다
+            </Typography>
           </Box>
         )}
 
@@ -533,7 +624,8 @@ export const FamilyChatConversationPage = () => {
           sx={{
             flex: 1,
             overflowY: "auto",
-            p: 2,
+            px: 2,
+            py: 2,
             display: "flex",
             flexDirection: "column",
             pb: 2.5,
@@ -551,7 +643,12 @@ export const FamilyChatConversationPage = () => {
             <div key={m.id || m.messageId || i} className={MESSAGE_ITEM_CLASS} data-message-id={m.id}>
                 <ChatMessage
                 message={m}
-                isMe={m.familyMemberId === currentUserId}
+                isMe={m.familyMemberId === currentFamilyMemberId}
+                sender={
+                  m.familyMemberId === 0
+                    ? { name: "AI 봇" }
+                    : familyGroup?.members?.find(mem => String(mem.id) === String(m.familyMemberId)) || null
+                }
                 />
             </div>
           ))}
@@ -565,7 +662,7 @@ export const FamilyChatConversationPage = () => {
           )}
         </Box>
 
-        <ChatInput onSend={handleSendMessage} disabled={isSending} />
+        <ChatInput onSend={handleSendMessage} disabled={isSending} quickChips={quickChips} />
       </Box>
     </MainLayout>
   );
