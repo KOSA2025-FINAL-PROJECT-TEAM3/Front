@@ -67,91 +67,139 @@ export const FamilyMemberCard = ({
         borderColor: 'divider',
       }}
     >
-      <Box sx={{ position: 'relative', flexShrink: 0 }}>
-        <Avatar
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 3,
-            bgcolor: member.avatarColor || '#c7d2fe',
-            color: 'text.primary',
-            fontSize: 18,
-            fontWeight: 900,
-          }}
-        >
-          {initials}
-        </Avatar>
-        {isOnline ? (
-          <Box
-            aria-label="온라인"
+      <Box
+        role={onDetail ? 'button' : undefined}
+        tabIndex={onDetail ? 0 : undefined}
+        onClick={() => onDetail?.(member.id)}
+        onKeyDown={(e) => {
+          if (!onDetail) return
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onDetail(member.id)
+          }
+        }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          flex: 1,
+          minWidth: 0,
+          cursor: onDetail ? 'pointer' : 'default',
+        }}
+      >
+        <Box sx={{ position: 'relative', flexShrink: 0 }}>
+          <Avatar
             sx={{
-              position: 'absolute',
-              right: -2,
-              bottom: -2,
-              width: 14,
-              height: 14,
-              borderRadius: '50%',
-              border: '2px solid',
-              borderColor: 'common.white',
-              bgcolor: 'success.main',
-              boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.25)',
+              width: 48,
+              height: 48,
+              borderRadius: 3,
+              bgcolor: member.avatarColor || '#c7d2fe',
+              color: 'text.primary',
+              fontSize: 18,
+              fontWeight: 900,
             }}
-          />
-        ) : null}
-      </Box>
+          >
+            {initials}
+          </Avatar>
+          {isOnline ? (
+            <Box
+              aria-label="온라인"
+              sx={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 14,
+                height: 14,
+                borderRadius: '50%',
+                border: '2px solid',
+                borderColor: 'common.white',
+                bgcolor: 'success.main',
+                boxShadow: '0 0 0 2px rgba(34, 197, 94, 0.25)',
+              }}
+            />
+          ) : null}
+        </Box>
 
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5, flexWrap: 'wrap' }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
-            {member.name}
-          </Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.5, flexWrap: 'wrap' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 900 }} noWrap>
+              {member.name}
+            </Typography>
 
-          {canChangeRole && onRoleChange ? (
-            <>
-              <Button
-                type="button"
-                size="small"
-                variant="outlined"
-                endIcon={<ExpandMoreIcon fontSize="small" />}
-                onClick={(e) => setRoleAnchorEl(e.currentTarget)}
-                disabled={isRoleChanging}
-                title="역할 변경"
-                sx={{ borderRadius: 999, fontWeight: 900 }}
-              >
-                {isRoleChanging ? '변경 중...' : roleLabels[currentRole] || currentRole}
+            {canChangeRole && onRoleChange ? (
+              <>
+                <Button
+                  type="button"
+                  size="small"
+                  variant="outlined"
+                  endIcon={<ExpandMoreIcon fontSize="small" />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setRoleAnchorEl(e.currentTarget)
+                  }}
+                  disabled={isRoleChanging}
+                  title="역할 변경"
+                  sx={{ borderRadius: 999, fontWeight: 900 }}
+                >
+                  {isRoleChanging ? '변경 중...' : roleLabels[currentRole] || currentRole}
+                </Button>
+                <Menu
+                  anchorEl={roleAnchorEl}
+                  open={Boolean(roleAnchorEl)}
+                  onClose={(e) => {
+                    e?.stopPropagation?.()
+                    setRoleAnchorEl(null)
+                  }}
+                >
+                  <MenuItem
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleRoleToggle()
+                    }}
+                  >
+                    {roleLabels[oppositeRole]}(으)로 변경
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button type="button" size="small" variant="outlined" disabled sx={{ borderRadius: 999, fontWeight: 900 }}>
+                {roleLabels[currentRole] || currentRole}
               </Button>
-              <Menu
-                anchorEl={roleAnchorEl}
-                open={Boolean(roleAnchorEl)}
-                onClose={() => setRoleAnchorEl(null)}
-              >
-                <MenuItem onClick={handleRoleToggle}>
-                  {roleLabels[oppositeRole]}(으)로 변경
-                </MenuItem>
-              </Menu>
-            </>
-          ) : (
-            <Button type="button" size="small" variant="outlined" disabled sx={{ borderRadius: 999, fontWeight: 900 }}>
-              {roleLabels[currentRole] || currentRole}
-            </Button>
-          )}
-        </Stack>
+            )}
+          </Stack>
 
-        <Typography variant="body2" color="text.secondary">
-          가입일: {joinedDate}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {member.email}
-        </Typography>
+          <Typography variant="body2" color="text.secondary">
+            가입일: {joinedDate}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" noWrap>
+            {member.email}
+          </Typography>
+        </Box>
       </Box>
 
-      <Stack spacing={1} sx={{ flexShrink: 0, alignItems: 'flex-end' }}>
-        <Button size="small" variant="outlined" onClick={() => onDetail?.(member.id)} sx={{ fontWeight: 900 }}>
+      <Stack spacing={1} sx={{ flexShrink: 0, alignItems: 'flex-end', position: 'relative', zIndex: 1 }}>
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDetail?.(member.id)
+          }}
+          sx={{ fontWeight: 900 }}
+        >
           상세
         </Button>
 
         {canOpenSettings ? (
-          <IconButton size="small" onClick={() => onSettings?.(member.userId)} title="알림 설정" aria-label="알림 설정">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSettings?.(member.userId)
+            }}
+            title="알림 설정"
+            aria-label="알림 설정"
+          >
             <SettingsIcon fontSize="small" />
           </IconButton>
         ) : null}
@@ -161,7 +209,10 @@ export const FamilyMemberCard = ({
             size="small"
             color="error"
             variant="contained"
-            onClick={() => onRemove?.(member.id)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove?.(member.id)
+            }}
             disabled={isRemoving}
             aria-busy={isRemoving}
             sx={{ fontWeight: 900 }}

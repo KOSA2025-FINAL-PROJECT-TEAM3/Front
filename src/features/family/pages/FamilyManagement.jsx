@@ -3,7 +3,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { ROUTE_PATHS } from '@config/routes.config'
 import MainLayout from '@shared/components/layout/MainLayout'
 import AppDialog from '@shared/components/mui/AppDialog'
-import { Alert, Badge, Box, Button, Container, Divider, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { Alert, Badge, Box, Button, Chip, FormControlLabel, Paper, Stack, Switch, TextField, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -14,6 +16,7 @@ import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
 import OwnerDelegationModal from '../components/OwnerDelegationModal.jsx'
 import logger from '@core/utils/logger'
 import { useUnreadBadge } from '@features/chat/hooks/useUnreadBadge'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 // [2025-12-08] 가족 그룹 만들기 기능을 FamilyInvite에서 이동
 
@@ -153,15 +156,24 @@ export const FamilyManagementPage = () => {
   const handleRemoveMember = (memberId) => {
     if (!memberId) return
     const target = members.find((member) => member.id === memberId)
-    const message = target
-      ? `${target.name}님을 가족 목록에서 제거하시겠어요?`
-      : '이 구성원을 제거하시겠어요?'
+    const isSelf =
+      Boolean(target?.userId) &&
+      Boolean(currentUserId) &&
+      String(target.userId) === String(currentUserId)
+
+    const title = isSelf ? '가족 탈퇴' : '구성원 제거'
+    const message = isSelf
+      ? '현재 가족 그룹에서 탈퇴하시겠어요?'
+      : target
+        ? `${target.name}님을 가족 목록에서 제거하시겠어요?`
+        : '이 구성원을 제거하시겠어요?'
 
     setConfirmModal({
       type: 'remove',
-      title: '구성원 제거',
+      title,
       message,
       memberId,
+      isSelf,
     })
   }
 
@@ -318,11 +330,15 @@ export const FamilyManagementPage = () => {
                     setRemovingMemberId(memberId)
                     try {
                       await removeMember(memberId)
-                      toast.success('구성원이 제거되었습니다.')
+                      toast.success(confirmModal.isSelf ? '가족에서 탈퇴했습니다.' : '구성원이 제거되었습니다.')
                       await refetchFamily?.() // Add this line to refetch family data
 
                     } catch (error) {
-                      toast.error('구성원 제거에 실패했습니다. 다시 시도해 주세요.')
+                      toast.error(
+                        confirmModal.isSelf
+                          ? '가족 탈퇴에 실패했습니다. 다시 시도해 주세요.'
+                          : '구성원 제거에 실패했습니다. 다시 시도해 주세요.',
+                      )
                       logger.warn('[FamilyManagement] removeMember failed', error)
                     } finally {
                       setRemovingMemberId(null)
@@ -352,8 +368,7 @@ export const FamilyManagementPage = () => {
           <Typography variant="body2">{confirmModal.message}</Typography>
         </AppDialog>
       )}
-      <Container maxWidth="lg" sx={{ py: 3 }}>
-        <Box role="region" aria-busy={loading}>
+      <PageStack role="region" aria-busy={loading}>
         {/* 알림 설정 모달 */}
         {showNotificationModal && (
           <AppDialog
@@ -443,61 +458,63 @@ export const FamilyManagementPage = () => {
           </AppDialog>
         )}
 
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }} sx={{ mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 900 }}>
-              가족 관리
-            </Typography>
-            {familyGroups.length > 1 ? (
-              <Button
-                type="button"
-                variant="outlined"
-                sx={{ mt: 1 }}
-                onClick={() => setShowGroupModal(true)}
+        <PageHeader
+          leading={<BackButton />}
+          title="가족 관리"
+          subtitle={
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+              {familyGroup?.name ? (
+                <Chip size="small" color="primary" label={familyGroup.name} />
+              ) : (
+                <Chip size="small" variant="outlined" label="그룹 없음" />
+              )}
+              {familyGroups.length > 1 ? (
+                <Button type="button" variant="outlined" onClick={() => setShowGroupModal(true)} sx={{ fontWeight: 900 }}>
+                  그룹 변경 ({familyGroups.findIndex((g) => g.id === selectedGroupId) + 1}/{familyGroups.length})
+                </Button>
+              ) : null}
+            </Stack>
+          }
+          right={
+            <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
+              <Button type="button" variant="outlined" onClick={() => setShowGroupCreateModal(true)} sx={{ fontWeight: 900 }}>
+                + 그룹 생성
+              </Button>
+              <Button type="button" variant="contained" onClick={() => navigate(ROUTE_PATHS.familyInvite)} sx={{ fontWeight: 900 }}>
+                + 가족 초대
+              </Button>
+              {familyGroup?.id && familyGroup?.ownerId?.toString?.() === currentUserId?.toString?.() ? (
+                <Button type="button" color="error" variant="outlined" onClick={handleDissolveGroup} disabled={dissolving}>
+                  {dissolving ? '해산 중...' : '그룹 해산'}
+                </Button>
+              ) : null}
+              <Badge
+                color="error"
+                overlap="circular"
+                badgeContent={unreadCount > 99 ? '99+' : unreadCount}
+                invisible={!unreadCount}
               >
-                그룹 변경 ({familyGroups.findIndex((g) => g.id === selectedGroupId) + 1}/{familyGroups.length})
-              </Button>
-            ) : null}
-          </Box>
-
-          <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent={{ md: 'flex-end' }}>
-            <Button type="button" variant="contained" onClick={() => setShowGroupCreateModal(true)}>
-              + 그룹 생성
-            </Button>
-            <Button type="button" variant="contained" onClick={() => navigate(ROUTE_PATHS.familyInvite)}>
-              + 가족 초대
-            </Button>
-            {familyGroup?.id && familyGroup?.ownerId?.toString?.() === currentUserId?.toString?.() ? (
-              <Button type="button" color="error" variant="outlined" onClick={handleDissolveGroup} disabled={dissolving}>
-                {dissolving ? '해산 중...' : '그룹 해산'}
-              </Button>
-            ) : null}
-            <Badge
-              color="error"
-              overlap="circular"
-              badgeContent={unreadCount > 99 ? '99+' : unreadCount}
-              invisible={!unreadCount}
-            >
-              <Button
-                type="button"
-                variant="outlined"
-                onClick={() => {
-                  if (familyGroup?.id) {
-                    const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
-                    navigate(path)
-                  } else {
-                    navigate(ROUTE_PATHS.familyChat)
-                  }
-                }}
-              >
-                가족 채팅
-              </Button>
-            </Badge>
-          </Stack>
-        </Stack>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={() => {
+                    if (familyGroup?.id) {
+                      const path = ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(familyGroup.id))
+                      navigate(path)
+                    } else {
+                      navigate(ROUTE_PATHS.familyChat)
+                    }
+                  }}
+                >
+                  가족 채팅
+                </Button>
+              </Badge>
+            </Stack>
+          }
+        />
 
         {loading ? (
-          <Paper variant="outlined" sx={{ p: 4 }}>
+          <Paper variant="outlined" sx={{ p: 4, borderRadius: 3 }}>
             <Typography variant="body2" color="text.secondary" role="status" aria-live="polite">
               가족 정보를 불러오는 중입니다...
             </Typography>
@@ -554,8 +571,7 @@ export const FamilyManagementPage = () => {
             />
           </>
         )}
-        </Box>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

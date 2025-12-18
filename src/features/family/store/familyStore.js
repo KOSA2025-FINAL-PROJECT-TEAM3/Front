@@ -174,7 +174,13 @@ export const useFamilyStore = create((set, get) => ({
     withLoading(set, async () => {
       await familyApiClient.removeMember(memberId)
       set((prev) => ({
-        members: prev.members.filter((member) => member.id !== memberId),
+        members: prev.members.filter((member) => String(member.id) !== String(memberId)),
+        familyGroups: prev.familyGroups.map((group) => ({
+          ...group,
+          members: Array.isArray(group.members)
+            ? group.members.filter((member) => String(member.id) !== String(memberId))
+            : group.members,
+        })),
         error: null,
       }))
     }),
