@@ -43,8 +43,8 @@ export const ChatMessage = ({ message, isMe, sender }) => {
       return {
         bgcolor: '#2EC4B6',
         color: 'common.white',
-        borderRadius: 18,
-        borderTopRightRadius: 6,
+        borderRadius: 2.5,
+        borderTopRightRadius: 1,
       }
     }
     return {
@@ -52,37 +52,35 @@ export const ChatMessage = ({ message, isMe, sender }) => {
       color: '#0F172A',
       border: '1px solid',
       borderColor: 'divider',
-      borderRadius: 18,
-      borderTopLeftRadius: 6,
+      borderRadius: 2.5,
+      borderTopLeftRadius: 1,
     }
   }, [isMe])
 
   return (
     <Stack direction={layoutDirection} spacing={1} alignItems="flex-end" sx={{ mb: 2 }}>
-      {!isMe ? (
-        sender?.profileImage ? (
-          <Box
-            component="img"
-            src={sender.profileImage}
-            alt={sender.name}
-            sx={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
-          />
-        ) : (
-          <Avatar
-            sx={{
-              width: 32,
-              height: 32,
-              fontSize: 14,
-              bgcolor: 'common.white',
-              border: '1px solid',
-              borderColor: 'divider',
-              color: 'text.secondary',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-            }}
-          >
-            {message.familyMemberId === 0 ? '🤖' : '👴'}
-          </Avatar>
-        )
+      {sender?.profileImage ? (
+        <Box
+          component="img"
+          src={sender.profileImage}
+          alt={sender.name}
+          sx={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }}
+        />
+      ) : !isMe ? (
+        <Avatar
+          sx={{
+            width: 32,
+            height: 32,
+            fontSize: 14,
+            bgcolor: 'common.white',
+            border: '1px solid',
+            borderColor: 'divider',
+            color: 'text.secondary',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          }}
+        >
+          {message.familyMemberId === 0 ? '🤖' : '👴'}
+        </Avatar>
       ) : null}
 
       <Box sx={{ maxWidth: { xs: '80%', md: '70%' }, display: 'flex', flexDirection: 'column' }}>
@@ -94,8 +92,8 @@ export const ChatMessage = ({ message, isMe, sender }) => {
 
         <Box
           sx={{
-            px: 1.75,
-            py: 1.25,
+            px: 2,
+            py: 1,
             fontSize: 15,
             lineHeight: 1.5,
             wordBreak: 'break-word',
