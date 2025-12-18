@@ -2,12 +2,14 @@ import logger from '@core/utils/logger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/mui/BackButton'
-import { Box, Button, Chip, Container, LinearProgress, Paper, Stack, Typography } from '@mui/material'
+import { Box, Button, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
 import { reportApiClient } from '@/core/services/api/reportApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { useAuthStore } from '@/features/auth/store/authStore'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
 
 /**
  * 복약 순응도 리포트 페이지 컴포넌트
@@ -231,11 +233,12 @@ export const AdherenceReportPage = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Container maxWidth="md" sx={{ py: 3 }}>
+        <PageStack>
+          <PageHeader leading={<BackButton />} title="복약 순응도 리포트" subtitle="리포트를 불러오는 중..." />
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography color="text.secondary">로딩 중...</Typography>
           </Paper>
-        </Container>
+        </PageStack>
       </MainLayout>
     )
   }
@@ -243,133 +246,131 @@ export const AdherenceReportPage = () => {
   if (!adherenceData) {
     return (
       <MainLayout>
-        <Container maxWidth="md" sx={{ py: 3 }}>
+        <PageStack>
+          <PageHeader leading={<BackButton />} title="복약 순응도 리포트" subtitle="데이터를 불러올 수 없습니다." />
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography color="text.secondary">데이터를 불러올 수 없습니다</Typography>
           </Paper>
-        </Container>
+        </PageStack>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Stack spacing={2.5}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <BackButton />
-            <Typography variant="h5" fontWeight={800}>
-              복약 순응도 리포트
-            </Typography>
-            <Box sx={{ flex: 1 }} />
+      <PageStack>
+        <PageHeader
+          leading={<BackButton />}
+          title="복약 순응도 리포트"
+          right={
             <Button variant="outlined" onClick={handleDownloadPdf}>
               PDF 저장
             </Button>
-          </Stack>
+          }
+        />
 
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Stack spacing={1}>
-              <Typography variant="caption" color="text.secondary">
-                최근 30일 요약
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Stack spacing={1}>
+            <Typography variant="caption" color="text.secondary">
+              최근 30일 요약
+            </Typography>
+            <Stack direction="row" spacing={2} alignItems="baseline">
+              <Typography variant="h4" fontWeight={900}>
+                {adherenceData.overall || 0}%
               </Typography>
-              <Stack direction="row" spacing={2} alignItems="baseline">
-                <Typography variant="h4" fontWeight={900}>
-                  {adherenceData.overall || 0}%
-                </Typography>
-                <Typography color="text.secondary">전체 복약 순응도</Typography>
-              </Stack>
-
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 1 }}>
-                <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    이번 주
-                  </Typography>
-                  <Typography fontWeight={900} sx={{ mt: 0.25 }}>
-                    {adherenceData.thisWeek || 0}%
-                  </Typography>
-                </Paper>
-                <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    이번 달
-                  </Typography>
-                  <Typography fontWeight={900} sx={{ mt: 0.25 }}>
-                    {adherenceData.thisMonth || 0}%
-                  </Typography>
-                </Paper>
-                <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    연속 복용
-                  </Typography>
-                  <Typography fontWeight={900} sx={{ mt: 0.25 }}>
-                    {adherenceData.streak || 0}일
-                  </Typography>
-                </Paper>
-              </Stack>
+              <Typography color="text.secondary">전체 복약 순응도</Typography>
             </Stack>
-          </Paper>
 
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2 }}>
-              최근 복약 기록
-            </Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 1 }}>
+              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  이번 주
+                </Typography>
+                <Typography fontWeight={900} sx={{ mt: 0.25 }}>
+                  {adherenceData.thisWeek || 0}%
+                </Typography>
+              </Paper>
+              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  이번 달
+                </Typography>
+                <Typography fontWeight={900} sx={{ mt: 0.25 }}>
+                  {adherenceData.thisMonth || 0}%
+                </Typography>
+              </Paper>
+              <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2, flex: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  연속 복용
+                </Typography>
+                <Typography fontWeight={900} sx={{ mt: 0.25 }}>
+                  {adherenceData.streak || 0}일
+                </Typography>
+              </Paper>
+            </Stack>
+          </Stack>
+        </Paper>
 
-            {recentHistory.length === 0 ? (
-              <Typography color="text.secondary">최근 복약 기록이 없습니다</Typography>
-            ) : (
-              <Stack spacing={1}>
-                {recentHistory.map((day, index) => {
-                  const completed = day.completed || day.count
-                  const total = day.total || 0
-                  const status = calculateStatus(completed, total)
-                  const progress = total > 0 ? (completed / total) * 100 : 0
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2 }}>
+            최근 복약 기록
+          </Typography>
 
-                  return (
-                    <Paper key={index} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Typography fontWeight={800}>
-                          {new Date(day.date).toLocaleDateString('ko-KR', {
-                            month: 'short',
-                            day: 'numeric',
-                            weekday: 'short',
-                          })}
-                        </Typography>
-                        <Box sx={{ flex: 1 }} />
-                        <Chip size="small" color={getStatusColor(status)} label={getStatusLabel(status)} />
-                      </Stack>
+          {recentHistory.length === 0 ? (
+            <Typography color="text.secondary">최근 복약 기록이 없습니다</Typography>
+          ) : (
+            <Stack spacing={1}>
+              {recentHistory.map((day, index) => {
+                const completed = day.completed || day.count
+                const total = day.total || 0
+                const status = calculateStatus(completed, total)
+                const progress = total > 0 ? (completed / total) * 100 : 0
 
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                        <Box sx={{ flex: 1 }}>
-                          <LinearProgress variant="determinate" value={progress} color={getStatusColor(status)} />
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ minWidth: 56, textAlign: 'right' }}>
-                          {completed}/{total}
-                        </Typography>
-                      </Stack>
-                    </Paper>
-                  )
-                })}
-              </Stack>
-            )}
-          </Paper>
+                return (
+                  <Paper key={index} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography fontWeight={800}>
+                        {new Date(day.date).toLocaleDateString('ko-KR', {
+                          month: 'short',
+                          day: 'numeric',
+                          weekday: 'short',
+                        })}
+                      </Typography>
+                      <Box sx={{ flex: 1 }} />
+                      <Chip size="small" color={getStatusColor(status)} label={getStatusLabel(status)} />
+                    </Stack>
 
-          <Paper variant="outlined" sx={{ p: 2 }}>
-            <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>
-              인사이트
-            </Typography>
-            {insights.length === 0 ? (
-              <Typography color="text.secondary">표시할 인사이트가 없습니다.</Typography>
-            ) : (
-              <Stack spacing={0.75}>
-                {insights.map((line) => (
-                  <Typography key={line} variant="body2" color="text.secondary">
-                    - {line}
-                  </Typography>
-                ))}
-              </Stack>
-            )}
-          </Paper>
-        </Stack>
-      </Container>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                      <Box sx={{ flex: 1 }}>
+                        <LinearProgress variant="determinate" value={progress} color={getStatusColor(status)} />
+                      </Box>
+                      <Typography variant="caption" color="text.secondary" sx={{ minWidth: 56, textAlign: 'right' }}>
+                        {completed}/{total}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                )
+              })}
+            </Stack>
+          )}
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>
+            인사이트
+          </Typography>
+          {insights.length === 0 ? (
+            <Typography color="text.secondary">표시할 인사이트가 없습니다.</Typography>
+          ) : (
+            <Stack spacing={0.75}>
+              {insights.map((line) => (
+                <Typography key={line} variant="body2" color="text.secondary">
+                  - {line}
+                </Typography>
+              ))}
+            </Stack>
+          )}
+        </Paper>
+      </PageStack>
     </MainLayout>
   )
 }
