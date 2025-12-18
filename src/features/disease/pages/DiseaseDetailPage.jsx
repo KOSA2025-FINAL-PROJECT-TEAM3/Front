@@ -2,9 +2,12 @@ import logger from '@core/utils/logger'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Alert, Box, Button, Chip, Container, Paper, Stack, Typography } from '@mui/material'
+import { Alert, Button, Chip, Paper, Stack, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
+import BackButton from '@shared/components/mui/BackButton'
 
 const STATUS_LABEL = {
   ACTIVE: '치료 중',
@@ -69,11 +72,12 @@ export const DiseaseDetailPage = () => {
   if (loading) {
     return (
       <MainLayout>
-        <Container maxWidth="md" sx={{ py: 3 }}>
+        <PageStack>
+          <PageHeader title="질병 상세" leading={<BackButton onClick={() => navigate('/disease')} label="목록" />} />
           <Typography variant="body2" color="text.secondary">
             불러오는 중입니다...
           </Typography>
-        </Container>
+        </PageStack>
       </MainLayout>
     )
   }
@@ -81,7 +85,8 @@ export const DiseaseDetailPage = () => {
   if (!disease) {
     return (
       <MainLayout>
-        <Container maxWidth="md" sx={{ py: 3 }}>
+        <PageStack>
+          <PageHeader title="질병 상세" leading={<BackButton onClick={() => navigate('/disease')} label="목록" />} />
           <Alert
             severity="warning"
             action={
@@ -92,43 +97,41 @@ export const DiseaseDetailPage = () => {
           >
             질병 정보를 찾을 수 없습니다.
           </Alert>
-        </Container>
+        </PageStack>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between">
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+      <PageStack>
+        <PageHeader
+          title={disease.name}
+          leading={<BackButton onClick={() => navigate('/disease')} label="목록" />}
+          subtitle={
+            <Stack spacing={1}>
               <Typography variant="caption" color="text.secondary">
                 ID: {disease.id}
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 900, mt: 0.5 }}>
-                {disease.name}
-              </Typography>
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+              <Stack direction="row" spacing={1} flexWrap="wrap">
                 {disease.isCritical ? <Chip label="중요" color="error" size="small" /> : null}
                 {disease.isPrivate ? <Chip label="비공개" color="default" size="small" /> : null}
                 {disease.status ? (
                   <Chip label={STATUS_LABEL[disease.status] ?? disease.status} variant="outlined" size="small" />
                 ) : null}
               </Stack>
-            </Box>
+            </Stack>
+          }
+          right={
             <Stack direction="row" spacing={1} justifyContent="flex-end">
-              <Button variant="outlined" onClick={() => navigate('/disease')}>
-                목록
-              </Button>
               <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting}>
                 {deleting ? '삭제 중...' : '삭제'}
               </Button>
             </Stack>
-          </Stack>
-        </Paper>
+          }
+        />
 
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
             기본 정보
           </Typography>
@@ -168,7 +171,7 @@ export const DiseaseDetailPage = () => {
           </Stack>
         </Paper>
 
-        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
             설명
           </Typography>
@@ -176,7 +179,7 @@ export const DiseaseDetailPage = () => {
             {disease.description || '등록된 설명이 없습니다.'}
           </Typography>
         </Paper>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }
