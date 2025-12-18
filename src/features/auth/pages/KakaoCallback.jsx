@@ -15,10 +15,14 @@ import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/ma
 
 export const KakaoCallbackPage = () => {
   const navigate = useNavigate()
-  const { kakaoLogin } = useAuth((state) => ({ kakaoLogin: state.kakaoLogin }))
+  const { kakaoLogin, reactivate } = useAuth((state) => ({
+    kakaoLogin: state.kakaoLogin,
+    reactivate: state.reactivate,
+  }))
   const [searchParams] = useSearchParams()
   const [status, setStatus] = useState('카카오 로그인 처리 중입니다...')
   const [errorMessage, setErrorMessage] = useState(null)
+  const [reactivationToken, setReactivationToken] = useState(null)
 
   const processedRef = useRef(false)
 
@@ -66,6 +70,30 @@ export const KakaoCallbackPage = () => {
           window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
         }
       } catch (err) {
+        // 403 Account Deactivated 처리
+        if (err.response?.status === 403 && err.response?.data?.reactivationToken) {
+          const { deactivatedAt, reactivationToken } = err.response.data
+          let dateMsg = '이전에'
+
+          if (deactivatedAt) {
+            try {
+              const date = new Date(deactivatedAt)
+              dateMsg = date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              }) + '에'
+            } catch (e) {
+              // Date parsing fail fallback
+            }
+          }
+
+          setStatus('비활성화된 계정입니다.')
+          setErrorMessage(`${dateMsg} 탈퇴한 계정이 있습니다. 다시 활성화하시겠습니까?`)
+          setReactivationToken(reactivationToken)
+          return
+        }
+
         setStatus('카카오 로그인 과정에서 오류가 발생했습니다.')
         setErrorMessage(err.message || '잠시 후 다시 시도해 주세요.')
         // Reset processed ref on error to allow retry if needed (though code is likely invalid now)
@@ -105,6 +133,20 @@ export const KakaoCallbackPage = () => {
     }
   }, [isAuthenticated, customerRole, user, navigate])
 
+  const handleReactivate = async () => {
+    if (!reactivationToken) return
+    try {
+      setStatus('계정 활성화 중...')
+      setErrorMessage(null)
+      await reactivate(reactivationToken)
+      // 성공 시 isAuthenticated가 true가 되어 useEffect가 네비게이션 처리함
+    } catch (err) {
+      setStatus('계정 활성화 실패')
+      setErrorMessage(err.message || '활성화 중 오류가 발생했습니다.')
+      setReactivationToken(null)
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -130,11 +172,17 @@ export const KakaoCallbackPage = () => {
 
             {errorMessage ? (
               <Alert
-                severity="error"
+                severity={reactivationToken ? 'warning' : 'error'}
                 action={
-                  <Button color="inherit" size="small" onClick={() => navigate(ROUTE_PATHS.login, { replace: true })}>
-                    로그인 화면으로
-                  </Button>
+                  reactivationToken ? (
+                    <Button color="inherit" size="small" onClick={handleReactivate}>
+                      활성화하기
+                    </Button>
+                  ) : (
+                    <Button color="inherit" size="small" onClick={() => navigate(ROUTE_PATHS.login, { replace: true })}>
+                      로그인 화면으로
+                    </Button>
+                  )
                 }
               >
                 {errorMessage}
