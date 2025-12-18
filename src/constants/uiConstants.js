@@ -8,10 +8,10 @@ import { ROUTE_PATHS } from '@config/routes.config'
 
 // 시니어 대시보드 빠른 액션
 export const SENIOR_QUICK_ACTIONS = [
-  { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
-  { icon: '🔍', label: '검색', path: ROUTE_PATHS.search },
-  { icon: '🍽️', label: '식단 경고', path: ROUTE_PATHS.dietWarning },
-  { icon: '📊', label: '복용 리포트', path: ROUTE_PATHS.adherenceReport },
+  { icon: '🔍', label: '약/식단 검색', path: ROUTE_PATHS.search },
+  { icon: '🍽️', label: '식단 기록', path: ROUTE_PATHS.dietLog },
+  { icon: '💬', label: '가족 채팅', path: ROUTE_PATHS.familyChat },
+  { icon: '📸', label: '처방전 스캔', path: ROUTE_PATHS.ocrScan },
 ]
 
 // 시니어 대시보드 FAB 액션
@@ -31,7 +31,7 @@ export const CAREGIVER_QUICK_ACTIONS = [
 // 보호자 대시보드 FAB 액션
 export const CAREGIVER_FAB_ACTIONS = [
   { icon: '👥', label: '가족 초대', path: ROUTE_PATHS.familyInvite },
-  { icon: '💊', label: '약 등록', path: ROUTE_PATHS.medicationAdd },
+  { icon: '💊', label: '약 등록', path: ROUTE_PATHS.prescriptionAdd },
   { id: 'pdf_export', icon: '📄', label: 'PDF 내보내기' },
 ]
 
