@@ -8,6 +8,19 @@ import logger from "@core/utils/logger"
 import { create } from 'zustand'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
 
+const normalizeTypeKey = (value) => String(value || '').toLowerCase().replace(/\./g, '_')
+
+const isDietWarningType = (value) => normalizeTypeKey(value) === 'diet_warning'
+
+const dayKeyFromDate = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const calculateUnreadCount = (notifications) => {
   const seen = new Set()
   return notifications.filter((n) => {
@@ -51,13 +64,34 @@ export const useNotificationStore = create((set) => ({
       const response = await notificationApiClient.list()
       if (response && Array.isArray(response)) {
         const notifications = response.map((n) => ({
+          // 서버 필드 다양성 고려
           id: n.id,
           title: n.title,
           message: n.message,
           read: n.read || n.status === 'READ',
-          createdAt: new Date(n.createdAt),
+          createdAt: new Date(n.takenTime || n.createdAt),
           type: n.type,
+          scheduledTime: n.scheduledTime || n.scheduleTime || n.scheduledAt,
+          missedMedications: n.missedMedications || n.missedMedicationList || n.medications,
+          missedCount:
+            n.missedCount ??
+            n.missedMedicationCount ??
+            (Array.isArray(n.missedMedications) ? n.missedMedications.length : undefined),
+          groupKey:
+            n.groupKey ||
+            ((n.scheduledTime || n.scheduleTime || n.scheduledAt) &&
+            normalizeTypeKey(n.type).includes('missed')
+              ? `${normalizeTypeKey(n.type)}-${n.scheduledTime || n.scheduleTime || n.scheduledAt}`
+              : undefined),
         }))
+          .map((n) => {
+            const typeKey = normalizeTypeKey(n.type)
+            if (!n.groupKey && isDietWarningType(typeKey)) {
+              const dayKey = dayKeyFromDate(n.createdAt)
+              return dayKey ? { ...n, groupKey: `${typeKey}-${dayKey}` } : n
+            }
+            return n
+          })
         set({ notifications, unreadCount: calculateUnreadCount(notifications), loading: false })
       } else {
         set({ notifications: [], unreadCount: 0, loading: false })
@@ -72,18 +106,23 @@ export const useNotificationStore = create((set) => ({
   addRealtimeNotification: (notification) => {
     set((state) => {
       const payload = notification.notification ? { ...notification, ...notification.notification } : notification
-      const normalizedType = (payload.type || notification.type || '').toLowerCase()
+      const normalizedType = normalizeTypeKey(payload.type || notification.type)
       const scheduledTime = payload.scheduledTime || notification.scheduledTime
       const missedMedications = payload.missedMedications || notification.missedMedications
       const missedCount =
         payload.missedCount ??
         notification.missedCount ??
         (Array.isArray(missedMedications) ? missedMedications.length : undefined)
-      const groupKey =
-        payload.groupKey ||
-        (scheduledTime && normalizedType.includes('missed')
-          ? `${normalizedType}-${scheduledTime}`
-          : undefined)
+      const createdAt = new Date(payload.takenTime || payload.createdAt || new Date())
+      const groupKey = (() => {
+        if (payload.groupKey) return payload.groupKey
+        if (scheduledTime && normalizedType.includes('missed')) return `${normalizedType}-${scheduledTime}`
+        if (isDietWarningType(normalizedType)) {
+          const dayKey = dayKeyFromDate(createdAt)
+          return dayKey ? `${normalizedType}-${dayKey}` : undefined
+        }
+        return undefined
+      })()
       const id = payload.id || notification.id || groupKey || `realtime-${Date.now()}`
       const dedupKey = `${normalizedType}-${payload.message || ''}`.trim()
 
@@ -103,7 +142,7 @@ export const useNotificationStore = create((set) => ({
         title: payload.title || payload.medicationName || '알림',
         message: payload.message,
         read: false,
-        createdAt: new Date(payload.takenTime || payload.createdAt || new Date()),
+        createdAt,
         type: payload.type || notification.type || 'notification',
         scheduledTime,
         missedMedications,
@@ -140,14 +179,29 @@ export const useNotificationStore = create((set) => ({
   },
 
   // 모든 알림 읽음 처리
-  markAllAsRead: () => {
+  markAllAsRead: async () => {
+    const snapshot = []
     set((state) => {
+      snapshot.push(state.notifications)
       const newNotifications = state.notifications.map((n) => ({ ...n, read: true }))
       return {
         notifications: newNotifications,
         unreadCount: 0,
       }
     })
+
+    try {
+      await notificationApiClient.markAllAsRead()
+    } catch (error) {
+      logger.warn('Failed to mark all notifications as read:', error)
+      set((state) => {
+        const prev = snapshot[0] || state.notifications
+        return {
+          notifications: prev,
+          unreadCount: calculateUnreadCount(prev),
+        }
+      })
+    }
   },
 
   // 알림 삭제
@@ -168,6 +222,30 @@ export const useNotificationStore = create((set) => ({
       logger.warn('Failed to delete notification:', error)
       // Optional: rollback state if needed, but for now just log warning
     })
+  },
+
+  removeAllNotifications: async () => {
+    const snapshot = []
+    set((state) => {
+      snapshot.push(state.notifications)
+      return {
+        notifications: [],
+        unreadCount: 0,
+      }
+    })
+
+    try {
+      await notificationApiClient.deleteAll()
+    } catch (error) {
+      logger.warn('Failed to delete all notifications:', error)
+      set((state) => {
+        const prev = snapshot[0] || state.notifications
+        return {
+          notifications: prev,
+          unreadCount: calculateUnreadCount(prev),
+        }
+      })
+    }
   },
 }))
 
