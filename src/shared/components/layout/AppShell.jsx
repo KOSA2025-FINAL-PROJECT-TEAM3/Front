@@ -90,15 +90,15 @@ export const AppShell = ({
             flex: 1,
             overflowY: fullScreen ? 'hidden' : 'auto',
             px: fullScreen ? 0 : { xs: 2.5, md: 4 },
-            py: fullScreen ? 0 : { xs: 2.5, md: 4 },
-            width: '100%',
-            maxWidth: fullScreen ? 'none' : { xs: '100%', md: 1280 },
-            mx: 'auto',
+            pt: fullScreen ? 0 : { xs: 2.5, md: 4 },
             pb: fullScreen
               ? 0
               : showMobileBottomNav
-                ? 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + var(--bottom-dock-gap))'
-                : 0,
+                ? { xs: 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + 32px)', md: 4 }
+                : { xs: 2.5, md: 4 },
+            width: '100%',
+            maxWidth: fullScreen ? 'none' : { xs: '100%', md: 1280 },
+            mx: 'auto',
             display: fullScreen ? 'flex' : 'block',
             flexDirection: fullScreen ? 'column' : undefined,
           }}

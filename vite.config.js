@@ -65,8 +65,6 @@ export default defineConfig(({ command, mode }) => {
               '@emotion/react',
               '@emotion/styled'
             ],
-            // Collaboration/real-time features - only needed in specific pages
-            'vendor-collab': ['yjs', '@hocuspocus/provider'],
             // Data fetching and state management
             'vendor-data': ['@tanstack/react-query', 'zustand', 'axios'],
             // Date utilities

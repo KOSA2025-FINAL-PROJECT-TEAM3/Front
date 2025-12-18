@@ -616,24 +616,26 @@ export default CaregiverDashboard
 
 const GuardianMenuCard = ({ title, icon, color, onClick }) => {
   return (
-    <ButtonBase onClick={onClick} sx={{ width: '100%', textAlign: 'left', borderRadius: 3 }}>
+    <ButtonBase onClick={onClick} sx={{ width: '100%', textAlign: 'center', borderRadius: 3 }}>
       <Paper
         variant="outlined"
         sx={{
           width: '100%',
-          p: 2.25,
+          p: { xs: 1.5, md: 2.25 },
           borderRadius: 3,
           display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
-          gap: 2,
+          justifyContent: { xs: 'center', md: 'flex-start' },
+          gap: { xs: 1, md: 2 },
           transition: 'all 160ms ease',
           '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
         }}
       >
         <Box
           sx={{
-            width: 48,
-            height: 48,
+            width: { xs: 40, md: 48 },
+            height: { xs: 40, md: 48 },
             borderRadius: 2.5,
             display: 'flex',
             alignItems: 'center',
@@ -641,11 +643,22 @@ const GuardianMenuCard = ({ title, icon, color, onClick }) => {
             bgcolor: color,
             color: 'text.primary',
             flex: '0 0 auto',
+            '& .MuiSvgIcon-root': {
+              fontSize: { xs: 20, md: 24 }
+            }
           }}
         >
           {icon}
         </Box>
-        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+        <Typography 
+          variant="subtitle1" 
+          sx={{ 
+            fontWeight: 900,
+            fontSize: { xs: 12, md: 16 },
+            whiteSpace: 'nowrap',
+            textAlign: 'center'
+          }}
+        >
           {title}
         </Typography>
       </Paper>

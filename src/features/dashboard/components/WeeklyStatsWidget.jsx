@@ -57,6 +57,7 @@ export const WeeklyStatsWidget = ({
       elevation={2}
       sx={{
         textAlign: 'left',
+        p: { xs: 1.5, md: 2.5 },
         ...(onClick
           ? {
               cursor: 'pointer',
@@ -65,12 +66,12 @@ export const WeeklyStatsWidget = ({
           : null),
       }}
     >
-      <Stack spacing={2}>
+      <Stack spacing={{ xs: 1, md: 2 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: 13, md: 20 } }}>
             {title}
           </Typography>
-          <Typography variant="h6" fontWeight={700} color="primary">
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: 13, md: 20 } }} color="primary">
             {adherenceRate}%
           </Typography>
         </Stack>
@@ -79,7 +80,7 @@ export const WeeklyStatsWidget = ({
           variant="determinate"
           value={adherenceRate}
           sx={{
-            height: 8,
+            height: { xs: 6, md: 8 },
             borderRadius: 4,
             bgcolor: 'grey.200',
             '& .MuiLinearProgress-bar': {
@@ -88,7 +89,7 @@ export const WeeklyStatsWidget = ({
           }}
         />
 
-        <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ mt: { xs: 1, md: 2 } }}>
           {DAYS.map((day, index) => {
             const dayData = weeklyData[index] || { status: 'pending' }
             
@@ -96,15 +97,18 @@ export const WeeklyStatsWidget = ({
               <Box key={day} sx={{ textAlign: 'center' }}>
                 <Avatar
                   sx={{
-                    width: 48,
-                    height: 48,
+                    width: { xs: 28, md: 48 },
+                    height: { xs: 28, md: 48 },
                     bgcolor: getStatusColor(dayData.status),
-                    mb: 1,
+                    mb: { xs: 0.5, md: 1 },
+                    '& .MuiSvgIcon-root': {
+                      fontSize: { xs: 14, md: 24 }
+                    }
                   }}
                 >
                   {getStatusIcon(dayData.status)}
                 </Avatar>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: 10, md: 12 } }}>
                   {day}
                 </Typography>
               </Box>
@@ -112,7 +116,15 @@ export const WeeklyStatsWidget = ({
           })}
         </Stack>
 
-        <Stack direction="row" spacing={3} sx={{ mt: 2, justifyContent: 'center' }}>
+        <Stack 
+          direction="row" 
+          spacing={{ xs: 1.5, md: 3 }} 
+          sx={{ 
+            mt: { xs: 1, md: 2 }, 
+            justifyContent: 'center',
+            display: { xs: 'none', md: 'flex' }
+          }}
+        >
           <Stack direction="row" alignItems="center" spacing={0.5}>
             <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'success.main' }} />
             <Typography variant="body2">완료</Typography>
