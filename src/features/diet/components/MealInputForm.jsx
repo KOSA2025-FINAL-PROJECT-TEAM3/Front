@@ -21,7 +21,8 @@ export const MealInputForm = ({
   onUpdateMeal,
   editingMeal,
   onCancelEdit,
-  autoFillData // [Voice] New prop
+  autoFillData, // [Voice] New prop
+  initialAnalysisResult,
 }) => {
   const dietCameraRef = useRef(null)
   const dietJobs = useNotificationStore((state) => state.dietJobs)
@@ -105,6 +106,18 @@ export const MealInputForm = ({
       }
     }
   }, [autoFillData])
+
+  useEffect(() => {
+    if (!initialAnalysisResult || isEditing) return
+    setAnalysisResult(initialAnalysisResult)
+
+    if (initialAnalysisResult.foodName) {
+      setFoodName(initialAnalysisResult.foodName)
+    }
+    if (initialAnalysisResult.mealType) {
+      setMealType(initialAnalysisResult.mealType)
+    }
+  }, [initialAnalysisResult, isEditing])
 
   useEffect(() => {
     if (isEditing) {

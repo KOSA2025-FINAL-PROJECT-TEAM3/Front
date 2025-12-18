@@ -1,14 +1,19 @@
 import logger from "@core/utils/logger"
 import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useLocation } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MealInputForm } from '../components/MealInputForm'
 import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
-import { Box, Container, Divider, TextField, Stack, Typography } from '@mui/material'
+import { Box, Divider, TextField, Stack, Typography } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const DietLogPage = () => {
+  const location = useLocation()
   const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingMeal, setEditingMeal] = useState(null)
@@ -21,6 +26,13 @@ export const DietLogPage = () => {
   const [autoFillData, setAutoFillData] = useState(null)
   const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
   const { consumeAction } = useVoiceActionStore()
+
+  useEffect(() => {
+    const navAutoFill = location.state?.autoFillData
+    if (navAutoFill && (navAutoFill.foodName || navAutoFill.mealType)) {
+      setAutoFillData(navAutoFill)
+    }
+  }, [location.state])
 
   // Voice Command Handling (Auto Fill)
   useEffect(() => {
@@ -149,15 +161,12 @@ export const DietLogPage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3 }}>
-        <Box textAlign="center" sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            {editingMeal ? '식단 수정' : '식단 기록'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 관리하세요.'}
-          </Typography>
-        </Box>
+      <PageStack>
+        <PageHeader
+          leading={<BackButton />}
+          title={editingMeal ? '식단 수정' : '식단 기록'}
+          subtitle={editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 관리하세요.'}
+        />
 
         {/* 날짜 선택기 & 날짜 표시 통합 */}
         <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
@@ -201,6 +210,7 @@ export const DietLogPage = () => {
             editingMeal={editingMeal}
             onCancelEdit={handleCancelEdit}
             autoFillData={autoFillData}
+            initialAnalysisResult={location.state?.initialAnalysisResult}
           />
         )}
 
@@ -221,7 +231,7 @@ export const DietLogPage = () => {
             selectedDate={selectedDate}
           />
         )}
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

@@ -18,6 +18,7 @@ import {
     Stack
 } from '@mui/material';
 import logger from '@core/utils/logger';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 // Fallback icons
 const CloseIcon = () => (
@@ -69,11 +70,16 @@ const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading,
                 sx: { borderRadius: 3 }
             }}
         >
-            <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-                <Typography fontWeight="bold">음식 분석 결과</Typography>
-                <IconButton onClick={onClose} size="small">
-                    <CloseIcon />
-                </IconButton>
+            <DialogTitle sx={{ pb: 1, px: 1.25, py: 1.25 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center' }}>
+                    <IconButton onClick={onClose} aria-label="뒤로">
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography fontWeight="bold" sx={{ textAlign: 'center' }}>음식 분석 결과</Typography>
+                    <IconButton onClick={onClose} size="small" aria-label="닫기">
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
             </DialogTitle>
 
             <DialogContent dividers>
