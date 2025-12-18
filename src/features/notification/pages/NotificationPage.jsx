@@ -4,7 +4,7 @@
  * @component NotificationPage
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Accordion,
@@ -13,6 +13,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   IconButton,
   List,
   ListItemButton,
@@ -81,14 +82,50 @@ const buildMissedSummary = (notification) => {
  */
 export const NotificationPage = () => {
   const navigate = useNavigate()
-  const { notifications, loading, unreadCount, fetchNotifications, markAsRead, markAllAsRead, removeNotification, removeAllNotifications } =
-    useNotificationStore()
+  const { 
+    notifications, 
+    loading, 
+    unreadCount, 
+    hasMore,
+    fetchNotifications, 
+    loadMoreNotifications,
+    markAsRead, 
+    markAllAsRead, 
+    removeNotification, 
+    removeAllNotifications 
+  } = useNotificationStore()
   const customerRole = useAuth((state) => state.customerRole)
   const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
   const familyMembers = useFamilyStore((state) => state.members || [])
   const [importantExpanded, setImportantExpanded] = useState(true)
   const [normalExpanded, setNormalExpanded] = useState(false)
+
+  // Intersection Observer for infinite scroll
+  const loadMoreRef = useRef(null)
+
+  const handleLoadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      loadMoreNotifications()
+    }
+  }, [loading, hasMore, loadMoreNotifications])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [handleLoadMore])
 
   useEffect(() => {
     fetchNotifications()
@@ -533,6 +570,16 @@ export const NotificationPage = () => {
             defaultExpanded: normalExpanded,
             onToggle: setNormalExpanded,
           })}
+
+          {/* Infinite scroll trigger */}
+          <Box ref={loadMoreRef} sx={{ py: 2, textAlign: 'center' }}>
+            {loading && <CircularProgress size={24} />}
+            {!loading && !hasMore && displayNotifications.length > 0 && (
+              <Typography variant="body2" color="text.secondary">
+                더 이상 알림이 없습니다
+              </Typography>
+            )}
+          </Box>
         </Stack>
       </Paper>
     )

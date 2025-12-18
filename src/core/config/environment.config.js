@@ -155,6 +155,7 @@ export const getEnvironmentConfig = () => {
     CHAT_API_URL: getServiceURL('VITE_CHAT_API_URL', 8080),
     NOTIFICATION_API_URL: getServiceURL('VITE_NOTIFICATION_API_URL', 8080),
     REPORT_API_URL: getServiceURL('VITE_REPORT_API_URL', 8080),
+    APPOINTMENT_API_URL: getServiceURL('VITE_APPOINTMENT_API_URL', 8080),
 
     // WebSocket Configuration
     WS_BASE_URL: getWsBaseURL(),

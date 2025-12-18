@@ -14,11 +14,14 @@ class NotificationApiClient extends ApiClient {
         this.lastSubscribeArgs = null
     }
 
-    list(userId) {
-        if (userId) {
-            return this.get('/', { params: { userId } })
-        }
-        return this.get('/')
+    /**
+     * 알림 목록 조회 (페이지네이션)
+     * @param {number} page - 페이지 번호 (0부터 시작)
+     * @param {number} size - 페이지 크기
+     * @returns {Promise<{content: Array, totalElements: number, totalPages: number, last: boolean}>}
+     */
+    list(page = 0, size = 20) {
+        return this.get('/', { params: { page, size } })
     }
 
     markAsRead(id) {
