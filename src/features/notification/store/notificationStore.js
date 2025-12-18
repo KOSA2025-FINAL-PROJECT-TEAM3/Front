@@ -7,6 +7,7 @@ import logger from "@core/utils/logger"
 
 import { create } from 'zustand'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
+import { NOTIFICATION_PAGINATION } from '@config/constants'
 
 const normalizeTypeKey = (value) => String(value || '').toLowerCase().replace(/\./g, '_')
 
@@ -68,8 +69,14 @@ const mapNotification = (n) => {
 export const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
-  loading: false,
-  error: null,
+  // loading states
+  loading: false, // backward-compat alias (initialLoading || loadingMore)
+  initialLoading: false,
+  loadingMore: false,
+  // error states
+  error: null, // initial load error
+  loadMoreError: null, // pagination load error
+  loadMorePaused: false,
   dietJobs: {},
   ocrJobs: {},
   // 페이지네이션 상태
@@ -97,37 +104,75 @@ export const useNotificationStore = create((set, get) => ({
 
   // 알림 목록 가져오기 (초기 로드)
   fetchNotifications: async () => {
-    set({ loading: true, error: null, currentPage: 0 })
+    set({
+      loading: true,
+      initialLoading: true,
+      loadingMore: false,
+      error: null,
+      loadMoreError: null,
+      loadMorePaused: false,
+      currentPage: 0,
+    })
     try {
-      const response = await notificationApiClient.list(0, 20)
+      const response = await notificationApiClient.list(0, NOTIFICATION_PAGINATION.PAGE_SIZE)
       if (response && response.content) {
         const notifications = response.content.map(mapNotification)
         set({ 
           notifications, 
           unreadCount: calculateUnreadCount(notifications), 
           loading: false,
+          initialLoading: false,
+          loadingMore: false,
+          error: null,
+          loadMoreError: null,
+          loadMorePaused: false,
           currentPage: 0,
           hasMore: !response.last,
           totalCount: response.totalElements || 0,
         })
       } else {
-        set({ notifications: [], unreadCount: 0, loading: false, hasMore: false, totalCount: 0 })
+        set({
+          notifications: [],
+          unreadCount: 0,
+          loading: false,
+          initialLoading: false,
+          loadingMore: false,
+          error: null,
+          loadMoreError: null,
+          loadMorePaused: false,
+          hasMore: false,
+          totalCount: 0,
+        })
       }
     } catch (error) {
       logger.error('Failed to fetch notifications:', error)
-      set({ error, loading: false, notifications: [], unreadCount: 0, hasMore: false })
+      set({
+        error,
+        loading: false,
+        initialLoading: false,
+        loadingMore: false,
+        notifications: [],
+        unreadCount: 0,
+        hasMore: false,
+        loadMoreError: null,
+        loadMorePaused: false,
+      })
     }
   },
 
   // 추가 알림 로드 (무한 스크롤)
   loadMoreNotifications: async () => {
-    const { loading, hasMore, currentPage, notifications } = get()
-    if (loading || !hasMore) return
+    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications } = get()
+    if (initialLoading || loadingMore || loadMorePaused || !hasMore) return
 
-    set({ loading: true })
+    set({
+      loading: true,
+      loadingMore: true,
+      loadMoreError: null,
+    })
     try {
       const nextPage = currentPage + 1
-      const response = await notificationApiClient.list(nextPage, 20)
+      const response = await notificationApiClient.list(nextPage, NOTIFICATION_PAGINATION.PAGE_SIZE)
       if (response && response.content) {
         const newNotifications = response.content.map(mapNotification)
         const merged = [...notifications, ...newNotifications]
@@ -135,16 +180,35 @@ export const useNotificationStore = create((set, get) => ({
           notifications: merged, 
           unreadCount: calculateUnreadCount(merged), 
           loading: false,
+          loadingMore: false,
+          loadMoreError: null,
+          loadMorePaused: false,
           currentPage: nextPage,
           hasMore: !response.last,
         })
       } else {
-        set({ loading: false, hasMore: false })
+        set({
+          loading: false,
+          loadingMore: false,
+          loadMoreError: null,
+          loadMorePaused: false,
+          hasMore: false,
+        })
       }
     } catch (error) {
       logger.error('Failed to load more notifications:', error)
-      set({ error, loading: false })
+      set({
+        loadMoreError: error,
+        loadMorePaused: true,
+        loading: false,
+        loadingMore: false,
+      })
     }
+  },
+
+  retryLoadMoreNotifications: async () => {
+    set({ loadMorePaused: false, loadMoreError: null })
+    await get().loadMoreNotifications()
   },
 
   // 실시간 알림 추가 (SSE에서 호출)

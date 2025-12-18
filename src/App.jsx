@@ -9,18 +9,18 @@
  * /caregiver → CaregiverDashboard (보호자 대시보드) - PrivateRoute 보호
  */
 
-	import React, { Suspense, useEffect, useMemo, lazy } from 'react'
-	import { ThemeProvider } from '@mui/material/styles'
-	import CssBaseline from '@mui/material/CssBaseline'
-	import { createAppTheme } from '@/styles/theme'
-	import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-	import { ROUTE_PATHS } from '@config/routes.config'
-	import { useAuth } from '@features/auth/hooks/useAuth'
-	import { FamilyProvider } from '@features/family/context/FamilyContext'
-	import { PrivateRoute } from './core/routing/PrivateRoute'
-	import LoadingSpinner from '@shared/components/LoadingSpinner'
-	import envConfig from '@config/environment.config'
-	import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
+import React, { Suspense, useEffect, useMemo, lazy } from 'react'
+import { ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+import { createAppTheme } from '@/styles/theme'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
+import { useAuth } from '@features/auth/hooks/useAuth'
+import { FamilyProvider } from '@features/family/context/FamilyContext'
+import { PrivateRoute } from './core/routing/PrivateRoute'
+import LoadingSpinner from '@shared/components/LoadingSpinner'
+import envConfig from '@config/environment.config'
+import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
 
 // Lazy-loaded page components
 const Login = lazy(() => import('@features/auth/pages/Login'))
@@ -67,6 +67,13 @@ const WeeklyStatsPage = lazy(() => import('@features/report/pages/WeeklyStatsPag
 const MorePage = lazy(() => import('@pages/more/MorePage'))
 const DeveloperModePanel = lazy(() => import('@devtools/DeveloperModePanel'))
 const PlaceSearchPage = lazy(() => import('@features/places/pages/PlaceSearchPage'))
+
+// Appointment (병원 예약)
+const AppointmentListPage = lazy(() => import('@features/appointment/pages/AppointmentListPage'))
+const AppointmentAddPage = lazy(() => import('@features/appointment/pages/AppointmentAddPage'))
+const AppointmentDetailPage = lazy(() => import('@features/appointment/pages/AppointmentDetailPage'))
+const AppointmentEditPage = lazy(() => import('@features/appointment/pages/AppointmentEditPage'))
+const CaregiverAppointmentAddPage = lazy(() => import('@features/appointment/pages/CaregiverAppointmentAddPage'))
 
 import ErrorBoundary from '@shared/components/ErrorBoundary'
 import ErrorFallback from '@shared/components/ErrorFallback'
@@ -146,27 +153,27 @@ function InviteAcceptRedirect() {
  * 메인 App 컴포넌트
  * @returns {JSX.Element}
  */
-	function App() {
-	  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
-	  const { customerRole, _hasHydrated } = useAuth((state) => ({
-	    customerRole: state.customerRole,
-	    _hasHydrated: state._hasHydrated,
-	  }))
-	  const { fontScaleLevel, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
-	    fontScaleLevel: state.fontScaleLevel,
-	    ensureDefaultForRole: state.ensureDefaultForRole,
-	  }))
+function App() {
+  const showDevTools = envConfig.isDevelopment && envConfig.ENABLE_DEV_MODE
+  const { customerRole, _hasHydrated } = useAuth((state) => ({
+    customerRole: state.customerRole,
+    _hasHydrated: state._hasHydrated,
+  }))
+  const { fontScaleLevel, ensureDefaultForRole } = useUiPreferencesStore((state) => ({
+    fontScaleLevel: state.fontScaleLevel,
+    ensureDefaultForRole: state.ensureDefaultForRole,
+  }))
 
-	  useEffect(() => {
-	    if (!_hasHydrated) return
-	    ensureDefaultForRole(customerRole)
-	  }, [_hasHydrated, customerRole, ensureDefaultForRole])
+  useEffect(() => {
+    if (!_hasHydrated) return
+    ensureDefaultForRole(customerRole)
+  }, [_hasHydrated, customerRole, ensureDefaultForRole])
 
-	  const theme = useMemo(() => createAppTheme({ fontScaleLevel }), [fontScaleLevel])
-	
-	  return (
-	    <ThemeProvider theme={theme}>
-	      <CssBaseline />
+  const theme = useMemo(() => createAppTheme({ fontScaleLevel }), [fontScaleLevel])
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <ErrorBoundary fallback={<ErrorFallback />}>
           <FamilyProvider>
@@ -226,7 +233,7 @@ function InviteAcceptRedirect() {
                   path={ROUTE_PATHS.medicationAdd}
                   element={<PrivateRoute element={<MedicationAddPage />} />}
                 />
-                
+
                 {/* AI 음성 명령 호환성 (Legacy Path Support) */}
                 <Route
                   path="/medication/register"
@@ -395,6 +402,28 @@ function InviteAcceptRedirect() {
                 <Route
                   path={ROUTE_PATHS.places}
                   element={<PrivateRoute element={<PlaceSearchPage />} />}
+                />
+
+                {/* 병원 예약 */}
+                <Route
+                  path={ROUTE_PATHS.appointments}
+                  element={<PrivateRoute element={<AppointmentListPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.appointmentAdd}
+                  element={<PrivateRoute element={<AppointmentAddPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.appointmentCaregiverAdd}
+                  element={<PrivateRoute element={<CaregiverAppointmentAddPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.appointmentDetail}
+                  element={<PrivateRoute element={<AppointmentDetailPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.appointmentEdit}
+                  element={<PrivateRoute element={<AppointmentEditPage />} />}
                 />
 
                 {/* 기본 경로: 인증 상태에 따라 대시보드 또는 로그인 페이지로 리다이렉트 */}

@@ -84,7 +84,7 @@ export const KakaoCallbackPage = () => {
                 month: 'long',
                 day: 'numeric',
               }) + '에'
-            } catch (e) {
+            } catch {
               // Date parsing fail fallback
             }
           }

@@ -120,6 +120,11 @@ export const RETRY_CONFIG = {
   RETRY_DELAY: 1000, // ms
 }
 
+// 알림 페이지네이션 (무한 스크롤)
+export const NOTIFICATION_PAGINATION = {
+  PAGE_SIZE: parseInt(import.meta.env.VITE_NOTIFICATION_PAGE_SIZE || '20', 10),
+}
+
 // 로컬 스토리지 키
 export const STORAGE_KEYS = {
   AUTH_TOKEN: import.meta.env.VITE_TOKEN_STORAGE_KEY || 'amapill_token',

@@ -1,6 +1,7 @@
 import logger from "@core/utils/logger"
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
+import { NOTIFICATION_PAGINATION } from '@config/constants'
 
 class NotificationApiClient extends ApiClient {
     constructor() {
@@ -20,7 +21,7 @@ class NotificationApiClient extends ApiClient {
      * @param {number} size - 페이지 크기
      * @returns {Promise<{content: Array, totalElements: number, totalPages: number, last: boolean}>}
      */
-    list(page = 0, size = 20) {
+    list(page = 0, size = NOTIFICATION_PAGINATION.PAGE_SIZE) {
         return this.get('/', { params: { page, size } })
     }
 

@@ -36,6 +36,7 @@ export const ROUTE_PATHS = {
 
   appointments: '/appointments',
   appointmentAdd: '/appointments/add',
+  appointmentCaregiverAdd: '/appointments/add/caregiver',
   appointmentDetail: '/appointments/:id',
   appointmentEdit: '/appointments/:id/edit',
 
@@ -104,6 +105,7 @@ export const ROUTE_META = {
 
     ROUTE_PATHS.appointments,
     ROUTE_PATHS.appointmentAdd,
+    ROUTE_PATHS.appointmentCaregiverAdd,
     ROUTE_PATHS.appointmentDetail,
     ROUTE_PATHS.appointmentEdit,
 
