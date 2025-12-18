@@ -44,7 +44,9 @@ httpClient.interceptors.response.use(
   }
 )
 
-attachAuthInterceptor(httpClient)
+// NOTE: response interceptor는 등록 역순으로 실행된다.
+// refresh(401) 처리를 먼저 하고, 최종적으로 401이 남을 때만 로그인으로 리다이렉트하도록 순서를 유지한다.
 attachErrorInterceptor(httpClient)
+attachAuthInterceptor(httpClient)
 
 export default httpClient

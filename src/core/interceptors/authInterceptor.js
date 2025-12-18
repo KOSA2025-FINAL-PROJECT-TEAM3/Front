@@ -12,6 +12,91 @@ const PUBLIC_ENDPOINTS = [
 ]
 
 let store = null
+let refreshPromise = null
+
+const EXPIRY_SKEW_SECONDS = 30
+
+const decodeJwtPayload = (token) => {
+  if (!token || typeof token !== 'string') return null
+  const parts = token.split('.')
+  if (parts.length < 2) return null
+
+  try {
+    const base64Url = parts[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=')
+    const json = decodeURIComponent(
+      atob(padded)
+        .split('')
+        .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
+        .join(''),
+    )
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
+const isJwtExpiredOrNearExpiry = (token, skewSeconds = EXPIRY_SKEW_SECONDS) => {
+  const payload = decodeJwtPayload(token)
+  const exp = payload?.exp
+  if (!exp) return false
+  const nowSec = Math.floor(Date.now() / 1000)
+  return exp <= nowSec + skewSeconds
+}
+
+const applyTokenToStore = (newToken, refreshToken) => {
+  if (!store) return
+  const state = store.getState?.() || {}
+  const user = state.user || null
+  const customerRole = state.customerRole || null
+  const nextRefresh = state.refreshToken || refreshToken || null
+
+  state.setAuthData?.({
+    user,
+    token: newToken,
+    refreshToken: nextRefresh,
+    customerRole,
+  })
+}
+
+const logoutFallback = () => {
+  window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+  window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
+  window.location.href = '/login'
+}
+
+const performRefresh = async (axiosInstance) => {
+  if (refreshPromise) return refreshPromise
+
+  const refreshToken = window.localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+  if (!refreshToken) return null
+
+  refreshPromise = (async () => {
+    try {
+      // Raw Axios로 갱신 요청 (인터셉터 무한 루프 방지)
+      const response = await axios.post(
+        `${API_CONFIG.baseURL}/api/auth/refresh`,
+        { refreshToken },
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+
+      const { accessToken: newToken } = response.data || {}
+      if (!newToken) return null
+
+      window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
+      applyTokenToStore(newToken, refreshToken)
+      return newToken
+    } catch (e) {
+      // refresh 실패: 상위에서 logout 처리
+      return null
+    } finally {
+      refreshPromise = null
+    }
+  })()
+
+  return refreshPromise
+}
 
 export const injectStore = (_store) => {
   store = _store
@@ -20,7 +105,7 @@ export const injectStore = (_store) => {
 export const attachAuthInterceptor = (axiosInstance) => {
   // Request Interceptor
   axiosInstance.interceptors.request.use(
-    (config) => {
+    async (config) => {
       if (typeof window === 'undefined') {
         return config
       }
@@ -33,11 +118,27 @@ export const attachAuthInterceptor = (axiosInstance) => {
         return config
       }
 
-      const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+      let token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+
+      // JWT 만료(또는 임박) 시, 요청 전에 refresh 시도
+      if (token && isJwtExpiredOrNearExpiry(token)) {
+        const newToken = await performRefresh(axiosInstance)
+        token = newToken || null
+      }
+
       if (token) {
         config.headers = config.headers || {}
         config.headers.Authorization = `Bearer ${token}`
+        return config
       }
+
+      // 보호 리소스에 토큰이 없으면 즉시 로그아웃/로그인 이동
+      if (store) {
+        store.getState().logout?.()
+      } else {
+        logoutFallback()
+      }
+
       return config
     },
     (error) => Promise.reject(error),
@@ -58,53 +159,19 @@ export const attachAuthInterceptor = (axiosInstance) => {
       ) {
         originalRequest._retry = true
 
-        const refreshToken = window.localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+        const newToken = await performRefresh(axiosInstance)
+        if (newToken) {
+          originalRequest.headers = originalRequest.headers || {}
+          originalRequest.headers.Authorization = `Bearer ${newToken}`
+          originalRequest._authRefreshed = true
+          return axiosInstance(originalRequest)
+        }
 
-        if (refreshToken) {
-          try {
-            // Raw Axios로 갱신 요청 (인터셉터 무한 루프 방지)
-            const response = await axios.post(
-              `${API_CONFIG.baseURL}/api/auth/refresh`,
-              { refreshToken },
-              {
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-
-            const { accessToken: newToken } = response.data
-
-            if (newToken) {
-              // 1. 스토리지 갱신
-              window.localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
-
-              // 2. 스토어 상태 갱신 (소켓 재연결 등을 위해)
-              if (store) {
-                store.getState().setAuthData({ 
-                    ...store.getState(),
-                    token: newToken 
-                })
-              }
-
-              // 3. 실패했던 요청의 헤더 갱신 및 재시도
-              originalRequest.headers.Authorization = `Bearer ${newToken}`
-              return axiosInstance(originalRequest)
-            }
-          } catch (refreshError) {
-            console.error('Token refresh failed:', refreshError)
-            // 갱신 실패 시 로그아웃 처리
-            if (store) {
-              store.getState().logout()
-            } else {
-              window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-              window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
-              window.location.href = '/login'
-            }
-          }
+        // 리프레시 토큰이 없거나 refresh 실패 시 로그아웃
+        if (store) {
+          store.getState().logout?.()
         } else {
-            // 리프레시 토큰이 없으면 로그아웃
-            if (store) {
-                store.getState().logout()
-            }
+          logoutFallback()
         }
       }
 

@@ -10,7 +10,8 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { Box, ButtonBase, Container, Paper, Stack, Typography } from '@mui/material'
+import { Box, ButtonBase, Paper, Stack, Typography } from '@mui/material'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const RoleSelection = () => {
   const navigate = useNavigate()
@@ -47,10 +48,14 @@ export const RoleSelection = () => {
         display: 'flex',
         alignItems: 'center',
         py: 4,
+        px: { xs: 2.5, sm: 3 },
         background: 'linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%)',
       }}
     >
-      <Container maxWidth="md">
+      <Box sx={{ width: '100%', maxWidth: 900, mx: 'auto' }}>
+        <Stack direction="row" justifyContent="flex-start" sx={{ mb: 2 }}>
+          <BackButton label="뒤로" />
+        </Stack>
         <Stack spacing={4} alignItems="center" textAlign="center">
           <Box>
             <Typography component="div" sx={{ fontSize: 56 }}>
@@ -113,7 +118,7 @@ export const RoleSelection = () => {
             개발 모드 | 로그인 기능은 진행 중
           </Typography>
         </Stack>
-      </Container>
+      </Box>
     </Box>
   )
 }

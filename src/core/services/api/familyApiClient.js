@@ -2,6 +2,16 @@
 import logger from '@core/utils/logger'
 import envConfig from '@config/environment.config'
 
+const normalizeFamilyRole = (role) => {
+  const raw = role == null ? '' : String(role)
+  const upper = raw.trim().toUpperCase()
+  if (!upper) return 'SENIOR'
+  if (upper === 'PARENT' || upper === 'ELDER' || upper === 'ELDERLY') return 'SENIOR'
+  if (upper === 'CHILD' || upper === 'GUARDIAN') return 'CAREGIVER'
+  if (upper === 'SENIOR' || upper === 'CAREGIVER') return upper
+  return upper
+}
+
 class FamilyApiClient extends ApiClient {
   constructor() {
     super({
@@ -25,7 +35,7 @@ class FamilyApiClient extends ApiClient {
             userId,
             name: member?.user?.name || member?.userName || '이름 없음',
             email: member?.user?.email || member?.userEmail || '',
-            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            role: normalizeFamilyRole(member?.familyRole || member?.user?.customerRole || member?.userRole),
             joinedAt: member?.joinedAt || new Date().toISOString(),
             raw: member,
           }
@@ -79,7 +89,7 @@ class FamilyApiClient extends ApiClient {
             userId: member?.user?.id ?? member?.userId ?? null,
             name: member?.user?.name || member?.userName || '이름 없음',
             email: member?.user?.email || member?.userEmail || '',
-            role: member?.familyRole || member?.user?.customerRole || member?.userRole || 'SENIOR',
+            role: normalizeFamilyRole(member?.familyRole || member?.user?.customerRole || member?.userRole),
             joinedAt: member?.joinedAt || new Date().toISOString(),
             raw: member,
           }))

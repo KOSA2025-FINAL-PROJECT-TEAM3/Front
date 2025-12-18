@@ -3,15 +3,16 @@
  * - 이메일/비밀번호 로그인, 카카오 로그인, 회원가입 링크
  */
 
-import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { ROUTE_PATHS } from '@config/routes.config'
-import { USER_ROLES } from '@config/constants'
-import { useForm } from 'react-hook-form'
-import { Alert, Box, Button, Container, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
-import { useAuth } from '@features/auth/hooks/useAuth'
-import { useAuthStore } from '@features/auth/store/authStore'
-import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
-import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
+	import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+	import { ROUTE_PATHS } from '@config/routes.config'
+	import { USER_ROLES } from '@config/constants'
+	import { useForm } from 'react-hook-form'
+	import { Alert, Box, Button, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
+	import { useAuth } from '@features/auth/hooks/useAuth'
+	import { useAuthStore } from '@features/auth/store/authStore'
+	import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
+	import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
+	import { BackButton } from '@shared/components/mui/BackButton'
 
 import { useInviteStore } from '@features/family/stores/inviteStore'
 
@@ -94,18 +95,31 @@ export const Login = () => {
     }
   }
 
-  return (
-    <Box
-      sx={{
-        minHeight: '100vh',
+	  return (
+	    <Box
+	      sx={{
+	        minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        py: 3,
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #f9fafb 100%)',
+        py: { xs: 3, sm: 4 },
+        px: 2.5,
+        bgcolor: 'background.default',
       }}
-    >
-      <Container maxWidth="sm" sx={{ maxWidth: 460 }}>
-        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3 }}>
+	    >
+	      <Box sx={{ width: '100%', maxWidth: 460, mx: 'auto' }}>
+	        <Stack direction="row" justifyContent="flex-start" sx={{ mb: 1 }}>
+	          <BackButton label="뒤로" />
+	        </Stack>
+	        <Paper
+	          variant="outlined"
+	          elevation={0}
+          sx={{
+            p: { xs: 3, sm: 5 },
+            borderRadius: 3,
+            borderColor: 'divider',
+            boxShadow: '0 2px 10px -4px rgba(0,0,0,0.05)',
+          }}
+        >
           <Stack spacing={3} textAlign="center">
             <Box>
               <Typography component="div" sx={{ fontSize: 44 }}>
@@ -175,7 +189,7 @@ export const Login = () => {
             </Typography>
           </Stack>
         </Paper>
-      </Container>
+      </Box>
     </Box>
   )
 }
