@@ -48,6 +48,11 @@ export const Header = ({ navItems = [] }) => {
     navigate(ROUTE_PATHS.more)
   }
 
+  const hasMoreNav = useMemo(
+    () => navItems.some((item) => item?.path === ROUTE_PATHS.more),
+    [navItems],
+  )
+
   // 사용자 이름 가져오기
   const userName = user?.name || user?.email?.split('@')[0] || '사용자'
 
@@ -59,16 +64,31 @@ export const Header = ({ navItems = [] }) => {
       position="fixed"
       elevation={0}
       sx={{
-        height: 60,
-        bgcolor: 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(20px)',
+        height: {
+          xs: 'calc(64px + var(--safe-area-top))',
+          md: 'calc(72px + var(--safe-area-top))',
+        },
+        pt: 'var(--safe-area-top)',
+        bgcolor: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(16px)',
         borderBottom: '1px solid',
-        borderBottomColor: 'rgba(200, 200, 200, 0.2)',
+        borderBottomColor: 'divider',
         color: 'text.primary',
         zIndex: 101,
+        boxShadow: '0 2px 10px -4px rgba(0,0,0,0.05)',
       }}
     >
-      <Toolbar sx={{ height: 60, px: { xs: 2, md: 7.5 }, maxWidth: 1400, width: '100%', mx: 'auto' }}>
+      <Toolbar
+        sx={{
+          minHeight: { xs: 64, md: 72 },
+          height: { xs: 64, md: 72 },
+          px: { xs: 2.5, md: 3 },
+          width: '100%',
+          maxWidth: 1400,
+          mx: 'auto',
+          position: 'relative',
+        }}
+      >
         <Stack
           direction="row"
           alignItems="center"
@@ -144,11 +164,11 @@ export const Header = ({ navItems = [] }) => {
           )}
         </Box>
 
-        <Stack direction="row" alignItems="center" spacing={{ xs: 1.25, md: 2.5 }}>
+        <Stack direction="row" alignItems="center" spacing={{ xs: 0.75, md: 2.5 }}>
           <Stack
             direction="row"
             alignItems="center"
-            spacing={1}
+            spacing={{ xs: 0.5, md: 1 }}
             onClick={() => navigate(ROUTE_PATHS.settings)}
             role="button"
             tabIndex={0}
@@ -158,29 +178,46 @@ export const Header = ({ navItems = [] }) => {
                 navigate(ROUTE_PATHS.settings)
               }
             }}
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: 'pointer', maxWidth: { xs: 100, md: 'none' } }}
           >
-            <Typography sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 800 }}>
+            <Typography 
+              sx={{ 
+                fontSize: { xs: 11, md: 14 }, 
+                fontWeight: 800,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: { xs: 60, md: 'none' }
+              }}
+            >
               {userName} 님
             </Typography>
-            <Typography sx={{ fontSize: { xs: 10, md: 12 }, color: 'text.secondary' }}>
+            <Typography sx={{ fontSize: { xs: 10, md: 12 }, color: 'text.secondary', display: { xs: 'none', md: 'block' } }}>
               ({roleLabel})
             </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={async (e) => {
-                e.stopPropagation()
-                if (window.confirm('로그아웃 하시겠습니까?')) {
-                  await logout()
-                  navigate(ROUTE_PATHS.login, { replace: true })
-                }
-              }}
-              sx={{ borderRadius: 999, fontWeight: 800 }}
-            >
-              로그아웃
-            </Button>
           </Stack>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={async (e) => {
+              e.stopPropagation()
+              if (window.confirm('로그아웃 하시겠습니까?')) {
+                await logout()
+                navigate(ROUTE_PATHS.login, { replace: true })
+              }
+            }}
+            sx={{ 
+              borderRadius: 999, 
+              fontWeight: 800,
+              minWidth: { xs: 28, md: 'auto' },
+              px: { xs: 0.75, md: 2 },
+              py: { xs: 0.25, md: 0.5 },
+              fontSize: { xs: 10, md: 14 }
+            }}
+          >
+            <Box component="span" sx={{ display: { xs: 'none', md: 'inline' } }}>로그아웃</Box>
+            <Box component="span" sx={{ display: { xs: 'inline', md: 'none' }, fontSize: 12 }}>⎋</Box>
+          </Button>
 
           <IconButton
             onClick={handleNotificationClick}
@@ -204,18 +241,20 @@ export const Header = ({ navItems = [] }) => {
             </Badge>
           </IconButton>
 
-          <IconButton
-            onClick={handleMoreClick}
-            aria-label="더보기"
-            sx={{
-              width: { xs: 24, md: 28 },
-              height: { xs: 24, md: 28 },
-              bgcolor: 'rgba(0, 0, 0, 0.06)',
-              '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.1)' },
-            }}
-          >
-            <MoreHorizIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-          </IconButton>
+          {!hasMoreNav ? (
+            <IconButton
+              onClick={handleMoreClick}
+              aria-label="더보기"
+              sx={{
+                width: { xs: 24, md: 28 },
+                height: { xs: 24, md: 28 },
+                bgcolor: 'rgba(0, 0, 0, 0.06)',
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.1)' },
+              }}
+            >
+              <MoreHorizIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+            </IconButton>
+          ) : null}
         </Stack>
       </Toolbar>
     </AppBar>

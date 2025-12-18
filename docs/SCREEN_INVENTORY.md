@@ -14,6 +14,7 @@
 | Dashboard | `/dashboard` | `Front/src/features/dashboard/pages/SeniorDashboard.jsx` | MUI 전환 완료 |
 | Dashboard | `/caregiver` | `Front/src/features/dashboard/pages/CaregiverDashboard.jsx` | MUI 전환 완료 |
 | Medication | `/medication` | `Front/src/features/medication/pages/MedicationManagement.jsx` | MUI 전환 완료 |
+| Medication | `/medication/today` | `Front/src/features/medication/pages/TodayMedications.jsx` | MUI 전환 완료 |
 | Medication | `/prescriptions/add` | `Front/src/features/medication/pages/PrescriptionAddPage.jsx` | MUI 전환 완료 |
 | Medication | `/prescriptions/:id` | `Front/src/features/medication/pages/PrescriptionDetailPage.jsx` | MUI 전환 완료 |
 | Medication | `/medication/add` | `Front/src/features/medication/pages/MedicationAddPage.jsx` | MUI 전환 완료(Deprecated route) |
@@ -21,7 +22,7 @@
 | OCR | `/ocr/scan` | `Front/src/features/ocr/pages/PrescriptionScan.jsx` | MUI 전환 완료 |
 | Diet | `/diet/log` | `Front/src/features/diet/pages/DietLogPage.jsx` | MUI 전환 완료 |
 | Diet | `/diet/warning` | `Front/src/features/diet/pages/FoodWarning.jsx` | MUI 전환 완료 |
-| Places | `/places` | `Front/src/features/places/pages/PlaceSearchPage.jsx` | Kakao Maps 연동 |
+| Places | `/places` | `Front/src/features/places/pages/PlaceSearchPage.jsx` | Kakao Maps 연동 + AppShell/PageHeader 리듬 |
 | Search | `/search` | `Front/src/features/search/pages/UnifiedSearchPage.jsx` | MUI 전환 완료 |
 | Search | `/pills/search` | `Front/src/App.jsx` | `/search`로 리다이렉트(레거시 호환) |
 | Search | `/pills/result` | `Front/src/features/search/pages/PillResultPage.jsx` | placeholder(MUI) |

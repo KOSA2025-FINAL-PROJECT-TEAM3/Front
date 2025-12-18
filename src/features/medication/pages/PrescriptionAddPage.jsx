@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
 import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+import { PageHeader } from '@shared/components/layout/PageHeader';
+import { PageStack } from '@shared/components/layout/PageStack';
+import { BackButton } from '@shared/components/mui/BackButton';
 import { MedicationModal } from '../components/MedicationModal';
 import { MedicationCardInPrescription } from '../components/MedicationCardInPrescription';
 import { usePrescriptionStore } from '../store/prescriptionStore';
@@ -44,6 +47,7 @@ export const PrescriptionAddPage = () => {
     const [newTime, setNewTime] = useState('');
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [editingMedicationIndex, setEditingMedicationIndex] = useState(null);
+    const [notesExpanded, setNotesExpanded] = useState(false);
 
     // 마운트 시 상태 초기화 (loading 상태 리셋)
     useEffect(() => {
@@ -234,141 +238,253 @@ export const PrescriptionAddPage = () => {
 
     return (
         <MainLayout showBottomNav={false}>
-            <Box sx={{ maxWidth: 800, mx: 'auto', px: 2.5, py: 2.5, pb: 12 }}>
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900 }}>
-                        {isEditMode ? '처방전 수정' : '약 등록'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {isEditMode ? '처방전 정보를 수정하세요' : '처방전 정보를 입력하고 약을 추가하세요'}
-                    </Typography>
-                </Box>
+            <Box sx={{ pb: 'calc(72px + var(--safe-area-bottom) + 24px)' }}>
+                <PageStack>
+                    <PageHeader
+                        leading={<BackButton />}
+                        title={isEditMode ? '처방전 수정' : '약 등록'}
+                        subtitle={isEditMode ? '처방전 정보를 수정하세요' : '처방전 정보를 입력하고 약을 추가하세요'}
+                    />
 
-                {/* 처방전 기본 정보 */}
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-                    <Stack spacing={2}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
-                            처방전 정보
-                        </Typography>
-                        <Divider />
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="약국명"
-                                    value={prescriptionData.pharmacyName}
-                                    onChange={(e) => setPrescriptionData(prev => ({
-                                        ...prev,
-                                        pharmacyName: e.target.value
-                                    }))}
-                                    placeholder="예: 청독약국"
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="병원명"
-                                    value={prescriptionData.hospitalName}
-                                    onChange={(e) => setPrescriptionData(prev => ({
-                                        ...prev,
-                                        hospitalName: e.target.value
-                                    }))}
-                                    placeholder="예: 서울대학교병원"
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="복용 시작일"
-                                    type="date"
-                                    value={prescriptionData.startDate}
-                                    onChange={(e) => setPrescriptionData(prev => ({
-                                        ...prev,
-                                        startDate: e.target.value
-                                    }))}
-                                    required
-                                    InputLabelProps={{ shrink: true }}
-                                    fullWidth
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    label="복용 종료일"
-                                    type="date"
-                                    value={prescriptionData.endDate}
-                                    onChange={(e) => setPrescriptionData(prev => ({
-                                        ...prev,
-                                        endDate: e.target.value
-                                    }))}
-                                    required
-                                    InputLabelProps={{ shrink: true }}
-                                    fullWidth
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                                복용 시간 ({prescriptionData.intakeTimes.length})
+                    {/* 처방전 기본 정보 */}
+                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+                        <Stack spacing={2}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                                처방전 정보
                             </Typography>
-                            <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
-                                {prescriptionData.intakeTimes.map((time) => (
-                                    <Chip key={time} label={time} onDelete={() => handleRemoveTime(time)} />
-                                ))}
-                            </Stack>
+                            <Divider />
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        label="약국명"
+                                        value={prescriptionData.pharmacyName}
+                                        onChange={(e) => setPrescriptionData(prev => ({
+                                            ...prev,
+                                            pharmacyName: e.target.value
+                                        }))}
+                                        placeholder="예: 청독약국"
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        label="병원명"
+                                        value={prescriptionData.hospitalName}
+                                        onChange={(e) => setPrescriptionData(prev => ({
+                                            ...prev,
+                                            hospitalName: e.target.value
+                                        }))}
+                                        placeholder="예: 서울대학교병원"
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        label="복용 시작일"
+                                        type="date"
+                                        value={prescriptionData.startDate}
+                                        onChange={(e) => setPrescriptionData(prev => ({
+                                            ...prev,
+                                            startDate: e.target.value
+                                        }))}
+                                        required
+                                        InputLabelProps={{ shrink: true }}
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        label="복용 종료일"
+                                        type="date"
+                                        value={prescriptionData.endDate}
+                                        onChange={(e) => setPrescriptionData(prev => ({
+                                            ...prev,
+                                            endDate: e.target.value
+                                        }))}
+                                        required
+                                        InputLabelProps={{ shrink: true }}
+                                        fullWidth
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Stack>
+                    </Paper>
 
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2 }}>
-                                <TextField
-                                    type="time"
-                                    value={newTime}
-                                    onChange={(e) => setNewTime(e.target.value)}
-                                    size="small"
-                                    InputLabelProps={{ shrink: true }}
-                                />
-                                <Button type="button" variant="outlined" onClick={handleAddTime}>
-                                    시간 추가
-                                </Button>
-                            </Stack>
-                        </Box>
-                    </Stack>
-                </Paper>
+                    {/* 복용 시간 */}
+                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+                        <Stack spacing={2}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                                복용시간
+                            </Typography>
+                            <Divider />
 
-                {/* 약 목록 */}
-                <Paper variant="outlined" sx={{ p: 3, borderRadius: 2 }}>
-                    <Stack spacing={2}>
-                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                                    복용 시간 ({prescriptionData.intakeTimes.length})
+                                </Typography>
+                                <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mt: 1 }}>
+                                    {prescriptionData.intakeTimes.map((time) => (
+                                        <Chip key={time} label={time} onDelete={() => handleRemoveTime(time)} />
+                                    ))}
+                                </Stack>
+
+                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2 }}>
+                                    <TextField
+                                        type="time"
+                                        value={newTime}
+                                        onChange={(e) => setNewTime(e.target.value)}
+                                        size="small"
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                    <Button type="button" variant="outlined" onClick={handleAddTime}>
+                                        시간 추가
+                                    </Button>
+                                </Stack>
+                            </Box>
+                        </Stack>
+                    </Paper>
+
+                    {/* 약 목록 */}
+                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+                        <Stack spacing={2}>
                             <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
                                 처방약 {prescriptionData.medications.length}개
                             </Typography>
-                            <Button type="button" variant="contained" onClick={() => setShowSearchModal(true)}>
-                                + 약 추가
-                            </Button>
-                        </Stack>
-                        <Divider />
+                            <Divider />
 
-                        <Stack spacing={1.5}>
-                            {prescriptionData.medications.map((medication, index) => (
-                                <MedicationCardInPrescription
-                                    key={index}
-                                    medication={medication}
-                                    intakeTimes={prescriptionData.intakeTimes}
-                                    onEdit={() => handleEditMedication(index)}
-                                    onRemove={() => handleRemoveMedication(index)}
-                                />
-                            ))}
+                            <Stack spacing={1.5}>
+                                {prescriptionData.medications.map((medication, index) => (
+                                    <MedicationCardInPrescription
+                                        key={index}
+                                        medication={medication}
+                                        intakeTimes={prescriptionData.intakeTimes}
+                                        onEdit={() => handleEditMedication(index)}
+                                        onRemove={() => handleRemoveMedication(index)}
+                                    />
+                                ))}
 
-                            {prescriptionData.medications.length === 0 && (
-                                <Paper
-                                    variant="outlined"
-                                    sx={{ p: 4, textAlign: 'center', borderStyle: 'dashed' }}
-                                >
-                                    <Typography variant="body2" color="text.secondary">
-                                        약을 추가해주세요
-                                    </Typography>
-                                </Paper>
-                            )}
+                                {prescriptionData.medications.length === 0 && (
+                                    <Paper
+                                        variant="outlined"
+                                        sx={{ p: 4, textAlign: 'center', borderStyle: 'dashed', bgcolor: 'grey.50' }}
+                                    >
+                                        <Typography sx={{ fontSize: 34 }} aria-hidden="true">
+                                            💊
+                                        </Typography>
+                                        <Typography sx={{ fontWeight: 900, mt: 1 }}>
+                                            처방약을 추가해주세요
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>
+                                            약품명을 검색해서 처방전에 추가할 수 있어요.
+                                        </Typography>
+                                        <Button
+                                            type="button"
+                                            variant="contained"
+                                            size="large"
+                                            fullWidth
+                                            onClick={() => setShowSearchModal(true)}
+                                            sx={{ fontWeight: 900, borderRadius: 3 }}
+                                        >
+                                            + 약 추가
+                                        </Button>
+                                    </Paper>
+                                )}
+
+                                {prescriptionData.medications.length > 0 && (
+                                    <Button
+                                        type="button"
+                                        variant="contained"
+                                        size="large"
+                                        fullWidth
+                                        onClick={() => setShowSearchModal(true)}
+                                        sx={{ fontWeight: 900, borderRadius: 3, mt: 0.5 }}
+                                    >
+                                        + 약 추가
+                                    </Button>
+                                )}
+                            </Stack>
                         </Stack>
-                    </Stack>
-                </Paper>
+                    </Paper>
+
+                    {/* 메모/결제 */}
+                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+                        <Stack spacing={2}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                                메모/결제
+                            </Typography>
+                            <Divider />
+
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={6}>
+                                    <TextField
+                                        label="결제 금액"
+                                        type="number"
+                                        value={prescriptionData.paymentAmount ?? ''}
+                                        onChange={(e) => setPrescriptionData(prev => ({
+                                            ...prev,
+                                            paymentAmount: e.target.value === '' ? null : parseInt(e.target.value) || null
+                                        }))}
+                                        placeholder="금액 입력"
+                                        fullWidth
+                                    />
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {String(prescriptionData.notes || '').length > 60 && !notesExpanded ? (
+                                        <Paper
+                                            variant="outlined"
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={() => setNotesExpanded(true)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    setNotesExpanded(true);
+                                                }
+                                            }}
+                                            sx={{ p: 2, borderRadius: 3, bgcolor: 'grey.50', cursor: 'pointer' }}
+                                        >
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
+                                                메모
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
+                                                {String(prescriptionData.notes || '').slice(0, 60)}…
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75, fontWeight: 800 }}>
+                                                탭하여 펼치기
+                                            </Typography>
+                                        </Paper>
+                                    ) : (
+                                        <Box>
+                                            <TextField
+                                                label="메모"
+                                                value={prescriptionData.notes || ''}
+                                                onChange={(e) => setPrescriptionData(prev => ({
+                                                    ...prev,
+                                                    notes: e.target.value
+                                                }))}
+                                                placeholder="메모 입력"
+                                                multiline
+                                                minRows={2}
+                                                fullWidth
+                                            />
+                                            {String(prescriptionData.notes || '').length > 60 ? (
+                                                <Button
+                                                    type="button"
+                                                    variant="text"
+                                                    onClick={() => setNotesExpanded(false)}
+                                                    sx={{ fontWeight: 900, mt: 0.5 }}
+                                                >
+                                                    접기
+                                                </Button>
+                                            ) : null}
+                                        </Box>
+                                    )}
+                                </Grid>
+                            </Grid>
+                        </Stack>
+                    </Paper>
+                </PageStack>
+            </Box>
 
                 {/* 저장 버튼 */}
                 <Paper
@@ -378,33 +494,29 @@ export const PrescriptionAddPage = () => {
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        p: 2,
+                        px: 2.5,
+                        pt: 2,
+                        pb: 'calc(var(--safe-area-bottom) + 16px)',
                         borderTop: '1px solid',
                         borderColor: 'divider',
+                        bgcolor: 'rgba(255,255,255,0.95)',
+                        backdropFilter: 'blur(16px)',
                     }}
                 >
-                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-                        <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
-                            <Button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                variant="outlined"
-                                disabled={loading}
-                            >
-                                취소
-                            </Button>
-                            <Button
-                                type="button"
-                                onClick={handleSubmit}
-                                variant="contained"
-                                disabled={loading || prescriptionData.medications.length === 0}
-                            >
-                                {loading ? '저장 중...' : '저장'}
-                            </Button>
-                        </Stack>
+                    <Box sx={{ maxWidth: 520, mx: 'auto' }}>
+                        <Button
+                            type="button"
+                            onClick={handleSubmit}
+                            variant="contained"
+                            size="large"
+                            fullWidth
+                            disabled={loading || prescriptionData.medications.length === 0}
+                            sx={{ fontWeight: 900, borderRadius: 3 }}
+                        >
+                            {loading ? '저장 중...' : '저장'}
+                        </Button>
                     </Box>
                 </Paper>
-            </Box>
 
             {showSearchModal && (
                 <MedicationModal

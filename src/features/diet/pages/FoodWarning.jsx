@@ -3,8 +3,11 @@ import logger from "@core/utils/logger"
 import { useState, useEffect } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { dietApiClient } from '@/core/services/api/dietApiClient'
-import { CircularProgress, Alert, Box, Typography, Chip, Stack, Divider, Card, CardContent, Container } from '@mui/material'
+import { CircularProgress, Alert, Box, Typography, Chip, Stack, Divider, Card, CardContent } from '@mui/material'
 import { useSearchParams } from 'react-router-dom'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const FoodWarningPage = () => {
   const [searchParams] = useSearchParams()
@@ -78,15 +81,12 @@ export const FoodWarningPage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 12 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            음식 충돌 경고
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            최근 기록된 식단과 복용 중인 약물 정보를 기반으로 자동 분석합니다.
-          </Typography>
-        </Box>
+      <PageStack>
+        <PageHeader
+          leading={<BackButton />}
+          title="음식 충돌 경고"
+          subtitle="최근 기록된 식단과 복용 중인 약물 정보를 기반으로 자동 분석합니다."
+        />
 
         {loading ? (
           <Box display="flex" justifyContent="center" p={4}>
@@ -197,7 +197,7 @@ export const FoodWarningPage = () => {
             )}
           </Stack>
         )}
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

@@ -4,14 +4,16 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import CloseIcon from '@mui/icons-material/Close'
 import SendIcon from '@mui/icons-material/Send'
+import MicIcon from '@mui/icons-material/Mic'
 
 /**
  * ChatInput - 채팅 메시지 입력 컴포넌트
  * @param {Function} onSend - 메시지 전송 핸들러 (text, file)
  * @param {boolean} disabled - 입력 비활성화 여부
  * @param {boolean} allowImageUpload - 이미지 업로드 허용 여부
+ * @param {string[]} quickChips - 빠른 전송 칩(선택)
  */
-export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true }) => {
+export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true, quickChips = [] }) => {
   const [message, setMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const textareaRef = useRef(null)
@@ -79,7 +81,47 @@ export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true })
   }, [disabled])
 
   return (
-    <Paper variant="outlined" sx={{ borderLeft: 0, borderRight: 0, borderBottom: 0, borderRadius: 0 }}>
+    <Paper
+      variant="outlined"
+      sx={{
+        borderLeft: 0,
+        borderRight: 0,
+        borderBottom: 0,
+        borderRadius: 0,
+        bgcolor: 'common.white',
+        pb: 'calc(var(--safe-area-bottom) + 12px)',
+      }}
+    >
+      {/* Quick chips */}
+      {Array.isArray(quickChips) && quickChips.length > 0 ? (
+        <Box sx={{ px: 2, pt: 1.25 }}>
+          <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 0.5, WebkitOverflowScrolling: 'touch' }}>
+            {quickChips.map((chip) => (
+              <Box
+                key={chip}
+                component="button"
+                type="button"
+                disabled={disabled}
+                onClick={() => onSend?.(chip, null)}
+                style={{
+                  whiteSpace: 'nowrap',
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
+                  color: '#64748B',
+                  borderRadius: 999,
+                  padding: '6px 12px',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {chip}
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ) : null}
+
       {/* 파일 미리보기 (입력창 위에 표시) */}
       {allowImageUpload && selectedFile ? (
         <Box sx={{ px: 2, pt: 1.5 }}>
@@ -108,27 +150,35 @@ export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true })
           <input type="file" ref={fileInputRef} onChange={handleFileChange} hidden accept="image/*" />
         ) : null}
 
-        {allowImageUpload ? (
-          <IconButton
-            type="button"
-            onClick={handleUploadClick}
-            disabled={disabled}
-            aria-label="이미지 업로드"
-            sx={{ mb: 0.25 }}
-          >
-            <ImageOutlinedIcon color={selectedFile ? 'primary' : 'inherit'} />
-          </IconButton>
-        ) : null}
+        <IconButton
+          type="button"
+          disabled
+          aria-label="음성 입력(준비 중)"
+          sx={{
+            mb: 0.25,
+            bgcolor: '#EEF2FF',
+            color: '#7C8CFF',
+            '&:hover': { bgcolor: '#E0E7FF' },
+          }}
+        >
+          <MicIcon />
+        </IconButton>
 
         <Box
           sx={{
             flex: 1,
-            bgcolor: 'grey.100',
-            borderRadius: 4,
+            bgcolor: '#F8FAFC',
+            border: '1px solid',
+            borderColor: '#E2E8F0',
+            borderRadius: 999,
             px: 2,
             py: 1,
             maxHeight: 140,
             overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 1,
+            '&:focus-within': { borderColor: '#2EC4B6', boxShadow: '0 0 0 3px rgba(46,196,182,0.12)' },
           }}
         >
           <Box
@@ -160,13 +210,29 @@ export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true })
               '&:disabled': { opacity: 0.6, cursor: 'not-allowed' },
             }}
           />
+
+          {allowImageUpload ? (
+            <IconButton
+              type="button"
+              onClick={handleUploadClick}
+              disabled={disabled}
+              aria-label="이미지 업로드"
+              sx={{ mb: 0.25, color: selectedFile ? '#2EC4B6' : 'text.disabled' }}
+            >
+              <ImageOutlinedIcon />
+            </IconButton>
+          ) : null}
         </Box>
 
         <IconButton
           type="submit"
           color="primary"
           disabled={disabled || (!message.trim() && !selectedFile)}
-          sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', '&:hover': { bgcolor: 'primary.dark' } }}
+          sx={{
+            bgcolor: message.trim() || selectedFile ? '#2EC4B6' : '#F1F5F9',
+            color: message.trim() || selectedFile ? 'common.white' : '#CBD5E1',
+            '&:hover': { bgcolor: message.trim() || selectedFile ? '#25A094' : '#F1F5F9' },
+          }}
           aria-label="전송"
         >
           <SendIcon fontSize="small" />

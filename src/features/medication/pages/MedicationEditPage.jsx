@@ -13,7 +13,9 @@ import { BackButton } from '@shared/components/mui/BackButton'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@config/routes.config'
-import { Container, Paper, Stack, Typography } from '@mui/material'
+import { Paper, Typography } from '@mui/material'
+import PageHeader from '@shared/components/layout/PageHeader'
+import PageStack from '@shared/components/layout/PageStack'
 
 /**
  * 약 편집 페이지 컴포넌트
@@ -74,31 +76,21 @@ export const MedicationEditPage = () => {
   if (!medication) {
     return (
       <MainLayout>
-        <Container maxWidth="lg" sx={{ py: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-            <BackButton />
-            <Typography variant="h5" sx={{ fontWeight: 900 }}>
-              약 편집
-            </Typography>
-          </Stack>
+        <PageStack>
+          <PageHeader title="약 편집" leading={<BackButton />} />
           <Typography variant="body2" color="text.secondary">
             {loading ? '약 정보를 불러오는 중...' : '약 정보를 찾을 수 없습니다.'}
           </Typography>
-        </Container>
+        </PageStack>
       </MainLayout>
     )
   }
 
   return (
     <MainLayout>
-      <Container maxWidth="lg" sx={{ py: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
-          <BackButton />
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            약 편집
-          </Typography>
-        </Stack>
-        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600 }}>
+      <PageStack>
+        <PageHeader title="약 편집" leading={<BackButton />} />
+        <Paper sx={{ p: 3, borderRadius: 2, maxWidth: 600, width: '100%', mx: 'auto' }}>
           <MedicationForm
             initialValues={medication}
             onSubmit={handleSubmit}
@@ -108,7 +100,7 @@ export const MedicationEditPage = () => {
             shouldResetOnSubmit={false}
           />
         </Paper>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

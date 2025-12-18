@@ -8,10 +8,11 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { useInviteStore } from '@features/family/stores/inviteStore'
-import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
-import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
-import { ROUTE_PATHS } from '@config/routes.config'
-import { Alert, Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+	import { STORAGE_KEYS, USER_ROLES } from '@config/constants'
+	import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
+	import { ROUTE_PATHS } from '@config/routes.config'
+	import { Alert, Box, Button, Paper, Stack, Typography } from '@mui/material'
+	import { BackButton } from '@shared/components/mui/BackButton'
 
 export const KakaoCallbackPage = () => {
   const navigate = useNavigate()
@@ -154,14 +155,18 @@ export const KakaoCallbackPage = () => {
         display: 'flex',
         alignItems: 'center',
         py: 3,
+        px: { xs: 2.5, sm: 3 },
         background: 'linear-gradient(135deg, #f7f9fc, #eef2ff)',
       }}
-    >
-      <Container maxWidth="sm" sx={{ maxWidth: 460 }}>
-        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3, textAlign: 'center' }}>
-          <Stack spacing={2}>
-            <Typography component="div" sx={{ fontSize: 42 }}>
-              💊
+	    >
+	      <Box sx={{ width: '100%', maxWidth: 460, mx: 'auto' }}>
+	        <Stack direction="row" justifyContent="flex-start" sx={{ mb: 1 }}>
+	          <BackButton label="뒤로" />
+	        </Stack>
+	        <Paper elevation={6} sx={{ p: { xs: 3, sm: 5 }, borderRadius: 3, textAlign: 'center' }}>
+	          <Stack spacing={2}>
+	            <Typography component="div" sx={{ fontSize: 42 }}>
+	              💊
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 900 }}>
               뭐냑? (AMA...Pill)
@@ -190,7 +195,7 @@ export const KakaoCallbackPage = () => {
             ) : null}
           </Stack>
         </Paper>
-      </Container>
+      </Box>
     </Box>
   )
 }

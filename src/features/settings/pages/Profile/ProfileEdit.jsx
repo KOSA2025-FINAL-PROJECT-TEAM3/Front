@@ -1,19 +1,22 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { PROFILE_EDIT_FIELDS } from '@/constants/uiConstants'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { Box, Button, Container, Paper, Stack, TextField, Typography, Avatar, IconButton } from '@mui/material'
-import { toast } from '@shared/components/toast/toastStore'
+import { Avatar, Box, Button, IconButton, Paper, Stack, TextField } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
+import { toast } from '@shared/components/toast/toastStore'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 export const ProfileEditPage = () => {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
-  const { user, updateUser, withdraw } = useAuth((state) => ({ 
-    user: state.user, 
+  const { user, updateUser, withdraw } = useAuth((state) => ({
+    user: state.user,
     updateUser: state.updateUser,
-    withdraw: state.withdraw 
+    withdraw: state.withdraw,
   }))
 
   const [isLoading, setIsLoading] = useState(false)
@@ -63,7 +66,7 @@ export const ProfileEditPage = () => {
       try {
         await withdraw()
         toast.success('회원 탈퇴가 완료되었습니다.')
-        navigate('/') // 로그인 페이지 등으로 이동
+        navigate('/login', { replace: true })
       } catch (error) {
         console.error(error)
         toast.error('회원 탈퇴 처리에 실패했습니다.')
@@ -98,58 +101,40 @@ export const ProfileEditPage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            프로필 편집
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            연락처 정보를 최신 상태로 유지하세요.
-          </Typography>
-        </Box>
+      <PageStack>
+        <PageHeader leading={<BackButton />} title="프로필 편집" subtitle="연락처 정보를 최신 상태로 유지하세요." />
 
-        <Paper 
-          variant="outlined" 
-          sx={{ p: 3, borderRadius: 2 }} 
-          component="form"
-          onSubmit={handleSubmit}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, position: 'relative' }}>
-             <Box sx={{ position: 'relative' }}>
-               <Avatar 
-                 src={previewImage} 
-                 alt={formData.name}
-                 sx={{ width: 100, height: 100, fontSize: '2rem', cursor: 'pointer', border: '2px solid #e2e8f0' }}
-                 onClick={handleAvatarClick}
-               >
-                 {formData.name?.[0] || 'U'}
-               </Avatar>
-               <IconButton
-                 sx={{
-                   position: 'absolute',
-                   bottom: 0,
-                   right: 0,
-                   backgroundColor: 'primary.main',
-                   color: 'white',
-                   width: 32,
-                   height: 32,
-                   '&:hover': { backgroundColor: 'primary.dark' },
-                 }}
-                 onClick={handleAvatarClick}
-               >
-                 <EditIcon sx={{ fontSize: 18 }} />
-               </IconButton>
-             </Box>
-             <input 
-               type="file" 
-               ref={fileInputRef} 
-               hidden 
-               accept="image/*"
-               onChange={handleFileChange}
-             />
-          </Box>
-
+        <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }} component="form" onSubmit={handleSubmit}>
           <Stack spacing={2}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+              <Box sx={{ position: 'relative' }}>
+                <Avatar
+                  src={previewImage}
+                  alt={formData.name}
+                  sx={{ width: 100, height: 100, fontSize: '2rem', cursor: 'pointer', border: '2px solid #e2e8f0' }}
+                  onClick={handleAvatarClick}
+                >
+                  {formData.name?.[0] || 'U'}
+                </Avatar>
+                <IconButton
+                  onClick={handleAvatarClick}
+                  sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    width: 32,
+                    height: 32,
+                    '&:hover': { backgroundColor: 'primary.dark' },
+                  }}
+                >
+                  <EditIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Box>
+              <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleFileChange} />
+            </Box>
+
             {PROFILE_EDIT_FIELDS.map((field) => (
               <TextField
                 key={field.id}
@@ -197,7 +182,7 @@ export const ProfileEditPage = () => {
             회원탈퇴
           </Button>
         </Box>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

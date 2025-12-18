@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient'
 import {
@@ -39,6 +39,7 @@ import logger from '@core/utils/logger'
  */
 export function useOcrRegistration() {
   const navigate = useNavigate()
+  const location = useLocation()
   const ocrJobs = useNotificationStore((state) => state.ocrJobs)
   const ocrJobsRef = useRef({})
 
@@ -313,8 +314,11 @@ export function useOcrRegistration() {
       logger.debug('✅ OCR 등록 성공:', result)
       toast.success('처방전이 등록되었습니다')
 
-      // 약 관리 페이지로 이동
-      navigate(ROUTE_PATHS.medication, { replace: true })
+      const returnTo = location.state?.returnTo
+      const safeReturnTo = typeof returnTo === 'string' && returnTo.startsWith('/') ? returnTo : null
+
+      // 호출한 화면으로 복귀 (없으면 약 관리 페이지)
+      navigate(safeReturnTo ?? ROUTE_PATHS.medication, { replace: true })
 
     } catch (err) {
       logger.error('❌ OCR 등록 실패:', err)
@@ -324,7 +328,7 @@ export function useOcrRegistration() {
     } finally {
       setIsLoading(false)
     }
-  }, [formState, navigate])
+  }, [formState, location.state, navigate])
 
   // === 초기화 ===
   const reset = useCallback(() => {

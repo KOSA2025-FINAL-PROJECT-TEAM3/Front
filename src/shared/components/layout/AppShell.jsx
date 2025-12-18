@@ -11,13 +11,14 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { USER_ROLES } from '@config/constants'
-import { ROUTE_PATHS } from '@config/routes.config'
 
 import { Header } from './Header'
 import { AdaptiveNavigation } from './AdaptiveNavigation'
 import { getPrimaryNavItems } from './primaryNavItems'
-import { VoiceAssistant } from '@features/voice/components/VoiceAssistant'
 import { useFocusModeStore } from '@shared/stores/focusModeStore'
+import FloatingActionButtons from './FloatingActionButtons'
+import SearchOverlay from '@features/search/components/SearchOverlay'
+import { shouldHideFloatingActions } from './floatingActionsVisibility'
 
 export const AppShell = ({
   children,
@@ -45,15 +46,11 @@ export const AppShell = ({
 
   const focusModeActive = useFocusModeStore((state) => Object.keys(state.activeKeys || {}).length > 0)
 
-  const shouldHideVoiceAssistant =
-    focusModeActive ||
-    fullScreen ||
-    location.pathname === ROUTE_PATHS.ocrScan ||
-    location.pathname.startsWith(ROUTE_PATHS.ocrScan + '/') ||
-    location.pathname === ROUTE_PATHS.dietLog ||
-    location.pathname.startsWith(ROUTE_PATHS.dietLog + '/')
-
-  const showVoiceAssistant = !shouldHideVoiceAssistant
+  const hideFloatingActions = shouldHideFloatingActions({
+    pathname: location.pathname,
+    focusModeActive,
+    fullScreen,
+  })
 
   const showMobileBottomNav = Boolean(showBottomNav && isMobile)
 
@@ -64,13 +61,23 @@ export const AppShell = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        background: 'linear-gradient(135deg, #F6FAFF 0%, #ffffff 100%)',
+        backgroundColor: 'background.default',
         overflow: 'hidden',
       }}
     >
       <Header navItems={navItems} />
 
-      <Box sx={{ display: 'flex', flex: 1, pt: '60px', overflow: 'hidden' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flex: 1,
+          pt: {
+            xs: 'calc(64px + var(--safe-area-top))',
+            md: 'calc(72px + var(--safe-area-top))',
+          },
+          overflow: 'hidden',
+        }}
+      >
         {showMobileBottomNav && (
           <nav aria-label="주요 내비게이션">
             <AdaptiveNavigation items={navItems} position="bottom" />
@@ -82,12 +89,16 @@ export const AppShell = ({
           sx={{
             flex: 1,
             overflowY: fullScreen ? 'hidden' : 'auto',
-            px: fullScreen ? 0 : { xs: 2, md: 2 },
-            py: fullScreen ? 0 : { xs: 2, md: 2 },
+            px: fullScreen ? 0 : { xs: 2.5, md: 4 },
+            pt: fullScreen ? 0 : { xs: 2.5, md: 4 },
+            pb: fullScreen
+              ? 0
+              : showMobileBottomNav
+                ? { xs: 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + 32px)', md: 4 }
+                : { xs: 2.5, md: 4 },
             width: '100%',
-            maxWidth: fullScreen ? 'none' : { xs: '100%', md: 640 },
+            maxWidth: fullScreen ? 'none' : { xs: '100%', md: 1280 },
             mx: 'auto',
-            pb: fullScreen ? 0 : showMobileBottomNav ? '96px' : 0,
             display: fullScreen ? 'flex' : 'block',
             flexDirection: fullScreen ? 'column' : undefined,
           }}
@@ -96,7 +107,8 @@ export const AppShell = ({
         </Box>
       </Box>
 
-      {showVoiceAssistant && <VoiceAssistant />}
+      <SearchOverlay />
+      {!hideFloatingActions && <FloatingActionButtons hasBottomDock={showMobileBottomNav} />}
     </Box>
   )
 }

@@ -9,11 +9,14 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  IconButton,
   Radio,
   RadioGroup,
   Stack,
   Typography,
 } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import CloseIcon from '@mui/icons-material/Close'
 
 /**
  * 소유자 양도 모달
@@ -62,8 +65,24 @@ const OwnerDelegationModal = ({
 
   return (
     <Dialog open={isOpen} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 900, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'common.white' }}>
-        그룹 소유자 양도
+      <DialogTitle
+        sx={{
+          px: 1.25,
+          py: 1.25,
+          fontWeight: 900,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'common.white',
+        }}
+      >
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center' }}>
+          <IconButton aria-label="뒤로" onClick={handleClose} sx={{ color: 'inherit' }}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ textAlign: 'center', fontWeight: 900, px: 1 }}>그룹 소유자 양도</Box>
+          <IconButton aria-label="닫기" onClick={handleClose} sx={{ color: 'inherit' }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 2.5 }}>

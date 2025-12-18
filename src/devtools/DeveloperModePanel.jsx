@@ -37,7 +37,14 @@ export const DeveloperModePanel = () => {
   }
 
   return (
-    <Box sx={{ position: 'fixed', left: 16, bottom: 16, zIndex: 1200 }}>
+    <Box
+      sx={{
+        position: 'fixed',
+        left: 16,
+        bottom: { xs: 'calc(var(--bottom-dock-height) + var(--safe-area-bottom) + var(--bottom-dock-gap))', md: 16 },
+        zIndex: 1200,
+      }}
+    >
       <Button
         variant="contained"
         size="small"

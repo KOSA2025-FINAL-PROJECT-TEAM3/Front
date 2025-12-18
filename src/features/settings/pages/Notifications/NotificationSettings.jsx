@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { Box, Button, Container, Paper, Stack, Switch, Typography } from '@mui/material'
+import { Box, Button, Paper, Stack, Switch, Typography } from '@mui/material'
+import { PageHeader } from '@shared/components/layout/PageHeader'
+import { PageStack } from '@shared/components/layout/PageStack'
+import { BackButton } from '@shared/components/mui/BackButton'
 import { notificationSettingsApiClient } from '@core/services/api/notificationSettingsApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 
@@ -60,18 +63,20 @@ export const NotificationSettingsPage = () => {
 
   return (
     <MainLayout>
-      <Container maxWidth="md" sx={{ py: 3, pb: 10 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 900 }}>
-            알림 설정
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            받고 싶은 알림과 채널을 선택하세요.
-          </Typography>
-        </Box>
+      <PageStack>
+        <PageHeader
+          leading={<BackButton />}
+          title="알림 설정"
+          subtitle="받고 싶은 알림과 채널을 선택하세요."
+          right={
+            <Button variant="contained" onClick={save} disabled={loading}>
+              {loading ? '저장 중...' : '저장'}
+            </Button>
+          }
+        />
 
         <Stack spacing={2}>
-          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
               채널
             </Typography>
@@ -101,7 +106,7 @@ export const NotificationSettingsPage = () => {
             </Stack>
           </Paper>
 
-          <Paper variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+          <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1 }}>
               알림 종류
             </Typography>
@@ -130,14 +135,8 @@ export const NotificationSettingsPage = () => {
               ))}
             </Stack>
           </Paper>
-
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" onClick={save} disabled={loading}>
-              {loading ? '저장 중...' : '저장'}
-            </Button>
-          </Box>
         </Stack>
-      </Container>
+      </PageStack>
     </MainLayout>
   )
 }

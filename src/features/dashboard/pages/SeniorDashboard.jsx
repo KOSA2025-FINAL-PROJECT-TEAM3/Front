@@ -5,25 +5,24 @@
  */
 
 import { useMemo, useState, useEffect, useCallback } from 'react'
-import { Box, Typography, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Stack, useMediaQuery, useTheme } from '@mui/material'
 import { MainLayout } from '@shared/components/layout/MainLayout'
-import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
-import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
+import { useNavigate } from 'react-router-dom'
 import { QuickActionGrid } from '../components/QuickActionGrid'
-import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
 import { HeroMedicationCard } from '../components/HeroMedicationCard'
 import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
 import { TodayMedicationCheckbox } from '../components/TodayMedicationCheckbox'
-import { LargeActionButtons } from '../components/LargeActionButtons'
-import { SENIOR_QUICK_ACTIONS, SENIOR_FAB_ACTIONS } from '@/constants/uiConstants'
+import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
-import { format, startOfWeek, endOfWeek, addDays, isAfter } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addDays, isAfter, subDays } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
+import TodaySummaryCard from '../components/TodaySummaryCard'
+import HistoryTimelineCard from '../components/HistoryTimelineCard'
+import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -33,12 +32,14 @@ const getLogScheduleId = (log) =>
   null
 
 export const SeniorDashboard = () => {
+  const navigate = useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const { user } = useAuth((state) => ({ user: state.user }))
   const { medications, fetchMedications } = useMedicationStore()
-  const [exporting, setExporting] = useState(false)
+  const openSearchOverlay = useSearchOverlayStore((state) => state.open)
   const [medicationLogs, setMedicationLogs] = useState([])
+  const [historyData, setHistoryData] = useState([])
   const [loading, setLoading] = useState(true)
 
   // 오늘 날짜
@@ -180,39 +181,90 @@ export const SeniorDashboard = () => {
     }
   }, [today])
 
+  const loadHistoryTimeline = useCallback(async () => {
+    try {
+      const end = subDays(today, 1)
+      const start = subDays(today, 3)
+      if (isAfter(start, end)) {
+        setHistoryData([])
+        return
+      }
+
+      const logs = await medicationLogApiClient.getByDateRange(format(start, 'yyyy-MM-dd'), format(end, 'yyyy-MM-dd')) || []
+      const byDate = new Map()
+
+      const getTimeSectionLabel = (time) => {
+        const hour = parseInt(String(time || '').split(':')[0] || '0', 10)
+        if (hour >= 5 && hour < 11) return '아침'
+        if (hour >= 11 && hour < 17) return '점심'
+        if (hour >= 17 && hour < 21) return '저녁'
+        return '야간'
+      }
+
+      logs.forEach((log) => {
+        const scheduledDate = log?.scheduledTime ? parseServerLocalDateTime(log.scheduledTime) : null
+        if (!scheduledDate) return
+
+        const dateKey = format(scheduledDate, 'yyyy-MM-dd')
+        const time = format(scheduledDate, 'HH:mm')
+        const label = getTimeSectionLabel(time)
+        const medication = medications.find((m) => m.id === log.medicationId)
+        const medicationName = medication?.name || log.medicationName || '알 수 없는 약'
+
+        if (!byDate.has(dateKey)) {
+          byDate.set(dateKey, { dateKey, date: scheduledDate, sections: new Map() })
+        }
+
+        const entry = byDate.get(dateKey)
+        if (!entry.sections.has(label)) {
+          entry.sections.set(label, { label, time, names: [], completed: true })
+        }
+
+        const section = entry.sections.get(label)
+        section.names.push(medicationName)
+        section.completed = section.completed && Boolean(log.completed)
+        if (time && section.time && time < section.time) {
+          section.time = time
+        }
+      })
+
+      const groups = Array.from(byDate.values())
+        .sort((a, b) => b.dateKey.localeCompare(a.dateKey))
+        .map((group) => {
+          const items = Array.from(group.sections.values()).sort((a, b) => String(a.time).localeCompare(String(b.time)))
+          return {
+            key: group.dateKey,
+            date: group.date,
+            dateLabel: group.date?.toLocaleDateString?.('ko-KR', { month: 'long', day: 'numeric' }) || group.dateKey,
+            dayLabel: group.date?.toLocaleDateString?.('ko-KR', { weekday: 'long' }) || '',
+            items: items.map((item) => ({
+              ...item,
+              names: Array.from(new Set(item.names)).join(', '),
+            })),
+          }
+        })
+
+      setHistoryData(groups)
+    } catch (error) {
+      logger.error('Failed to load history timeline:', error)
+      setHistoryData([])
+    }
+  }, [today, medications])
+
   useEffect(() => {
     loadWeeklyStats()
   }, [loadWeeklyStats])
+
+  useEffect(() => {
+    loadHistoryTimeline()
+  }, [loadHistoryTimeline])
 
   const adherenceRate = useMemo(() => {
     const completed = weeklyStats.filter(d => d.status === 'completed').length
     return Math.round((completed / weeklyStats.length) * 100)
   }, [weeklyStats])
 
-  const handleExportPdf = async () => {
-    const userId = user?.id || user?.userId
-    if (!userId) {
-      toast.error('사용자 정보를 찾을 수 없습니다.')
-      return
-    }
-
-    setExporting(true)
-    try {
-      const blob = await diseaseApiClient.exportPdf(userId)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'diseases.pdf'
-      link.click()
-      window.URL.revokeObjectURL(url)
-      toast.success('PDF 다운로드를 시작합니다.')
-    } catch (error) {
-      logger.error('PDF 다운로드 실패', error)
-      toast.error('PDF 다운로드에 실패했습니다.')
-    } finally {
-      setExporting(false)
-    }
-  }
+  void user
 
   // 복약 완료 처리
   const handleConfirmMedication = async () => {
@@ -258,51 +310,23 @@ export const SeniorDashboard = () => {
     }
   }
 
-  const fabActions = SENIOR_FAB_ACTIONS.map((action) => {
-    if (action.id === 'pdf_export') {
-      return {
-        ...action,
-        label: exporting ? '다운로드 중...' : action.label,
-        onClick: () => !exporting && handleExportPdf(),
-      }
-    }
-    return action
-  })
-
-  const todayDate = today.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-  })
+  const takenCount = useMemo(() => todaySchedules.filter((s) => s.status === 'completed').length, [todaySchedules])
+  const totalCount = useMemo(() => todaySchedules.length, [todaySchedules])
 
   return (
     <MainLayout>
-      <ResponsiveContainer maxWidth="lg">
-        <Stack spacing={4} sx={{ pb: 12 }}>
-          {/* 헤더 */}
-          <Box>
-            <Typography
-              variant="h4"
-              component="h1"
-              fontWeight={700}
-              gutterBottom
-              sx={{
-                fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' }
-              }}
-            >
-              오늘의 복용
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {todayDate}
-            </Typography>
-          </Box>
-
-          {/* Hero 복약 알림 카드 - 항상 표시 */}
+      <Box
+        sx={{
+          display: { xs: 'flex', md: 'grid' },
+          flexDirection: { xs: 'column' },
+          gridTemplateColumns: { md: '1fr 1fr' },
+          gap: { xs: 3, md: 4 },
+        }}
+      >
+        {/* Column 1 */}
+        <Stack spacing={{ xs: 3, md: 4 }}>
           {loading ? (
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography>로딩 중...</Typography>
-            </Box>
+            <HeroMedicationCard title="불러오는 중..." subtitle="오늘 복약 일정을 확인하고 있어요." medications={[]} />
           ) : nextMedication ? (
             <HeroMedicationCard
               title="복약 시간입니다 💊"
@@ -310,55 +334,51 @@ export const SeniorDashboard = () => {
               time={nextMedication.time}
               medications={nextMedication.medications}
               onConfirm={handleConfirmMedication}
+              onOpenDetail={() => navigate(ROUTE_PATHS.medicationToday)}
             />
           ) : (
-            <HeroMedicationCard
-              title="오늘 복약 일정이 없습니다"
-              subtitle="약 관리 페이지에서 약을 등록해주세요."
-              medications={[]}
-            />
+            <HeroMedicationCard title="오늘 복약 일정이 없습니다" subtitle="약을 등록하면 자동으로 일정이 생성돼요." medications={[]} />
           )}
 
-          {/* 오늘 복약 체크박스 (큼직하게) */}
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
-              gap: 3,
-            }}
-          >
-            <TodayMedicationCheckbox
-              schedules={todaySchedules}
-              onToggle={handleToggleTimeSection}
+          {/* Mobile: Summary sits under hero */}
+          {isMobile ? (
+            <TodaySummaryCard
+              takenCount={takenCount}
+              totalCount={totalCount}
+              onClick={() => navigate(ROUTE_PATHS.medicationToday)}
             />
+          ) : null}
 
-            {/* 주간 복약 현황 */}
-            <WeeklyStatsWidget
-              title="지난 7일 기록"
-              weeklyData={weeklyStats}
-              adherenceRate={adherenceRate}
-            />
-          </Box>
-
-          {/* 큰 버튼 2개 (약품 검색, 식단 로그) */}
-          <LargeActionButtons />
-
-          {/* 약 리스트 */}
-          <Box>
-            <MyMedicationSchedule title="전체 일정" showEmptyState={true} />
-          </Box>
-
-          {/* 빠른 작업 (맨 아래) - 나머지 작업들 */}
-          <Box>
-            <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-              기타 작업
-            </Typography>
-            <QuickActionGrid actions={SENIOR_QUICK_ACTIONS} />
-          </Box>
+          {/* RN-style quick actions */}
+          <QuickActionGrid
+            onSearchPill={() => openSearchOverlay('pill')}
+            dietPath={ROUTE_PATHS.dietLog}
+            chatPath={ROUTE_PATHS.familyChat}
+          />
         </Stack>
 
-        {isMobile && <SpeedDialFab actions={fabActions} />}
-      </ResponsiveContainer>
+        {/* Column 2 */}
+        <Stack spacing={{ xs: 3, md: 4 }}>
+          {!isMobile ? (
+            <TodaySummaryCard
+              takenCount={takenCount}
+              totalCount={totalCount}
+              onClick={() => navigate(ROUTE_PATHS.medicationToday)}
+            />
+          ) : null}
+
+          <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} />
+
+          <WeeklyStatsWidget
+            title="지난 7일 기록"
+            weeklyData={weeklyStats}
+            adherenceRate={adherenceRate}
+            onClick={() => navigate(ROUTE_PATHS.weeklyStats)}
+          />
+
+          <HistoryTimelineCard historyData={historyData} onOpenDetail={() => navigate(ROUTE_PATHS.adherenceReport)} />
+        </Stack>
+      </Box>
     </MainLayout>
   )
 }
