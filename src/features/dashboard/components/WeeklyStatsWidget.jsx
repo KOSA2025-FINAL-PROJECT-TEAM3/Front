@@ -10,6 +10,7 @@ import {
   Stack,
   Avatar,
   LinearProgress,
+  ButtonBase,
 } from '@mui/material'
 import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
@@ -47,9 +48,23 @@ export const WeeklyStatsWidget = ({
   title = '지난 7일 기록',
   weeklyData = [],
   adherenceRate = 0,
+  onClick,
 }) => {
   return (
-    <RoundedCard elevation={2}>
+    <RoundedCard
+      component={onClick ? ButtonBase : undefined}
+      onClick={onClick}
+      elevation={2}
+      sx={{
+        textAlign: 'left',
+        ...(onClick
+          ? {
+              cursor: 'pointer',
+              '&:hover': { boxShadow: '0 14px 34px rgba(15, 23, 42, 0.10)' },
+            }
+          : null),
+      }}
+    >
       <Stack spacing={2}>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" fontWeight={600}>
@@ -124,6 +139,7 @@ WeeklyStatsWidget.propTypes = {
     })
   ),
   adherenceRate: PropTypes.number,
+  onClick: PropTypes.func,
 }
 
 export default WeeklyStatsWidget

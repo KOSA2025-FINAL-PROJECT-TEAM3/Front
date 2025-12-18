@@ -1,21 +1,25 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Container, Stack, Chip, IconButton, Collapse, Button, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import MainLayout from '@shared/components/layout/MainLayout'
-import { RoundedCard } from '@shared/components/mui/RoundedCard'
-import { ResponsiveContainer } from '@shared/components/layout/ResponsiveContainer'
-import { MyMedicationSchedule } from '../components/MyMedicationSchedule'
-import { QuickActionGrid } from '../components/QuickActionGrid'
-import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
-import { CAREGIVER_QUICK_ACTIONS, CAREGIVER_FAB_ACTIONS } from '@/constants/uiConstants'
-import { useAuth } from '@features/auth/hooks/useAuth'
-import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
+import HistoryTimelineCard from '../components/HistoryTimelineCard'
+import TodaySummaryCard from '../components/TodaySummaryCard'
+import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
 import { familyApiClient } from '@core/services/api/familyApiClient'
-import { toast } from '@shared/components/toast/toastStore'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import SearchIcon from '@mui/icons-material/Search'
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
+import ChatIcon from '@mui/icons-material/Chat'
 import logger from '@core/utils/logger'
+import { endOfWeek, format, isAfter, startOfWeek, subDays, addDays } from 'date-fns'
+import { parseServerLocalDateTime } from '@core/utils/formatting'
+import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
+import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
+import { useAuth } from '@features/auth/hooks/useAuth'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드
@@ -24,16 +28,56 @@ import logger from '@core/utils/logger'
 export function CaregiverDashboard() {
   const navigate = useNavigate()
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const { members, loading, error, initialized, initialize } = useFamilyStore((state) => ({
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
+  const openSearchOverlay = useSearchOverlayStore((state) => state.open)
+  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore((state) => ({
+    familyGroups: state.familyGroups,
+    selectedGroupId: state.selectedGroupId,
     members: state.members,
     loading: state.loading,
     error: state.error,
     initialized: state.initialized,
     initialize: state.initialize,
   }))
-  const { user } = useAuth((state) => ({ user: state.user }))
-  const [exporting, setExporting] = useState(false)
+  const currentUserId = useAuth((state) => state.user?.id || state.user?.userId || null)
+  const { activeSeniorId, setActiveSeniorId } = useCareTargetStore((state) => ({
+    activeSeniorId: state.activeSeniorMemberId,
+    setActiveSeniorId: state.setActiveSeniorMemberId,
+  }))
+  const [todayRate, setTodayRate] = useState(null)
+  const [todayRateLoading, setTodayRateLoading] = useState(false)
+  const [todayCounts, setTodayCounts] = useState({ total: 0, completed: 0 })
+  const [weeklyStats, setWeeklyStats] = useState(Array(7).fill({ status: 'pending' }))
+  const [weeklyLoading, setWeeklyLoading] = useState(false)
+  const [recentHistoryData, setRecentHistoryData] = useState([])
+  const [recentHistoryLoading, setRecentHistoryLoading] = useState(false)
+
+  const openActiveMemberDetail = useCallback(
+    (target) => {
+      if (!activeSeniorId) {
+        navigate(ROUTE_PATHS.family)
+        return
+      }
+
+      const memberId = String(activeSeniorId)
+
+      if (target === 'medication') {
+        navigate(ROUTE_PATHS.familyMemberMedication.replace(':id', memberId))
+        return
+      }
+      if (target === 'diet') {
+        navigate(ROUTE_PATHS.familyMemberDiet.replace(':id', memberId))
+        return
+      }
+      if (target === 'disease') {
+        navigate(ROUTE_PATHS.familyMemberDisease.replace(':id', memberId))
+        return
+      }
+
+      navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
+    },
+    [activeSeniorId, navigate],
+  )
 
   useEffect(() => {
     if (!initialized) {
@@ -41,57 +85,206 @@ export function CaregiverDashboard() {
     }
   }, [initialized, initialize])
 
-  const seniorMembers = useMemo(
-    () => members.filter((member) => member.role === 'SENIOR'),
-    [members],
+  const groupMembers = useMemo(() => {
+    if (selectedGroupId && Array.isArray(familyGroups)) {
+      const group = familyGroups.find((g) => String(g?.id) === String(selectedGroupId))
+      if (Array.isArray(group?.members)) return group.members
+    }
+    return Array.isArray(members) ? members : []
+  }, [familyGroups, members, selectedGroupId])
+
+  const targetMembers = useMemo(() => {
+    const list = groupMembers.filter(Boolean).filter((m) => m.userId != null)
+    if (!currentUserId) return list
+    return list.filter((m) => String(m.userId) !== String(currentUserId))
+  }, [currentUserId, groupMembers])
+
+  useEffect(() => {
+    if (targetMembers.length === 0) return
+    if (!activeSeniorId) {
+      const preferred = targetMembers.find((m) => m.role === 'SENIOR') || targetMembers[0]
+      setActiveSeniorId(preferred?.id ?? null)
+      return
+    }
+    const stillExists = targetMembers.some((m) => String(m.id) === String(activeSeniorId))
+    if (!stillExists) {
+      const preferred = targetMembers.find((m) => m.role === 'SENIOR') || targetMembers[0]
+      setActiveSeniorId(preferred?.id ?? null)
+    }
+  }, [activeSeniorId, setActiveSeniorId, targetMembers])
+
+  const activeSenior = useMemo(
+    () =>
+      targetMembers.find((m) => String(m.id) === String(activeSeniorId)) || targetMembers[0] || null,
+    [activeSeniorId, targetMembers],
   )
 
-  const handleViewDetail = (memberId) => {
-    navigate(ROUTE_PATHS.familyMemberDetail.replace(':id', memberId))
-  }
+  useEffect(() => {
+    const loadRate = async () => {
+      if (!activeSenior?.userId) {
+        setTodayRate(null)
+        setTodayCounts({ total: 0, completed: 0 })
+        return
+      }
+      setTodayRateLoading(true)
+      try {
+        const today = new Date().toISOString().split('T')[0]
+        const response = await familyApiClient.getMedicationLogs(activeSenior.userId, { date: today })
+        const logs = response?.logs || response || []
+        const total = logs.length
+        const completed = logs.filter((l) => l.status === 'completed' || l.completed === true).length
+        setTodayCounts({ total, completed })
+        setTodayRate(total > 0 ? Math.round((completed / total) * 100) : 0)
+      } catch (e) {
+        logger.warn('[CaregiverDashboard] loadRate failed', e)
+        setTodayRate(null)
+        setTodayCounts({ total: 0, completed: 0 })
+      } finally {
+        setTodayRateLoading(false)
+      }
+    }
+    void loadRate()
+  }, [activeSenior?.userId])
 
-  const handleExportPdf = async () => {
-    const userId = user?.id || user?.userId
-    if (!userId) {
-      toast.error('사용자 정보를 찾을 수 없습니다.')
+  useEffect(() => {
+    const loadWeekly = async () => {
+      if (!activeSenior?.userId) {
+        setWeeklyStats(Array(7).fill({ status: 'pending' }))
+        return
+      }
+
+      setWeeklyLoading(true)
+      try {
+        const today = new Date()
+        const start = startOfWeek(today, { weekStartsOn: 1 })
+        const end = endOfWeek(today, { weekStartsOn: 1 })
+        const dates = Array.from({ length: 7 }).map((_, idx) => addDays(start, idx))
+
+        const results = await Promise.all(
+          dates.map((date) => {
+            if (isAfter(date, end)) return Promise.resolve([])
+            return familyApiClient
+              .getMedicationLogs(activeSenior.userId, { date: format(date, 'yyyy-MM-dd') })
+              .then((response) => response?.logs || response || [])
+              .catch(() => [])
+          }),
+        )
+
+        const stats = results.map((logs) => {
+          const total = logs.length
+          if (total === 0) return { status: 'pending' }
+          const completed = logs.filter((l) => l.status === 'completed' || l.completed === true).length
+          return completed >= total ? { status: 'completed' } : { status: 'missed' }
+        })
+
+        setWeeklyStats(stats)
+      } catch (e) {
+        logger.warn('[CaregiverDashboard] loadWeekly failed', e)
+        setWeeklyStats(Array(7).fill({ status: 'pending' }))
+      } finally {
+        setWeeklyLoading(false)
+      }
+    }
+
+    void loadWeekly()
+  }, [activeSenior?.userId])
+
+  const loadRecentHistory = useCallback(async () => {
+    if (!activeSenior?.userId) {
+      setRecentHistoryData([])
       return
     }
 
-    setExporting(true)
+    setRecentHistoryLoading(true)
     try {
-      const blob = await diseaseApiClient.exportPdf(userId)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'diseases.pdf'
-      link.click()
-      window.URL.revokeObjectURL(url)
-      toast.success('PDF 다운로드를 시작합니다.')
-    } catch (error) {
-      logger.error('PDF 다운로드 실패', error)
-      toast.error('PDF 다운로드에 실패했습니다.')
-    } finally {
-      setExporting(false)
-    }
-  }
-
-  const fabActions = CAREGIVER_FAB_ACTIONS.map((action) => {
-    if (action.id === 'pdf_export') {
-      return {
-        ...action,
-        label: exporting ? '다운로드 중...' : action.label,
-        onClick: () => !exporting && handleExportPdf(),
+      const dates = []
+      for (let i = 0; i <= 2; i += 1) {
+        const d = subDays(new Date(), 1 + i)
+        dates.push(format(d, 'yyyy-MM-dd'))
       }
-    }
-    return action
-  })
 
-  if (loading && members.length === 0) {
+      const results = await Promise.all(
+        dates.map((date) =>
+          familyApiClient
+            .getMedicationLogs(activeSenior.userId, { date })
+            .then((response) => response?.logs || response || [])
+            .catch(() => []),
+        ),
+      )
+      const logs = results.flat().filter(Boolean)
+
+      const byDate = new Map()
+
+      const getTimeSectionLabel = (time) => {
+        const hour = parseInt(String(time || '').split(':')[0] || '0', 10)
+        if (hour >= 5 && hour < 11) return '아침'
+        if (hour >= 11 && hour < 17) return '점심'
+        if (hour >= 17 && hour < 21) return '저녁'
+        return '야간'
+      }
+
+      logs.forEach((log) => {
+        const scheduledDate = log?.scheduledTime ? parseServerLocalDateTime(log.scheduledTime) : null
+        if (!scheduledDate) return
+
+        const dateKey = format(scheduledDate, 'yyyy-MM-dd')
+        const time = format(scheduledDate, 'HH:mm')
+        const label = getTimeSectionLabel(time)
+        const medicationName = log?.medicationName || log?.name || '알 수 없는 약'
+        const isCompleted = log?.status === 'completed' || log?.completed === true
+
+        if (!byDate.has(dateKey)) {
+          byDate.set(dateKey, { dateKey, date: scheduledDate, sections: new Map() })
+        }
+
+        const entry = byDate.get(dateKey)
+        if (!entry.sections.has(label)) {
+          entry.sections.set(label, { label, time, names: [], completed: true })
+        }
+
+        const section = entry.sections.get(label)
+        section.names.push(medicationName)
+        section.completed = section.completed && Boolean(isCompleted)
+        if (time && section.time && time < section.time) {
+          section.time = time
+        }
+      })
+
+      const groups = Array.from(byDate.values())
+        .sort((a, b) => b.dateKey.localeCompare(a.dateKey))
+        .map((group) => {
+          const items = Array.from(group.sections.values()).sort((a, b) => String(a.time).localeCompare(String(b.time)))
+          return {
+            key: group.dateKey,
+            date: group.date,
+            dateLabel: group.date?.toLocaleDateString?.('ko-KR', { month: 'long', day: 'numeric' }) || group.dateKey,
+            dayLabel: group.date?.toLocaleDateString?.('ko-KR', { weekday: 'long' }) || '',
+            items: items.map((item) => ({
+              ...item,
+              names: Array.from(new Set(item.names)).join(', '),
+            })),
+          }
+        })
+
+      setRecentHistoryData(groups)
+    } catch (e) {
+      logger.warn('[CaregiverDashboard] loadRecentHistory failed', e)
+      setRecentHistoryData([])
+    } finally {
+      setRecentHistoryLoading(false)
+    }
+  }, [activeSenior?.userId])
+
+  useEffect(() => {
+    loadRecentHistory().catch(() => {})
+  }, [loadRecentHistory])
+
+  if (loading && groupMembers.length === 0) {
     return (
       <MainLayout>
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
+        <Box sx={{ py: 4 }}>
           <Typography>가족 데이터를 불러오는 중...</Typography>
-        </Container>
+        </Box>
       </MainLayout>
     )
   }
@@ -99,363 +292,362 @@ export function CaregiverDashboard() {
   if (error) {
     return (
       <MainLayout>
-        <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, sm: 3, md: 4 } }}>
+        <Box sx={{ py: 4 }}>
           <Typography color="error">가족 데이터를 불러오지 못했습니다. {error.message}</Typography>
-        </Container>
+        </Box>
       </MainLayout>
     )
   }
 
+  const adherenceRate = useMemo(() => {
+    const completed = weeklyStats.filter((d) => d.status === 'completed').length
+    return Math.round((completed / weeklyStats.length) * 100)
+  }, [weeklyStats])
+
+  const activeRoleLabel = activeSenior?.role === 'CAREGIVER' ? '보호자' : '어르신'
+
   return (
     <MainLayout>
-      <ResponsiveContainer maxWidth="lg">
-        <Stack spacing={4}>
-          {/* 헤더 */}
-          <Box>
-            <Typography 
-              variant="h4" 
-              component="h1"
-              fontWeight={700}
-              gutterBottom
-              sx={{ fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' } }}
+      {isDesktop ? (
+        <Box sx={{ display: 'grid', gridTemplateColumns: { md: '4fr 8fr' }, gap: 3 }}>
+          <Stack spacing={2.5}>
+            <Paper
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                p: 3,
+                bgcolor: 'common.white',
+              }}
             >
-              보호자 대시보드
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              가족 구성원의 오늘 복약 상태를 빠르게 확인할 수 있습니다.
-            </Typography>
-          </Box>
+              <Stack spacing={2.5}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: 999,
+                      bgcolor: '#EEF2FF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 30,
+                      flex: '0 0 auto',
+                    }}
+                    aria-hidden
+                  >
+                    👴
+                  </Box>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                        {activeSenior?.name ? `${activeSenior.name} 님` : '케어 대상'}
+                      </Typography>
+                      <Box
+                        sx={{
+                          px: 1,
+                          py: 0.25,
+                          borderRadius: 999,
+                          bgcolor: '#EEF2FF',
+                          color: '#7C8CFF',
+                          fontSize: 12,
+                          fontWeight: 900,
+                        }}
+                      >
+                        {activeRoleLabel}
+                      </Box>
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontWeight: 700 }}>
+                      오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                    </Typography>
+                  </Box>
+                </Stack>
 
-          <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-              빠른 작업
-            </Typography>
-            <QuickActionGrid actions={CAREGIVER_QUICK_ACTIONS} />
-          </Box>
+                {targetMembers.length > 1 ? (
+                  <Box>
+                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.disabled', mb: 1 }}>
+                      다른 가족 보기
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {targetMembers.map((member) => (
+                        <ButtonBase
+                          key={member.id}
+                          onClick={() => setActiveSeniorId(member.id)}
+                          sx={{
+                            px: 1.5,
+                            py: 1,
+                            borderRadius: 2.5,
+                            border: '1px solid',
+                            borderColor: String(activeSeniorId) === String(member.id) ? '#2EC4B6' : 'divider',
+                            bgcolor: String(activeSeniorId) === String(member.id) ? '#F0FDFA' : 'common.white',
+                            color: 'text.primary',
+                            fontWeight: 900,
+                          }}
+                        >
+                          {member.name}
+                        </ButtonBase>
+                      ))}
+                    </Box>
+                  </Box>
+                ) : null}
 
-          <MyMedicationSchedule title="내 복용 일정" showEmptyState={false} />
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
+                  <Box sx={{ bgcolor: '#F8FAFC', borderRadius: 3, p: 2 }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.secondary' }}>
+                      오늘 복용 완료
+                    </Typography>
+                    <Typography sx={{ fontSize: 20, fontWeight: 900, color: 'primary.main', mt: 0.75 }}>
+                      {todayRateLoading ? '…' : `${todayCounts.completed}/${todayCounts.total}`}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ bgcolor: '#F8FAFC', borderRadius: 3, p: 2 }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.secondary' }}>
+                      주간 준수율
+                    </Typography>
+                    <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#2EC4B6', mt: 0.75 }}>
+                      {weeklyLoading ? '…' : `${adherenceRate}%`}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Stack>
+            </Paper>
 
-          <RoundedCard elevation={2} padding="large">
-            <Typography variant="h5" fontWeight={700} gutterBottom>
-              어르신 복약 현황
-            </Typography>
-            {seniorMembers.length === 0 && (
-              <Typography color="text.secondary">등록된 어르신이 없습니다.</Typography>
-            )}
+            <TodaySummaryCard
+              takenCount={todayCounts.completed}
+              totalCount={todayCounts.total}
+              onClick={() => openActiveMemberDetail('medication')}
+            />
 
-            <Stack spacing={2}>
-              {seniorMembers.map((member) => (
-                <SeniorMedicationSnapshot
-                  key={member.id}
-                  member={member}
-                  onDetail={() => handleViewDetail(member.id)}
+            <WeeklyStatsWidget
+              title="지난 7일 기록"
+              weeklyData={weeklyStats}
+              adherenceRate={adherenceRate}
+              onClick={() => openActiveMemberDetail('medication')}
+            />
+          </Stack>
+
+          <Stack spacing={2.5}>
+            <Paper variant="outlined" sx={{ borderRadius: 3, p: 3 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2 }}>
+                케어 메뉴
+              </Typography>
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
+                  gap: 2,
+                }}
+              >
+                <GuardianMenuCard
+                  title="복약 관리"
+                  icon={<LocalPharmacyIcon sx={{ color: '#7C8CFF' }} />}
+                  color="#EEF2FF"
+                  onClick={() => openActiveMemberDetail('medication')}
                 />
-              ))}
-            </Stack>
-          </RoundedCard>
+                <GuardianMenuCard
+                  title="식단 관리"
+                  icon={<RestaurantIcon sx={{ color: '#F59E0B' }} />}
+                  color="#FFFBEB"
+                  onClick={() => openActiveMemberDetail('diet')}
+                />
+                <GuardianMenuCard
+                  title="질병 관리"
+                  icon={<HealthAndSafetyIcon sx={{ color: '#EF4444' }} />}
+                  color="#FEF2F2"
+                  onClick={() => openActiveMemberDetail('disease')}
+                />
+                <GuardianMenuCard
+                  title="통합 검색"
+                  icon={<SearchIcon sx={{ color: '#10B981' }} />}
+                  color="#ECFDF5"
+                  onClick={() => openSearchOverlay('pill')}
+                />
+                <GuardianMenuCard
+                  title="OCR 약봉투"
+                  icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
+                  color="#F0FDFA"
+                  onClick={() => navigate(ROUTE_PATHS.ocrScan)}
+                />
+                <GuardianMenuCard
+                  title="가족 채팅"
+                  icon={<ChatIcon sx={{ color: '#F59E0B' }} />}
+                  color="#FFFBEB"
+                  onClick={() => navigate(ROUTE_PATHS.familyChat)}
+                />
+              </Box>
+            </Paper>
 
-          {isMobile && <SpeedDialFab actions={fabActions} />}
+            <HistoryTimelineCard
+              title="최근 활동 로그"
+              emptyText={recentHistoryLoading ? '불러오는 중…' : '최근 기록이 없습니다.'}
+              historyData={recentHistoryData}
+              onOpenDetail={() => openActiveMemberDetail('medication')}
+            />
+          </Stack>
+        </Box>
+      ) : (
+        <Stack spacing={{ xs: 3, md: 4 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: 3,
+              p: { xs: 2.5, md: 3 },
+              color: 'common.white',
+              background: 'linear-gradient(135deg, #7C8CFF 0%, #6366F1 100%)',
+              boxShadow: '0 16px 40px rgba(99, 102, 241, 0.25)',
+            }}
+          >
+            <Stack spacing={2}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                    {activeSenior?.name ? `${activeSenior.name} 님 케어 현황` : '케어 대상 없음'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+                    오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 999,
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                  }}
+                >
+                  {todayRate !== null && todayRate >= 90 ? '✅' : '⚠️'}
+                </Box>
+              </Stack>
+
+              {targetMembers.length > 1 ? (
+                <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 0.5 }}>
+                  {targetMembers.map((member) => (
+                    <ButtonBase
+                      key={member.id}
+                      onClick={() => setActiveSeniorId(member.id)}
+                      sx={{
+                        px: 1.5,
+                        py: 0.75,
+                        borderRadius: 999,
+                        whiteSpace: 'nowrap',
+                        bgcolor: String(activeSeniorId) === String(member.id) ? 'common.white' : 'rgba(255,255,255,0.2)',
+                        color: String(activeSeniorId) === String(member.id) ? '#6366F1' : 'common.white',
+                        fontWeight: 900,
+                      }}
+                    >
+                      {member.name}
+                    </ButtonBase>
+                  ))}
+                </Box>
+              ) : null}
+            </Stack>
+          </Paper>
+
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+              gap: 2,
+            }}
+          >
+            <GuardianMenuCard
+              title="복약 관리"
+              icon={<LocalPharmacyIcon sx={{ color: '#7C8CFF' }} />}
+              color="#EEF2FF"
+              onClick={() => openActiveMemberDetail('medication')}
+            />
+            <GuardianMenuCard
+              title="식단 관리"
+              icon={<RestaurantIcon sx={{ color: '#F59E0B' }} />}
+              color="#FFFBEB"
+              onClick={() => openActiveMemberDetail('diet')}
+            />
+            <GuardianMenuCard
+              title="질병 관리"
+              icon={<HealthAndSafetyIcon sx={{ color: '#EF4444' }} />}
+              color="#FEF2F2"
+              onClick={() => openActiveMemberDetail('disease')}
+            />
+            <GuardianMenuCard
+              title="통합 검색"
+              icon={<SearchIcon sx={{ color: '#10B981' }} />}
+              color="#ECFDF5"
+              onClick={() => openSearchOverlay('pill')}
+            />
+            <GuardianMenuCard
+              title="OCR 약봉투"
+              icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
+              color="#F0FDFA"
+              onClick={() => navigate(ROUTE_PATHS.ocrScan)}
+            />
+            <GuardianMenuCard
+              title="가족 채팅"
+              icon={<ChatIcon sx={{ color: '#F59E0B' }} />}
+              color="#FFFBEB"
+              onClick={() => navigate(ROUTE_PATHS.familyChat)}
+            />
+          </Box>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+            <TodaySummaryCard
+              takenCount={todayCounts.completed}
+              totalCount={todayCounts.total}
+              onClick={() => openActiveMemberDetail('medication')}
+            />
+
+            <WeeklyStatsWidget
+              title="지난 7일 기록"
+              weeklyData={weeklyStats}
+              adherenceRate={adherenceRate}
+              onClick={() => openActiveMemberDetail('medication')}
+            />
+          </Box>
         </Stack>
-      </ResponsiveContainer>
+      )}
     </MainLayout>
   )
 }
 
 export default CaregiverDashboard
 
-const SeniorMedicationSnapshot = ({ member, onDetail }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [medications, setMedications] = useState([])
-  const [todayLogs, setTodayLogs] = useState([])
-  const [logsLoading, setLogsLoading] = useState(false)
-  const relation = member.relation || (member.role === 'SENIOR' ? '어르신' : '보호자')
-
-  // 약 목록 조회
-  useEffect(() => {
-    const loadMedications = async () => {
-      try {
-        const meds = await familyApiClient.getMemberMedications(member.userId)
-        setMedications(meds || [])
-      } catch (error) {
-        logger.error('Failed to load medications:', error)
-        setMedications([])
-      }
-    }
-
-    if (member.userId) {
-      loadMedications()
-    }
-  }, [member.userId])
-
-  const [expandedSections, setExpandedSections] = useState({})
-
-  const getTimeCategory = (dateString) => {
-    if (!dateString) return 'NIGHT';
-    const hour = new Date(dateString).getHours();
-    if (hour >= 5 && hour < 11) return 'MORNING';
-    if (hour >= 11 && hour < 17) return 'LUNCH';
-    if (hour >= 17 && hour < 21) return 'DINNER';
-    return 'NIGHT';
-  };
-
-  const initializeExpandedState = (currentLogs) => {
-    const currentCategory = getTimeCategory(new Date());
-    const nextExpanded = {};
-    const sections = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
-
-    sections.forEach(section => {
-      if (section === currentCategory) {
-        nextExpanded[section] = true;
-        return;
-      }
-
-      const logsInSection = currentLogs.filter(log =>
-        getTimeCategory(log.scheduledTime) === section
-      );
-
-      const hasUntaken = logsInSection.some(log => log.status !== 'completed');
-      if (hasUntaken) {
-        nextExpanded[section] = true;
-      } else {
-        nextExpanded[section] = false;
-      }
-    });
-    setExpandedSections(nextExpanded);
-  };
-
-  const toggleSection = (section) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }))
-  }
-
-  const loadTodayLogs = async () => {
-    if (isExpanded) {
-      setIsExpanded(false)
-      return
-    }
-
-    setLogsLoading(true)
-    try {
-      const today = new Date().toISOString().split('T')[0]
-      const response = await familyApiClient.getMedicationLogs(member.userId, {
-        date: today
-      })
-      const logs = response?.logs || response || []
-      setTodayLogs(logs)
-      initializeExpandedState(logs)
-      setIsExpanded(true)
-    } catch (error) {
-      logger.error('Failed to load today logs:', error)
-      setTodayLogs([])
-      setIsExpanded(true)
-    } finally {
-      setLogsLoading(false)
-    }
-  }
-
-  const completedToday = todayLogs.filter((l) => l.status === 'completed').length
-  const pendingToday = todayLogs.filter((l) => l.status === 'pending').length
-  const missedToday = todayLogs.filter((l) => l.status === 'missed').length
-
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'completed':
-        return '복용 완료'
-      case 'missed':
-        return '미복용'
-      case 'pending':
-      default:
-        return '복용 예정'
-    }
-  }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return '#00B300'
-      case 'missed':
-        return '#FF0000'
-      case 'pending':
-      default:
-        return '#FF9900'
-    }
-  }
-
+const GuardianMenuCard = ({ title, icon, color, onClick }) => {
   return (
-    <RoundedCard elevation={1} padding="default">
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="h6" fontWeight={600}>
-            {member.name}
-          </Typography>
-          <Chip 
-            label={relation} 
-            size="small" 
-            color="primary" 
-            variant="outlined"
-          />
+    <ButtonBase onClick={onClick} sx={{ width: '100%', textAlign: 'left', borderRadius: 3 }}>
+      <Paper
+        variant="outlined"
+        sx={{
+          width: '100%',
+          p: 2.25,
+          borderRadius: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          transition: 'all 160ms ease',
+          '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
+        }}
+      >
+        <Box
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: color,
+            color: 'text.primary',
+            flex: '0 0 auto',
+          }}
+        >
+          {icon}
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <IconButton
-            onClick={loadTodayLogs}
-            color="primary"
-            aria-label="복약 일정 펼치기"
-            sx={{
-              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.3s',
-            }}
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={onDetail}
-          >
-            자세히
-          </Button>
-        </Box>
-      </Box>
-
-      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-        <Box sx={{ mt: 2 }}>
-          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Chip 
-              label={`완료 ${completedToday}`}
-              color="success"
-              sx={{ fontWeight: 600 }}
-            />
-            <Chip 
-              label={`예정 ${pendingToday}`}
-              color="warning"
-              sx={{ fontWeight: 600 }}
-            />
-            <Chip 
-              label={`미복용 ${missedToday}`}
-              color="error"
-              sx={{ fontWeight: 600 }}
-            />
-          </Stack>
-
-          {logsLoading ? (
-            <Typography color="text.secondary" sx={{ py: 2 }}>
-              오늘 복약 일정을 불러오는 중...
-            </Typography>
-          ) : todayLogs.length === 0 ? (
-            <Typography color="text.secondary" sx={{ py: 2 }}>
-              오늘 복약 일정이 없습니다.
-            </Typography>
-          ) : (
-            ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'].map(sectionKey => {
-              const SECTION_LABELS = {
-                MORNING: { label: '아침', sub: '05:00 - 11:00' },
-                LUNCH: { label: '점심', sub: '11:00 - 17:00' },
-                DINNER: { label: '저녁', sub: '17:00 - 21:00' },
-                NIGHT: { label: '취침 전', sub: '21:00 - 05:00' }
-              };
-
-              const sectionLogs = todayLogs.filter(log => {
-                const isCorrectTime = getTimeCategory(log.scheduledTime) === sectionKey;
-                if (!isCorrectTime) return false;
-
-                const medication = medications.find(m => m.id === log.medicationId);
-                if (medication && medication.active === false) return false;
-
-                return true;
-              });
-              if (sectionLogs.length === 0) return null;
-
-              sectionLogs.sort((a, b) => new Date(a.scheduledTime) - new Date(b.scheduledTime));
-              const isSectionExpanded = expandedSections[sectionKey];
-
-              return (
-                <Box key={sectionKey} sx={{ mb: 2 }}>
-                  <Box
-                    onClick={() => toggleSection(sectionKey)}
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      p: 1.5,
-                      borderRadius: 2,
-                      bgcolor: 'grey.50',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        bgcolor: 'grey.100',
-                      },
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600}>
-                        {SECTION_LABELS[sectionKey].label}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {SECTION_LABELS[sectionKey].sub}
-                      </Typography>
-                    </Box>
-                    <ExpandMoreIcon
-                      sx={{
-                        transform: isSectionExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.3s',
-                      }}
-                    />
-                  </Box>
-
-                  <Collapse in={isSectionExpanded} timeout="auto" unmountOnExit>
-                    <Stack spacing={1} sx={{ mt: 1 }}>
-                      {sectionLogs.map((log, index) => {
-                        const statusLabel = getStatusLabel(log.status)
-                        const time = new Date(log.scheduledTime).toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })
-
-                        return (
-                          <Box
-                            key={`${member.id}-${log.id || index}`}
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 2,
-                              p: 1.5,
-                              borderLeft: 4,
-                              borderLeftColor: getStatusColor(log.status),
-                              bgcolor: 'background.paper',
-                              borderRadius: 1,
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              sx={{ minWidth: 60 }}
-                            >
-                              {time}
-                            </Typography>
-                            <Typography variant="body2" sx={{ flex: 1 }}>
-                              {log.medicationName || '알 수 없는 약'}
-                            </Typography>
-                            <Chip
-                              label={statusLabel}
-                              size="small"
-                              sx={{
-                                bgcolor: getStatusColor(log.status),
-                                color: 'white',
-                                fontWeight: 600,
-                              }}
-                            />
-                          </Box>
-                        )
-                      })}
-                    </Stack>
-                  </Collapse>
-                </Box>
-              );
-            })
-          )}
-        </Box>
-      </Collapse>
-    </RoundedCard>
+        <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+          {title}
+        </Typography>
+      </Paper>
+    </ButtonBase>
   )
 }

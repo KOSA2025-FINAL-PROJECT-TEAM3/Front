@@ -9,6 +9,7 @@ import {
   Typography,
   Button,
   Stack,
+  ButtonBase,
   useTheme,
 } from '@mui/material'
 import { RoundedCard } from '@shared/components/mui/RoundedCard'
@@ -22,11 +23,14 @@ export const HeroMedicationCard = ({
   time,
   medications = [],
   onConfirm,
+  onOpenDetail,
 }) => {
   const theme = useTheme()
 
   return (
     <RoundedCard
+      component={onOpenDetail ? ButtonBase : undefined}
+      onClick={onOpenDetail}
       elevation={3}
       padding="large"
       sx={{
@@ -34,6 +38,14 @@ export const HeroMedicationCard = ({
         color: 'white',
         position: 'relative',
         overflow: 'hidden',
+        textAlign: 'left',
+        alignItems: 'stretch',
+        ...(onOpenDetail
+          ? {
+              cursor: 'pointer',
+              '&:hover': { boxShadow: '0 18px 45px rgba(15, 23, 42, 0.22)' },
+            }
+          : null),
       }}
     >
       <Box
@@ -96,7 +108,10 @@ export const HeroMedicationCard = ({
           <Button
             variant="contained"
             size="large"
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.stopPropagation()
+              onConfirm()
+            }}
             sx={{
               mt: 2,
               bgcolor: 'white',
@@ -126,6 +141,7 @@ HeroMedicationCard.propTypes = {
     })
   ),
   onConfirm: PropTypes.func,
+  onOpenDetail: PropTypes.func,
 }
 
 export default HeroMedicationCard
