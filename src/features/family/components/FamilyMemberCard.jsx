@@ -44,7 +44,7 @@ export const FamilyMemberCard = ({
   const showRemove =
     (isViewerGroupOwner && !isCardSelf) || (isCardSelf && !isCardGroupOwner)
 
-  const removeLabel = isCardSelf ? '탈퇴' : '제거'
+  const removeLabel = isCardSelf ? '탈퇴' : '추방'
   const currentRole = member.role
   const oppositeRole = currentRole === 'SENIOR' ? 'CAREGIVER' : 'SENIOR'
 
@@ -65,6 +65,7 @@ export const FamilyMemberCard = ({
         borderRadius: 3.5,
         p: 2,
         borderColor: 'divider',
+        flexWrap: { xs: 'wrap', sm: 'nowrap' },
       }}
     >
       <Box
@@ -188,7 +189,12 @@ export const FamilyMemberCard = ({
         </Box>
       </Box>
 
-      <Stack spacing={1} sx={{ flexShrink: 0, alignItems: 'flex-end', position: 'relative', zIndex: 1 }}>
+      <Stack 
+        direction="row" 
+        spacing={1} 
+        alignItems="center" 
+        sx={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
+      >
         <Button
           size="small"
           variant="outlined"
@@ -196,23 +202,25 @@ export const FamilyMemberCard = ({
             e.stopPropagation()
             onDetail?.(member.id)
           }}
-          sx={{ fontWeight: 900 }}
+          sx={{ fontWeight: 900, minWidth: 60 }}
         >
           상세
         </Button>
 
         {canOpenSettings ? (
-          <IconButton
+          <Button
             size="small"
+            variant="outlined"
             onClick={(e) => {
               e.stopPropagation()
               onSettings?.(member.userId)
             }}
             title="알림 설정"
             aria-label="알림 설정"
+            sx={{ fontWeight: 900, minWidth: 0, px: 1 }}
           >
             <SettingsIcon fontSize="small" />
-          </IconButton>
+          </Button>
         ) : null}
 
         {showRemove ? (
@@ -226,7 +234,7 @@ export const FamilyMemberCard = ({
             }}
             disabled={isRemoving}
             aria-busy={isRemoving}
-            sx={{ fontWeight: 900 }}
+            sx={{ fontWeight: 900, minWidth: 60 }}
           >
             {isRemoving ? `${removeLabel} 중...` : removeLabel}
           </Button>

@@ -8,6 +8,7 @@ import DiseaseList from '../components/DiseaseList'
 import DiseaseTrash from '../components/DiseaseTrash'
 import DiseaseForm from '../components/DiseaseForm'
 import AppDialog from '@shared/components/mui/AppDialog'
+import AppConfirmDialog from '@shared/components/mui/AppConfirmDialog'
 import AppButton from '@shared/components/mui/AppButton'
 import { SpeedDialFab } from '@shared/components/mui/SpeedDialFab'
 import AddIcon from '@mui/icons-material/Add'
@@ -43,6 +44,9 @@ export const DiseasePage = () => {
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
+  
+  // Refactored Confirmation State
+  const [confirmState, setConfirmState] = useState({ isOpen: false, type: null, data: null })
 
   const handleExportPdf = useCallback(async () => {
     if (!userId) return
@@ -111,45 +115,74 @@ export const DiseasePage = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (disease) => {
+  // --- Refactored Handlers Start ---
+
+  const handleDelete = (disease) => {
     if (!disease?.id) return
-    const confirmed = window.confirm('이 질병을 삭제하면 휴지통으로 이동합니다. 계속할까요?')
-    if (!confirmed) return
+    setConfirmState({ isOpen: true, type: 'DELETE', data: disease })
+  }
+
+  const handleEmptyTrash = () => {
+    setConfirmState({ isOpen: true, type: 'EMPTY' })
+  }
+
+  const handleRestore = (diseaseId) => {
+    setConfirmState({ isOpen: true, type: 'RESTORE', data: diseaseId })
+  }
+
+  const handleConfirmAction = async () => {
+    const { type, data } = confirmState
     try {
-      await deleteDisease(disease.id)
-      toast.success('휴지통으로 이동했습니다.')
-      setShowTrash(true)
+      if (type === 'DELETE') {
+        await deleteDisease(data.id)
+        toast.success('휴지통으로 이동했습니다.')
+        setShowTrash(true)
+      } else if (type === 'EMPTY') {
+        await emptyTrash()
+        toast.success('휴지통을 비웠습니다.')
+        await refresh()
+      } else if (type === 'RESTORE') {
+        await restoreDisease(data)
+        toast.success('질병이 복원되었습니다.')
+      }
     } catch (error) {
-      logger.error('질병 삭제 실패', error)
-      toast.error('삭제에 실패했습니다.')
+      logger.error('작업 실패', error)
+      toast.error('작업에 실패했습니다.')
+    } finally {
+      setConfirmState({ isOpen: false, type: null, data: null })
     }
   }
 
-  const handleEmptyTrash = async () => {
-    const confirmed = window.confirm('휴지통의 항목을 모두 영구 삭제할까요?')
-    if (!confirmed) return
-    try {
-      await emptyTrash()
-      toast.success('휴지통을 비웠습니다.')
-      await refresh()
-    } catch (error) {
-      logger.error('휴지통 비우기 실패', error)
-      toast.error('휴지통 비우기에 실패했습니다.')
+  const getConfirmProps = () => {
+    const { type, data } = confirmState
+    switch (type) {
+      case 'DELETE':
+        return {
+          title: '질병 삭제',
+          description: `'${data?.name || '질병'}'을(를) 휴지통으로 이동하시겠습니까?`,
+          confirmVariant: 'danger',
+          confirmLabel: '삭제',
+        }
+      case 'EMPTY':
+        return {
+          title: '휴지통 비우기',
+          description: '휴지통의 항목을 모두 영구 삭제할까요?',
+          confirmVariant: 'danger',
+          confirmLabel: '비우기',
+        }
+      case 'RESTORE':
+        return {
+          title: '질병 복원',
+          description: '선택한 질병을 목록으로 복원할까요?',
+          confirmVariant: 'primary',
+          confirmLabel: '복원',
+        }
+      default:
+        return { title: '알림', description: '' }
     }
   }
 
-  const handleRestore = async (diseaseId) => {
-    if (!diseaseId) return
-    const confirmed = window.confirm('선택한 질병을 목록으로 복원할까요?')
-    if (!confirmed) return
-    try {
-      await restoreDisease(diseaseId)
-      toast.success('질병이 복원되었습니다.')
-    } catch (error) {
-      logger.error('복원 실패', error)
-      toast.error('복원에 실패했습니다.')
-    }
-  }
+  // --- Refactored Handlers End ---
 
   const handleRefresh = () => {
     refresh()
@@ -191,7 +224,11 @@ export const DiseasePage = () => {
               <AppButton variant="primary" onClick={() => setShowForm(true)}>
                 질병 추가
               </AppButton>
-              <AppButton variant="ghost" onClick={() => setShowTrash((prev) => !prev)}>
+              <AppButton
+                variant="secondary"
+                color={showTrash ? 'primary' : 'error'}
+                onClick={() => setShowTrash((prev) => !prev)}
+              >
                 {showTrash ? '목록 보기' : '휴지통'}
               </AppButton>
               <AppButton variant="secondary" onClick={handleRefresh}>
@@ -241,6 +278,13 @@ export const DiseasePage = () => {
             submitting={submitting}
           />
         </AppDialog>
+
+        <AppConfirmDialog
+          open={confirmState.isOpen}
+          {...getConfirmProps()}
+          onConfirm={handleConfirmAction}
+          onCancel={() => setConfirmState({ ...confirmState, isOpen: false })}
+        />
       </PageStack>
     </MainLayout>
   )

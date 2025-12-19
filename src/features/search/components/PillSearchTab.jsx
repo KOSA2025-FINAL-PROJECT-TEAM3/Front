@@ -167,51 +167,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
     }
   }, [record])
 
-  const handleSearch = (event) => {
-    event?.preventDefault?.()
-    executeSearch(itemName.trim())
-  }
-
-  useEffect(() => {
-    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
-      const type = pendingAction.params?.searchType
-      if (!type || type === 'PILL') {
-        const action = consumeAction('AUTO_SEARCH')
-        if (action && action.params?.query) {
-          const keyword = action.params.query
-          setItemName(keyword)
-          executeSearch(keyword)
-        }
-      }
-    }
-  }, [pendingAction, consumeAction, executeSearch])
-
-  useEffect(() => {
-    if (!pendingPill) return
-    const request = consumeRequest('pill')
-    if (!request) return
-
-    const term = typeof request === 'string' ? request : request?.term
-    const variant = typeof request === 'string' ? 'default' : request?.variant
-    if (!term) return
-
-    setItemName(term)
-    if (variant === 'ai') {
-      handleAISearch(term)
-      return
-    }
-    executeSearch(term)
-  }, [pendingPill, consumeRequest, executeSearch])
-
-  useEffect(() => {
-    if (location.state?.autoSearch) {
-      const keyword = location.state.autoSearch
-      setItemName(keyword)
-      executeSearch(keyword)
-    }
-  }, [location.state, executeSearch])
-
-  const handleAISearch = async (overrideKeyword) => {
+  const handleAISearch = useCallback(async (overrideKeyword) => {
     const keyword = (typeof overrideKeyword === 'string' ? overrideKeyword : itemName).trim()
     if (!keyword) {
       setError('약품명을 입력해주세요.')
@@ -256,7 +212,51 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
     } finally {
       setLoading(false)
     }
+  }, [itemName, record])
+
+  const handleSearch = (event) => {
+    event?.preventDefault?.()
+    executeSearch(itemName.trim())
   }
+
+  useEffect(() => {
+    if (pendingAction && pendingAction.code === 'AUTO_SEARCH') {
+      const type = pendingAction.params?.searchType
+      if (!type || type === 'PILL') {
+        const action = consumeAction('AUTO_SEARCH')
+        if (action && action.params?.query) {
+          const keyword = action.params.query
+          setItemName(keyword)
+          executeSearch(keyword)
+        }
+      }
+    }
+  }, [pendingAction, consumeAction, executeSearch])
+
+  useEffect(() => {
+    if (!pendingPill) return
+    const request = consumeRequest('pill')
+    if (!request) return
+
+    const term = typeof request === 'string' ? request : request?.term
+    const variant = typeof request === 'string' ? 'default' : request?.variant
+    if (!term) return
+
+    setItemName(term)
+    if (variant === 'ai') {
+      handleAISearch(term)
+      return
+    }
+    executeSearch(term)
+  }, [pendingPill, consumeRequest, executeSearch, handleAISearch])
+
+  useEffect(() => {
+    if (location.state?.autoSearch) {
+      const keyword = location.state.autoSearch
+      setItemName(keyword)
+      executeSearch(keyword)
+    }
+  }, [location.state, executeSearch])
 
   const emptyState = useMemo(
     () => hasSearched && !loading && !error && results.length === 0,

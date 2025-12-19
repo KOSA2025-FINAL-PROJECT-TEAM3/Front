@@ -23,6 +23,7 @@ import { ROUTE_PATHS } from '@config/routes.config'
 
 const AI_LOADING_TEMP_ID = 'ai-loading-temp'; 
 const MESSAGE_ITEM_CLASS = "family-chat-message-item";
+const EMPTY_FAMILY_GROUPS = [];
 
 const toPositiveIntOrNull = (value) => {
   if (value === null || value === undefined) return null;
@@ -45,7 +46,7 @@ export const FamilyChatConversationPage = () => {
   const { familyGroupId: familyGroupIdParam } = useParams();
 
   // [Safety] Store 데이터가 없을 수 있으므로 안전하게 접근
-  const familyGroups = useFamilyStore((state) => state.familyGroups) || [];
+  const familyGroups = useFamilyStore((state) => state.familyGroups) ?? EMPTY_FAMILY_GROUPS;
   const selectedGroupId = useFamilyStore((state) => state.selectedGroupId);
 
   const resolvedFamilyGroupId = useMemo(() => {

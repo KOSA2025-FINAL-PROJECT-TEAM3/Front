@@ -10,6 +10,7 @@ export const shouldHideFloatingActions = ({ pathname = '', fullScreen = false, f
     path.startsWith(ROUTE_PATHS.ocrScan) ||
     path.startsWith(ROUTE_PATHS.dietLog) ||
     path.startsWith(ROUTE_PATHS.disease) ||
+    path.startsWith(ROUTE_PATHS.appointments) ||
     path.startsWith('/reports') ||
     path.startsWith(ROUTE_PATHS.settings)
   )
