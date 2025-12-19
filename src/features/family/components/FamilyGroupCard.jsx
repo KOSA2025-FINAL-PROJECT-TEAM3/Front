@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types'
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
+import { memo } from 'react'
 
-export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
+export const FamilyGroupCard = memo(({ group, memberCount = 0 }) => {
   if (!group) return null
 
   const createdDate = new Date(group.createdAt).toLocaleDateString('ko-KR', {
@@ -45,7 +46,7 @@ export const FamilyGroupCard = ({ group, memberCount = 0 }) => {
       </Stack>
     </Paper>
   )
-}
+})
 
 FamilyGroupCard.propTypes = {
   group: PropTypes.shape({

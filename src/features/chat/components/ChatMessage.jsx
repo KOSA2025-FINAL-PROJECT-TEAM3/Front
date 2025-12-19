@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import { Avatar, Box, Stack, Typography } from '@mui/material'
 import CircularProgress from '@mui/material/CircularProgress'
 import ReactMarkdown from 'react-markdown' // react-markdown 라이브러리 추가
@@ -6,30 +6,30 @@ import ReactMarkdown from 'react-markdown' // react-markdown 라이브러리 추
 /**
  * ChatMessage - 채팅 메시지 말풍선 컴포넌트
  */
-export const ChatMessage = ({ message, isMe, sender }) => {
-  
+export const ChatMessage = memo(({ message, isMe, sender }) => {
+
   // ✅ 날짜 포맷팅 함수 (배열과 문자열 모두 처리하도록 수정됨)
   const formatTime = (dateData) => {
     if (!dateData) return '';
 
     let date;
-    
+
     // 1. 백엔드가 배열로 줄 때: [2025, 11, 25, 18, 30]
     if (Array.isArray(dateData)) {
       const [year, month, day, hour, minute] = dateData;
       // month는 0부터 시작하므로 -1 필수
       date = new Date(year, month - 1, day, hour, minute);
-    } 
+    }
     // 2. 문자열로 줄 때: "2025-11-25T18:30:00"
     else {
       date = new Date(dateData);
     }
 
     // 시간 변환 (오전/오후 HH:MM)
-    return date.toLocaleTimeString('ko-KR', { 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      hour12: true 
+    return date.toLocaleTimeString('ko-KR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   }
 
@@ -147,6 +147,6 @@ export const ChatMessage = ({ message, isMe, sender }) => {
       </Box>
     </Stack>
   )
-}
+})
 
 export default ChatMessage
