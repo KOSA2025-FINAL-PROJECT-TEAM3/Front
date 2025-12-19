@@ -171,6 +171,13 @@ export const MorePage = () => {
       onClick: () => handleNavigate(ROUTE_PATHS.places),
     },
     {
+      id: 'appointments',
+      label: '병원 예약',
+      icon: '🏥',
+      description: '진료 일정 관리 · 리마인더',
+      onClick: () => handleNavigate(ROUTE_PATHS.appointments),
+    },
+    {
       id: 'disease',
       label: '질환 관리',
       icon: '📋',

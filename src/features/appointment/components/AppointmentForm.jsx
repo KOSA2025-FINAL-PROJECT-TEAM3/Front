@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
     Box,
     TextField,
@@ -6,14 +6,18 @@ import {
     Paper,
     Typography,
     Alert,
+    InputAdornment,
+    IconButton,
 } from '@mui/material'
 import {
     LocalHospital as HospitalIcon,
     Schedule as ScheduleIcon,
     LocationOn as LocationIcon,
     Notes as NotesIcon,
+    Search as SearchIcon,
 } from '@mui/icons-material'
 import AppButton from '@shared/components/mui/AppButton'
+import { HospitalSearchModal } from './HospitalSearchModal'
 
 /**
  * 오늘 날짜(YYYY-MM-DD) 계산
@@ -75,6 +79,7 @@ const initialFormState = {
  * @param {boolean} loading - 로딩 상태
  * @param {string} submitLabel - 제출 버튼 라벨
  * @param {number} targetUserId - 예약 대상 사용자 ID (대리 등록 시)
+ * @param {string} initialDate - 초기 날짜 (YYYY-MM-DD) - 캘린더에서 날짜 선택 시 전달
  */
 export const AppointmentForm = ({
     initialValues,
@@ -83,6 +88,7 @@ export const AppointmentForm = ({
     loading = false,
     submitLabel = '예약 등록',
     targetUserId,
+    initialDate,
 }) => {
     const [form, setForm] = useState(() => {
         if (initialValues) {
@@ -98,10 +104,29 @@ export const AppointmentForm = ({
                 memo: initialValues.memo || '',
             }
         }
-        return { ...initialFormState }
+        return {
+            ...initialFormState,
+            // initialDate가 있으면 해당 날짜 사용 (캘린더에서 선택 시)
+            visitDate: initialDate || getTodayDate(),
+        }
     })
 
     const [errors, setErrors] = useState({})
+    
+    // 병원 검색 모달 상태
+    const [hospitalSearchOpen, setHospitalSearchOpen] = useState(false)
+    
+    // 병원 선택 시 폼 자동 입력
+    const handleHospitalSelect = useCallback((hospital) => {
+        setForm((prev) => ({
+            ...prev,
+            hospitalName: hospital.name || '',
+            address: hospital.address || '',
+            phoneNumber: hospital.phone || '',
+        }))
+        // 에러 클리어
+        setErrors((prev) => ({ ...prev, hospitalName: null }))
+    }, [])
 
     // initialValues 변경 시 폼 업데이트 (수정 모드)
     useEffect(() => {
@@ -196,6 +221,7 @@ export const AppointmentForm = ({
     }
 
     return (
+        <>
         <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2}>
                 {/* 병원 정보 섹션 */}
@@ -208,16 +234,31 @@ export const AppointmentForm = ({
                     </Stack>
 
                     <Stack spacing={2}>
-                        <TextField
-                            label="병원명"
-                            value={form.hospitalName}
-                            onChange={handleChange('hospitalName')}
-                            error={Boolean(errors.hospitalName)}
-                            helperText={errors.hospitalName}
-                            placeholder="예: 서울대학교병원"
-                            required
-                            fullWidth
-                        />
+                        <Stack direction="row" spacing={1} alignItems="flex-start">
+                            <TextField
+                                label="붑원명"
+                                value={form.hospitalName}
+                                onChange={handleChange('hospitalName')}
+                                error={Boolean(errors.hospitalName)}
+                                helperText={errors.hospitalName}
+                                placeholder="예: 서울대학교붑원"
+                                required
+                                fullWidth
+                            />
+                            <AppButton
+                                variant="secondary"
+                                onClick={() => setHospitalSearchOpen(true)}
+                                sx={{ 
+                                    mt: 1, 
+                                    minWidth: 'auto', 
+                                    px: 2,
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                <SearchIcon sx={{ mr: 0.5 }} />
+                                검색
+                            </AppButton>
+                        </Stack>
 
                         <Stack direction="row" spacing={2}>
                             <TextField
@@ -359,6 +400,14 @@ export const AppointmentForm = ({
                 </Stack>
             </Stack>
         </Box>
+        
+        {/* 붑원 검색 모달 */}
+        <HospitalSearchModal
+            open={hospitalSearchOpen}
+            onClose={() => setHospitalSearchOpen(false)}
+            onSelect={handleHospitalSelect}
+        />
+        </>
     )
 }
 

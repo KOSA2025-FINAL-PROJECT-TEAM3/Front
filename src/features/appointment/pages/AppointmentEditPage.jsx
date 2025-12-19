@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Box, Typography, IconButton, CircularProgress, Alert } from '@mui/material'
+import { Box, Typography, IconButton, CircularProgress, Alert, Paper } from '@mui/material'
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import { useAppointmentStore } from '../store/appointmentStore'
 import { AppointmentForm } from '../components/AppointmentForm'
 import { toast } from '@shared/components/toast/toastStore'
 import logger from '@core/utils/logger'
+import { MainLayout } from '@shared/components/layout/MainLayout'
 
 /**
  * 병원 예약 수정 페이지
@@ -48,42 +49,51 @@ const AppointmentEditPage = () => {
 
     if (loading && !currentAppointment) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
-            </Box>
+            <MainLayout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <CircularProgress />
+                </Box>
+            </MainLayout>
         )
     }
 
     if (error || !currentAppointment) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="error">예약 정보를 불러올 수 없습니다.</Alert>
-            </Box>
+            <MainLayout>
+                <Box sx={{ p: 3 }}>
+                    <Alert severity="error">예약 정보를 불러올 수 없습니다.</Alert>
+                </Box>
+            </MainLayout>
         )
     }
 
     return (
-        <Box>
+        <MainLayout hideHeader>
             {/* 헤더 */}
-            <Box
+            <Paper
+                elevation={0}
                 sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
                     display: 'flex',
                     alignItems: 'center',
-                    p: 2,
+                    p: 1.5,
                     borderBottom: 1,
                     borderColor: 'divider',
+                    bgcolor: 'background.paper',
                 }}
             >
-                <IconButton onClick={handleCancel} edge="start">
+                <IconButton onClick={handleCancel} edge="start" sx={{ mr: 1 }}>
                     <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h6" sx={{ fontWeight: 700, ml: 1 }}>
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>
                     예약 수정
                 </Typography>
-            </Box>
+            </Paper>
 
             {/* 폼 */}
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 2, pb: 12 }}>
                 <AppointmentForm
                     initialValues={currentAppointment}
                     onSubmit={handleSubmit}
@@ -92,7 +102,7 @@ const AppointmentEditPage = () => {
                     submitLabel="수정 완료"
                 />
             </Box>
-        </Box>
+        </MainLayout>
     )
 }
 

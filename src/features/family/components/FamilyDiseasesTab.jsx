@@ -95,11 +95,21 @@ export const FamilyDiseasesTab = ({ userId }) => {
                 ) : null}
               </Stack>
 
-              {disease.description ? (
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, lineHeight: 1.5 }}>
-                  {disease.description}
-                </Typography>
-              ) : null}
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{
+                  mt: 0.75,
+                  lineHeight: 1.5,
+                  minHeight: '3em', // 2줄 높이 고정 (1.5 * 2)
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {disease.description || '\u00A0'}
+              </Typography>
             </Box>
 
             <Stack spacing={0.5} sx={{ flexShrink: 0, alignItems: 'flex-end' }}>

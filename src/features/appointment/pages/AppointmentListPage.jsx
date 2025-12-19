@@ -7,12 +7,15 @@ import {
     Fab,
     CircularProgress,
     Alert,
+    Paper,
+    IconButton,
 } from '@mui/material'
-import { Add as AddIcon } from '@mui/icons-material'
+import { Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import { useAppointmentStore } from '../store/appointmentStore'
 import { AppointmentCalendarView } from '../components/AppointmentCalendarView'
 import { AppointmentCard } from '../components/AppointmentCard'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { MainLayout } from '@shared/components/layout/MainLayout'
 
 /**
  * 병원 예약 목록 페이지
@@ -59,10 +62,21 @@ const AppointmentListPage = () => {
         setSelectedDate(null) // 날짜 선택 해제
     }, [])
 
-    // 날짜 선택 핸들러
+    // 날짜 선택 핸들러 - 미래 날짜 클릭 시 예약 추가 페이지로 이동
     const handleDateSelect = useCallback((date) => {
-        setSelectedDate((prev) => (prev === date ? null : date))
-    }, [])
+        // 과거 날짜는 무시 (이미 캘린더에서 클릭 비활성화됨)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const selected = new Date(date)
+        selected.setHours(0, 0, 0, 0)
+        
+        if (selected < today) {
+            return // 과거 날짜는 클릭 불가
+        }
+        
+        // 미래/오늘 날짜 클릭 시 예약 추가 페이지로 이동
+        navigate(`/appointments/add?date=${date}`)
+    }, [navigate])
 
     // 선택된 날짜의 예약 필터링
     const filteredAppointments = useMemo(() => {
@@ -77,23 +91,44 @@ const AppointmentListPage = () => {
 
     if (!userId) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="warning">로그인이 필요합니다.</Alert>
-            </Box>
+            <MainLayout>
+                <Box sx={{ p: 3 }}>
+                    <Alert severity="warning">로그인이 필요합니다.</Alert>
+                </Box>
+            </MainLayout>
         )
     }
 
     return (
-        <Box sx={{ pb: 10 }}>
+        <MainLayout hideHeader>
             {/* 헤더 */}
-            <Box sx={{ p: 2, pb: 1 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    병원 예약
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    진료 일정을 관리하고 알림을 받으세요
-                </Typography>
-            </Box>
+            <Paper
+                elevation={0}
+                sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10,
+                    p: 2,
+                    pb: 1,
+                    borderBottom: 1,
+                    borderColor: 'divider',
+                    bgcolor: 'background.paper',
+                }}
+            >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton onClick={() => navigate(-1)} edge="start">
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                            병원 예약
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            진료 일정을 관리하고 알림을 받으세요
+                        </Typography>
+                    </Box>
+                </Stack>
+            </Paper>
 
             {/* 캘린더 */}
             <Box sx={{ px: 2, pb: 2 }}>
@@ -118,7 +153,7 @@ const AppointmentListPage = () => {
             )}
 
             {/* 예약 목록 */}
-            <Box sx={{ px: 2 }}>
+            <Box sx={{ px: 2, pb: 16 }}>
                 {loading ? (
                     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                         <CircularProgress size={32} />
@@ -158,7 +193,7 @@ const AppointmentListPage = () => {
             >
                 <AddIcon />
             </Fab>
-        </Box>
+        </MainLayout>
     )
 }
 

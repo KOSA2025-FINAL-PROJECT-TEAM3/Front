@@ -110,9 +110,6 @@ export const DiseaseDetailPage = () => {
           leading={<BackButton onClick={() => navigate('/disease')} label="목록" />}
           subtitle={
             <Stack spacing={1}>
-              <Typography variant="caption" color="text.secondary">
-                ID: {disease.id}
-              </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap">
                 {disease.isCritical ? <Chip label="중요" color="error" size="small" /> : null}
                 {disease.isPrivate ? <Chip label="비공개" color="default" size="small" /> : null}

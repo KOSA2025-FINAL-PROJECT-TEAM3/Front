@@ -75,6 +75,18 @@ const isToday = (date) => {
 }
 
 /**
+ * 날짜가 과거인지 확인 (오늘 이전)
+ */
+const isPast = (date) => {
+    if (!date) return false
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const target = new Date(date)
+    target.setHours(0, 0, 0, 0)
+    return target < today
+}
+
+/**
  * 병원 예약 월간 캘린더 컴포넌트
  *
  * @param {number} year - 현재 연도
@@ -190,11 +202,12 @@ export const AppointmentCalendarView = ({
                         const count = countMap[key] || 0
                         const isSelected = selectedDate === key
                         const isTodayDate = isToday(date)
+                        const isPastDate = isPast(date)
 
                         return (
                             <Box
                                 key={dayIdx}
-                                onClick={() => handleDateClick(date)}
+                                onClick={() => !isPastDate && handleDateClick(date)}
                                 sx={{
                                     flex: 1,
                                     aspectRatio: '1 / 1',
@@ -202,17 +215,20 @@ export const AppointmentCalendarView = ({
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    cursor: date ? 'pointer' : 'default',
+                                    cursor: date && !isPastDate ? 'pointer' : 'default',
                                     borderRadius: 2,
                                     mx: 0.25,
                                     my: 0.25,
                                     transition: 'all 0.15s',
+                                    opacity: isPastDate ? 0.4 : 1,
                                     bgcolor: isSelected
                                         ? 'primary.main'
                                         : isTodayDate
                                             ? alpha(theme.palette.primary.main, 0.1)
-                                            : 'transparent',
-                                    '&:hover': date
+                                            : isPastDate
+                                                ? alpha(theme.palette.grey[500], 0.08)
+                                                : 'transparent',
+                                    '&:hover': date && !isPastDate
                                         ? {
                                             bgcolor: isSelected
                                                 ? 'primary.dark'
