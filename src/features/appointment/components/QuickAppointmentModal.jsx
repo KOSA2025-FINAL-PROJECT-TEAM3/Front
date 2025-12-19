@@ -142,7 +142,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
 
         try {
             await createAppointment(payload)
-            toast.success(`${hospitalInfo.name} 예약이 등록되었습니다.`)
+            toast.success(`${hospitalInfo.name} 진료 일정이 등록되었습니다.`)
 
             // 상태 초기화
             setVisitDate(getTodayDate())
@@ -154,7 +154,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
             onSuccess?.()
         } catch (error) {
             logger.error('[QuickAppointmentModal] createAppointment failed:', error)
-            toast.error('예약 등록에 실패했습니다.')
+            toast.error('진료 일정 등록에 실패했습니다.')
         }
     }
 
@@ -178,7 +178,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
                 <HospitalIcon color="primary" />
                 <Typography variant="h6" sx={{ fontWeight: 700, flex: 1 }}>
-                    빠른 예약 등록
+                    빠른 진료 일정 등록
                 </Typography>
                 <IconButton onClick={handleClose} edge="end" size="small">
                     <CloseIcon />
@@ -295,7 +295,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
                     disabled={!canSubmit || loading}
                     loading={loading}
                 >
-                    예약 등록
+                    일정 등록
                 </AppButton>
             </DialogActions>
         </Dialog>

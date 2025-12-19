@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
     Box,
     Typography,
@@ -28,7 +28,12 @@ const EMPTY_FAMILY_GROUPS = []
  */
 const CaregiverAppointmentAddPage = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const { createAppointment, loading } = useAppointmentStore()
+
+    // CaregiverDashboard에서 전달받은 targetUserId
+    const initialTargetUserId = location.state?.targetUserId || ''
+    const initialTargetUserName = location.state?.targetUserName || ''
 
     // 가족 그룹에서 SENIOR 역할 멤버 목록 가져오기
     const familyGroups = useFamilyStore((state) => state.familyGroups) ?? EMPTY_FAMILY_GROUPS
@@ -42,10 +47,10 @@ const CaregiverAppointmentAddPage = () => {
         return currentGroup.members.filter((m) => m.role === 'SENIOR')
     }, [familyGroups, selectedGroupId])
 
-    // 선택된 어르신 ID
-    const [targetUserId, setTargetUserId] = useState('')
+    // 선택된 어르신 ID (초기값: CaregiverDashboard에서 전달받은 값)
+    const [targetUserId, setTargetUserId] = useState(initialTargetUserId)
 
-    // 시니어가 1명뿐이면 자동 선택
+    // 시니어가 1명뿐이면 자동 선택 (초기값이 없을 때만)
     useEffect(() => {
         if (seniorMembers.length === 1 && !targetUserId) {
             setTargetUserId(seniorMembers[0].userId)
@@ -54,18 +59,18 @@ const CaregiverAppointmentAddPage = () => {
 
     const handleSubmit = async (payload) => {
         if (!targetUserId) {
-            toast.warning('예약 대상 어르신을 선택해주세요.')
+            toast.warning('진료 일정 대상 어르신을 선택해주세요.')
             return
         }
 
         try {
             const data = { ...payload, userId: targetUserId }
             await createAppointment(data)
-            toast.success('예약이 등록되었습니다.')
+            toast.success('진료 일정이 등록되었습니다.')
             navigate('/appointments')
         } catch (error) {
             logger.error('[CaregiverAppointmentAddPage] createAppointment failed:', error)
-            toast.error('예약 등록에 실패했습니다.')
+            toast.error('진료 일정 등록에 실패했습니다.')
         }
     }
 
@@ -113,7 +118,7 @@ const CaregiverAppointmentAddPage = () => {
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h6" sx={{ fontWeight: 700, ml: 1 }}>
-                    어르신 예약 등록
+                    어르신 진료 일정 등록
                 </Typography>
             </Box>
 
@@ -122,7 +127,7 @@ const CaregiverAppointmentAddPage = () => {
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                     <PersonIcon color="primary" />
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                        예약 대상 선택
+                        진료 대상 선택
                     </Typography>
                 </Stack>
                 <FormControl fullWidth required>
@@ -148,7 +153,7 @@ const CaregiverAppointmentAddPage = () => {
                     onSubmit={handleSubmit}
                     onCancel={handleCancel}
                     loading={loading}
-                    submitLabel="예약 등록"
+                    submitLabel="일정 등록"
                     targetUserId={targetUserId}
                 />
             </Box>

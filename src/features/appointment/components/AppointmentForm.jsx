@@ -86,7 +86,7 @@ export const AppointmentForm = ({
     onSubmit,
     onCancel,
     loading = false,
-    submitLabel = '예약 등록',
+    submitLabel = '일정 등록',
     targetUserId,
     initialDate,
 }) => {
@@ -112,10 +112,10 @@ export const AppointmentForm = ({
     })
 
     const [errors, setErrors] = useState({})
-    
+
     // 병원 검색 모달 상태
     const [hospitalSearchOpen, setHospitalSearchOpen] = useState(false)
-    
+
     // 병원 선택 시 폼 자동 입력
     const handleHospitalSelect = useCallback((hospital) => {
         setForm((prev) => ({
@@ -222,191 +222,191 @@ export const AppointmentForm = ({
 
     return (
         <>
-        <Box component="form" onSubmit={handleSubmit}>
-            <Stack spacing={2}>
-                {/* 병원 정보 섹션 */}
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                        <HospitalIcon color="primary" />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                            병원 정보
-                        </Typography>
-                    </Stack>
+            <Box component="form" onSubmit={handleSubmit}>
+                <Stack spacing={2}>
+                    {/* 병원 정보 섹션 */}
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                            <HospitalIcon color="primary" />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                병원 정보
+                            </Typography>
+                        </Stack>
 
-                    <Stack spacing={2}>
-                        <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <Stack spacing={2}>
+                            <Stack direction="row" spacing={1} alignItems="flex-start">
+                                <TextField
+                                    label="붑원명"
+                                    value={form.hospitalName}
+                                    onChange={handleChange('hospitalName')}
+                                    error={Boolean(errors.hospitalName)}
+                                    helperText={errors.hospitalName}
+                                    placeholder="예: 서울대학교붑원"
+                                    required
+                                    fullWidth
+                                />
+                                <AppButton
+                                    variant="secondary"
+                                    onClick={() => setHospitalSearchOpen(true)}
+                                    sx={{
+                                        mt: 1,
+                                        minWidth: 'auto',
+                                        px: 2,
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    <SearchIcon sx={{ mr: 0.5 }} />
+                                    검색
+                                </AppButton>
+                            </Stack>
+
+                            <Stack direction="row" spacing={2}>
+                                <TextField
+                                    label="진료과"
+                                    value={form.department}
+                                    onChange={handleChange('department')}
+                                    placeholder="예: 내과"
+                                    fullWidth
+                                />
+                                <TextField
+                                    label="담당의"
+                                    value={form.doctorName}
+                                    onChange={handleChange('doctorName')}
+                                    placeholder="예: 홍길동"
+                                    fullWidth
+                                />
+                            </Stack>
+
                             <TextField
-                                label="붑원명"
-                                value={form.hospitalName}
-                                onChange={handleChange('hospitalName')}
-                                error={Boolean(errors.hospitalName)}
-                                helperText={errors.hospitalName}
-                                placeholder="예: 서울대학교붑원"
-                                required
+                                label="전화번호"
+                                value={form.phoneNumber}
+                                onChange={handleChange('phoneNumber')}
+                                placeholder="예: 02-1234-5678"
                                 fullWidth
                             />
-                            <AppButton
-                                variant="secondary"
-                                onClick={() => setHospitalSearchOpen(true)}
-                                sx={{ 
-                                    mt: 1, 
-                                    minWidth: 'auto', 
-                                    px: 2,
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                <SearchIcon sx={{ mr: 0.5 }} />
-                                검색
-                            </AppButton>
+                        </Stack>
+                    </Paper>
+
+                    {/* 날짜/시간 섹션 */}
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                            <ScheduleIcon color="primary" />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                방문 일시
+                            </Typography>
                         </Stack>
 
                         <Stack direction="row" spacing={2}>
                             <TextField
-                                label="진료과"
-                                value={form.department}
-                                onChange={handleChange('department')}
-                                placeholder="예: 내과"
+                                type="date"
+                                label="날짜"
+                                value={form.visitDate}
+                                onChange={handleChange('visitDate')}
+                                error={Boolean(errors.visitDate)}
+                                helperText={errors.visitDate}
+                                inputProps={{ min: getTodayDate() }}
+                                InputLabelProps={{ shrink: true }}
+                                required
                                 fullWidth
                             />
                             <TextField
-                                label="담당의"
-                                value={form.doctorName}
-                                onChange={handleChange('doctorName')}
-                                placeholder="예: 홍길동"
+                                type="time"
+                                label="시간"
+                                value={form.visitTime}
+                                onChange={handleChange('visitTime')}
+                                error={Boolean(errors.visitTime)}
+                                helperText={errors.visitTime}
+                                InputLabelProps={{ shrink: true }}
+                                required
                                 fullWidth
                             />
                         </Stack>
+                    </Paper>
+
+                    {/* 위치 정보 섹션 (선택) */}
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                            <LocationIcon color="primary" />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                위치 정보
+                            </Typography>
+                            <Typography variant="caption" color="text.disabled">
+                                (선택)
+                            </Typography>
+                        </Stack>
+
+                        <Stack spacing={2}>
+                            <TextField
+                                label="주소"
+                                value={form.address}
+                                onChange={handleChange('address')}
+                                placeholder="예: 서울시 종로구 대학로 101"
+                                fullWidth
+                            />
+                            <TextField
+                                label="상세 주소"
+                                value={form.addressDetail}
+                                onChange={handleChange('addressDetail')}
+                                placeholder="예: 본관 3층"
+                                fullWidth
+                            />
+                        </Stack>
+                    </Paper>
+
+                    {/* 메모 섹션 */}
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                            <NotesIcon color="primary" />
+                            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                                메모
+                            </Typography>
+                            <Typography variant="caption" color="text.disabled">
+                                (선택)
+                            </Typography>
+                        </Stack>
 
                         <TextField
-                            label="전화번호"
-                            value={form.phoneNumber}
-                            onChange={handleChange('phoneNumber')}
-                            placeholder="예: 02-1234-5678"
+                            value={form.memo}
+                            onChange={handleChange('memo')}
+                            placeholder="예: 공복 상태 유지, 신분증 지참"
+                            multiline
+                            minRows={2}
                             fullWidth
                         />
-                    </Stack>
-                </Paper>
+                    </Paper>
 
-                {/* 날짜/시간 섹션 */}
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                        <ScheduleIcon color="primary" />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                            방문 일시
-                        </Typography>
-                    </Stack>
-
-                    <Stack direction="row" spacing={2}>
-                        <TextField
-                            type="date"
-                            label="날짜"
-                            value={form.visitDate}
-                            onChange={handleChange('visitDate')}
-                            error={Boolean(errors.visitDate)}
-                            helperText={errors.visitDate}
-                            inputProps={{ min: getTodayDate() }}
-                            InputLabelProps={{ shrink: true }}
-                            required
-                            fullWidth
-                        />
-                        <TextField
-                            type="time"
-                            label="시간"
-                            value={form.visitTime}
-                            onChange={handleChange('visitTime')}
-                            error={Boolean(errors.visitTime)}
-                            helperText={errors.visitTime}
-                            InputLabelProps={{ shrink: true }}
-                            required
-                            fullWidth
-                        />
-                    </Stack>
-                </Paper>
-
-                {/* 위치 정보 섹션 (선택) */}
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                        <LocationIcon color="primary" />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                            위치 정보
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled">
-                            (선택)
-                        </Typography>
-                    </Stack>
-
-                    <Stack spacing={2}>
-                        <TextField
-                            label="주소"
-                            value={form.address}
-                            onChange={handleChange('address')}
-                            placeholder="예: 서울시 종로구 대학로 101"
-                            fullWidth
-                        />
-                        <TextField
-                            label="상세 주소"
-                            value={form.addressDetail}
-                            onChange={handleChange('addressDetail')}
-                            placeholder="예: 본관 3층"
-                            fullWidth
-                        />
-                    </Stack>
-                </Paper>
-
-                {/* 메모 섹션 */}
-                <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                        <NotesIcon color="primary" />
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                            메모
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled">
-                            (선택)
-                        </Typography>
-                    </Stack>
-
-                    <TextField
-                        value={form.memo}
-                        onChange={handleChange('memo')}
-                        placeholder="예: 공복 상태 유지, 신분증 지참"
-                        multiline
-                        minRows={2}
-                        fullWidth
-                    />
-                </Paper>
-
-                {/* 과거 날짜 경고 */}
-                {errors.visitDate && errors.visitDate.includes('과거') && (
-                    <Alert severity="warning">
-                        과거 날짜에는 예약을 등록할 수 없습니다. 리마인더 기능에 집중하는 앱이기 때문입니다.
-                    </Alert>
-                )}
-
-                {/* 액션 버튼 */}
-                <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ pt: 1 }}>
-                    {onCancel && (
-                        <AppButton variant="ghost" type="button" onClick={onCancel} disabled={loading}>
-                            취소
-                        </AppButton>
+                    {/* 과거 날짜 경고 */}
+                    {errors.visitDate && errors.visitDate.includes('과거') && (
+                        <Alert severity="warning">
+                            과거 날짜에는 진료 일정을 등록할 수 없습니다. 리마인더 기능에 집중하는 앱이기 때문입니다.
+                        </Alert>
                     )}
-                    <AppButton
-                        variant="primary"
-                        type="submit"
-                        disabled={!canSubmit || loading}
-                        loading={loading}
-                    >
-                        {submitLabel}
-                    </AppButton>
+
+                    {/* 액션 버튼 */}
+                    <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ pt: 1 }}>
+                        {onCancel && (
+                            <AppButton variant="ghost" type="button" onClick={onCancel} disabled={loading}>
+                                취소
+                            </AppButton>
+                        )}
+                        <AppButton
+                            variant="primary"
+                            type="submit"
+                            disabled={!canSubmit || loading}
+                            loading={loading}
+                        >
+                            {submitLabel}
+                        </AppButton>
+                    </Stack>
                 </Stack>
-            </Stack>
-        </Box>
-        
-        {/* 붑원 검색 모달 */}
-        <HospitalSearchModal
-            open={hospitalSearchOpen}
-            onClose={() => setHospitalSearchOpen(false)}
-            onSelect={handleHospitalSelect}
-        />
+            </Box>
+
+            {/* 붑원 검색 모달 */}
+            <HospitalSearchModal
+                open={hospitalSearchOpen}
+                onClose={() => setHospitalSearchOpen(false)}
+                onSelect={handleHospitalSelect}
+            />
         </>
     )
 }

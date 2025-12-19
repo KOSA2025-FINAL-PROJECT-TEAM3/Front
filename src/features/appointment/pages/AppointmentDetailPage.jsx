@@ -78,15 +78,15 @@ const AppointmentDetailPage = () => {
 
     // 삭제 (취소)
     const handleDelete = useCallback(async () => {
-        if (!window.confirm('이 예약을 취소하시겠습니까?')) return
+        if (!window.confirm('이 진료 일정을 취소하시겠습니까?')) return
         setActionLoading(true)
         try {
             await cancelAppointment(Number(id))
-            toast.success('예약이 취소되었습니다.')
+            toast.success('진료 일정이 취소되었습니다.')
             navigate('/appointments')
         } catch (error) {
             logger.error('[AppointmentDetailPage] cancelAppointment failed:', error)
-            toast.error('예약 취소에 실패했습니다.')
+            toast.error('진료 일정 취소에 실패했습니다.')
         } finally {
             setActionLoading(false)
         }
@@ -141,7 +141,7 @@ const AppointmentDetailPage = () => {
     if (error || !currentAppointment) {
         return (
             <Box sx={{ p: 3 }}>
-                <Alert severity="error">예약 정보를 불러올 수 없습니다.</Alert>
+                <Alert severity="error">진료 일정 정보를 불러올 수 없습니다.</Alert>
                 <Button onClick={() => navigate('/appointments')} sx={{ mt: 2 }}>
                     목록으로 돌아가기
                 </Button>
@@ -171,7 +171,7 @@ const AppointmentDetailPage = () => {
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant="h6" sx={{ fontWeight: 700, ml: 1 }}>
-                        예약 상세
+                        진료 일정 상세
                     </Typography>
                 </Stack>
                 {isActive && (
@@ -303,7 +303,7 @@ const AppointmentDetailPage = () => {
                     )}
 
                     {isCancelled && (
-                        <Alert severity="warning">이 예약은 취소되었습니다.</Alert>
+                        <Alert severity="warning">이 진료 일정은 취소되었습니다.</Alert>
                     )}
                 </Stack>
             </Box>

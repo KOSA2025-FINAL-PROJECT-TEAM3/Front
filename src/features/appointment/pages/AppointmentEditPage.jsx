@@ -35,11 +35,11 @@ const AppointmentEditPage = () => {
     const handleSubmit = async (payload) => {
         try {
             await updateAppointment(Number(id), payload)
-            toast.success('예약이 수정되었습니다.')
+            toast.success('진료 일정이 수정되었습니다.')
             navigate(`/appointments/${id}`)
         } catch (error) {
             logger.error('[AppointmentEditPage] updateAppointment failed:', error)
-            toast.error('예약 수정에 실패했습니다.')
+            toast.error('진료 일정 수정에 실패했습니다.')
         }
     }
 
@@ -61,7 +61,7 @@ const AppointmentEditPage = () => {
         return (
             <MainLayout>
                 <Box sx={{ p: 3 }}>
-                    <Alert severity="error">예약 정보를 불러올 수 없습니다.</Alert>
+                    <Alert severity="error">진료 일정 정보를 불러올 수 없습니다.</Alert>
                 </Box>
             </MainLayout>
         )
@@ -88,7 +88,7 @@ const AppointmentEditPage = () => {
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    예약 수정
+                    진료 일정 수정
                 </Typography>
             </Paper>
 

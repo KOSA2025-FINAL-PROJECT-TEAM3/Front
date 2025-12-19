@@ -376,7 +376,7 @@ export const SeniorDashboard = () => {
                   🏥
                 </Box>
                 <Box>
-                  <Typography sx={{ fontWeight: 800 }}>병원 예약</Typography>
+                  <Typography sx={{ fontWeight: 800 }}>진료 일정</Typography>
                   <Typography variant="body2" color="text.secondary">
                     진료 일정 확인 · 리마인더
                   </Typography>

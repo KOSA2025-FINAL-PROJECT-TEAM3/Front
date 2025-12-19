@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useMemo } from 'react'
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -17,6 +18,7 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import PersonIcon from '@mui/icons-material/Person'
 import Slide from '@mui/material/Slide'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -35,13 +37,18 @@ export const SearchOverlay = () => {
   const location = useLocation()
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
-  const { isOpen, activeTab, openSeq, close, setActiveTab } = useSearchOverlayStore((state) => ({
+  const { isOpen, activeTab, openSeq, close, setActiveTab, targetUserId, targetUserName } = useSearchOverlayStore((state) => ({
     isOpen: state.isOpen,
     activeTab: state.activeTab,
     openSeq: state.openSeq,
     close: state.close,
     setActiveTab: state.setActiveTab,
+    targetUserId: state.targetUserId,
+    targetUserName: state.targetUserName,
   }))
+
+  // 대리 검색 여부
+  const isProxySearch = !!targetUserId && !!targetUserName
 
   const { history, clearAll, requestSearch, clearPending } = useSearchHistoryStore((state) => ({
     history: state.history,
@@ -138,6 +145,23 @@ export const SearchOverlay = () => {
 
       <DialogContent sx={{ pt: 0 }}>
         <Stack spacing={2.25}>
+          {/* 대리 검색 배너 */}
+          {isProxySearch && (
+            <Alert
+              severity="info"
+              icon={<PersonIcon />}
+              sx={{
+                fontWeight: 700,
+                bgcolor: '#EEF2FF',
+                color: '#4F46E5',
+                border: '1px solid #C7D2FE',
+                '& .MuiAlert-icon': { color: '#6366F1' }
+              }}
+            >
+              <strong>{targetUserName}</strong> 님을 위한 검색입니다
+            </Alert>
+          )}
+
           <Box>
             <Tabs
               value={activeTab}
@@ -157,10 +181,16 @@ export const SearchOverlay = () => {
                 autoFocus
                 layout="overlay"
                 recentSection={RecentSection}
+                targetUserId={targetUserId}
+                targetUserName={targetUserName}
                 onOpenOcr={() => {
                   handleClose()
                   navigate(ROUTE_PATHS.ocrScan, {
-                    state: { returnTo: `${location.pathname}${location.search || ''}` },
+                    state: {
+                      returnTo: `${location.pathname}${location.search || ''}`,
+                      targetUserId,
+                      targetUserName,
+                    },
                   })
                 }}
               />
@@ -170,6 +200,8 @@ export const SearchOverlay = () => {
                 autoFocus
                 layout="overlay"
                 recentSection={RecentSection}
+                targetUserId={targetUserId}
+                targetUserName={targetUserName}
                 onRequestClose={handleClose}
               />
             )}

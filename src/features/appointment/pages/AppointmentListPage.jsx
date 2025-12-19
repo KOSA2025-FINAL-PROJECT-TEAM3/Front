@@ -69,11 +69,11 @@ const AppointmentListPage = () => {
         today.setHours(0, 0, 0, 0)
         const selected = new Date(date)
         selected.setHours(0, 0, 0, 0)
-        
+
         if (selected < today) {
             return // 과거 날짜는 클릭 불가
         }
-        
+
         // 미래/오늘 날짜 클릭 시 예약 추가 페이지로 이동
         navigate(`/appointments/add?date=${date}`)
     }, [navigate])
@@ -121,7 +121,7 @@ const AppointmentListPage = () => {
                     </IconButton>
                     <Box>
                         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            병원 예약
+                            병원 진료 일정
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                             진료 일정을 관리하고 알림을 받으세요
@@ -147,7 +147,7 @@ const AppointmentListPage = () => {
             {selectedDate && (
                 <Box sx={{ px: 2, pb: 1 }}>
                     <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600 }}>
-                        {selectedDate.replace(/-/g, '. ')} 예약
+                        {selectedDate.replace(/-/g, '. ')} 진료
                     </Typography>
                 </Box>
             )}
@@ -160,15 +160,15 @@ const AppointmentListPage = () => {
                     </Box>
                 ) : error ? (
                     <Alert severity="error" sx={{ mb: 2 }}>
-                        예약 정보를 불러오는 중 오류가 발생했습니다.
+                        진료 일정을 불러오는 중 오류가 발생했습니다.
                     </Alert>
                 ) : filteredAppointments.length === 0 ? (
                     <Box sx={{ textAlign: 'center', py: 4 }}>
                         <Typography color="text.disabled">
-                            {selectedDate ? '이 날짜에 예약이 없습니다.' : '등록된 예약이 없습니다.'}
+                            {selectedDate ? '이 날짜에 진료 일정이 없습니다.' : '등록된 진료 일정이 없습니다.'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            아래 + 버튼을 눌러 예약을 추가해보세요
+                            아래 + 버튼을 눌러 진료 일정을 추가해보세요
                         </Typography>
                     </Box>
                 ) : (
@@ -183,7 +183,7 @@ const AppointmentListPage = () => {
             {/* FAB - 새 예약 추가 */}
             <Fab
                 color="primary"
-                aria-label="새 예약 추가"
+                aria-label="새 진료 일정 추가"
                 onClick={handleAddAppointment}
                 sx={{
                     position: 'fixed',

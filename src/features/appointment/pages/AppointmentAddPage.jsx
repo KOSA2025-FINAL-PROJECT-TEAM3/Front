@@ -16,7 +16,7 @@ const AppointmentAddPage = () => {
     const [searchParams] = useSearchParams()
     const { user } = useAuthStore()
     const { createAppointment, loading } = useAppointmentStore()
-    
+
     // URL에서 date 파라미터 읽기 (캘린더에서 날짜 클릭 시 전달됨)
     const initialDate = searchParams.get('date') || null
 
@@ -25,11 +25,11 @@ const AppointmentAddPage = () => {
             // 본인 등록이므로 userId는 현재 사용자
             const data = { ...payload, userId: user?.id }
             await createAppointment(data)
-            toast.success('예약이 등록되었습니다.')
+            toast.success('진료 일정이 등록되었습니다.')
             navigate('/appointments')
         } catch (error) {
             logger.error('[AppointmentAddPage] createAppointment failed:', error)
-            toast.error('예약 등록에 실패했습니다.')
+            toast.error('진료 일정 등록에 실패했습니다.')
         }
     }
 
@@ -58,7 +58,7 @@ const AppointmentAddPage = () => {
                     <ArrowBackIcon />
                 </IconButton>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    새 예약 등록
+                    새 진료 일정 등록
                 </Typography>
             </Paper>
 
@@ -68,7 +68,7 @@ const AppointmentAddPage = () => {
                     onSubmit={handleSubmit}
                     onCancel={handleCancel}
                     loading={loading}
-                    submitLabel="예약 등록"
+                    submitLabel="일정 등록"
                     initialDate={initialDate}
                 />
             </Box>

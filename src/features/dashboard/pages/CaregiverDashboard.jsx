@@ -277,7 +277,7 @@ export function CaregiverDashboard() {
   }, [activeSenior?.userId])
 
   useEffect(() => {
-    loadRecentHistory().catch(() => {})
+    loadRecentHistory().catch(() => { })
   }, [loadRecentHistory])
 
   const adherenceRate = useMemo(() => {
@@ -461,13 +461,18 @@ export function CaregiverDashboard() {
                   title="통합 검색"
                   icon={<SearchIcon sx={{ color: '#10B981' }} />}
                   color="#ECFDF5"
-                  onClick={() => openSearchOverlay('pill')}
+                  onClick={() => openSearchOverlay('pill', { targetUserId: activeSenior?.userId, targetUserName: activeSenior?.name })}
                 />
                 <GuardianMenuCard
                   title="OCR 약봉투"
                   icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
                   color="#F0FDFA"
-                  onClick={() => navigate(ROUTE_PATHS.ocrScan)}
+                  onClick={() => navigate(ROUTE_PATHS.ocrScan, {
+                    state: {
+                      targetUserId: activeSenior?.userId,
+                      targetUserName: activeSenior?.name
+                    }
+                  })}
                 />
                 <GuardianMenuCard
                   title="가족 채팅"
@@ -476,10 +481,15 @@ export function CaregiverDashboard() {
                   onClick={() => navigate(ROUTE_PATHS.familyChat)}
                 />
                 <GuardianMenuCard
-                  title="병원 예약"
+                  title="진료 일정"
                   icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
                   color="#EEF2FF"
-                  onClick={() => navigate(ROUTE_PATHS.appointments)}
+                  onClick={() => navigate(ROUTE_PATHS.caregiverAppointmentAdd, {
+                    state: {
+                      targetUserId: activeSenior?.userId,
+                      targetUserName: activeSenior?.name
+                    }
+                  })}
                 />
               </Box>
             </Paper>
@@ -583,13 +593,18 @@ export function CaregiverDashboard() {
               title="통합 검색"
               icon={<SearchIcon sx={{ color: '#10B981' }} />}
               color="#ECFDF5"
-              onClick={() => openSearchOverlay('pill')}
+              onClick={() => openSearchOverlay('pill', { targetUserId: activeSenior?.userId, targetUserName: activeSenior?.name })}
             />
             <GuardianMenuCard
               title="OCR 약봉투"
               icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
               color="#F0FDFA"
-              onClick={() => navigate(ROUTE_PATHS.ocrScan)}
+              onClick={() => navigate(ROUTE_PATHS.ocrScan, {
+                state: {
+                  targetUserId: activeSenior?.userId,
+                  targetUserName: activeSenior?.name
+                }
+              })}
             />
             <GuardianMenuCard
               title="가족 채팅"
@@ -598,27 +613,30 @@ export function CaregiverDashboard() {
               onClick={() => navigate(ROUTE_PATHS.familyChat)}
             />
             <GuardianMenuCard
-              title="병원 예약"
+              title="진료 일정"
               icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
               color="#EEF2FF"
-              onClick={() => navigate(ROUTE_PATHS.appointments)}
+              onClick={() => navigate(ROUTE_PATHS.caregiverAppointmentAdd, {
+                state: {
+                  targetUserId: activeSenior?.userId,
+                  targetUserName: activeSenior?.name
+                }
+              })}
             />
           </Box>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-            <TodaySummaryCard
-              takenCount={todayCounts.completed}
-              totalCount={todayCounts.total}
-              onClick={() => openActiveMemberDetail('medication')}
-            />
+          <TodaySummaryCard
+            takenCount={todayCounts.completed}
+            totalCount={todayCounts.total}
+            onClick={() => openActiveMemberDetail('medication')}
+          />
 
-            <WeeklyStatsWidget
-              title="지난 7일 기록"
-              weeklyData={weeklyStats}
-              adherenceRate={adherenceRate}
-              onClick={() => openActiveMemberDetail('medication')}
-            />
-          </Box>
+          <WeeklyStatsWidget
+            title="지난 7일 기록"
+            weeklyData={weeklyStats}
+            adherenceRate={adherenceRate}
+            onClick={() => openActiveMemberDetail('medication')}
+          />
         </Stack>
       )}
     </MainLayout>
@@ -663,9 +681,9 @@ const GuardianMenuCard = ({ title, icon, color, onClick }) => {
         >
           {icon}
         </Box>
-        <Typography 
-          variant="subtitle1" 
-          sx={{ 
+        <Typography
+          variant="subtitle1"
+          sx={{
             fontWeight: 900,
             fontSize: { xs: 12, md: 16 },
             whiteSpace: 'nowrap',

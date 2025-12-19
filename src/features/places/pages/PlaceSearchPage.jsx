@@ -836,7 +836,7 @@ export const PlaceSearchPage = () => {
                                   startIcon={<EventIcon fontSize="small" />}
                                   sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
                                 >
-                                  예약
+                                  진료
                                 </AppButton>
                               )}
                             </Stack>

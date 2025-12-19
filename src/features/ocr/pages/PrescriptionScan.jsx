@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import CameraCapture from '../components/CameraCapture'
-import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography, Fade } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, Paper, Stack, Typography, Fade } from '@mui/material'
 import RestoreIcon from '@mui/icons-material/Restore'
+import PersonIcon from '@mui/icons-material/Person'
 import {
   PharmacyHeader,
   MedicationCardList,
@@ -14,7 +15,7 @@ import { useOcrRegistration } from '../hooks/useOcrRegistration'
 import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
 import BackButton from '@shared/components/mui/BackButton'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
 import { ROUTE_PATHS } from '@core/config/routes.config'
 import { fromOCRResponse } from '@/types/ocr.types'
@@ -34,8 +35,15 @@ import { ocrApiClient } from '@core/services/api/ocrApiClient'
  */
 const PrescriptionScanPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const user = useAuthStore((state) => state.user)
   const userId = user?.id || user?.userId
+
+  // 보호자가 어르신을 위해 등록하는 경우
+  const targetUserId = location.state?.targetUserId
+  const targetUserName = location.state?.targetUserName
+  const isProxyRegistration = !!targetUserId && !!targetUserName
+
   const {
     // 상태
     step,
@@ -59,7 +67,7 @@ const PrescriptionScanPage = () => {
     removeIntakeTime,
     handleRegister,
     reset
-  } = useOcrRegistration()
+  } = useOcrRegistration({ targetUserId })
 
   const [cachedJobId, setCachedJobId] = useState(null)
   const [isRestoring, setIsRestoring] = useState(false)
@@ -97,7 +105,7 @@ const PrescriptionScanPage = () => {
       if (data && data.status === 'DONE' && data.result?.medications) {
         const result = data.result
         const medications = fromOCRResponse(result.medications)
-        
+
         navigate(ROUTE_PATHS.prescriptionAdd, {
           state: {
             ocrData: {
@@ -125,10 +133,10 @@ const PrescriptionScanPage = () => {
   const handleAsyncScan = () => {
     // 1. 분석 시작 알림 즉시 표시 (서버 응답 기다리지 않음)
     toast.success('처방전 분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
-    
+
     // 2. 즉시 메인 화면으로 이동
     navigate(ROUTE_PATHS.root)
-    
+
     // 3. API 호출은 백그라운드에서 실행 (await 하지 않음)
     startAnalysisAsync()
   }
@@ -152,6 +160,23 @@ const PrescriptionScanPage = () => {
             subtitle="처방전을 촬영하거나 앨범에서 선택해 등록할 수 있어요."
             leading={<BackButton onClick={handleBack} />}
           />
+
+          {/* 대리 등록 배너 */}
+          {isProxyRegistration && (
+            <Alert
+              severity="info"
+              icon={<PersonIcon />}
+              sx={{
+                fontWeight: 700,
+                bgcolor: '#EEF2FF',
+                color: '#4F46E5',
+                border: '1px solid #C7D2FE',
+                '& .MuiAlert-icon': { color: '#6366F1' }
+              }}
+            >
+              <strong>{targetUserName}</strong> 님의 처방전을 등록합니다
+            </Alert>
+          )}
 
           {error && (
             <Alert

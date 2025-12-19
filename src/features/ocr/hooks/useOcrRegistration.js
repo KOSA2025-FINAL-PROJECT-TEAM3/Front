@@ -37,13 +37,16 @@ import logger from '@core/utils/logger'
  * @property {Function} handleRegister - 등록 실행
  * @property {Function} reset - 초기화
  */
-export function useOcrRegistration() {
+export function useOcrRegistration(options = {}) {
   const navigate = useNavigate()
   const location = useLocation()
   const ocrJobs = useNotificationStore((state) => state.ocrJobs)
   const isOcrScanning = useNotificationStore((state) => state.isOcrScanning)
   const setOcrScanning = useNotificationStore((state) => state.setOcrScanning)
   const ocrJobsRef = useRef({})
+
+  // 대리 등록용 targetUserId
+  const targetUserId = options.targetUserId || null
 
   // === 상태 ===
   const [step, setStep] = useState(isOcrScanning ? 'analyzing' : 'select')
@@ -346,6 +349,11 @@ export function useOcrRegistration() {
       // OCR 데이터를 처방전 등록 형식으로 변환
       const ocrData = toRegisterFromOCRRequest(formState)
 
+      // 대리 등록의 경우 targetUserId 추가
+      if (targetUserId) {
+        ocrData.userId = targetUserId
+      }
+
       logger.debug('📤 OCR 등록 시작:', ocrData)
 
       // 백엔드 API 직접 호출
@@ -368,7 +376,7 @@ export function useOcrRegistration() {
     } finally {
       setIsLoading(false)
     }
-  }, [formState, location.state, navigate])
+  }, [formState, location.state, navigate, targetUserId])
 
   // === 초기화 ===
   const reset = useCallback(() => {
