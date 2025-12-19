@@ -17,6 +17,7 @@ export const useToastStore = create((set) => ({
       type: toast.type || 'info', // success, error, warning, info
       message: toast.message,
       duration: toast.duration || 3000,
+      onClick: toast.onClick,
     }
 
     set((state) => ({
@@ -47,13 +48,18 @@ export const useToastStore = create((set) => ({
 }))
 
 // 간편 사용 함수들
+const parseOptions = (options) => {
+  if (typeof options === 'number') return { duration: options }
+  return options || {}
+}
+
 export const toast = {
-  success: (message, duration) =>
-    useToastStore.getState().addToast({ type: 'success', message, duration }),
-  error: (message, duration) =>
-    useToastStore.getState().addToast({ type: 'error', message, duration }),
-  warning: (message, duration) =>
-    useToastStore.getState().addToast({ type: 'warning', message, duration }),
-  info: (message, duration) =>
-    useToastStore.getState().addToast({ type: 'info', message, duration }),
+  success: (message, options) =>
+    useToastStore.getState().addToast({ type: 'success', message, ...parseOptions(options) }),
+  error: (message, options) =>
+    useToastStore.getState().addToast({ type: 'error', message, ...parseOptions(options) }),
+  warning: (message, options) =>
+    useToastStore.getState().addToast({ type: 'warning', message, ...parseOptions(options) }),
+  info: (message, options) =>
+    useToastStore.getState().addToast({ type: 'info', message, ...parseOptions(options) }),
 }

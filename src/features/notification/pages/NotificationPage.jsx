@@ -35,6 +35,7 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { USER_ROLES } from '@config/constants'
 import { useFamilyStore } from '@features/family/store/familyStore'
+import { fromOCRResponse } from '@/types/ocr.types'
 
 const normalizeTypeKey = (value) => String(value || '').toLowerCase().replace(/\./g, '_')
 
@@ -180,6 +181,22 @@ export const NotificationPage = () => {
     const typeKey = normalizeTypeKey(notification?.type)
     if (!notification.read) {
       markAsRead(notification.id)
+    }
+
+    // OCR 완료 알림인 경우 약 등록 페이지로 이동
+    if (notification.type === 'ocr.job.done' && notification.result?.medications) {
+      const medications = fromOCRResponse(notification.result.medications)
+      navigate(ROUTE_PATHS.prescriptionAdd, {
+        state: {
+          ocrData: {
+            medications,
+            hospitalName: notification.result.hospitalName || notification.result.clinicName || '',
+            pharmacyName: notification.result.pharmacyName || '',
+            startDate: notification.result.prescribedDate || new Date().toISOString().split('T')[0]
+          }
+        }
+      })
+      return
     }
 
     if (typeKey.includes('missed')) {

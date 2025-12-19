@@ -19,6 +19,7 @@ import { useFocusModeStore } from '@shared/stores/focusModeStore'
 import FloatingActionButtons from './FloatingActionButtons'
 import SearchOverlay from '@features/search/components/SearchOverlay'
 import { shouldHideFloatingActions } from './floatingActionsVisibility'
+import GlobalOcrStatus from './GlobalOcrStatus'
 
 export const AppShell = ({
   children,
@@ -111,6 +112,7 @@ export const AppShell = ({
       </Box>
 
       <SearchOverlay />
+      <GlobalOcrStatus />
       {!hideFloatingActions && <FloatingActionButtons hasBottomDock={showMobileBottomNav} />}
     </Box>
   )

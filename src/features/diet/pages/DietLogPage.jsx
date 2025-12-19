@@ -6,7 +6,7 @@ import { MealInputForm } from '../components/MealInputForm'
 import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
-import { Box, Divider, TextField, Stack, Typography } from '@mui/material'
+import { Box, Divider, TextField, Stack, Typography, Alert, Button, Collapse } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { PageHeader } from '@shared/components/layout/PageHeader'
 import { PageStack } from '@shared/components/layout/PageStack'
@@ -22,6 +22,10 @@ export const DietLogPage = () => {
   )
   const [allMeals, setAllMeals] = useState([])
 
+  // Recovery State
+  const [recoveredJob, setRecoveredJob] = useState(null)
+  const [initialAnalysis, setInitialAnalysis] = useState(null)
+
   // Voice Action State
   const [autoFillData, setAutoFillData] = useState(null)
   const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
@@ -32,7 +36,56 @@ export const DietLogPage = () => {
     if (navAutoFill && (navAutoFill.foodName || navAutoFill.mealType)) {
       setAutoFillData(navAutoFill)
     }
+    // Location state로 전달된 초기 분석 결과가 있으면 설정
+    if (location.state?.initialAnalysisResult) {
+      setInitialAnalysis(location.state.initialAnalysisResult)
+    }
   }, [location.state])
+
+  // [Recovery] Check for pending analysis job
+  useEffect(() => {
+    const checkRecovery = async () => {
+      const lastJobId = localStorage.getItem('last_diet_job_id')
+      if (!lastJobId) return
+
+      try {
+        const resp = await dietApiClient.getAnalysisJob(lastJobId)
+        const jobData = (resp && resp.data) ? resp.data : resp // Handle axios wrapper
+
+        if (jobData && jobData.status === 'DONE' && jobData.result) {
+          logger.info('Found recoverable diet job:', jobData)
+          setRecoveredJob({
+            id: lastJobId,
+            result: jobData.result
+          })
+        } else if (jobData && jobData.status === 'FAILED') {
+          localStorage.removeItem('last_diet_job_id') // Clean up failed job
+        }
+      } catch (error) {
+        logger.warn('Failed to check recovery job:', error)
+        // 404 등 에러 시 cleanup
+        localStorage.removeItem('last_diet_job_id')
+      }
+    }
+
+    checkRecovery()
+  }, [])
+
+  const handleApplyRecovery = () => {
+    if (recoveredJob && recoveredJob.result) {
+      setInitialAnalysis(recoveredJob.result)
+      setRecoveredJob(null)
+      localStorage.removeItem('last_diet_job_id')
+      toast.success('분석 결과를 불러왔습니다.')
+      // Scroll to form
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const handleDiscardRecovery = () => {
+    setRecoveredJob(null)
+    localStorage.removeItem('last_diet_job_id')
+  }
 
   // Voice Command Handling (Auto Fill)
   useEffect(() => {
@@ -168,6 +221,28 @@ export const DietLogPage = () => {
           subtitle={editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 관리하세요.'}
         />
 
+        {/* Recovery Alert */}
+        <Collapse in={!!recoveredJob}>
+          {recoveredJob && (
+            <Alert
+              severity="info"
+              sx={{ mb: 3 }}
+              action={
+                <Stack direction="row" spacing={1}>
+                  <Button color="inherit" size="small" onClick={handleDiscardRecovery}>
+                    무시
+                  </Button>
+                  <Button variant="contained" color="primary" size="small" onClick={handleApplyRecovery}>
+                    불러오기
+                  </Button>
+                </Stack>
+              }
+            >
+              방금 분석 완료된 식단 결과가 있습니다.
+            </Alert>
+          )}
+        </Collapse>
+
         {/* 날짜 선택기 & 날짜 표시 통합 */}
         <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
           <Stack direction="row" spacing={2} alignItems="center">
@@ -210,7 +285,7 @@ export const DietLogPage = () => {
             editingMeal={editingMeal}
             onCancelEdit={handleCancelEdit}
             autoFillData={autoFillData}
-            initialAnalysisResult={location.state?.initialAnalysisResult}
+            initialAnalysisResult={initialAnalysis}
           />
         )}
 

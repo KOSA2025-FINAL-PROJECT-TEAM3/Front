@@ -79,6 +79,11 @@ export const useNotificationStore = create((set, get) => ({
   loadMorePaused: false,
   dietJobs: {},
   ocrJobs: {},
+  isOcrScanning: false, // OCR 분석 진행 중 여부
+  isDietAnalyzing: false, // 식단 분석 진행 중 여부
+
+  setOcrScanning: (isScanning) => set({ isOcrScanning: isScanning }),
+  setDietAnalyzing: (isAnalyzing) => set({ isDietAnalyzing: isAnalyzing }),
   // 페이지네이션 상태
   currentPage: 0,
   hasMore: true,

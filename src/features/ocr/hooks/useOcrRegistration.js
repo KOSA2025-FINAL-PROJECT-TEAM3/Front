@@ -41,10 +41,12 @@ export function useOcrRegistration() {
   const navigate = useNavigate()
   const location = useLocation()
   const ocrJobs = useNotificationStore((state) => state.ocrJobs)
+  const isOcrScanning = useNotificationStore((state) => state.isOcrScanning)
+  const setOcrScanning = useNotificationStore((state) => state.setOcrScanning)
   const ocrJobsRef = useRef({})
 
   // === 상태 ===
-  const [step, setStep] = useState('select')
+  const [step, setStep] = useState(isOcrScanning ? 'analyzing' : 'select')
   const [file, setFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -80,6 +82,12 @@ export function useOcrRegistration() {
     setStep('preview')
     setError(null)
   }, [])
+
+  useEffect(() => {
+    if (isOcrScanning && step !== 'analyzing' && step !== 'edit' && step !== 'registering') {
+      setStep('analyzing')
+    }
+  }, [isOcrScanning, step])
 
   useEffect(() => {
     ocrJobsRef.current = ocrJobs || {}
@@ -162,6 +170,38 @@ export function useOcrRegistration() {
       setIsLoading(false)
     }
   }, [file])
+
+  // === 비동기 OCR 분석 시작 (Fire and Forget) ===
+  const startAnalysisAsync = useCallback(async () => {
+    if (!file) return null
+
+    setStep('analyzing')
+    setIsLoading(true)
+    setError(null)
+    setOcrScanning(true) // 전역 로딩 상태 시작
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // Start Job
+      const jobResp = await ocrApiClient.startScanJob(formData)
+      const data = (jobResp && jobResp.data) ? jobResp.data : jobResp
+      const { jobId } = data
+
+      // Just return jobId, do not poll
+      logger.debug('OCR Job Started:', jobId)
+      return { jobId }
+    } catch (err) {
+      logger.error('OCR Async Error:', err)
+      setError(err.message || '분석 요청 중 오류가 발생했습니다.')
+      setStep(file ? 'preview' : 'select')
+      setOcrScanning(false) // 실패 시 로딩 상태 해제
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [file, setOcrScanning])
 
   // SSE로 완료된 Job 결과 감지 시 현재 Job과 일치하면 즉시 반영
   useEffect(() => {
@@ -361,6 +401,7 @@ export function useOcrRegistration() {
     handleFileSelect,
     handleCameraCapture,
     startAnalysis,
+    startAnalysisAsync,
     updateFormState,
     updateMedication,
     removeMedication,

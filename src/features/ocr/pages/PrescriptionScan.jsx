@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import CameraCapture from '../components/CameraCapture'
-import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography, Fade } from '@mui/material'
+import RestoreIcon from '@mui/icons-material/Restore'
 import {
   PharmacyHeader,
   MedicationCardList,
@@ -14,6 +15,11 @@ import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
 import BackButton from '@shared/components/mui/BackButton'
 import { useNavigate } from 'react-router-dom'
+import { toast } from '@shared/components/toast/toastStore'
+import { ROUTE_PATHS } from '@core/config/routes.config'
+import { fromOCRResponse } from '@/types/ocr.types'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { ocrApiClient } from '@core/services/api/ocrApiClient'
 
 /**
  * 처방전 스캔 및 약물 등록 페이지
@@ -28,6 +34,8 @@ import { useNavigate } from 'react-router-dom'
  */
 const PrescriptionScanPage = () => {
   const navigate = useNavigate()
+  const user = useAuthStore((state) => state.user)
+  const userId = user?.id || user?.userId
   const {
     // 상태
     step,
@@ -41,6 +49,7 @@ const PrescriptionScanPage = () => {
     handleFileSelect,
     handleCameraCapture,
     startAnalysis,
+    startAnalysisAsync,
     updateFormState,
     updateMedication,
     removeMedication,
@@ -51,6 +60,78 @@ const PrescriptionScanPage = () => {
     handleRegister,
     reset
   } = useOcrRegistration()
+
+  const [cachedJobId, setCachedJobId] = useState(null)
+  const [isRestoring, setIsRestoring] = useState(false)
+
+  // 컴포넌트 마운트 시 캐시된 jobId 확인
+  useEffect(() => {
+    if (!userId) return
+
+    try {
+      const key = `ocr_result_${userId}`
+      const saved = localStorage.getItem(key)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        // 24시간 이내의 데이터만 유효하고, 사용자 ID가 일치해야 함
+        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000 && String(parsed.userId) === String(userId)) {
+          setCachedJobId(parsed.jobId)
+        } else {
+          localStorage.removeItem(key)
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [userId])
+
+  const handleLoadCachedResult = async () => {
+    if (!cachedJobId) return
+
+    setIsRestoring(true)
+    try {
+      toast.info('서버에서 이전 분석 결과를 불러오는 중입니다...')
+      const response = await ocrApiClient.getScanJob(cachedJobId)
+      const data = (response && response.data) ? response.data : response
+
+      if (data && data.status === 'DONE' && data.result?.medications) {
+        const result = data.result
+        const medications = fromOCRResponse(result.medications)
+        
+        navigate(ROUTE_PATHS.prescriptionAdd, {
+          state: {
+            ocrData: {
+              medications,
+              hospitalName: result.hospitalName || result.clinicName || '',
+              pharmacyName: result.pharmacyName || '',
+              startDate: result.prescribedDate || new Date().toISOString().split('T')[0]
+            }
+          }
+        })
+        toast.success('이전 분석 결과를 성공적으로 불러왔습니다.')
+      } else {
+        throw new Error('데이터가 만료되었거나 찾을 수 없습니다.')
+      }
+    } catch (e) {
+      console.error('OCR 복구 실패:', e)
+      toast.error('이전 결과를 불러오지 못했습니다. 다시 스캔해주세요.')
+      localStorage.removeItem(`ocr_result_${userId}`)
+      setCachedJobId(null)
+    } finally {
+      setIsRestoring(false)
+    }
+  }
+
+  const handleAsyncScan = () => {
+    // 1. 분석 시작 알림 즉시 표시 (서버 응답 기다리지 않음)
+    toast.success('처방전 분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
+    
+    // 2. 즉시 메인 화면으로 이동
+    navigate(ROUTE_PATHS.root)
+    
+    // 3. API 호출은 백그라운드에서 실행 (await 하지 않음)
+    startAnalysisAsync()
+  }
 
   const handleBack = () => {
     if (step !== 'select') {
@@ -88,6 +169,21 @@ const PrescriptionScanPage = () => {
           {step === 'select' && (
             <Stack spacing={3} alignItems="center" textAlign="center" sx={{ py: { xs: 3, md: 5 } }}>
               <Stack spacing={2} sx={{ width: '100%', maxWidth: 420 }}>
+                {cachedJobId && (
+                  <Fade in={true}>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      size="large"
+                      startIcon={isRestoring ? <CircularProgress size={20} color="inherit" /> : <RestoreIcon />}
+                      onClick={handleLoadCachedResult}
+                      disabled={isRestoring}
+                      sx={{ mb: 2, fontWeight: 'bold' }}
+                    >
+                      {isRestoring ? '불러오는 중...' : '방금 분석한 결과 불러오기'}
+                    </Button>
+                  </Fade>
+                )}
                 <Button variant="contained" color="success" size="large" onClick={() => setStep('camera')}>
                   📷 카메라 촬영
                 </Button>
@@ -121,7 +217,7 @@ const PrescriptionScanPage = () => {
                 <Button fullWidth variant="outlined" onClick={() => setStep('select')}>
                   다시 선택
                 </Button>
-                <Button fullWidth variant="contained" color="success" onClick={startAnalysis} disabled={isLoading}>
+                <Button fullWidth variant="contained" color="success" onClick={handleAsyncScan} disabled={isLoading}>
                   분석 시작
                 </Button>
               </Stack>
