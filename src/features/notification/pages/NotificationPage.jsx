@@ -4,7 +4,7 @@
  * @component NotificationPage
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Accordion,
@@ -13,6 +13,7 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   IconButton,
   List,
   ListItemButton,
@@ -82,14 +83,54 @@ const buildMissedSummary = (notification) => {
  */
 export const NotificationPage = () => {
   const navigate = useNavigate()
-  const { notifications, loading, unreadCount, fetchNotifications, markAsRead, markAllAsRead, removeNotification, removeAllNotifications } =
-    useNotificationStore()
+  const { 
+    notifications, 
+    initialLoading,
+    loadingMore,
+    error,
+    loadMoreError,
+    unreadCount, 
+    hasMore,
+    fetchNotifications, 
+    loadMoreNotifications,
+    retryLoadMoreNotifications,
+    markAsRead, 
+    markAllAsRead, 
+    removeNotification, 
+    removeAllNotifications 
+  } = useNotificationStore()
   const customerRole = useAuth((state) => state.customerRole)
   const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
   const familyMembers = useFamilyStore((state) => state.members || [])
   const [importantExpanded, setImportantExpanded] = useState(true)
   const [normalExpanded, setNormalExpanded] = useState(false)
+
+  // Intersection Observer for infinite scroll
+  const loadMoreRef = useRef(null)
+
+  const handleLoadMore = useCallback(() => {
+    if (!initialLoading && !loadingMore && !loadMoreError && hasMore) {
+      loadMoreNotifications()
+    }
+  }, [initialLoading, loadingMore, loadMoreError, hasMore, loadMoreNotifications])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          handleLoadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [handleLoadMore])
 
   useEffect(() => {
     fetchNotifications()
@@ -496,10 +537,26 @@ export const NotificationPage = () => {
   }
 
   const renderListArea = () => {
-    if (loading) {
+    if (initialLoading && displayNotifications.length === 0) {
       return (
         <Paper variant="outlined" sx={{ p: 2 }}>
           <Typography color="text.secondary">알림을 불러오는 중...</Typography>
+        </Paper>
+      )
+    }
+
+    if (error && displayNotifications.length === 0) {
+      return (
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Stack spacing={1.5} alignItems="flex-start">
+            <Typography fontWeight={800}>로드 실패</Typography>
+            <Typography variant="body2" color="text.secondary">
+              알림을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+            </Typography>
+            <Button variant="contained" onClick={fetchNotifications}>
+              다시 시도
+            </Button>
+          </Stack>
         </Paper>
       )
     }
@@ -550,6 +607,26 @@ export const NotificationPage = () => {
             defaultExpanded: normalExpanded,
             onToggle: setNormalExpanded,
           })}
+
+          {/* Infinite scroll trigger */}
+          <Box ref={loadMoreRef} sx={{ py: 2, textAlign: 'center' }}>
+            {loadingMore && <CircularProgress size={24} />}
+            {!loadingMore && loadMoreError ? (
+              <Stack spacing={1} alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  로드 실패, 다시 시도
+                </Typography>
+                <Button size="small" variant="outlined" onClick={retryLoadMoreNotifications}>
+                  다시 시도
+                </Button>
+              </Stack>
+            ) : null}
+            {!loadingMore && !loadMoreError && !hasMore && displayNotifications.length > 0 && (
+              <Typography variant="body2" color="text.secondary">
+                더 이상 알림이 없습니다
+              </Typography>
+            )}
+          </Box>
         </Stack>
       </Paper>
     )

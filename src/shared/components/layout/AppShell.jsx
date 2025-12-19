@@ -25,6 +25,7 @@ export const AppShell = ({
   children,
   showBottomNav = true,
   fullScreen = false,
+  hideHeader = false,
   className,
 }) => {
   const location = useLocation()
@@ -66,16 +67,18 @@ export const AppShell = ({
         overflow: 'hidden',
       }}
     >
-      <Header navItems={navItems} />
+      {!hideHeader && <Header navItems={navItems} />}
 
       <Box
         sx={{
           display: 'flex',
           flex: 1,
-          pt: {
-            xs: 'calc(64px + var(--safe-area-top))',
-            md: 'calc(72px + var(--safe-area-top))',
-          },
+          pt: hideHeader
+            ? 0
+            : {
+                xs: 'calc(64px + var(--safe-area-top))',
+                md: 'calc(72px + var(--safe-area-top))',
+              },
           overflow: 'hidden',
         }}
       >

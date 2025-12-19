@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState, useEffect, useCallback } from 'react'
-import { Box, Stack, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Paper, Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { MainLayout } from '@shared/components/layout/MainLayout'
 import { useNavigate } from 'react-router-dom'
 import { QuickActionGrid } from '../components/QuickActionGrid'
@@ -342,11 +342,47 @@ export const SeniorDashboard = () => {
 
           {/* Mobile: Summary sits under hero */}
           {isMobile ? (
-            <TodaySummaryCard
-              takenCount={takenCount}
-              totalCount={totalCount}
-              onClick={() => navigate(ROUTE_PATHS.medicationToday)}
-            />
+            <>
+              <TodaySummaryCard
+                takenCount={takenCount}
+                totalCount={totalCount}
+                onClick={() => navigate(ROUTE_PATHS.medicationToday)}
+              />
+              <Paper
+                variant="outlined"
+                onClick={() => navigate(ROUTE_PATHS.appointments)}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 2.5,
+                    bgcolor: '#EEF2FF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 22,
+                  }}
+                >
+                  🏥
+                </Box>
+                <Box>
+                  <Typography sx={{ fontWeight: 800 }}>병원 예약</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    진료 일정 확인 · 리마인더
+                  </Typography>
+                </Box>
+              </Paper>
+            </>
           ) : null}
 
           {/* RN-style quick actions */}

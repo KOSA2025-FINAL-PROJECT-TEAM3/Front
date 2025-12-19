@@ -7,6 +7,7 @@ import logger from "@core/utils/logger"
 
 import { create } from 'zustand'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
+import { NOTIFICATION_PAGINATION } from '@config/constants'
 
 const normalizeTypeKey = (value) => String(value || '').toLowerCase().replace(/\./g, '_')
 
@@ -31,11 +32,51 @@ const calculateUnreadCount = (notifications) => {
   }).length
 }
 
-export const useNotificationStore = create((set) => ({
+/**
+ * 서버 응답을 프론트엔드 알림 객체로 변환
+ * @param {Object} n - 서버 알림 객체
+ * @returns {Object} 변환된 알림 객체
+ */
+const mapNotification = (n) => {
+  const typeKey = normalizeTypeKey(n.type)
+  let groupKey = n.groupKey ||
+    ((n.scheduledTime || n.scheduleTime || n.scheduledAt) && typeKey.includes('missed')
+      ? `${typeKey}-${n.scheduledTime || n.scheduleTime || n.scheduledAt}`
+      : undefined)
+  
+  if (!groupKey && isDietWarningType(typeKey)) {
+    const dayKey = dayKeyFromDate(n.takenTime || n.createdAt)
+    if (dayKey) groupKey = `${typeKey}-${dayKey}`
+  }
+
+  return {
+    id: n.id,
+    title: n.title,
+    message: n.message,
+    read: n.read || n.status === 'READ',
+    createdAt: new Date(n.takenTime || n.createdAt),
+    type: n.type,
+    scheduledTime: n.scheduledTime || n.scheduleTime || n.scheduledAt,
+    missedMedications: n.missedMedications || n.missedMedicationList || n.medications,
+    missedCount:
+      n.missedCount ??
+      n.missedMedicationCount ??
+      (Array.isArray(n.missedMedications) ? n.missedMedications.length : undefined),
+    groupKey,
+  }
+}
+
+export const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
-  loading: false,
-  error: null,
+  // loading states
+  loading: false, // backward-compat alias (initialLoading || loadingMore)
+  initialLoading: false,
+  loadingMore: false,
+  // error states
+  error: null, // initial load error
+  loadMoreError: null, // pagination load error
+  loadMorePaused: false,
   dietJobs: {},
   ocrJobs: {},
   isOcrScanning: false, // OCR 분석 진행 중 여부
@@ -43,6 +84,10 @@ export const useNotificationStore = create((set) => ({
 
   setOcrScanning: (isScanning) => set({ isOcrScanning: isScanning }),
   setDietAnalyzing: (isAnalyzing) => set({ isDietAnalyzing: isAnalyzing }),
+  // 페이지네이션 상태
+  currentPage: 0,
+  hasMore: true,
+  totalCount: 0,
 
   setDietJobResult: (payload) => {
     set((state) => ({
@@ -62,49 +107,113 @@ export const useNotificationStore = create((set) => ({
     }))
   },
 
-  // 알림 목록 가져오기
+  // 알림 목록 가져오기 (초기 로드)
   fetchNotifications: async () => {
-    set({ loading: true, error: null })
+    set({
+      loading: true,
+      initialLoading: true,
+      loadingMore: false,
+      error: null,
+      loadMoreError: null,
+      loadMorePaused: false,
+      currentPage: 0,
+    })
     try {
-      const response = await notificationApiClient.list()
-      if (response && Array.isArray(response)) {
-        const notifications = response.map((n) => ({
-          // 서버 필드 다양성 고려
-          id: n.id,
-          title: n.title,
-          message: n.message,
-          read: n.read || n.status === 'READ',
-          createdAt: new Date(n.takenTime || n.createdAt),
-          type: n.type,
-          scheduledTime: n.scheduledTime || n.scheduleTime || n.scheduledAt,
-          missedMedications: n.missedMedications || n.missedMedicationList || n.medications,
-          missedCount:
-            n.missedCount ??
-            n.missedMedicationCount ??
-            (Array.isArray(n.missedMedications) ? n.missedMedications.length : undefined),
-          groupKey:
-            n.groupKey ||
-            ((n.scheduledTime || n.scheduleTime || n.scheduledAt) &&
-            normalizeTypeKey(n.type).includes('missed')
-              ? `${normalizeTypeKey(n.type)}-${n.scheduledTime || n.scheduleTime || n.scheduledAt}`
-              : undefined),
-        }))
-          .map((n) => {
-            const typeKey = normalizeTypeKey(n.type)
-            if (!n.groupKey && isDietWarningType(typeKey)) {
-              const dayKey = dayKeyFromDate(n.createdAt)
-              return dayKey ? { ...n, groupKey: `${typeKey}-${dayKey}` } : n
-            }
-            return n
-          })
-        set({ notifications, unreadCount: calculateUnreadCount(notifications), loading: false })
+      const response = await notificationApiClient.list(0, NOTIFICATION_PAGINATION.PAGE_SIZE)
+      if (response && response.content) {
+        const notifications = response.content.map(mapNotification)
+        set({ 
+          notifications, 
+          unreadCount: calculateUnreadCount(notifications), 
+          loading: false,
+          initialLoading: false,
+          loadingMore: false,
+          error: null,
+          loadMoreError: null,
+          loadMorePaused: false,
+          currentPage: 0,
+          hasMore: !response.last,
+          totalCount: response.totalElements || 0,
+        })
       } else {
-        set({ notifications: [], unreadCount: 0, loading: false })
+        set({
+          notifications: [],
+          unreadCount: 0,
+          loading: false,
+          initialLoading: false,
+          loadingMore: false,
+          error: null,
+          loadMoreError: null,
+          loadMorePaused: false,
+          hasMore: false,
+          totalCount: 0,
+        })
       }
     } catch (error) {
       logger.error('Failed to fetch notifications:', error)
-      set({ error, loading: false, notifications: [], unreadCount: 0 })
+      set({
+        error,
+        loading: false,
+        initialLoading: false,
+        loadingMore: false,
+        notifications: [],
+        unreadCount: 0,
+        hasMore: false,
+        loadMoreError: null,
+        loadMorePaused: false,
+      })
     }
+  },
+
+  // 추가 알림 로드 (무한 스크롤)
+  loadMoreNotifications: async () => {
+    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications } = get()
+    if (initialLoading || loadingMore || loadMorePaused || !hasMore) return
+
+    set({
+      loading: true,
+      loadingMore: true,
+      loadMoreError: null,
+    })
+    try {
+      const nextPage = currentPage + 1
+      const response = await notificationApiClient.list(nextPage, NOTIFICATION_PAGINATION.PAGE_SIZE)
+      if (response && response.content) {
+        const newNotifications = response.content.map(mapNotification)
+        const merged = [...notifications, ...newNotifications]
+        set({ 
+          notifications: merged, 
+          unreadCount: calculateUnreadCount(merged), 
+          loading: false,
+          loadingMore: false,
+          loadMoreError: null,
+          loadMorePaused: false,
+          currentPage: nextPage,
+          hasMore: !response.last,
+        })
+      } else {
+        set({
+          loading: false,
+          loadingMore: false,
+          loadMoreError: null,
+          loadMorePaused: false,
+          hasMore: false,
+        })
+      }
+    } catch (error) {
+      logger.error('Failed to load more notifications:', error)
+      set({
+        loadMoreError: error,
+        loadMorePaused: true,
+        loading: false,
+        loadingMore: false,
+      })
+    }
+  },
+
+  retryLoadMoreNotifications: async () => {
+    set({ loadMorePaused: false, loadMoreError: null })
+    await get().loadMoreNotifications()
   },
 
   // 실시간 알림 추가 (SSE에서 호출)

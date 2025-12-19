@@ -34,6 +34,12 @@ export const ROUTE_PATHS = {
 
   ocrScan: '/ocr/scan',
 
+  appointments: '/appointments',
+  appointmentAdd: '/appointments/add',
+  appointmentCaregiverAdd: '/appointments/add/caregiver',
+  appointmentDetail: '/appointments/:id',
+  appointmentEdit: '/appointments/:id/edit',
+
   settings: '/settings',
   settingsProfile: '/settings/profile',
   settingsNotifications: '/settings/notifications',
@@ -96,6 +102,12 @@ export const ROUTE_META = {
     ROUTE_PATHS.dietLog,
 
     ROUTE_PATHS.ocrScan,
+
+    ROUTE_PATHS.appointments,
+    ROUTE_PATHS.appointmentAdd,
+    ROUTE_PATHS.appointmentCaregiverAdd,
+    ROUTE_PATHS.appointmentDetail,
+    ROUTE_PATHS.appointmentEdit,
 
     ROUTE_PATHS.settings,
     ROUTE_PATHS.settingsProfile,

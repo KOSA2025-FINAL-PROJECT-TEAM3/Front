@@ -14,6 +14,7 @@ import RestaurantIcon from '@mui/icons-material/Restaurant'
 import SearchIcon from '@mui/icons-material/Search'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import ChatIcon from '@mui/icons-material/Chat'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import logger from '@core/utils/logger'
 import { endOfWeek, format, isAfter, startOfWeek, subDays, addDays } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
@@ -474,6 +475,12 @@ export function CaregiverDashboard() {
                   color="#FFFBEB"
                   onClick={() => navigate(ROUTE_PATHS.familyChat)}
                 />
+                <GuardianMenuCard
+                  title="병원 예약"
+                  icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
+                  color="#EEF2FF"
+                  onClick={() => navigate(ROUTE_PATHS.appointments)}
+                />
               </Box>
             </Paper>
 
@@ -589,6 +596,12 @@ export function CaregiverDashboard() {
               icon={<ChatIcon sx={{ color: '#F59E0B' }} />}
               color="#FFFBEB"
               onClick={() => navigate(ROUTE_PATHS.familyChat)}
+            />
+            <GuardianMenuCard
+              title="병원 예약"
+              icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
+              color="#EEF2FF"
+              onClick={() => navigate(ROUTE_PATHS.appointments)}
             />
           </Box>
 
