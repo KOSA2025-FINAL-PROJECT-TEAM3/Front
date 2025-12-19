@@ -119,12 +119,17 @@ export const useNotificationStore = create((set, get) => ({
       currentPage: 0,
     })
     try {
-      const response = await notificationApiClient.list(0, NOTIFICATION_PAGINATION.PAGE_SIZE)
-      if (response && response.content) {
-        const notifications = response.content.map(mapNotification)
+      // 알림 목록과 안읽은 개수 병렬 요청
+      const [listResponse, unreadResponse] = await Promise.all([
+        notificationApiClient.list(0, NOTIFICATION_PAGINATION.PAGE_SIZE),
+        notificationApiClient.getUnreadCount().catch(() => null)
+      ])
+
+      if (listResponse && listResponse.content) {
+        const notifications = listResponse.content.map(mapNotification)
         set({ 
           notifications, 
-          unreadCount: calculateUnreadCount(notifications), 
+          unreadCount: unreadResponse !== null ? Number(unreadResponse) : calculateUnreadCount(notifications), 
           loading: false,
           initialLoading: false,
           loadingMore: false,
@@ -132,8 +137,8 @@ export const useNotificationStore = create((set, get) => ({
           loadMoreError: null,
           loadMorePaused: false,
           currentPage: 0,
-          hasMore: !response.last,
-          totalCount: response.totalElements || 0,
+          hasMore: !listResponse.last,
+          totalCount: listResponse.totalElements || 0,
         })
       } else {
         set({
@@ -167,7 +172,7 @@ export const useNotificationStore = create((set, get) => ({
 
   // 추가 알림 로드 (무한 스크롤)
   loadMoreNotifications: async () => {
-    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications } = get()
+    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications, unreadCount } = get()
     if (initialLoading || loadingMore || loadMorePaused || !hasMore) return
 
     set({
@@ -183,7 +188,8 @@ export const useNotificationStore = create((set, get) => ({
         const merged = [...notifications, ...newNotifications]
         set({ 
           notifications: merged, 
-          unreadCount: calculateUnreadCount(merged), 
+          // 추가 로드 시에는 unreadCount를 유지 (이미 전체 개수를 알고 있으므로)
+          // 만약 로컬 계산을 쓴다면 다시 계산해야겠지만, 서버 데이터를 쓴다면 업데이트 불필요
           loading: false,
           loadingMore: false,
           loadMoreError: null,
@@ -214,6 +220,15 @@ export const useNotificationStore = create((set, get) => ({
   retryLoadMoreNotifications: async () => {
     set({ loadMorePaused: false, loadMoreError: null })
     await get().loadMoreNotifications()
+  },
+
+  fetchUnreadCount: async () => {
+    try {
+      const count = await notificationApiClient.getUnreadCount()
+      set({ unreadCount: Number(count) })
+    } catch (error) {
+      logger.warn('Failed to fetch unread count:', error)
+    }
   },
 
   // 실시간 알림 추가 (SSE에서 호출)
@@ -268,7 +283,7 @@ export const useNotificationStore = create((set, get) => ({
 
       return {
         notifications: newNotifications,
-        unreadCount: calculateUnreadCount(newNotifications),
+        unreadCount: state.unreadCount + 1, // 실시간 알림 추가 시 카운트 증가
       }
     })
   },
@@ -278,12 +293,16 @@ export const useNotificationStore = create((set, get) => ({
     set((state) => {
       const target = state.notifications.find((t) => t.id === id)
       const targetGroup = target?.groupKey
+      const isAlreadyRead = target?.read
+      
       const newNotifications = state.notifications.map((n) =>
         n.id === id || (targetGroup && n.groupKey === targetGroup) ? { ...n, read: true } : n
       )
+      
       return {
         notifications: newNotifications,
-        unreadCount: calculateUnreadCount(newNotifications),
+        // 안읽었던 알림일 경우에만 카운트 감소
+        unreadCount: !isAlreadyRead ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
       }
     })
     // API 호출 (비동기, 에러 무시)
