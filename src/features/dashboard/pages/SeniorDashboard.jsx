@@ -17,6 +17,7 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { toast } from '@shared/components/toast/toastStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
+import { shallow } from 'zustand/shallow'
 import { format, startOfWeek, endOfWeek, addDays, isAfter, subDays } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
@@ -35,8 +36,13 @@ export const SeniorDashboard = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const { user } = useAuth((state) => ({ user: state.user }))
-  const { medications, fetchMedications } = useMedicationStore()
+
+  // shallow 비교로 불필요한 리렌더링 방지
+  const { user } = useAuth((state) => ({ user: state.user }), shallow)
+  const { medications, fetchMedications } = useMedicationStore(
+    (state) => ({ medications: state.medications, fetchMedications: state.fetchMedications }),
+    shallow
+  )
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
   const [medicationLogs, setMedicationLogs] = useState([])
   const [historyData, setHistoryData] = useState([])

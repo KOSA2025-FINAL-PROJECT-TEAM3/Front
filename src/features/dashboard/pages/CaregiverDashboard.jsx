@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
+import { shallow } from 'zustand/shallow'
 import MainLayout from '@shared/components/layout/MainLayout'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import TodaySummaryCard from '../components/TodaySummaryCard'
@@ -31,20 +32,28 @@ export function CaregiverDashboard() {
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
-  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore((state) => ({
-    familyGroups: state.familyGroups,
-    selectedGroupId: state.selectedGroupId,
-    members: state.members,
-    loading: state.loading,
-    error: state.error,
-    initialized: state.initialized,
-    initialize: state.initialize,
-  }))
+
+  // shallow 비교로 불필요한 리렌더링 방지
+  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore(
+    (state) => ({
+      familyGroups: state.familyGroups,
+      selectedGroupId: state.selectedGroupId,
+      members: state.members,
+      loading: state.loading,
+      error: state.error,
+      initialized: state.initialized,
+      initialize: state.initialize,
+    }),
+    shallow
+  )
   const currentUserId = useAuth((state) => state.user?.id || state.user?.userId || null)
-  const { activeSeniorId, setActiveSeniorId } = useCareTargetStore((state) => ({
-    activeSeniorId: state.activeSeniorMemberId,
-    setActiveSeniorId: state.setActiveSeniorMemberId,
-  }))
+  const { activeSeniorId, setActiveSeniorId } = useCareTargetStore(
+    (state) => ({
+      activeSeniorId: state.activeSeniorMemberId,
+      setActiveSeniorId: state.setActiveSeniorMemberId,
+    }),
+    shallow
+  )
   const [todayRate, setTodayRate] = useState(null)
   const [todayRateLoading, setTodayRateLoading] = useState(false)
   const [todayCounts, setTodayCounts] = useState({ total: 0, completed: 0 })

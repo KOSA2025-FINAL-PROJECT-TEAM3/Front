@@ -10,6 +10,7 @@ import { toast } from '@shared/components/toast/toastStore'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useFamilyStore } from '../store/familyStore'
+import { shallow } from 'zustand/shallow'
 import { FamilyGroupCard } from '../components/FamilyGroupCard.jsx'
 import { FamilyMemberList } from '../components/FamilyMemberList.jsx'
 import { GroupSelectionModal } from '../components/GroupSelectionModal.jsx'
@@ -24,7 +25,8 @@ export const FamilyManagementPage = () => {
   const navigate = useNavigate()
   // [Fixed] Resolve user ID from either id or userId to handle different auth response structures
   const currentUserId = useAuthStore((state) => state.user?.id || state.user?.userId)
-  
+
+  // shallow 비교로 불필요한 리렌더링 방지
   const {
     familyGroups,
     selectedGroupId,
@@ -36,7 +38,21 @@ export const FamilyManagementPage = () => {
     loading,
     error,
     refetchFamily,
-  } = useFamilyStore()
+  } = useFamilyStore(
+    (state) => ({
+      familyGroups: state.familyGroups,
+      selectedGroupId: state.selectedGroupId,
+      getSelectedGroup: state.getSelectedGroup,
+      createFamilyGroup: state.createFamilyGroup,
+      removeMember: state.removeMember,
+      updateMemberRole: state.updateMemberRole,
+      deleteGroup: state.deleteGroup,
+      loading: state.loading,
+      error: state.error,
+      refetchFamily: state.refetchFamily,
+    }),
+    shallow
+  )
 
   // 선택된 그룹 및 멤버 파생
   const familyGroup = getSelectedGroup()
@@ -476,9 +492,9 @@ export const FamilyManagementPage = () => {
             </Stack>
           }
           right={
-            <Box sx={{ 
-              display: 'flex', 
-              flexWrap: 'wrap', 
+            <Box sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
               gap: { xs: 0.5, md: 1 },
               justifyContent: { xs: 'flex-start', md: 'flex-end' },
               '& .MuiButton-root': {
