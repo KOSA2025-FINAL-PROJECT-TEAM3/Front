@@ -15,8 +15,9 @@ import PropTypes from 'prop-types'
 import SearchIcon from '@mui/icons-material/Search'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
 import ChatIcon from '@mui/icons-material/Chat'
+import { memo } from 'react'
 
-export const QuickActionGrid = ({
+export const QuickActionGrid = memo(({
   onSearchPill,
   dietPath,
   chatPath,
@@ -171,7 +172,7 @@ export const QuickActionGrid = ({
       </ButtonBase>
     </Stack>
   )
-}
+})
 
 QuickActionGrid.propTypes = {
   onSearchPill: PropTypes.func.isRequired,

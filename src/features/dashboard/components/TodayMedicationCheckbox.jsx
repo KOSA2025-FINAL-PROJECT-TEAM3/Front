@@ -6,12 +6,13 @@
 
 import { Box, Typography, Stack, Checkbox } from '@mui/material'
 import { RoundedCard } from '@shared/components/mui/RoundedCard'
-	import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-	import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-	import { parseServerLocalDateTime } from '@core/utils/formatting'
-	import PropTypes from 'prop-types'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
+import { parseServerLocalDateTime } from '@core/utils/formatting'
+import PropTypes from 'prop-types'
+import { memo } from 'react'
 
-export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
+export const TodayMedicationCheckbox = memo(({ schedules = [], onToggle }) => {
   const now = new Date()
 
   // 시간대별 그룹화
@@ -41,14 +42,14 @@ export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
 
           const allCompleted = items.every(item => item.status === 'completed')
           const someCompleted = items.some(item => item.status === 'completed')
-	          const validTimeItems = items.filter((item) => item.log?.scheduledTime)
-	          const isFutureSection =
-	            validTimeItems.length > 0 &&
-	            validTimeItems.every((item) => {
-	              const scheduledDate = parseServerLocalDateTime(item.log.scheduledTime)
-	              if (!scheduledDate) return false
-	              return scheduledDate.getTime() - now.getTime() > 60 * 60 * 1000
-	            })
+          const validTimeItems = items.filter((item) => item.log?.scheduledTime)
+          const isFutureSection =
+            validTimeItems.length > 0 &&
+            validTimeItems.every((item) => {
+              const scheduledDate = parseServerLocalDateTime(item.log.scheduledTime)
+              if (!scheduledDate) return false
+              return scheduledDate.getTime() - now.getTime() > 60 * 60 * 1000
+            })
           const isDisabled = isFutureSection && !allCompleted
 
           return (
@@ -68,11 +69,11 @@ export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
                 ...(isDisabled
                   ? {}
                   : {
-                      '&:hover': {
-                        borderColor: 'primary.main',
-                        bgcolor: 'grey.50',
-                      },
-                    }),
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      bgcolor: 'grey.50',
+                    },
+                  }),
               }}
               onClick={() => !isDisabled && onToggle && onToggle(timeKey, items)}
             >
@@ -115,7 +116,7 @@ export const TodayMedicationCheckbox = ({ schedules = [], onToggle }) => {
       </Stack>
     </RoundedCard>
   )
-}
+})
 
 TodayMedicationCheckbox.propTypes = {
   schedules: PropTypes.arrayOf(

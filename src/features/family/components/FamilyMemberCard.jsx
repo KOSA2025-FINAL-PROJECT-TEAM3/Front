@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import PropTypes from 'prop-types'
 import { Avatar, Box, Button, IconButton, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
@@ -9,7 +9,9 @@ const roleLabels = {
   CAREGIVER: '보호자(자녀)',
 }
 
-export const FamilyMemberCard = ({
+
+
+export const FamilyMemberCard = memo(({
   member,
   onDetail,
   onRemove,
@@ -140,8 +142,8 @@ export const FamilyMemberCard = ({
                   }}
                   disabled={isRoleChanging}
                   title="역할 변경"
-                  sx={{ 
-                    borderRadius: 999, 
+                  sx={{
+                    borderRadius: 999,
                     fontWeight: 900,
                     fontSize: { xs: 10, md: 14 },
                     px: { xs: 1, md: 1.5 },
@@ -189,10 +191,10 @@ export const FamilyMemberCard = ({
         </Box>
       </Box>
 
-      <Stack 
-        direction="row" 
-        spacing={1} 
-        alignItems="center" 
+      <Stack
+        direction="row"
+        spacing={1}
+        alignItems="center"
         sx={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
         <Button
@@ -242,7 +244,7 @@ export const FamilyMemberCard = ({
       </Stack>
     </Paper>
   )
-}
+})
 
 FamilyMemberCard.propTypes = {
   member: PropTypes.shape({

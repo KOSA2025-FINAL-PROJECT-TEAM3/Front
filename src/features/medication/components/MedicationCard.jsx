@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Paper, Stack, Typography } from '@mui/material'
+import { memo } from 'react'
 
-export const MedicationCard = ({ medication, onToggle, onRemove, onSelect }) => {
+export const MedicationCard = memo(({ medication, onToggle, onRemove, onSelect }) => {
   const handleSelect = () => {
     onSelect?.(medication)
   }
@@ -79,6 +80,6 @@ export const MedicationCard = ({ medication, onToggle, onRemove, onSelect }) => 
       </Stack>
     </Paper>
   )
-}
+})
 
 export default MedicationCard
