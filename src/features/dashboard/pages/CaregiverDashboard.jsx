@@ -54,6 +54,8 @@ export function CaregiverDashboard() {
     }),
     shallow
   )
+
+
   const [todayRate, setTodayRate] = useState(null)
   const [todayRateLoading, setTodayRateLoading] = useState(false)
   const [todayCounts, setTodayCounts] = useState({ total: 0, completed: 0 })
@@ -139,6 +141,7 @@ export function CaregiverDashboard() {
       setTodayRateLoading(true)
       try {
         const today = new Date().toISOString().split('T')[0]
+
         const response = await familyApiClient.getMedicationLogs(activeSenior.userId, { date: today })
         const logs = response?.logs || response || []
         const total = logs.length

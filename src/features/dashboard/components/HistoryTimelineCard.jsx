@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, memo } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, ButtonBase, Paper, Stack, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -9,7 +9,7 @@ const formatDateLabel = (date) =>
 const formatDayLabel = (date) =>
   date?.toLocaleDateString?.('ko-KR', { weekday: 'long' }) || ''
 
-export const HistoryTimelineCard = ({
+export const HistoryTimelineCard = memo(({
   title = '이전 기록',
   emptyText = '표시할 기록이 없습니다.',
   historyData = [],
@@ -142,6 +142,6 @@ export const HistoryTimelineCard = ({
       )}
     </Stack>
   )
-}
+})
 
 export default HistoryTimelineCard

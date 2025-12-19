@@ -24,6 +24,7 @@ import logger from '@core/utils/logger'
 import TodaySummaryCard from '../components/TodaySummaryCard'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
+import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -44,32 +45,41 @@ export const SeniorDashboard = () => {
     shallow
   )
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
-  const [medicationLogs, setMedicationLogs] = useState([])
   const [historyData, setHistoryData] = useState([])
   const [loading, setLoading] = useState(true)
 
   // 오늘 날짜
   const today = useMemo(() => new Date(), [])
+  const todayStr = useMemo(() => today.toLocaleDateString('en-CA'), [today])
 
-  // 복약 로그 조회
-  const loadMedicationLogs = useCallback(async () => {
-    try {
+  // Medication Log Store 사용
+  const { logsByDate, fetchLogsByDate, updateLog } = useMedicationLogStore(
+    (state) => ({
+      logsByDate: state.logsByDate,
+      fetchLogsByDate: state.fetchLogsByDate,
+      updateLog: state.updateLog
+    }),
+    shallow
+  )
+
+  const medicationLogs = useMemo(() => logsByDate[todayStr] || [], [logsByDate, todayStr])
+
+  // 복약 로그 조회 (캐싱 적용)
+  useEffect(() => {
+    let mounted = true
+    const load = async () => {
       setLoading(true)
-      const todayStr = today.toLocaleDateString('en-CA') // YYYY-MM-DD
-      const response = await medicationLogApiClient.getByDate(todayStr)
-      setMedicationLogs(response || [])
-    } catch (error) {
-      logger.error('Failed to load medication logs:', error)
-      setMedicationLogs([])
-    } finally {
-      setLoading(false)
+      await fetchLogsByDate(todayStr)
+      if (mounted) setLoading(false)
     }
-  }, [today])
+    load()
+    return () => { mounted = false }
+  }, [fetchLogsByDate, todayStr])
 
   useEffect(() => {
     fetchMedications()
-    loadMedicationLogs()
-  }, [fetchMedications, loadMedicationLogs])
+    // logs 로딩은 위 useEffect에서 처리됨
+  }, [fetchMedications])
 
   // 현재 시간대의 다음 복약 정보 (Hero Card용)
   const nextMedication = useMemo(() => {
@@ -280,8 +290,9 @@ export const SeniorDashboard = () => {
       await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
       toast.success('복약이 완료되었습니다.')
 
-      // 로그 다시 불러오기
-      await loadMedicationLogs()
+      // 낙관적 업데이트 또는 다시 불러오기
+      // 여기서는 다시 불러오기를 수행하되, Store를 통해 캐시 갱신
+      await fetchLogsByDate(todayStr, true) // force refresh
       await loadWeeklyStats()
     } catch (error) {
       logger.error('Failed to complete medication:', error)
@@ -308,7 +319,7 @@ export const SeniorDashboard = () => {
         })
       )
       toast.success('복용 처리가 완료되었습니다.')
-      await loadMedicationLogs()
+      await fetchLogsByDate(todayStr, true)
       await loadWeeklyStats()
     } catch (error) {
       logger.error('Failed to complete medications:', error)

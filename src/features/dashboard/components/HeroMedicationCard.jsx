@@ -16,8 +16,9 @@ import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import PropTypes from 'prop-types'
+import { memo } from 'react'
 
-export const HeroMedicationCard = ({
+export const HeroMedicationCard = memo(({
   title = '복약 시간입니다 💊',
   subtitle = '정확한 약품 정보를 확인하세요.',
   time,
@@ -42,9 +43,9 @@ export const HeroMedicationCard = ({
         alignItems: 'stretch',
         ...(onOpenDetail
           ? {
-              cursor: 'pointer',
-              '&:hover': { boxShadow: '0 18px 45px rgba(15, 23, 42, 0.22)' },
-            }
+            cursor: 'pointer',
+            '&:hover': { boxShadow: '0 18px 45px rgba(15, 23, 42, 0.22)' },
+          }
           : null),
       }}
     >
@@ -59,7 +60,7 @@ export const HeroMedicationCard = ({
           bgcolor: 'rgba(255, 255, 255, 0.1)',
         }}
       />
-      
+
       <Stack spacing={2} sx={{ position: 'relative', zIndex: 1 }}>
         <Typography variant="h4" fontWeight={700}>
           {title}
@@ -140,7 +141,7 @@ export const HeroMedicationCard = ({
       </Stack>
     </RoundedCard>
   )
-}
+})
 
 HeroMedicationCard.propTypes = {
   title: PropTypes.string,
