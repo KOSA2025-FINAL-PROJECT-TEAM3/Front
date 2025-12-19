@@ -9,10 +9,12 @@ import AppDialog from '@shared/components/mui/AppDialog'
 import AppButton from '@shared/components/mui/AppButton'
 import DiseaseForm from '@features/disease/components/DiseaseForm'
 import PhoneIcon from '@mui/icons-material/Phone'
+import EventIcon from '@mui/icons-material/Event'
 import MainLayout from '@shared/components/layout/MainLayout'
 import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
 import { BackButton } from '@shared/components/mui/BackButton'
+import { QuickAppointmentModal } from '@features/appointment'
 
 const CATEGORY = {
   hospital: { label: '병원', code: 'HP8' },
@@ -118,6 +120,9 @@ export const PlaceSearchPage = () => {
   const [showDiseaseForm, setShowDiseaseForm] = useState(false)
   const [diseaseSubmitting, setDiseaseSubmitting] = useState(false)
   const authUserId = useMemo(() => getUserIdFromUser(user), [user])
+
+  // 빠른 예약 모달 상태
+  const [selectedPlaceForAppointment, setSelectedPlaceForAppointment] = useState(null)
 
   useEffect(() => {
     enterFocusMode('map')
@@ -440,11 +445,11 @@ export const PlaceSearchPage = () => {
         const center = mapCenter()
         const options = center
           ? {
-              location: new kakao.maps.LatLng(center.lat, center.lng),
-              radius: 5000,
-              category_group_code: CATEGORY.hospital.code,
-              sort: kakao.maps.services.SortBy.DISTANCE,
-            }
+            location: new kakao.maps.LatLng(center.lat, center.lng),
+            radius: 5000,
+            category_group_code: CATEGORY.hospital.code,
+            sort: kakao.maps.services.SortBy.DISTANCE,
+          }
           : { radius: 5000, category_group_code: CATEGORY.hospital.code }
 
         const keywordSearchAsync = (keyword) =>
@@ -566,10 +571,10 @@ export const PlaceSearchPage = () => {
         setCoords(next)
         setCenter(next.lat, next.lng)
         setMyLocationMarker(next.lat, next.lng)
-        ;(async () => {
-          await waitForMapIdle()
-          await rerunLastSearch()
-        })()
+          ; (async () => {
+            await waitForMapIdle()
+            await rerunLastSearch()
+          })()
       },
       (err) => {
         setError(err?.message || '위치 정보를 가져오지 못했습니다.')
@@ -802,10 +807,12 @@ export const PlaceSearchPage = () => {
                               {getAddress(item)}
                             </Typography>
                             {item.phone ? (
-                              <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
-                                <Typography variant="caption" color="text.secondary" noWrap>
-                                  {item.phone}
-                                </Typography>
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {item.phone}
+                              </Typography>
+                            ) : null}
+                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                              {item.phone && (
                                 <AppButton
                                   variant="secondary"
                                   size="sm"
@@ -817,8 +824,22 @@ export const PlaceSearchPage = () => {
                                 >
                                   전화
                                 </AppButton>
-                              </Stack>
-                            ) : null}
+                              )}
+                              {tab === 'hospital' && (
+                                <AppButton
+                                  variant="primary"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedPlaceForAppointment(item)
+                                  }}
+                                  startIcon={<EventIcon fontSize="small" />}
+                                  sx={{ fontWeight: 900, whiteSpace: 'nowrap' }}
+                                >
+                                  예약
+                                </AppButton>
+                              )}
+                            </Stack>
                           </Stack>
                         </Paper>
                       ))
@@ -898,6 +919,13 @@ export const PlaceSearchPage = () => {
         >
           <DiseaseForm onSubmit={handleSubmitDisease} onCancel={() => setShowDiseaseForm(false)} submitting={diseaseSubmitting} />
         </AppDialog>
+
+        {/* 빠른 예약 모달 */}
+        <QuickAppointmentModal
+          open={!!selectedPlaceForAppointment}
+          onClose={() => setSelectedPlaceForAppointment(null)}
+          placeData={selectedPlaceForAppointment}
+        />
       </>
     </MainLayout>
   )
