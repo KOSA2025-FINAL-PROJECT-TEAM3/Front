@@ -100,6 +100,16 @@ export const MealInputForm = ({
     if (initialAnalysisResult.mealType) {
       setMealType(initialAnalysisResult.mealType)
     }
+
+    if (initialAnalysisResult.imageUrl) {
+      setImageUrl(initialAnalysisResult.imageUrl)
+      setImagePreview(initialAnalysisResult.imageUrl)
+    }
+
+    // [Recovery] Open modal automatically to show full details (nutrients, warnings, etc.)
+    setIsModalOpen(true)
+    setIsLoading(false)
+    setAnalysisError(null)
   }, [initialAnalysisResult, isEditing])
 
   useEffect(() => {
