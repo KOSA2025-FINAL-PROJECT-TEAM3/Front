@@ -25,6 +25,10 @@ class NotificationApiClient extends ApiClient {
         return this.get('/', { params: { page, size } })
     }
 
+    getUnreadCount() {
+        return this.get('/unread-count')
+    }
+
     markAsRead(id) {
         return this.patch(`/${id}/read`)
     }
