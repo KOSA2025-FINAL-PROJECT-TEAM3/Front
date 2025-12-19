@@ -17,6 +17,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import PropTypes from 'prop-types'
+import { memo } from 'react'
 
 const DAYS = ['월', '화', '수', '목', '금', '토', '일']
 
@@ -44,7 +45,7 @@ const getStatusColor = (status) => {
   }
 }
 
-export const WeeklyStatsWidget = ({
+export const WeeklyStatsWidget = memo(({
   title = '지난 7일 기록',
   weeklyData = [],
   adherenceRate = 0,
@@ -60,9 +61,9 @@ export const WeeklyStatsWidget = ({
         p: { xs: 1.5, md: 2.5 },
         ...(onClick
           ? {
-              cursor: 'pointer',
-              '&:hover': { boxShadow: '0 14px 34px rgba(15, 23, 42, 0.10)' },
-            }
+            cursor: 'pointer',
+            '&:hover': { boxShadow: '0 14px 34px rgba(15, 23, 42, 0.10)' },
+          }
           : null),
       }}
     >
@@ -92,7 +93,7 @@ export const WeeklyStatsWidget = ({
         <Stack direction="row" justifyContent="space-between" sx={{ mt: { xs: 1, md: 2 } }}>
           {DAYS.map((day, index) => {
             const dayData = weeklyData[index] || { status: 'pending' }
-            
+
             return (
               <Box key={day} sx={{ textAlign: 'center' }}>
                 <Avatar
@@ -116,11 +117,11 @@ export const WeeklyStatsWidget = ({
           })}
         </Stack>
 
-        <Stack 
-          direction="row" 
-          spacing={{ xs: 1.5, md: 3 }} 
-          sx={{ 
-            mt: { xs: 1, md: 2 }, 
+        <Stack
+          direction="row"
+          spacing={{ xs: 1.5, md: 3 }}
+          sx={{
+            mt: { xs: 1, md: 2 },
             justifyContent: 'center',
             display: { xs: 'none', md: 'flex' }
           }}
@@ -141,7 +142,7 @@ export const WeeklyStatsWidget = ({
       </Stack>
     </RoundedCard>
   )
-}
+})
 
 WeeklyStatsWidget.propTypes = {
   title: PropTypes.string,

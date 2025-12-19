@@ -1,7 +1,8 @@
 import { Box, ButtonBase, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import PropTypes from 'prop-types'
+import { memo } from 'react'
 
-export const TodaySummaryCard = ({ takenCount = 0, totalCount = 0, onClick }) => {
+export const TodaySummaryCard = memo(({ takenCount = 0, totalCount = 0, onClick }) => {
   const safeTotal = Math.max(0, totalCount || 0)
   const safeTaken = Math.min(Math.max(0, takenCount || 0), safeTotal || 0)
   const percent = safeTotal > 0 ? Math.round((safeTaken / safeTotal) * 100) : 0
@@ -17,9 +18,9 @@ export const TodaySummaryCard = ({ takenCount = 0, totalCount = 0, onClick }) =>
         textAlign: 'left',
         ...(onClick
           ? {
-              cursor: 'pointer',
-              '&:hover': { borderColor: 'primary.main', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)' },
-            }
+            cursor: 'pointer',
+            '&:hover': { borderColor: 'primary.main', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)' },
+          }
           : null),
       }}
     >
@@ -54,7 +55,7 @@ export const TodaySummaryCard = ({ takenCount = 0, totalCount = 0, onClick }) =>
       </Stack>
     </Paper>
   )
-}
+})
 
 TodaySummaryCard.propTypes = {
   takenCount: PropTypes.number,

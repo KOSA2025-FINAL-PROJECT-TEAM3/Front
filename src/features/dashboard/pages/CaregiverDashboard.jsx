@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
@@ -654,54 +654,52 @@ export function CaregiverDashboard() {
 
 export default CaregiverDashboard
 
-const GuardianMenuCard = ({ title, icon, color, onClick }) => {
+const GuardianMenuCard = memo(({ title, icon, color, onClick }) => {
   return (
-    <ButtonBase onClick={onClick} sx={{ width: '100%', textAlign: 'center', borderRadius: 3 }}>
-      <Paper
-        variant="outlined"
+    <Paper
+      elevation={0}
+      component={ButtonBase}
+      onClick={onClick}
+      sx={{
+        p: 2,
+        height: '100%',
+        width: '100%',
+        bgcolor: 'white',
+        border: '1px solid',
+        borderColor: 'grey.200',
+        borderRadius: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 1.5,
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+          borderColor: 'primary.main',
+          bgcolor: 'primary.50',
+        },
+      }}
+    >
+      <Box
         sx={{
-          width: '100%',
-          p: { xs: 1.5, md: 2.25 },
-          borderRadius: 3,
+          p: 1.5,
+          borderRadius: 2,
+          bgcolor: color,
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
-          justifyContent: { xs: 'center', md: 'flex-start' },
-          gap: { xs: 1, md: 2 },
-          transition: 'all 160ms ease',
-          '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
+          justifyContent: 'center',
         }}
       >
-        <Box
-          sx={{
-            width: { xs: 40, md: 48 },
-            height: { xs: 40, md: 48 },
-            borderRadius: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: color,
-            color: 'text.primary',
-            flex: '0 0 auto',
-            '& .MuiSvgIcon-root': {
-              fontSize: { xs: 20, md: 24 }
-            }
-          }}
-        >
-          {icon}
-        </Box>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 900,
-            fontSize: { xs: 12, md: 16 },
-            whiteSpace: 'nowrap',
-            textAlign: 'center'
-          }}
-        >
-          {title}
-        </Typography>
-      </Paper>
-    </ButtonBase>
+        {icon}
+      </Box>
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: 600, color: 'text.primary' }}
+      >
+        {title}
+      </Typography>
+    </Paper>
   )
-}
+})
