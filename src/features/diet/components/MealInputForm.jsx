@@ -36,6 +36,7 @@ export const MealInputForm = ({
   const [foodName, setFoodName] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [imagePreview, setImagePreview] = useState('')
+  const [selectedFile, setSelectedFile] = useState(null)
 
   // Analysis state
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -47,39 +48,15 @@ export const MealInputForm = ({
 
   const isEditing = !!editingMeal
 
-  const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
   const extractPayload = (resp) => (resp && resp.data) ? resp.data : resp
 
   useEffect(() => {
     dietJobsRef.current = dietJobs || {}
   }, [dietJobs])
 
-  const pollAnalysisJob = async (jobId) => {
-    const maxAttempts = 20
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      const sseJob = dietJobsRef.current?.[jobId]
-      if (sseJob) {
-        if (sseJob.status === 'DONE') {
-          return sseJob.result
-        }
-        if (sseJob.status === 'FAILED') {
-          throw new Error(sseJob.error || '분석에 실패했습니다')
-        }
-      }
-      const resp = extractPayload(await dietApiClient.getAnalysisJob(jobId))
-      if (resp.status === 'DONE') {
-        return resp.result
-      }
-      if (resp.status === 'FAILED') {
-        throw new Error(resp.error || '분석에 실패했습니다')
-      }
-      await wait(1000)
-    }
-    throw new Error('분석이 지연되고 있습니다. 잠시 후 다시 시도해주세요.')
-  }
-
-  // SSE로 완료된 Job 결과 감지 시 현재 Job과 일치하면 즉시 반영
+  /* 
+  // [Modified] Remove SSE listener within the form to prevent interfering with navigation.
+  // Results are handled via global notifications or recovery logic on page re-entry.
   useEffect(() => {
     const jobId = currentJobIdRef.current
     if (!jobId) return
@@ -96,6 +73,7 @@ export const MealInputForm = ({
       setIsModalOpen(true)
     }
   }, [dietJobs])
+  */
 
   // [Voice] Auto-fill effect
   useEffect(() => {
@@ -139,6 +117,7 @@ export const MealInputForm = ({
     setFoodName('')
     setImageUrl('')
     setImagePreview('')
+    setSelectedFile(null)
     setAnalysisResult(null)
     // DietCamera 초기화
     if (dietCameraRef.current) {
@@ -185,10 +164,12 @@ export const MealInputForm = ({
     if (!file) {
       setImageUrl('')
       setImagePreview('')
+      setSelectedFile(null)
       return
     }
 
     setImagePreview(previewUrl || '')
+    setSelectedFile(file)
 
     // 먼저 이미지 업로드 (실패해도 식단 기록은 이미지 없이 진행 가능)
     try {
@@ -203,71 +184,54 @@ export const MealInputForm = ({
       console.error('Failed to upload diet image:', error)
       setImageUrl('')
       // 업로드 실패 시에도 분석은 진행할 수 있도록 경고만 표시
-      setAnalysisError('이미지 업로드에 실패했습니다. 분석은 계속 진행합니다.')
-      setIsModalOpen(true)
-    }
-
-    // 분석 시작 (비동기)
-    try {
-      setDietAnalyzing(true)
-      
-      // 이미지 분석 Job: 식사구분 + 이미지
-      const jobResp = extractPayload(await dietApiClient.startAnalysisJob(file, mealType, ''))
-      const jobId = jobResp.jobId
-      
-      logger.info('Diet Analysis Job Started:', jobId)
-      toast.success('식단 분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
-      
-      // 메인 화면으로 이동 (또는 현재 화면 유지)
-      // 식단은 보통 연속해서 올리지 않으므로 메인으로 가는게 자연스러울 수 있음
-      navigate(ROUTE_PATHS.root)
-      
-    } catch (error) {
-      logger.error('Failed to start diet analysis:', error)
-      toast.error(error.message || '식단 분석 요청에 실패했습니다.')
-      setDietAnalyzing(false)
-    } finally {
-      setIsLoading(false)
-      setIsModalOpen(false) // 모달 닫기 (비동기라 필요 없음)
     }
   }
 
-  const handleTextAnalysis = async () => {
-    if (!foodName.trim()) {
-      alert('음식 이름을 입력해주세요.')
+  const handleStartAnalysis = async () => {
+    if (!selectedFile && !foodName.trim()) {
+      alert('음식 사진을 등록하거나 이름을 입력해주세요.')
       return
     }
 
+    // 1. 즉시 알림 및 이동 (Fire and Forget)
+    setDietAnalyzing(true)
+    toast.success('분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
+    navigate(ROUTE_PATHS.root)
+
+    // 2. 백그라운드에서 API 호출
     try {
-      setDietAnalyzing(true)
-      
-      // 텍스트 분석 Job: 식사구분 + 음식 이름
-      const jobResp = extractPayload(await dietApiClient.startAnalysisJob(null, mealType, foodName))
-      const jobId = jobResp.jobId
-      
-      logger.info('Diet Text Analysis Job Started:', jobId)
-      toast.success('음식 분석이 시작되었습니다. 잠시만 기다려주세요.')
-      
-      navigate(ROUTE_PATHS.root)
+      logger.info('Starting diet analysis in background...', { hasFile: !!selectedFile, foodName, mealType })
+      let response
+      if (selectedFile) {
+        response = await dietApiClient.startAnalysisJob(selectedFile, mealType, '')
+      } else {
+        response = await dietApiClient.startAnalysisJob(null, mealType, foodName)
+      }
+
+      // Handle Axios response wrapper
+      const data = (response && response.data) ? response.data : response
+      const jobId = data?.jobId || data?.id || data?.result?.jobId
+
+      if (jobId) {
+        // [Recovery] Save jobId
+        localStorage.setItem('last_diet_job_id', jobId)
+        logger.info('Diet Analysis Job Started Successfully (Background):', jobId)
+      } else {
+        throw new Error('No Job ID returned')
+      }
 
     } catch (error) {
-      logger.error('Failed to analyze food:', error)
-      toast.error(error.message || '음식 분석 요청에 실패했습니다.')
+      // 이미 화면을 벗어났으므로 조용히 로그만 남기거나, 
+      // 정말 중요한 에러라면 전역 알림을 띄울 수 있음.
+      logger.error('Failed to start diet analysis (Background):', error)
+      // 사용자가 이미 다른 화면에 있으므로 실패 알림이 뜬금없을 수 있으나, 알려주는 게 좋음
+      toast.error('분석 요청 중 오류가 발생했습니다.')
       setDietAnalyzing(false)
     }
   }
 
   const handleRetry = async () => {
-    const req = lastRequestRef.current
-    if (!req) {
-      setAnalysisError('다시 시도할 요청이 없습니다.')
-      return
-    }
-    if (req.type === 'image') {
-      await handleImageCapture(req.file, imagePreview || imageUrl)
-    } else {
-      await handleTextAnalysis()
-    }
+    await handleStartAnalysis()
   }
 
   const handleAnalysisSave = (result) => {
@@ -328,10 +292,10 @@ export const MealInputForm = ({
 
           {/* Action Buttons */}
           <Stack direction="row" spacing={2}>
-            {!imageUrl && !analysisResult && (
+            {!analysisResult && (
               <Button
                 type="button"
-                onClick={handleTextAnalysis}
+                onClick={handleStartAnalysis}
                 variant="outlined"
                 color="primary"
                 fullWidth
