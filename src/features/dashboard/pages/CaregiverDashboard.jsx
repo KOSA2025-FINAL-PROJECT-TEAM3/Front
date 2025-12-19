@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
+import { shallow } from 'zustand/shallow'
 import MainLayout from '@shared/components/layout/MainLayout'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import TodaySummaryCard from '../components/TodaySummaryCard'
@@ -31,20 +32,30 @@ export function CaregiverDashboard() {
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'))
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
-  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore((state) => ({
-    familyGroups: state.familyGroups,
-    selectedGroupId: state.selectedGroupId,
-    members: state.members,
-    loading: state.loading,
-    error: state.error,
-    initialized: state.initialized,
-    initialize: state.initialize,
-  }))
+
+  // shallow 비교로 불필요한 리렌더링 방지
+  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore(
+    (state) => ({
+      familyGroups: state.familyGroups,
+      selectedGroupId: state.selectedGroupId,
+      members: state.members,
+      loading: state.loading,
+      error: state.error,
+      initialized: state.initialized,
+      initialize: state.initialize,
+    }),
+    shallow
+  )
   const currentUserId = useAuth((state) => state.user?.id || state.user?.userId || null)
-  const { activeSeniorId, setActiveSeniorId } = useCareTargetStore((state) => ({
-    activeSeniorId: state.activeSeniorMemberId,
-    setActiveSeniorId: state.setActiveSeniorMemberId,
-  }))
+  const { activeSeniorId, setActiveSeniorId } = useCareTargetStore(
+    (state) => ({
+      activeSeniorId: state.activeSeniorMemberId,
+      setActiveSeniorId: state.setActiveSeniorMemberId,
+    }),
+    shallow
+  )
+
+
   const [todayRate, setTodayRate] = useState(null)
   const [todayRateLoading, setTodayRateLoading] = useState(false)
   const [todayCounts, setTodayCounts] = useState({ total: 0, completed: 0 })
@@ -130,6 +141,7 @@ export function CaregiverDashboard() {
       setTodayRateLoading(true)
       try {
         const today = new Date().toISOString().split('T')[0]
+
         const response = await familyApiClient.getMedicationLogs(activeSenior.userId, { date: today })
         const logs = response?.logs || response || []
         const total = logs.length
@@ -645,54 +657,52 @@ export function CaregiverDashboard() {
 
 export default CaregiverDashboard
 
-const GuardianMenuCard = ({ title, icon, color, onClick }) => {
+const GuardianMenuCard = memo(({ title, icon, color, onClick }) => {
   return (
-    <ButtonBase onClick={onClick} sx={{ width: '100%', textAlign: 'center', borderRadius: 3 }}>
-      <Paper
-        variant="outlined"
+    <Paper
+      elevation={0}
+      component={ButtonBase}
+      onClick={onClick}
+      sx={{
+        p: 2,
+        height: '100%',
+        width: '100%',
+        bgcolor: 'white',
+        border: '1px solid',
+        borderColor: 'grey.200',
+        borderRadius: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 1.5,
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+          borderColor: 'primary.main',
+          bgcolor: 'primary.50',
+        },
+      }}
+    >
+      <Box
         sx={{
-          width: '100%',
-          p: { xs: 1.5, md: 2.25 },
-          borderRadius: 3,
+          p: 1.5,
+          borderRadius: 2,
+          bgcolor: color,
           display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
           alignItems: 'center',
-          justifyContent: { xs: 'center', md: 'flex-start' },
-          gap: { xs: 1, md: 2 },
-          transition: 'all 160ms ease',
-          '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
+          justifyContent: 'center',
         }}
       >
-        <Box
-          sx={{
-            width: { xs: 40, md: 48 },
-            height: { xs: 40, md: 48 },
-            borderRadius: 2.5,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            bgcolor: color,
-            color: 'text.primary',
-            flex: '0 0 auto',
-            '& .MuiSvgIcon-root': {
-              fontSize: { xs: 20, md: 24 }
-            }
-          }}
-        >
-          {icon}
-        </Box>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 900,
-            fontSize: { xs: 12, md: 16 },
-            whiteSpace: 'nowrap',
-            textAlign: 'center'
-          }}
-        >
-          {title}
-        </Typography>
-      </Paper>
-    </ButtonBase>
+        {icon}
+      </Box>
+      <Typography
+        variant="body2"
+        sx={{ fontWeight: 600, color: 'text.primary' }}
+      >
+        {title}
+      </Typography>
+    </Paper>
   )
-}
+})

@@ -11,6 +11,7 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { USER_ROLES } from '@config/constants'
+import { shallow } from 'zustand/shallow'
 
 import { Header } from './Header'
 import { AdaptiveNavigation } from './AdaptiveNavigation'
@@ -31,11 +32,16 @@ export const AppShell = ({
   const location = useLocation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
-  const { isAuthenticated, customerRole } = useAuth((state) => ({
-    isAuthenticated: state.isAuthenticated,
-    customerRole: state.customerRole,
-  }))
-  const { fetchNotifications } = useNotificationStore()
+
+  // shallow 비교로 불필요한 리렌더링 방지
+  const { isAuthenticated, customerRole } = useAuth(
+    (state) => ({
+      isAuthenticated: state.isAuthenticated,
+      customerRole: state.customerRole,
+    }),
+    shallow
+  )
+  const fetchNotifications = useNotificationStore((state) => state.fetchNotifications)
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -76,9 +82,9 @@ export const AppShell = ({
           pt: hideHeader
             ? 0
             : {
-                xs: 'calc(64px + var(--safe-area-top))',
-                md: 'calc(72px + var(--safe-area-top))',
-              },
+              xs: 'calc(64px + var(--safe-area-top))',
+              md: 'calc(72px + var(--safe-area-top))',
+            },
           overflow: 'hidden',
         }}
       >
