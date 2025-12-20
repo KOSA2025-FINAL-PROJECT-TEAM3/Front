@@ -37,11 +37,11 @@ export default defineConfig(({ command, mode }) => {
       cors: true,         // CORS 허용
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',  // Gateway로 직접 연결
+          target: 'http://localhost:80',  // Nginx → Gateway로 연결
           changeOrigin: true,
         },
         '/ws': {
-          target: 'ws://localhost:8080',    // WebSocket
+          target: 'ws://localhost:80',    // WebSocket via Nginx
           ws: true,
         }
       }
