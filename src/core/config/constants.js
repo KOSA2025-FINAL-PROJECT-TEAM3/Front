@@ -137,3 +137,9 @@ export const STORAGE_KEYS = {
   ROLE: 'amapill_role',
   KAKAO_STATE: 'amapill_kakao_oauth_state',
 }
+
+// 식단 경고 필터 설정
+export const DIET_WARNING_FILTER = {
+  HOURS_WINDOW: 24, // 시간 단위
+  WARNING_LEVELS: ['WARNING', 'DANGER', '주의', '경고'],
+}

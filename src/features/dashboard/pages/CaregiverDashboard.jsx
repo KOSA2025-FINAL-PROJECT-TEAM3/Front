@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme } from '@mui/material'
+import { Box, Typography, Stack, Paper, ButtonBase, useMediaQuery, useTheme, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { shallow } from 'zustand/shallow'
@@ -46,7 +46,13 @@ export function CaregiverDashboard() {
     }),
     shallow
   )
-  const currentUserId = useAuth((state) => state.user?.id || state.user?.userId || null)
+
+  const { user, token } = useAuth(
+    (state) => ({ user: state.user, token: state.token }),
+    shallow
+  )
+  const currentUserId = user?.id || user?.userId || null
+
   const { activeSeniorId, setActiveSeniorId } = useCareTargetStore(
     (state) => ({
       activeSeniorId: state.activeSeniorMemberId,
@@ -92,10 +98,10 @@ export function CaregiverDashboard() {
   )
 
   useEffect(() => {
-    if (!initialized) {
+    if (!initialized && token && !loading) {
       initialize().catch(() => { })
     }
-  }, [initialized, initialize])
+  }, [initialized, initialize, token, loading])
 
   const groupMembers = useMemo(() => {
     if (selectedGroupId && Array.isArray(familyGroups)) {
@@ -347,8 +353,73 @@ export function CaregiverDashboard() {
     )
   }
 
+  const hasFamilyGroup = useMemo(() => Array.isArray(familyGroups) && familyGroups.length > 0, [familyGroups])
+  // initialized가 false여도 로그인이 되어있고(token), 로딩중이 아니며, 그룹이 없으면 모달 표시 (loadFamily 실패/조기리턴 방어)
+  const shouldShowNoFamilyModal = !loading && !hasFamilyGroup && (initialized || !!token)
+
+  const handleRedirectToFamily = useCallback(() => {
+    navigate(ROUTE_PATHS.family)
+  }, [navigate])
+
+  const [autoRedirectTimer, setAutoRedirectTimer] = useState(10)
+
+  useEffect(() => {
+    let intervalId
+    if (shouldShowNoFamilyModal) {
+      setAutoRedirectTimer(10)
+      intervalId = setInterval(() => {
+        setAutoRedirectTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalId)
+            handleRedirectToFamily()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    return () => clearInterval(intervalId)
+  }, [shouldShowNoFamilyModal, handleRedirectToFamily])
+
   return (
     <MainLayout>
+      {/* 가족 그룹 없음 강제 모달 */}
+      <Dialog
+        open={shouldShowNoFamilyModal}
+        disableEscapeKeyDown
+        onClose={(event, reason) => {
+          // 백드롭 클릭 시에도 이동
+          if (reason === 'backdropClick') {
+            handleRedirectToFamily()
+          }
+        }}
+        aria-labelledby="no-family-dialog-title"
+      >
+        <DialogTitle id="no-family-dialog-title" sx={{ fontWeight: 900 }}>
+          가족 그룹이 없습니다
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            서비스를 이용하기 위해서는 가족 그룹이 생성되거나 소속되어야 합니다.<br />
+            가족 페이지로 이동하여 그룹을 생성하거나 초대를 확인해주세요.<br />
+            <Typography component="span" color="primary" sx={{ fontWeight: 700, mt: 1, display: 'block' }}>
+              {autoRedirectTimer}초 후 자동으로 이동합니다.
+            </Typography>
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, pt: 0 }}>
+          <Button
+            onClick={handleRedirectToFamily}
+            variant="contained"
+            fullWidth
+            size="large"
+            sx={{ fontWeight: 800 }}
+          >
+            가족 그룹 페이지로 이동
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {isDesktop ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { md: '4fr 8fr' }, gap: 3 }}>
           <Stack spacing={2.5}>

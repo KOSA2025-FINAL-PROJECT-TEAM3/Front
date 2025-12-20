@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
-import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Divider, Grid, Paper, Stack, TextField, Typography, Alert } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
 import { PageHeader } from '@shared/components/layout/PageHeader';
 import { PageStack } from '@shared/components/layout/PageStack';
 import { BackButton } from '@shared/components/mui/BackButton';
@@ -26,6 +27,11 @@ export const PrescriptionAddPage = () => {
     // 수정 모드인지 확인
     const editPrescriptionId = location.state?.editPrescriptionId;
     const isEditMode = !!editPrescriptionId;
+
+    // 대리 등록 (보호자가 어르신 대신 등록)
+    const targetUserId = location.state?.targetUserId;
+    const targetUserName = location.state?.targetUserName;
+    const isProxyRegistration = !!targetUserId;
 
     // 오늘 날짜와 30일 후 날짜 계산
     const today = new Date().toISOString().split('T')[0];
@@ -96,7 +102,7 @@ export const PrescriptionAddPage = () => {
             // OCR 데이터 중복 약물 제거
             const uniqueMedications = [];
             const seenNames = new Set();
-            
+
             if (ocrData.medications) {
                 ocrData.medications.forEach(med => {
                     if (!seenNames.has(med.name)) {
@@ -139,7 +145,7 @@ export const PrescriptionAddPage = () => {
                 medications: [medicationData]
             }));
 
-            toast.success(`${drug.itemName}이(가) 추가되었습니다`);
+            toast.info(`${drug.itemName}이(가) 추가되었습니다. 저장을 눌러야 등록이 완료됩니다.`);
         }
     }, [location.state]);
 
@@ -225,9 +231,9 @@ export const PrescriptionAddPage = () => {
                 toast.success('처방전이 수정되었습니다');
                 navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', editPrescriptionId), { replace: true });
             } else {
-                logger.debug('📤 처방전 등록 요청:', prescriptionData);
-                await createPrescription(prescriptionData);
-                toast.success('처방전이 등록되었습니다');
+                logger.debug('📤 처방전 등록 요청:', prescriptionData, 'targetUserId:', targetUserId);
+                await createPrescription(prescriptionData, targetUserId);
+                toast.success(isProxyRegistration ? `${targetUserName} 님의 처방전이 등록되었습니다` : '처방전이 등록되었습니다');
                 navigate(ROUTE_PATHS.medication, { replace: true });
             }
         } catch (error) {
@@ -245,6 +251,24 @@ export const PrescriptionAddPage = () => {
                         title={isEditMode ? '처방전 수정' : '약 등록'}
                         subtitle={isEditMode ? '처방전 정보를 수정하세요' : '처방전 정보를 입력하고 약을 추가하세요'}
                     />
+
+                    {/* 대리 등록 배너 */}
+                    {isProxyRegistration && (
+                        <Alert
+                            severity="info"
+                            icon={<PersonIcon />}
+                            sx={{
+                                mb: 2,
+                                fontWeight: 700,
+                                bgcolor: '#EEF2FF',
+                                color: '#4F46E5',
+                                border: '1px solid #C7D2FE',
+                                '& .MuiAlert-icon': { color: '#6366F1' }
+                            }}
+                        >
+                            <strong>{targetUserName}</strong> 님의 처방전을 등록합니다
+                        </Alert>
+                    )}
 
                     {/* 처방전 기본 정보 */}
                     <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
@@ -486,37 +510,37 @@ export const PrescriptionAddPage = () => {
                 </PageStack>
             </Box>
 
-                {/* 저장 버튼 */}
-                <Paper
-                    elevation={6}
-                    sx={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        px: 2.5,
-                        pt: 2,
-                        pb: 'calc(var(--safe-area-bottom) + 16px)',
-                        borderTop: '1px solid',
-                        borderColor: 'divider',
-                        bgcolor: 'rgba(255,255,255,0.95)',
-                        backdropFilter: 'blur(16px)',
-                    }}
-                >
-                    <Box sx={{ maxWidth: 520, mx: 'auto' }}>
-                        <Button
-                            type="button"
-                            onClick={handleSubmit}
-                            variant="contained"
-                            size="large"
-                            fullWidth
-                            disabled={loading || prescriptionData.medications.length === 0}
-                            sx={{ fontWeight: 900, borderRadius: 3 }}
-                        >
-                            {loading ? '저장 중...' : '저장'}
-                        </Button>
-                    </Box>
-                </Paper>
+            {/* 저장 버튼 */}
+            <Paper
+                elevation={6}
+                sx={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    px: 2.5,
+                    pt: 2,
+                    pb: 'calc(var(--safe-area-bottom) + 16px)',
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'rgba(255,255,255,0.95)',
+                    backdropFilter: 'blur(16px)',
+                }}
+            >
+                <Box sx={{ maxWidth: 520, mx: 'auto' }}>
+                    <Button
+                        type="button"
+                        onClick={handleSubmit}
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        disabled={loading || prescriptionData.medications.length === 0}
+                        sx={{ fontWeight: 900, borderRadius: 3 }}
+                    >
+                        {loading ? '저장 중...' : '저장'}
+                    </Button>
+                </Box>
+            </Paper>
 
             {showSearchModal && (
                 <MedicationModal

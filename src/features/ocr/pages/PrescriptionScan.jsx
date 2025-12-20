@@ -113,7 +113,9 @@ const PrescriptionScanPage = () => {
               hospitalName: result.hospitalName || result.clinicName || '',
               pharmacyName: result.pharmacyName || '',
               startDate: result.prescribedDate || new Date().toISOString().split('T')[0]
-            }
+            },
+            targetUserId: targetUserId || undefined,
+            targetUserName: targetUserName || undefined
           }
         })
         toast.success('이전 분석 결과를 성공적으로 불러왔습니다.')
