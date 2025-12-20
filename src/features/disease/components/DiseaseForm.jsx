@@ -17,7 +17,6 @@ export const DiseaseForm = ({ initialValue, onSubmit, onCancel, submitting = fal
   const values = initialValue || {}
   const [form, setForm] = useState({
     name: values.name || '',
-    code: values.code || '',
     diagnosedAt: values.diagnosedAt || '',
     isDiagnosedDateUnknown: values.isDiagnosedDateUnknown || false,
     status: values.status || 'ACTIVE',
@@ -64,15 +63,6 @@ export const DiseaseForm = ({ initialValue, onSubmit, onCancel, submitting = fal
       />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 1.25 }}>
-        <TextField
-          id="code"
-          name="code"
-          label="코드"
-          value={form.code}
-          onChange={(e) => handleChange('code', e.target.value)}
-          placeholder="예) I10"
-          fullWidth
-        />
         <TextField
           id="status"
           name="status"

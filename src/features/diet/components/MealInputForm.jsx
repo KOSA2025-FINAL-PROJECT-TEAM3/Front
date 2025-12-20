@@ -26,6 +26,7 @@ export const MealInputForm = ({
   onCancelEdit,
   autoFillData, // [Voice] New prop
   initialAnalysisResult,
+  isModal = false, // [Refactor] Support modal mode
 }) => {
   const navigate = useNavigate()
   const dietCameraRef = useRef(null)
@@ -206,7 +207,9 @@ export const MealInputForm = ({
     // 1. 즉시 알림 및 이동 (Fire and Forget)
     setDietAnalyzing(true)
     toast.success('분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
-    navigate(ROUTE_PATHS.root)
+    if (!isModal) {
+      navigate(ROUTE_PATHS.root)
+    }
 
     // 2. 백그라운드에서 API 호출
     try {
@@ -251,113 +254,124 @@ export const MealInputForm = ({
     // Note: form will be reset after successful submission in handleSubmit
   }
 
-  return (
-    <Card elevation={3} sx={{ borderRadius: 4, mb: 4 }}>
-      <CardContent sx={{ p: 3 }}>
-        <DietCamera
-          ref={dietCameraRef}
-          onImageCapture={handleImageCapture}
-          initialPreview={imagePreview}
-        />
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Meal Type Selection */}
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
-              식사 구분
-            </Typography>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {Object.values(MEAL_TYPES).map((type) => (
-                <Chip
-                  key={type}
-                  label={MEAL_TYPE_LABELS[type]}
-                  onClick={() => setMealType(type)}
-                  color={mealType === type ? 'primary' : 'default'}
-                  variant={mealType === type ? 'filled' : 'outlined'}
-                  clickable
-                  sx={{
-                    borderRadius: 2,
-                    px: 1,
-                    py: 0.5,
-                    fontWeight: mealType === type ? 'bold' : 'normal'
-                  }}
-                />
-              ))}
-            </Stack>
-          </Box>
+  const content = (
+    <Box sx={{ p: isModal ? 0 : 3 }}>
+      <DietCamera
+        ref={dietCameraRef}
+        onImageCapture={handleImageCapture}
+        initialPreview={imagePreview}
+      />
 
-          {/* Food Name Input */}
-          <TextField
-            label={analysisResult ? '인식된 음식 이름' : '음식 이름'}
-            value={foodName}
-            onChange={(e) => setFoodName(e.target.value)}
-            placeholder={analysisResult ? "GPT가 인식한 음식명" : "예: 사과, 계란후라이"}
-            fullWidth
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-            sx={{
-              '& .MuiOutlinedInput-root': { borderRadius: 3 }
-            }}
-          />
-
-          {/* Action Buttons */}
-          <Stack direction="row" spacing={2}>
-            {!analysisResult && (
-              <Button
-                type="button"
-                onClick={handleStartAnalysis}
-                variant="outlined"
-                color="primary"
-                fullWidth
-                size="large"
-                sx={{ borderRadius: 3, py: 1.5 }}
-              >
-                음식 분석하기
-              </Button>
-            )}
-
-            {/* Warning when isFood is false */}
-            {isNotFood && (
-              <Typography variant="body2" color="error" sx={{ width: '100%', textAlign: 'center' }}>
-                ⚠️ 음식으로 인식되지 않아 등록할 수 없습니다.
-              </Typography>
-            )}
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              size="large"
-              disabled={isNotFood}
-              sx={{ borderRadius: 3, py: 1.5, boxShadow: 2 }}
-            >
-              {isEditing ? '식단 수정 완료' : '식단 추가하기'}
-            </Button>
-
-            {isEditing && (
-              <Button
-                type="button"
-                onClick={resetForm}
-                variant="text"
-                color="inherit"
-                sx={{ borderRadius: 3 }}
-              >
-                취소
-              </Button>
-            )}
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Meal Type Selection */}
+        <Box>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom fontWeight="bold">
+            식사 구분
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {Object.values(MEAL_TYPES).map((type) => (
+              <Chip
+                key={type}
+                label={MEAL_TYPE_LABELS[type]}
+                onClick={() => setMealType(type)}
+                color={mealType === type ? 'primary' : 'default'}
+                variant={mealType === type ? 'filled' : 'outlined'}
+                clickable
+                sx={{
+                  borderRadius: 2,
+                  px: 1,
+                  py: 0.5,
+                  fontWeight: mealType === type ? 'bold' : 'normal'
+                }}
+              />
+            ))}
           </Stack>
         </Box>
 
-        <DietAnalysisModal
-          isOpen={isModalOpen}
-          onClose={() => { setIsModalOpen(false); setAnalysisError(null) }}
-          analysisResult={analysisResult}
-          onSave={handleAnalysisSave}
-          isLoading={isLoading}
-          errorMessage={analysisError}
-          onRetry={!isLoading ? handleRetry : null}
+        {/* Food Name Input */}
+        <TextField
+          label={analysisResult ? '인식된 음식 이름' : '음식 이름'}
+          value={foodName}
+          onChange={(e) => setFoodName(e.target.value)}
+          placeholder={analysisResult ? "GPT가 인식한 음식명" : "예: 사과, 계란후라이"}
+          fullWidth
+          variant="outlined"
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            '& .MuiOutlinedInput-root': { borderRadius: 3 }
+          }}
         />
+
+        {/* Action Buttons */}
+        <Stack direction="row" spacing={2}>
+          {!analysisResult && (
+            <Button
+              type="button"
+              onClick={handleStartAnalysis}
+              variant="outlined"
+              color="primary"
+              fullWidth
+              size="large"
+              sx={{ borderRadius: 3, py: 1.5 }}
+            >
+              음식 분석하기
+            </Button>
+          )}
+
+          {/* Warning when isFood is false */}
+          {isNotFood && (
+            <Typography variant="body2" color="error" sx={{ width: '100%', textAlign: 'center' }}>
+              ⚠️ 음식으로 인식되지 않아 등록할 수 없습니다.
+            </Typography>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+            disabled={isNotFood}
+            sx={{ borderRadius: 3, py: 1.5, boxShadow: 2 }}
+          >
+            {isEditing ? '식단 수정 완료' : '식단 추가하기'}
+          </Button>
+
+          {isEditing && (
+            <Button
+              type="button"
+              onClick={resetForm}
+              variant="text"
+              color="inherit"
+              sx={{ borderRadius: 3 }}
+            >
+              취소
+            </Button>
+          )}
+        </Stack>
+      </Box>
+
+      <DietAnalysisModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setAnalysisError(null) }}
+        analysisResult={analysisResult}
+        onSave={handleAnalysisSave}
+        isLoading={isLoading}
+        errorMessage={analysisError}
+        onRetry={!isLoading ? handleRetry : null}
+      />
+    </Box>
+  )
+
+  if (isModal) {
+    return content
+  }
+
+  return (
+    <Card elevation={3} sx={{ borderRadius: 4, mb: 4 }}>
+      <CardContent sx={{ p: 0 }}>
+        {content}
       </CardContent>
     </Card>
   )

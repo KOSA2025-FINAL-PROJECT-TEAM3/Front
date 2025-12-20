@@ -18,13 +18,13 @@ import { toast } from '@shared/components/toast/toastStore'
 import { medicationLogApiClient } from '@core/services/api/medicationLogApiClient'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
 import { shallow } from 'zustand/shallow'
-import { format, startOfWeek, endOfWeek, addDays, isAfter, subDays } from 'date-fns'
+import { format, startOfWeek, endOfWeek, addDays, isAfter } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
 import TodaySummaryCard from '../components/TodaySummaryCard'
-import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
+import { useAppointmentStore } from '@features/appointment/store/appointmentStore'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -45,8 +45,103 @@ export const SeniorDashboard = () => {
     shallow
   )
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
-  const [historyData, setHistoryData] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Appointment Store
+  const { appointments: appointmentList, fetchAppointments } = useAppointmentStore(
+    (state) => ({ appointments: state.appointments, fetchAppointments: state.fetchAppointments }),
+    shallow
+  )
+
+  useEffect(() => {
+    if (user?.id) {
+      // Fetch future appointments starting from today
+      const today = new Date()
+      const startDate = format(today, 'yyyy-MM-dd')
+      fetchAppointments(user.id, { startDate })
+    }
+  }, [user?.id, fetchAppointments])
+
+  const upcomingAppointment = useMemo(() => {
+    if (!appointmentList || appointmentList.length === 0) return null
+    const now = new Date()
+    // Filter for future, non-cancelled/completed apps
+    const future = appointmentList.filter((app) => {
+      if (!app.visitAt) return false
+      const appDate = new Date(app.visitAt)
+      return appDate > now && app.status !== 'CANCELLED' && app.status !== 'COMPLETED'
+    })
+    // Sort by date/time ascending
+    future.sort((a, b) => new Date(a.visitAt) - new Date(b.visitAt))
+    return future[0]
+  }, [appointmentList])
+
+  const renderAppointmentCard = () => {
+    // 날짜 포맷팅 함수
+    const formatAppDate = (visitAt) => {
+      if (!visitAt) return ''
+      return new Date(visitAt).toLocaleString('ko-KR', {
+        month: 'numeric',
+        day: 'numeric',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+    }
+
+    return (
+      <Paper
+        variant="outlined"
+        onClick={() => navigate(ROUTE_PATHS.appointments)}
+        sx={{
+          p: 2,
+          borderRadius: 3,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center', // Center content
+          gap: 2,
+          transition: 'all 0.2s ease',
+          '&:hover': { boxShadow: 4, borderColor: 'primary.main', transform: 'translateY(-2px)' },
+        }}
+      >
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: 2.5,
+            bgcolor: upcomingAppointment ? '#EEF2FF' : '#F3F4F6',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 22,
+          }}
+        >
+          🏥
+        </Box>
+        <Box>
+          {upcomingAppointment ? (
+            <>
+              <Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>
+                {upcomingAppointment.hospitalName || '병원 정보 없음'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                {formatAppDate(upcomingAppointment.visitAt)}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography sx={{ fontWeight: 800, fontSize: '1.0rem' }}>진료 일정</Typography>
+              <Typography variant="body2" color="text.secondary">
+                예정된 진료가 없습니다
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Paper>
+    )
+  }
 
   // 오늘 날짜
   const today = useMemo(() => new Date(), [])
@@ -186,9 +281,25 @@ export const SeniorDashboard = () => {
 
         if (completed >= total) {
           return { status: 'completed' }
-        } else {
-          return { status: 'missed' }
         }
+
+        // 오늘인 경우: 아직 시간이 안 된 약이 남아있다면 'pending' (진행중/예정) 처리
+        if (dateStr === format(new Date(), 'yyyy-MM-dd')) {
+          const now = new Date()
+          const hasOverdue = dayLogs.some((log) => {
+            if (log.completed) return false
+            if (!log.scheduledTime) return false
+            const logTime = parseServerLocalDateTime(log.scheduledTime)
+            // 예정 시간이 지났는데 완료되지 않음 -> Missed
+            return logTime && logTime < now
+          })
+
+          if (!hasOverdue) {
+            return { status: 'pending' }
+          }
+        }
+
+        return { status: 'missed' }
       })
 
       setWeeklyStats(stats)
@@ -197,90 +308,20 @@ export const SeniorDashboard = () => {
     }
   }, [today])
 
-  const loadHistoryTimeline = useCallback(async () => {
-    try {
-      const end = subDays(today, 1)
-      const start = subDays(today, 3)
-      if (isAfter(start, end)) {
-        setHistoryData([])
-        return
-      }
 
-      const logs = await medicationLogApiClient.getByDateRange(format(start, 'yyyy-MM-dd'), format(end, 'yyyy-MM-dd')) || []
-      const byDate = new Map()
-
-      const getTimeSectionLabel = (time) => {
-        const hour = parseInt(String(time || '').split(':')[0] || '0', 10)
-        if (hour >= 5 && hour < 11) return '아침'
-        if (hour >= 11 && hour < 17) return '점심'
-        if (hour >= 17 && hour < 21) return '저녁'
-        return '야간'
-      }
-
-      logs.forEach((log) => {
-        const scheduledDate = log?.scheduledTime ? parseServerLocalDateTime(log.scheduledTime) : null
-        if (!scheduledDate) return
-
-        const dateKey = format(scheduledDate, 'yyyy-MM-dd')
-        const time = format(scheduledDate, 'HH:mm')
-        const label = getTimeSectionLabel(time)
-        const medication = medications.find((m) => m.id === log.medicationId)
-        const medicationName = medication?.name || log.medicationName || '알 수 없는 약'
-
-        if (!byDate.has(dateKey)) {
-          byDate.set(dateKey, { dateKey, date: scheduledDate, sections: new Map() })
-        }
-
-        const entry = byDate.get(dateKey)
-        if (!entry.sections.has(label)) {
-          entry.sections.set(label, { label, time, names: [], completed: true })
-        }
-
-        const section = entry.sections.get(label)
-        section.names.push(medicationName)
-        section.completed = section.completed && Boolean(log.completed)
-        if (time && section.time && time < section.time) {
-          section.time = time
-        }
-      })
-
-      const groups = Array.from(byDate.values())
-        .sort((a, b) => b.dateKey.localeCompare(a.dateKey))
-        .map((group) => {
-          const items = Array.from(group.sections.values()).sort((a, b) => String(a.time).localeCompare(String(b.time)))
-          return {
-            key: group.dateKey,
-            date: group.date,
-            dateLabel: group.date?.toLocaleDateString?.('ko-KR', { month: 'long', day: 'numeric' }) || group.dateKey,
-            dayLabel: group.date?.toLocaleDateString?.('ko-KR', { weekday: 'long' }) || '',
-            items: items.map((item) => ({
-              ...item,
-              names: Array.from(new Set(item.names)).join(', '),
-            })),
-          }
-        })
-
-      setHistoryData(groups)
-    } catch (error) {
-      logger.error('Failed to load history timeline:', error)
-      setHistoryData([])
-    }
-  }, [today, medications])
 
   useEffect(() => {
     loadWeeklyStats()
   }, [loadWeeklyStats])
 
-  useEffect(() => {
-    loadHistoryTimeline()
-  }, [loadHistoryTimeline])
+
 
   const adherenceRate = useMemo(() => {
     const completed = weeklyStats.filter(d => d.status === 'completed').length
     return Math.round((completed / weeklyStats.length) * 100)
   }, [weeklyStats])
 
-  void user
+
 
   // 복약 완료 처리
   const handleConfirmMedication = async () => {
@@ -364,7 +405,7 @@ export const SeniorDashboard = () => {
         {/* Column 1 */}
         <Stack spacing={{ xs: 3, md: 4 }}>
           {loading ? (
-            <HeroMedicationCard title="불러오는 중..." subtitle="오늘 복약 일정을 확인하고 있어요." medications={[]} />
+            <HeroMedicationCard title="불러오는 중..." subtitle="오늘 복약 일정을 확인하고 있어요." medications={[]} sx={{ minHeight: 320 }} />
           ) : nextMedication ? (
             <HeroMedicationCard
               title="복약 시간입니다 💊"
@@ -373,9 +414,10 @@ export const SeniorDashboard = () => {
               medications={nextMedication.medications}
               onConfirm={handleConfirmMedication}
               onOpenDetail={() => navigate(ROUTE_PATHS.medicationToday)}
+              sx={{ minHeight: 320 }}
             />
           ) : (
-            <HeroMedicationCard title="오늘 복약 일정이 없습니다" subtitle="약을 등록하면 자동으로 일정이 생성돼요." medications={[]} />
+            <HeroMedicationCard title="오늘 복약 일정이 없습니다" subtitle="약을 등록하면 자동으로 일정이 생성돼요." medications={[]} sx={{ minHeight: 320 }} />
           )}
 
           {/* Mobile: Summary sits under hero */}
@@ -386,48 +428,17 @@ export const SeniorDashboard = () => {
                 totalCount={totalCount}
                 onClick={() => navigate(ROUTE_PATHS.medicationToday)}
               />
-              <Paper
-                variant="outlined"
-                onClick={() => navigate(ROUTE_PATHS.appointments)}
-                sx={{
-                  p: 2,
-                  borderRadius: 3,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  '&:hover': { boxShadow: 2, borderColor: 'primary.light' },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 2.5,
-                    bgcolor: '#EEF2FF',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 22,
-                  }}
-                >
-                  🏥
-                </Box>
-                <Box>
-                  <Typography sx={{ fontWeight: 800 }}>진료 일정</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    진료 일정 확인 · 리마인더
-                  </Typography>
-                </Box>
-              </Paper>
+              {renderAppointmentCard()}
             </>
           ) : null}
 
           {/* RN-style quick actions */}
           <QuickActionGrid
             onSearchPill={() => openSearchOverlay('pill')}
-            dietPath={ROUTE_PATHS.dietLog}
+            medicationPath={ROUTE_PATHS.medication}
             chatPath={ROUTE_PATHS.familyChat}
+            onDietWarning={() => navigate(ROUTE_PATHS.dietWarning)}
+            onDiseaseSearch={() => openSearchOverlay('disease')}
           />
 
           {!isMobile ? (
@@ -441,8 +452,12 @@ export const SeniorDashboard = () => {
 
         {/* Column 2 */}
         <Stack spacing={{ xs: 3, md: 4 }}>
-          {/* Desktop: TodayChecklist is here */}
-          {!isMobile ? <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} /> : null}
+          {/* TodayChecklist is here (visible on all devices) */}
+          <TodayMedicationCheckbox
+            schedules={todaySchedules}
+            onToggle={handleToggleTimeSection}
+            sx={{ minHeight: 320 }}
+          />
 
           <WeeklyStatsWidget
             title="지난 7일 기록"
@@ -451,10 +466,11 @@ export const SeniorDashboard = () => {
             onClick={() => navigate(ROUTE_PATHS.weeklyStats)}
           />
 
-          <HistoryTimelineCard historyData={historyData} onOpenDetail={() => navigate(ROUTE_PATHS.adherenceReport)} />
+          {/* Desktop/Tablet: Appointment Card settles here */}
+          {!isMobile && renderAppointmentCard()}
         </Stack>
       </Box>
-    </MainLayout>
+    </MainLayout >
   )
 }
 

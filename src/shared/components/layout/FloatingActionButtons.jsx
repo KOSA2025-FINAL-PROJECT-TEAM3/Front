@@ -25,6 +25,7 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
 
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
 import { useVoiceRecognition } from '@features/voice/hooks/useVoiceRecognition'
@@ -37,12 +38,14 @@ import { toast } from '@shared/components/toast/toastStore'
 import logger from '@core/utils/logger'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
+import { DietEntryModal } from '@features/diet/components/DietEntryModal'
 
 export const FloatingActionButtons = ({ hasBottomDock = true }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [dietModalOpen, setDietModalOpen] = useState(false)
 
   const { fontScaleLevel, increaseFontScaleLevel, decreaseFontScaleLevel } = useUiPreferencesStore((state) => ({
     fontScaleLevel: state.fontScaleLevel,
@@ -157,7 +160,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       label: '식단 기록',
       icon: <RestaurantIcon fontSize="small" />,
       color: { bg: '#F0FDFA', fg: '#2EC4B6' },
-      onClick: () => navigate(ROUTE_PATHS.dietLog),
+      onClick: () => setDietModalOpen(true),
     },
     {
       id: 'disease',
@@ -165,6 +168,13 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       icon: <HealthAndSafetyIcon fontSize="small" />,
       color: { bg: '#FFFBEB', fg: '#F59E0B' },
       onClick: () => navigate(ROUTE_PATHS.disease),
+    },
+    {
+      id: 'pdf_export',
+      label: 'PDF 출력',
+      icon: <PictureAsPdfIcon fontSize="small" />,
+      color: { bg: '#FEE2E2', fg: '#EF4444' },
+      onClick: handleExportPdf,
     },
     {
       id: 'medication_log',
@@ -461,6 +471,11 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
           </ButtonBase>
         </Stack>
       </Box>
+
+      <DietEntryModal
+        open={dietModalOpen}
+        onClose={() => setDietModalOpen(false)}
+      />
     </>
   )
 }
