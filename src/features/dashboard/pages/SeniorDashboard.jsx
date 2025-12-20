@@ -25,6 +25,12 @@ import TodaySummaryCard from '../components/TodaySummaryCard'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
+import SpeedDialFab from '@shared/components/mui/SpeedDialFab'
+import MicIcon from '@mui/icons-material/Mic'
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import SearchIcon from '@mui/icons-material/Search'
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -284,7 +290,11 @@ export const SeniorDashboard = () => {
 
   // 복약 완료 처리
   const handleConfirmMedication = async () => {
-    if (!nextMedication?.scheduleId) return
+    if (!nextMedication?.scheduleId) {
+      logger.warn('[SeniorDashboard] scheduleId is missing, cannot complete medication', nextMedication)
+      toast.error('해당 복용 일정을 찾을 수 없습니다. 약물 관리에서 스케줄을 확인해주세요.')
+      return
+    }
 
     try {
       await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
@@ -432,6 +442,53 @@ export const SeniorDashboard = () => {
           <HistoryTimelineCard historyData={historyData} onOpenDetail={() => navigate(ROUTE_PATHS.adherenceReport)} />
         </Stack>
       </Box>
+      <SpeedDialFab
+        actions={[
+          {
+            label: '음성 인식',
+            icon: <MicIcon sx={{ fontSize: 28 }} />,
+            onClick: () => toast.info('음성 인식을 시작합니다...'),
+          },
+          {
+            label: '처방전 촬영',
+            icon: <CameraAltIcon sx={{ fontSize: 28 }} />,
+            onClick: () => navigate(ROUTE_PATHS.ocrScan),
+          },
+          {
+            label: '식단 기록',
+            icon: <RestaurantIcon sx={{ fontSize: 28 }} />,
+            onClick: () => navigate(ROUTE_PATHS.dietLog),
+          },
+          {
+            label: '약 검색',
+            icon: <SearchIcon sx={{ fontSize: 28 }} />,
+            onClick: () => openSearchOverlay('pill'),
+          },
+          {
+            label: '질병 리포트',
+            icon: <HealthAndSafetyIcon sx={{ fontSize: 28 }} />,
+            onClick: () => navigate(ROUTE_PATHS.disease),
+          },
+        ]}
+        ariaLabel="어르신 빠른 메뉴"
+        size={64} // 큰 사이즈
+        highContrast // 고대비 모드
+        backdropBlur
+        gameFeel
+        sx={{
+          '& .MuiSpeedDialAction-fab': {
+            width: 56,
+            height: 56,
+          },
+          '& .MuiSpeedDialAction-staticTooltipLabel': {
+            fontSize: '16px', // 큰 폰트
+            fontWeight: 800,
+            color: 'common.white',
+            bgcolor: 'rgba(0,0,0,0.8)',
+            p: 1.5,
+          }
+        }}
+      />
     </MainLayout>
   )
 }
