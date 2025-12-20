@@ -79,6 +79,9 @@ export const Login = () => {
 
   const handleLogin = async (formData) => {
     try {
+      // Clear storage on login
+      window.localStorage.clear()
+      window.sessionStorage.clear()
       await login(formData.email, formData.password)
       navigateAfterAuthentication(navigate, redirectPath)
     } catch (err) {
