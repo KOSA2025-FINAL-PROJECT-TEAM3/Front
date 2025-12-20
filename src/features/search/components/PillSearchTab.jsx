@@ -24,7 +24,6 @@ import { ROUTE_PATHS } from '@config/routes.config'
 import { searchApiClient } from '@core/services/api/searchApiClient'
 import logger from '@core/utils/logger'
 import { useMedicationStore } from '@features/medication/store/medicationStore'
-import { usePrescriptionStore } from '@features/medication/store/prescriptionStore'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
 import AppDialog from '@shared/components/mui/AppDialog'
 import AiWarningDialog from '@shared/components/mui/AiWarningDialog'
@@ -64,7 +63,7 @@ const DetailBlock = ({ label, value }) => {
   )
 }
 
-export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', recentSection = null } = {}) => {
+export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', recentSection = null, onRequestClose } = {}) => {
   const navigate = useNavigate()
   const location = useLocation()
   const pendingAction = useVoiceActionStore((state) => state.pendingAction)
@@ -87,17 +86,9 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
   const [warningContext, setWarningContext] = useState('')
   const [isAiResult, setIsAiResult] = useState(false)
 
-  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false)
-  const [selectedDrug, setSelectedDrug] = useState(null)
-
   const { medications, fetchMedications } = useMedicationStore((state) => ({
     medications: state.medications,
     fetchMedications: state.fetchMedications,
-  }))
-
-  const { prescriptions, fetchPrescriptions } = usePrescriptionStore((state) => ({
-    prescriptions: state.prescriptions,
-    fetchPrescriptions: state.fetchPrescriptions,
   }))
 
   useEffect(() => {
@@ -263,18 +254,6 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
     [hasSearched, loading, error, results],
   )
 
-  const proceedToPrescriptionSelection = async (drug) => {
-    setSelectedDrug(drug)
-    setShowPrescriptionModal(true)
-
-    try {
-      await fetchPrescriptions()
-    } catch (err) {
-      logger.error('처방전 목록 조회 실패', err)
-      toast.error('처방전 목록을 불러오지 못했습니다.')
-    }
-  }
-
   const handleRegisterMedication = async (drug) => {
     const token = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     if (!token) {
@@ -289,28 +268,21 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
       return
     }
 
-    await proceedToPrescriptionSelection(drug)
+    // Directly navigate to prescription add page
+    navigate(ROUTE_PATHS.prescriptionAdd, {
+      state: { addDrug: drug },
+    })
+    onRequestClose?.() // Close overlay if exists
   }
 
   const confirmAiRegister = () => {
     if (!pendingAiDrug) return
     setWarningOpen(false)
-    proceedToPrescriptionSelection({ ...pendingAiDrug, aiGenerated: false })
-    setPendingAiDrug(null)
-  }
-
-  const handleAddToPrescription = (prescriptionId) => {
-    navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', prescriptionId), {
-      state: { addDrug: selectedDrug },
-    })
-    setShowPrescriptionModal(false)
-  }
-
-  const handleCreateNewPrescription = () => {
     navigate(ROUTE_PATHS.prescriptionAdd, {
-      state: { addDrug: selectedDrug },
+      state: { addDrug: { ...pendingAiDrug, aiGenerated: false } },
     })
-    setShowPrescriptionModal(false)
+    setPendingAiDrug(null)
+    onRequestClose?.() // Close overlay if exists
   }
 
   const inputPanel = (
@@ -557,49 +529,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
         }
       />
 
-      <AppDialog
-        isOpen={showPrescriptionModal}
-        onClose={() => setShowPrescriptionModal(false)}
-        title="처방전 선택"
-        description={selectedDrug ? `${selectedDrug.itemName}을(를) 추가할 처방전을 선택하세요` : undefined}
-        maxWidth="sm"
-      >
-        <Stack spacing={1}>
-          {prescriptions.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              등록된 처방전이 없습니다.
-            </Typography>
-          ) : null}
 
-          {prescriptions.map((prescription) => (
-            <Button
-              key={prescription.id}
-              variant="outlined"
-              onClick={() => handleAddToPrescription(prescription.id)}
-              sx={{ justifyContent: 'space-between', py: 1.25, px: 1.5, borderRadius: 3 }}
-            >
-              <Box sx={{ textAlign: 'left' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
-                  {prescription.pharmacyName || '약국명 미입력'}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {prescription.hospitalName || '병원명 미입력'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {prescription.startDate} ~ {prescription.endDate}
-                </Typography>
-              </Box>
-              <Typography variant="body2" sx={{ fontWeight: 900 }}>
-                →
-              </Typography>
-            </Button>
-          ))}
-
-          <Button variant="contained" onClick={handleCreateNewPrescription} sx={{ fontWeight: 900, borderRadius: 3 }}>
-            + 새 처방전 만들기
-          </Button>
-        </Stack>
-      </AppDialog>
     </Box>
   )
 }

@@ -134,14 +134,39 @@ export const useAuthStore = create(
       clearAuthState: () => {
         // 1. 먼저 모든 Auth 관련 localStorage 삭제
         if (typeof window !== 'undefined') {
+          // LocalStorage - 개별 키 삭제
           window.localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
           window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
           window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
           window.localStorage.removeItem(STORAGE_KEYS.ROLE)
           window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
+          window.localStorage.removeItem(STORAGE_KEYS.FAMILY_GROUP)
+          window.localStorage.removeItem(STORAGE_KEYS.FAMILY_MEMBER_DETAILS)
+          window.localStorage.removeItem(STORAGE_KEYS.DIET_LOGS)
           window.localStorage.removeItem('amapill-auth-storage-v2')
-          // 세션 관련 데이터도 정리 (보호자가 선택한 어르신 정보)
           window.localStorage.removeItem('amapill-care-target-v1')
+
+          // LocalStorage - amapill 관련 모든 키 삭제 (확장성)
+          Object.keys(window.localStorage).forEach(key => {
+            if (key.startsWith('amapill')) {
+              window.localStorage.removeItem(key)
+            }
+          })
+
+          // SessionStorage - amapill 관련 모든 키 삭제
+          Object.keys(window.sessionStorage).forEach(key => {
+            if (key.startsWith('amapill')) {
+              window.sessionStorage.removeItem(key)
+            }
+          })
+
+          // Cookie - amapill 관련 쿠키 삭제
+          document.cookie.split(';').forEach(cookie => {
+            const cookieName = cookie.split('=')[0].trim()
+            if (cookieName.startsWith('amapill')) {
+              document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
+            }
+          })
         }
 
         // 2. Zustand 상태 초기화 (persist가 빈 상태 저장할 수 있음)
