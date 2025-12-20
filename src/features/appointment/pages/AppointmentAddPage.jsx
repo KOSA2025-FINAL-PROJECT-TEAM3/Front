@@ -38,7 +38,7 @@ const AppointmentAddPage = () => {
     }
 
     return (
-        <MainLayout hideHeader>
+        <MainLayout>
             {/* 커스텀 헤더 */}
             <Paper
                 elevation={0}

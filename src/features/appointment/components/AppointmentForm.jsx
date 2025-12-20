@@ -236,12 +236,12 @@ export const AppointmentForm = ({
                         <Stack spacing={2}>
                             <Stack direction="row" spacing={1} alignItems="flex-start">
                                 <TextField
-                                    label="붑원명"
+                                    label="병원명"
                                     value={form.hospitalName}
                                     onChange={handleChange('hospitalName')}
                                     error={Boolean(errors.hospitalName)}
                                     helperText={errors.hospitalName}
-                                    placeholder="예: 서울대학교붑원"
+                                    placeholder="예: 서울대학교병원"
                                     required
                                     fullWidth
                                 />
@@ -401,7 +401,7 @@ export const AppointmentForm = ({
                 </Stack>
             </Box>
 
-            {/* 붑원 검색 모달 */}
+            {/* 병원 검색 모달 */}
             <HospitalSearchModal
                 open={hospitalSearchOpen}
                 onClose={() => setHospitalSearchOpen(false)}
