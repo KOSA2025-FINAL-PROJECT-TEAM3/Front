@@ -1,6 +1,6 @@
 import logger from '@core/utils/logger'
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
@@ -36,15 +36,15 @@ export const DiseasePage = () => {
     updateDisease,
     restoreDisease,
   } = useDiseases()
-  
+
   const { consumeAction } = useVoiceActionStore()
-  
+
   const [showTrash, setShowTrash] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(null)
-  
+
   // Refactored Confirmation State
   const [confirmState, setConfirmState] = useState({ isOpen: false, type: null, data: null })
 
@@ -84,6 +84,17 @@ export const DiseasePage = () => {
       handleExportPdf()
     }
   }, [consumeAction, handleExportPdf])
+
+  // 3. Navigation State (검색 탭에서 질병 등록으로 넘어온 경우)
+  const location = useLocation()
+  useEffect(() => {
+    if (location.state?.autoCreate) {
+      setEditing({ name: location.state.autoCreate })
+      setShowForm(true)
+      // Clear state to prevent reopening on refresh (optional, but good practice if using replace)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [location.state, navigate])
 
   const fabActions = [
     {

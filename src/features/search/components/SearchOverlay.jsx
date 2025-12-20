@@ -25,7 +25,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useSearchHistoryStore } from '@features/search/store/searchHistoryStore'
 import { PillSearchTab } from '@features/search/components/PillSearchTab'
-import { DietSearchTab } from '@features/search/components/DietSearchTab'
+import { DiseaseSearchTab } from '@features/search/components/DiseaseSearchTab'
 import { ROUTE_PATHS } from '@config/routes.config'
 
 const TransitionUp = forwardRef(function TransitionUp(props, ref) {
@@ -65,7 +65,7 @@ export const SearchOverlay = () => {
     }
   }, [isOpen])
 
-  const overlayTitle = activeTab === 'pill' ? '약 검색' : '식단'
+  const overlayTitle = activeTab === 'pill' ? '약 검색' : '질병 검색'
 
   const recent = useMemo(() => (Array.isArray(history) ? history : []), [history])
 
@@ -170,7 +170,7 @@ export const SearchOverlay = () => {
               variant="fullWidth"
             >
               <Tab value="pill" label="약" />
-              <Tab value="diet" label="식단" />
+              <Tab value="disease" label="질병" />
             </Tabs>
           </Box>
 
@@ -195,8 +195,8 @@ export const SearchOverlay = () => {
                 }}
               />
             ) : (
-              <DietSearchTab
-                key={`diet-${openSeq}`}
+              <DiseaseSearchTab
+                key={`disease-${openSeq}`}
                 autoFocus
                 layout="overlay"
                 recentSection={RecentSection}

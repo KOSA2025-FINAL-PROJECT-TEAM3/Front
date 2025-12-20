@@ -183,11 +183,38 @@ export function CaregiverDashboard() {
           }),
         )
 
-        const stats = results.map((logs) => {
+        const stats = results.map((logs, index) => {
+          const dayDate = dates[index]
           const total = logs.length
           if (total === 0) return { status: 'pending' }
+
           const completed = logs.filter((l) => l.status === 'completed' || l.completed === true).length
-          return completed >= total ? { status: 'completed' } : { status: 'missed' }
+
+          if (completed >= total) {
+            return { status: 'completed' }
+          }
+
+          // 오늘인 경우: 아직 시간이 안 된 약이 남아있다면 'pending' (진행중/예정) 처리
+          const dateStr = format(dayDate, 'yyyy-MM-dd')
+          const todayStr = format(new Date(), 'yyyy-MM-dd')
+
+          if (dateStr === todayStr) {
+            const now = new Date()
+            const hasOverdue = logs.some((log) => {
+              const isLogCompleted = log.status === 'completed' || log.completed === true
+              if (isLogCompleted) return false
+              if (!log.scheduledTime) return false
+              const logTime = parseServerLocalDateTime(log.scheduledTime)
+              // 예정 시간이 지났는데 완료되지 않음 -> Missed
+              return logTime && logTime < now
+            })
+
+            if (!hasOverdue) {
+              return { status: 'pending' }
+            }
+          }
+
+          return { status: 'missed' }
         })
 
         setWeeklyStats(stats)

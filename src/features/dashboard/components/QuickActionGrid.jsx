@@ -12,22 +12,33 @@ import {
   Typography,
 } from '@mui/material'
 import PropTypes from 'prop-types'
+import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import SearchIcon from '@mui/icons-material/Search'
-import RestaurantIcon from '@mui/icons-material/Restaurant'
 import ChatIcon from '@mui/icons-material/Chat'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import CoronavirusIcon from '@mui/icons-material/Coronavirus'
 import { memo } from 'react'
 
 export const QuickActionGrid = memo(({
   onSearchPill,
-  dietPath,
+  medicationPath,
   chatPath,
+  onDietWarning,
+  onDiseaseSearch,
 }) => {
   return (
     <Stack spacing={2}>
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
+      {/* Mobile: 1 Col (List), Desktop: 4 Col (Grid) */}
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' },
+        gap: 2
+      }}>
+        {/* 1. 약/질병 검색 */}
         <ButtonBase
           onClick={onSearchPill}
           sx={{
+            width: '100%',
             textAlign: 'left',
             borderRadius: 3.5,
             overflow: 'hidden',
@@ -35,6 +46,7 @@ export const QuickActionGrid = memo(({
             borderColor: 'divider',
             bgcolor: 'common.white',
             p: 2.25,
+            height: '100%',
             transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
             '&:hover': {
               borderColor: 'primary.main',
@@ -44,7 +56,12 @@ export const QuickActionGrid = memo(({
             },
           }}
         >
-          <Stack spacing={1.25} alignItems="center">
+          <Stack
+            direction={{ xs: 'row', md: 'column' }}
+            alignItems="center"
+            spacing={{ xs: 2, md: 1.25 }}
+            sx={{ width: '100%' }}
+          >
             <Box
               className="qa-icon"
               sx={{
@@ -57,24 +74,27 @@ export const QuickActionGrid = memo(({
                 bgcolor: '#F6FAFF',
                 color: 'primary.main',
                 transition: 'all 160ms ease',
+                flexShrink: 0,
               }}
             >
               <SearchIcon />
             </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>약품 검색</Typography>
+            <Box sx={{ textAlign: 'center', flex: 1 }}>
+              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>약/질병 검색</Typography>
               <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 800 }}>
-                무슨 약일까?
+                궁금한 증상/약 검색
               </Typography>
             </Box>
           </Stack>
         </ButtonBase>
 
+        {/* 2. 복약 관리 (구 식단 기록) */}
         <ButtonBase
           onClick={() => {
-            if (dietPath) window.location.href = dietPath
+            if (medicationPath) window.location.href = medicationPath
           }}
           sx={{
+            width: '100%',
             textAlign: 'left',
             borderRadius: 3.5,
             overflow: 'hidden',
@@ -82,16 +102,22 @@ export const QuickActionGrid = memo(({
             borderColor: 'divider',
             bgcolor: 'common.white',
             p: 2.25,
+            height: '100%',
             transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
             '&:hover': {
-              borderColor: '#FBBF24',
+              borderColor: '#6366F1',
               boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
               transform: 'translateY(-1px)',
-              '& .qa-icon': { bgcolor: '#F59E0B', color: 'common.white' },
+              '& .qa-icon': { bgcolor: '#6366F1', color: 'common.white' },
             },
           }}
         >
-          <Stack spacing={1.25} alignItems="center">
+          <Stack
+            direction={{ xs: 'row', md: 'column' }}
+            alignItems="center"
+            spacing={{ xs: 2, md: 1.25 }}
+            sx={{ width: '100%' }}
+          >
             <Box
               className="qa-icon"
               sx={{
@@ -101,23 +127,133 @@ export const QuickActionGrid = memo(({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: '#FFFBEB',
-                color: '#F59E0B',
+                bgcolor: '#EEF2FF',
+                color: '#6366F1',
                 transition: 'all 160ms ease',
+                flexShrink: 0,
               }}
             >
-              <RestaurantIcon />
+              <LocalPharmacyIcon />
             </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>식단 기록</Typography>
+            <Box sx={{ textAlign: 'center', flex: 1 }}>
+              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>복약 관리</Typography>
               <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 800 }}>
-                건강한 식습관
+                내 약 관리하기
+              </Typography>
+            </Box>
+          </Stack>
+        </ButtonBase>
+
+        {/* 3. 식이 경고 */}
+        <ButtonBase
+          onClick={onDietWarning}
+          sx={{
+            width: '100%',
+            textAlign: 'left',
+            borderRadius: 3.5,
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'common.white',
+            p: 2.25,
+            height: '100%',
+            transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
+            '&:hover': {
+              borderColor: '#EF4444',
+              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+              transform: 'translateY(-1px)',
+              '& .qa-icon': { bgcolor: '#EF4444', color: 'common.white' },
+            },
+          }}
+        >
+          <Stack
+            direction={{ xs: 'row', md: 'column' }}
+            alignItems="center"
+            spacing={{ xs: 2, md: 1.25 }}
+            sx={{ width: '100%' }}
+          >
+            <Box
+              className="qa-icon"
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: '#FEF2F2',
+                color: '#EF4444',
+                transition: 'all 160ms ease',
+                flexShrink: 0,
+              }}
+            >
+              <WarningAmberIcon />
+            </Box>
+            <Box sx={{ textAlign: 'center', flex: 1 }}>
+              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>식이 경고</Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 800 }}>
+                주의할 음식
+              </Typography>
+            </Box>
+          </Stack>
+        </ButtonBase>
+
+        {/* 4. 질병 검색 */}
+        <ButtonBase
+          onClick={onDiseaseSearch}
+          sx={{
+            width: '100%',
+            textAlign: 'left',
+            borderRadius: 3.5,
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'common.white',
+            p: 2.25,
+            height: '100%',
+            transition: 'border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease',
+            '&:hover': {
+              borderColor: '#10B981',
+              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+              transform: 'translateY(-1px)',
+              '& .qa-icon': { bgcolor: '#10B981', color: 'common.white' },
+            },
+          }}
+        >
+          <Stack
+            direction={{ xs: 'row', md: 'column' }}
+            alignItems="center"
+            spacing={{ xs: 2, md: 1.25 }}
+            sx={{ width: '100%' }}
+          >
+            <Box
+              className="qa-icon"
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: '#ECFDF5',
+                color: '#10B981',
+                transition: 'all 160ms ease',
+                flexShrink: 0,
+              }}
+            >
+              <CoronavirusIcon />
+            </Box>
+            <Box sx={{ textAlign: 'center', flex: 1 }}>
+              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>질병 검색</Typography>
+              <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 800 }}>
+                질병 정보 찾기
               </Typography>
             </Box>
           </Stack>
         </ButtonBase>
       </Box>
 
+      {/* 가족 채팅방 (Full Width) */}
       <ButtonBase
         onClick={() => {
           if (chatPath) window.location.href = chatPath
@@ -144,7 +280,7 @@ export const QuickActionGrid = memo(({
             },
           }}
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center" justifyContent="center">
             <Box
               sx={{
                 width: 48,
@@ -161,7 +297,7 @@ export const QuickActionGrid = memo(({
             >
               <ChatIcon />
             </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
               <Typography sx={{ fontWeight: 900, color: '#B45309' }}>가족 채팅방</Typography>
               <Typography variant="body2" sx={{ color: '#D97706', fontWeight: 800 }}>
                 우리 가족에게 안부 묻기
@@ -178,6 +314,8 @@ QuickActionGrid.propTypes = {
   onSearchPill: PropTypes.func.isRequired,
   dietPath: PropTypes.string.isRequired,
   chatPath: PropTypes.string.isRequired,
+  onDietWarning: PropTypes.func, // New
+  onDiseaseSearch: PropTypes.func, // New
 }
 
 export default QuickActionGrid
