@@ -13,7 +13,7 @@ import { useOcrRegistration } from '../hooks/useOcrRegistration'
 import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
 import BackButton from '@shared/components/mui/BackButton'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 /**
  * 처방전 스캔 및 약물 등록 페이지
@@ -28,6 +28,11 @@ import { useNavigate } from 'react-router-dom'
  */
 const PrescriptionScanPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // 대리 등록 정보 (보호자 -> 어르신)
+  const targetUserId = location.state?.targetUserId
+
   const {
     // 상태
     step,
@@ -50,7 +55,7 @@ const PrescriptionScanPage = () => {
     removeIntakeTime,
     handleRegister,
     reset
-  } = useOcrRegistration()
+  } = useOcrRegistration({ targetUserId })
 
   const handleBack = () => {
     if (step !== 'select') {

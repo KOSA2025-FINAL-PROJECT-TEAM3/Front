@@ -32,6 +32,11 @@ export const GroupSelectionModal = ({ isOpen, onClose, onSelect }) => {
       isOpen={isOpen}
       onClose={onClose}
       title="가족 그룹 선택"
+      slotProps={{
+        backdrop: {
+          sx: { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        },
+      }}
       footer={
         <Stack direction="row" justifyContent="flex-end" spacing={1}>
           <Button variant="contained" onClick={handleSelect} disabled={!localSelectedId} sx={{ fontWeight: 900 }}>

@@ -120,6 +120,27 @@ export const MealInputForm = ({
       const existingImage = editingMeal.imageUrl || ''
       setImageUrl(existingImage)
       setImagePreview(existingImage)
+
+      // [Fix] Restore analysis result from existing meal data so it doesn't get wiped on update
+      try {
+        setAnalysisResult({
+          isFood: true, // Existing meals must be food
+          foodName: editingMeal.foodName,
+          mealType: editingMeal.mealType,
+          overallLevel: editingMeal.overallLevel,
+          summary: editingMeal.summary,
+          // Parse JSON strings back to arrays if needed
+          drugInteractions: typeof editingMeal.drugInteractions === 'string'
+            ? JSON.parse(editingMeal.drugInteractions)
+            : (editingMeal.drugInteractions || []),
+          diseaseInteractions: typeof editingMeal.diseaseInteractions === 'string'
+            ? JSON.parse(editingMeal.diseaseInteractions)
+            : (editingMeal.diseaseInteractions || [])
+        })
+      } catch (e) {
+        logger.error('Failed to restore analysis result from editingMeal', e)
+        // Fallback to avoid breaking the form, but level might be lost
+      }
     }
   }, [editingMeal, isEditing])
 
@@ -250,6 +271,7 @@ export const MealInputForm = ({
   const handleAnalysisSave = (result) => {
     setFoodName(result.foodName)
     setMealType(result.mealType)
+    setAnalysisResult(result)
     setIsModalOpen(false)
     // Note: form will be reset after successful submission in handleSubmit
   }

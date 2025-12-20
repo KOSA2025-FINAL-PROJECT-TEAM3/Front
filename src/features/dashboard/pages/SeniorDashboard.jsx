@@ -25,6 +25,7 @@ import TodaySummaryCard from '../components/TodaySummaryCard'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
 import { useAppointmentStore } from '@features/appointment/store/appointmentStore'
+import { FoodWarningModal } from '@features/diet/components/FoodWarningModal'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -46,6 +47,7 @@ export const SeniorDashboard = () => {
   )
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
   const [loading, setLoading] = useState(true)
+  const [dietWarningOpen, setDietWarningOpen] = useState(false)
 
   // Appointment Store
   const { appointments: appointmentList, fetchAppointments } = useAppointmentStore(
@@ -437,7 +439,7 @@ export const SeniorDashboard = () => {
             onSearchPill={() => openSearchOverlay('pill')}
             medicationPath={ROUTE_PATHS.medication}
             chatPath={ROUTE_PATHS.familyChat}
-            onDietWarning={() => navigate(ROUTE_PATHS.dietWarning)}
+            onDietWarning={() => setDietWarningOpen(true)}
             onDiseaseSearch={() => openSearchOverlay('disease')}
           />
 
@@ -470,7 +472,12 @@ export const SeniorDashboard = () => {
           {!isMobile && renderAppointmentCard()}
         </Stack>
       </Box>
-    </MainLayout >
+      <FoodWarningModal
+        open={dietWarningOpen}
+        onClose={() => setDietWarningOpen(false)}
+        userId={user?.id}
+      />
+    </MainLayout>
   )
 }
 

@@ -32,3 +32,7 @@
 1. 로그인 후 DevTools > Application 탭에서 LocalStorage, SessionStorage, Cookies 확인
 2. 로그아웃 버튼 클릭 (헤더 또는 더보기 페이지)
 3. 모든 `amapill` 관련 데이터가 삭제되었는지 확인
+
+## 6. 추가 수정 사항 (2025-12-20)
+*   **[Refactor] `CaregiverDashboard`**: `NoFamilyModal` 컴포넌트 분리 및 리다이렉트 타이머 로직 개선
+*   **[Fix] `MealInputForm`**: 식사 수정 시 `analysisResult` 상태가 초기화되는 버그 수정 (기존 데이터에서 복원)

@@ -63,7 +63,7 @@ const DetailBlock = ({ label, value }) => {
   )
 }
 
-export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', recentSection = null, onRequestClose } = {}) => {
+export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', recentSection = null, onRequestClose, targetUserId, targetUserName } = {}) => {
   const navigate = useNavigate()
   const location = useLocation()
   const pendingAction = useVoiceActionStore((state) => state.pendingAction)
@@ -270,7 +270,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
 
     // Directly navigate to prescription add page
     navigate(ROUTE_PATHS.prescriptionAdd, {
-      state: { addDrug: drug },
+      state: { addDrug: drug, targetUserId, targetUserName },
     })
     onRequestClose?.() // Close overlay if exists
   }
@@ -279,7 +279,7 @@ export const PillSearchTab = ({ autoFocus = false, onOpenOcr, layout = 'page', r
     if (!pendingAiDrug) return
     setWarningOpen(false)
     navigate(ROUTE_PATHS.prescriptionAdd, {
-      state: { addDrug: { ...pendingAiDrug, aiGenerated: false } },
+      state: { addDrug: { ...pendingAiDrug, aiGenerated: false }, targetUserId, targetUserName },
     })
     setPendingAiDrug(null)
     onRequestClose?.() // Close overlay if exists

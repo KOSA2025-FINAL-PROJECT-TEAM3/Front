@@ -33,11 +33,11 @@ export const usePrescriptionStore = create((set, get) => ({
         }
     },
 
-    // 처방전 생성
-    createPrescription: async (prescriptionData) => {
+    // 처방전 생성 (targetUserId: 보호자가 어르신 대신 등록할 때 사용)
+    createPrescription: async (prescriptionData, targetUserId) => {
         set({ loading: true, error: null });
         try {
-            logger.debug('Creating prescription with raw data:', prescriptionData);
+            logger.debug('Creating prescription with raw data:', prescriptionData, 'targetUserId:', targetUserId);
 
             // 데이터 형식 변환
             const formattedData = {
@@ -64,7 +64,7 @@ export const usePrescriptionStore = create((set, get) => ({
             };
 
             logger.debug('Creating prescription with formatted data:', formattedData);
-            const newPrescription = await prescriptionApiClient.createPrescription(formattedData);
+            const newPrescription = await prescriptionApiClient.createPrescription(formattedData, targetUserId);
             logger.debug('Prescription created successfully:', newPrescription);
             set(state => ({
                 prescriptions: [newPrescription, ...state.prescriptions],

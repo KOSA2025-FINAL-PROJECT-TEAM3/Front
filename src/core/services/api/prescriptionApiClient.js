@@ -10,10 +10,12 @@ class PrescriptionApiClient extends ApiClient {
     /**
      * 처방전 생성 (단독 약 등록 또는 OCR 일괄 등록)
      * @param {Object} data - 처방전 데이터
+     * @param {number|string} [targetUserId] - 대리 등록 시 대상 사용자 ID (보호자가 어르신 대신 등록할 때)
      * @returns {Promise<Object>} 생성된 처방전 상세 정보
      */
-    async createPrescription(data) {
-        return this.post('', data);
+    async createPrescription(data, targetUserId) {
+        const params = targetUserId ? { userId: targetUserId } : undefined;
+        return this.post('', data, { params });
     }
 
     /**

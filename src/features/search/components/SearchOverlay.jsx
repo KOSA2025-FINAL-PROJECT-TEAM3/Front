@@ -183,6 +183,7 @@ export const SearchOverlay = () => {
                 recentSection={RecentSection}
                 targetUserId={targetUserId}
                 targetUserName={targetUserName}
+                onRequestClose={handleClose}
                 onOpenOcr={() => {
                   handleClose()
                   navigate(ROUTE_PATHS.ocrScan, {

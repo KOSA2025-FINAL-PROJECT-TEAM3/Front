@@ -349,15 +349,8 @@ export function useOcrRegistration(options = {}) {
       // OCR 데이터를 처방전 등록 형식으로 변환
       const ocrData = toRegisterFromOCRRequest(formState)
 
-      // 대리 등록의 경우 targetUserId 추가
-      if (targetUserId) {
-        ocrData.userId = targetUserId
-      }
-
-      logger.debug('📤 OCR 등록 시작:', ocrData)
-
       // 백엔드 API 직접 호출
-      const result = await prescriptionApiClient.createPrescription(ocrData)
+      const result = await prescriptionApiClient.createPrescription(ocrData, targetUserId)
 
       logger.debug('✅ OCR 등록 성공:', result)
       toast.success('처방전이 등록되었습니다')

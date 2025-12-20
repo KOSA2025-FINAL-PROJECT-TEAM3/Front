@@ -8,6 +8,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import TodaySummaryCard from '../components/TodaySummaryCard'
 import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
+import { NoFamilyModal } from '../components/NoFamilyModal'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
@@ -46,7 +47,13 @@ export function CaregiverDashboard() {
     }),
     shallow
   )
-  const currentUserId = useAuth((state) => state.user?.id || state.user?.userId || null)
+
+  const { user, token } = useAuth(
+    (state) => ({ user: state.user, token: state.token }),
+    shallow
+  )
+  const currentUserId = user?.id || user?.userId || null
+
   const { activeSeniorId, setActiveSeniorId } = useCareTargetStore(
     (state) => ({
       activeSeniorId: state.activeSeniorMemberId,
@@ -92,10 +99,10 @@ export function CaregiverDashboard() {
   )
 
   useEffect(() => {
-    if (!initialized) {
+    if (!initialized && token && !loading) {
       initialize().catch(() => { })
     }
-  }, [initialized, initialize])
+  }, [initialized, initialize, token, loading])
 
   const groupMembers = useMemo(() => {
     if (selectedGroupId && Array.isArray(familyGroups)) {
@@ -327,6 +334,10 @@ export function CaregiverDashboard() {
 
   const activeRoleLabel = activeSenior?.role === 'CAREGIVER' ? '보호자' : '어르신'
 
+  // Hook 규칙 준수: early return 이전에 모든 Hook 호출
+  const hasFamilyGroup = useMemo(() => Array.isArray(familyGroups) && familyGroups.length > 0, [familyGroups])
+  const shouldShowNoFamilyModal = !loading && !hasFamilyGroup && (initialized || !!token)
+
   if (loading && groupMembers.length === 0) {
     return (
       <MainLayout>
@@ -349,6 +360,9 @@ export function CaregiverDashboard() {
 
   return (
     <MainLayout>
+      {/* 가족 그룹 없음 강제 모달 - 별도 컴포넌트로 분리 */}
+      <NoFamilyModal open={shouldShowNoFamilyModal} />
+
       {isDesktop ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { md: '4fr 8fr' }, gap: 3 }}>
           <Stack spacing={2.5}>
