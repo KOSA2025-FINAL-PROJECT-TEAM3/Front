@@ -25,6 +25,7 @@ export const HeroMedicationCard = memo(({
   medications = [],
   onConfirm,
   onOpenDetail,
+  sx,
 }) => {
   const theme = useTheme()
 
@@ -47,6 +48,7 @@ export const HeroMedicationCard = memo(({
             '&:hover': { boxShadow: '0 18px 45px rgba(15, 23, 42, 0.22)' },
           }
           : null),
+        ...sx,
       }}
     >
       <Box

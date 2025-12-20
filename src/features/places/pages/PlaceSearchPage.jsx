@@ -10,6 +10,7 @@ import AppButton from '@shared/components/mui/AppButton'
 import DiseaseForm from '@features/disease/components/DiseaseForm'
 import PhoneIcon from '@mui/icons-material/Phone'
 import EventIcon from '@mui/icons-material/Event'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
 import MainLayout from '@shared/components/layout/MainLayout'
 import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
@@ -653,7 +654,8 @@ export const PlaceSearchPage = () => {
 
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                {/* Row 1: Search Bar & Primary Actions */}
+                <Stack direction="row" spacing={1} alignItems="center">
                   <TextField
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -666,12 +668,13 @@ export const PlaceSearchPage = () => {
                         searchByKeyword()
                       }
                     }}
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
                     onClick={searchByKeyword}
                     disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
-                    sx={{ fontWeight: 900, minWidth: 110 }}
+                    sx={{ fontWeight: 900, minWidth: 80, whiteSpace: 'nowrap' }}
                   >
                     검색
                   </Button>
@@ -679,47 +682,50 @@ export const PlaceSearchPage = () => {
                     variant="outlined"
                     onClick={searchByCategory}
                     disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching'}
-                    sx={{ fontWeight: 900, minWidth: 140 }}
+                    sx={{ fontWeight: 900, minWidth: 100, whiteSpace: 'nowrap' }}
                   >
-                    현재 지도 위치 중심으로 찾기
+                    현 지도 검색
                   </Button>
                 </Stack>
 
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center">
+                {/* Row 2: Helper Buttons & Chips */}
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ gap: 1 }}>
                   <Button
                     variant="outlined"
                     onClick={requestLocation}
                     disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
-                    sx={{ fontWeight: 900 }}
+                    startIcon={<MyLocationIcon sx={{ fontSize: 18 }} />}
+                    sx={{ fontWeight: 900, px: 1.5, minWidth: 'auto' }}
                   >
                     내 위치로 이동
                   </Button>
+
                   {tab === 'hospital' ? (
                     <Button
                       variant="contained"
+                      color="secondary" // Use a distinct color if available or stick to contained
                       onClick={openDiseaseKeywordPicker}
                       disabled={!kakaoKey || status === 'loadingSdk' || status === 'searching' || isRecommending}
-                      sx={{ fontWeight: 900 }}
+                      sx={{ fontWeight: 900, px: 1.5, minWidth: 'auto', bgcolor: '#FFFBEB', color: '#B45309', '&:hover': { bgcolor: '#FEF3C7' } }}
                     >
                       내 질환 기반 추천
                     </Button>
                   ) : null}
-                  {coords ? <Chip size="small" label={`현재 위치: ${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`} /> : null}
-                  {centerCoords ? (
-                    <Chip size="small" label={`이 위치 중심 탐색: ${centerCoords.lat.toFixed(5)}, ${centerCoords.lng.toFixed(5)}`} />
-                  ) : null}
+
+                  {coords ? <Chip size="small" label="현재위치" color="primary" variant="outlined" /> : null}
+                  {centerCoords ? <Chip size="small" label="이 위치 중심 탐색" /> : null}
+
                   {tab === 'hospital' && recommendationKeywords.length > 0 ? (
                     <Chip
                       size="small"
-                      label={`추천 키워드: ${recommendationKeywords.slice(0, 3).join(', ')}${recommendationKeywords.length > 3 ? '…' : ''}`}
+                      label={`추천: ${recommendationKeywords.slice(0, 2).join(', ')}`}
+                      color="warning"
+                      variant="outlined"
                     />
                   ) : null}
-                  {status === 'loadingSdk' ? (
-                    <Chip size="small" label="지도 로딩 중..." />
-                  ) : status === 'searching' ? (
-                    <Chip size="small" label="검색 중..." />
-                  ) : isRecommending ? (
-                    <Chip size="small" label="추천 중..." />
+
+                  {status === 'searching' || isRecommending ? (
+                    <Chip size="small" label="검색 중..." color="default" />
                   ) : null}
                 </Stack>
 

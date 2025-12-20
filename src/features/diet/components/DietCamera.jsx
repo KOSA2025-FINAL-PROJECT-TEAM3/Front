@@ -83,9 +83,18 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
 
     const startCamera = async () => {
         try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
-            });
+            // First attempt with back camera
+            let constraints = { video: { facingMode: 'environment' } };
+            let mediaStream;
+            
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+            } catch (e) {
+                logger.warn("Environment camera not found, falling back to default video", e);
+                // Fallback to any camera if 'environment' is not available (e.g. PC)
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            }
+
             setStream(mediaStream);
             setIsCameraOpen(true);
             // Wait for state update and ref to be attached
@@ -96,7 +105,13 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
             }, 100);
         } catch (err) {
             logger.error("Error accessing camera:", err);
-            alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
+            if (err.name === 'NotAllowedError') {
+                alert("카메라 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.");
+            } else if (err.name === 'NotFoundError') {
+                alert("카메라 장치를 찾을 수 없습니다.");
+            } else {
+                alert("카메라에 접근할 수 없습니다: " + err.message);
+            }
         }
     };
 

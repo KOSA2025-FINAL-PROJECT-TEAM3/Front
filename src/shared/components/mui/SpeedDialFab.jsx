@@ -119,18 +119,20 @@ export const SpeedDialFab = ({
           <SpeedDialAction
             key={action.id || action.label || index}
             icon={action.icon}
-            tooltipTitle={!highContrast ? action.label : null} // 시니어 모드에서는 툴팁 대신 항상 라벨 표시 고려
-            tooltipOpen={highContrast || isMobile} // 모바일이나 고대비 모드에서는 라벨 항상 표시
+            tooltipTitle={!highContrast ? action.label : null}
+            tooltipOpen={highContrast || isMobile}
             onClick={() => handleActionClick(action)}
             FabProps={{
               sx: {
-                bgcolor: highContrast ? '#FFFFFF' : 'common.white',
-                color: highContrast ? '#000000' : 'text.primary',
+                bgcolor: highContrast ? '#FFFFFF' : (action.color?.bg || 'common.white'),
+                color: highContrast ? '#000000' : (action.color?.fg || 'text.primary'),
                 width: 50,
                 height: 50,
                 '&:hover': {
-                  bgcolor: highContrast ? '#F0F0F0' : 'grey.100',
+                  bgcolor: highContrast ? '#F0F0F0' : (action.color?.bg || 'grey.100'),
+                  filter: 'brightness(0.95)',
                 },
+                ...action.sx,
               },
             }}
           />

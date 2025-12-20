@@ -22,8 +22,6 @@ import { parseServerLocalDateTime } from '@core/utils/formatting'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import SpeedDialFab from '@shared/components/mui/SpeedDialFab'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드
@@ -653,38 +651,6 @@ export function CaregiverDashboard() {
           />
         </Stack>
       )}
-      <SpeedDialFab
-        actions={[
-          {
-            label: '가족 채팅',
-            icon: <ChatIcon />,
-            onClick: () => navigate(ROUTE_PATHS.familyChat),
-          },
-          {
-            label: '통합 검색',
-            icon: <SearchIcon />,
-            onClick: () => openSearchOverlay('pill', { targetUserId: activeSenior?.userId, targetUserName: activeSenior?.name }),
-          },
-          {
-            label: '진료 일정',
-            icon: <CalendarMonthIcon />,
-            onClick: () => navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
-              state: {
-                targetUserId: activeSenior?.userId,
-                targetUserName: activeSenior?.name
-              }
-            }),
-          },
-          {
-            label: '가족 관리',
-            icon: <ManageAccountsIcon />,
-            path: ROUTE_PATHS.family,
-          },
-        ]}
-        ariaLabel="보호자 빠른 메뉴"
-        gameFeel
-        backdropBlur
-      />
     </MainLayout>
   )
 }

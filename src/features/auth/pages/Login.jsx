@@ -3,16 +3,16 @@
  * - 이메일/비밀번호 로그인, 카카오 로그인, 회원가입 링크
  */
 
-	import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-	import { ROUTE_PATHS } from '@config/routes.config'
-	import { USER_ROLES } from '@config/constants'
-	import { useForm } from 'react-hook-form'
-	import { Alert, Box, Button, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
-	import { useAuth } from '@features/auth/hooks/useAuth'
-	import { useAuthStore } from '@features/auth/store/authStore'
-	import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
-	import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
-	import { BackButton } from '@shared/components/mui/BackButton'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
+import { useForm } from 'react-hook-form'
+import { Alert, Box, Button, Divider, Paper, Stack, TextField, Typography } from '@mui/material'
+import { useAuth } from '@features/auth/hooks/useAuth'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
+import { KakaoLoginButton } from '@features/auth/components/KakaoLoginButton'
+import { BackButton } from '@shared/components/mui/BackButton'
 
 import { useInviteStore } from '@features/family/stores/inviteStore'
 
@@ -105,12 +105,12 @@ export const Login = () => {
             return
           }
         } else {
-            // 복구 거절 시
-            setError('root', {
-                type: 'server',
-                message: '탈퇴한 계정입니다.',
-            })
-            return
+          // 복구 거절 시
+          setError('root', {
+            type: 'server',
+            message: '탈퇴한 계정입니다.',
+          })
+          return
         }
       }
 
@@ -128,24 +128,21 @@ export const Login = () => {
     }
   }
 
-	  return (
-	    <Box
-	      sx={{
-	        minHeight: '100vh',
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         py: { xs: 3, sm: 4 },
         px: 2.5,
         bgcolor: 'background.default',
       }}
-	    >
-	      <Box sx={{ width: '100%', maxWidth: 460, mx: 'auto' }}>
-	        <Stack direction="row" justifyContent="flex-start" sx={{ mb: 1 }}>
-	          <BackButton label="뒤로" />
-	        </Stack>
-	        <Paper
-	          variant="outlined"
-	          elevation={0}
+    >
+      <Box sx={{ width: '100%', maxWidth: 460, mx: 'auto' }}>
+        <Paper
+          variant="outlined"
+          elevation={0}
           sx={{
             p: { xs: 3, sm: 5 },
             borderRadius: 3,

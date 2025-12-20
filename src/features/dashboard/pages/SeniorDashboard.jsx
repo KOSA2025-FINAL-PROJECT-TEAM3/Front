@@ -25,12 +25,6 @@ import TodaySummaryCard from '../components/TodaySummaryCard'
 import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
-import SpeedDialFab from '@shared/components/mui/SpeedDialFab'
-import MicIcon from '@mui/icons-material/Mic'
-import CameraAltIcon from '@mui/icons-material/CameraAlt'
-import RestaurantIcon from '@mui/icons-material/Restaurant'
-import SearchIcon from '@mui/icons-material/Search'
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
 
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
@@ -296,6 +290,23 @@ export const SeniorDashboard = () => {
       return
     }
 
+    // 복약 시간 체크 (30분 전부터 가능하도록 설정)
+    if (nextMedication.time) {
+      const now = new Date()
+      const [hours, minutes] = nextMedication.time.split(':').map(Number)
+      const scheduledTime = new Date()
+      scheduledTime.setHours(hours, minutes, 0, 0)
+
+      // 만약 예정 시간이 현재 시간보다 30분 이상 미래라면 경고
+      const timeDiff = scheduledTime.getTime() - now.getTime()
+      const THIRTY_MINUTES = 30 * 60 * 1000
+
+      if (timeDiff > THIRTY_MINUTES) {
+        toast.warning(`아직 복용 시간이 아닙니다.\n(예정 시간: ${nextMedication.time})`)
+        return
+      }
+    }
+
     try {
       await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
       toast.success('복약이 완료되었습니다.')
@@ -418,10 +429,7 @@ export const SeniorDashboard = () => {
             dietPath={ROUTE_PATHS.dietLog}
             chatPath={ROUTE_PATHS.familyChat}
           />
-        </Stack>
 
-        {/* Column 2 */}
-        <Stack spacing={{ xs: 3, md: 4 }}>
           {!isMobile ? (
             <TodaySummaryCard
               takenCount={takenCount}
@@ -429,8 +437,12 @@ export const SeniorDashboard = () => {
               onClick={() => navigate(ROUTE_PATHS.medicationToday)}
             />
           ) : null}
+        </Stack>
 
-          <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} />
+        {/* Column 2 */}
+        <Stack spacing={{ xs: 3, md: 4 }}>
+          {/* Desktop: TodayChecklist is here */}
+          {!isMobile ? <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} /> : null}
 
           <WeeklyStatsWidget
             title="지난 7일 기록"
@@ -442,52 +454,8 @@ export const SeniorDashboard = () => {
           <HistoryTimelineCard historyData={historyData} onOpenDetail={() => navigate(ROUTE_PATHS.adherenceReport)} />
         </Stack>
       </Box>
-      <SpeedDialFab
-        actions={[
-          {
-            label: '음성 인식',
-            icon: <MicIcon sx={{ fontSize: 28 }} />,
-            onClick: () => toast.info('음성 인식을 시작합니다...'),
-          },
-          {
-            label: '처방전 촬영',
-            icon: <CameraAltIcon sx={{ fontSize: 28 }} />,
-            onClick: () => navigate(ROUTE_PATHS.ocrScan),
-          },
-          {
-            label: '식단 기록',
-            icon: <RestaurantIcon sx={{ fontSize: 28 }} />,
-            onClick: () => navigate(ROUTE_PATHS.dietLog),
-          },
-          {
-            label: '질병 리포트',
-            icon: <HealthAndSafetyIcon sx={{ fontSize: 28 }} />,
-            onClick: () => navigate(ROUTE_PATHS.disease),
-          },
-        ]}
-        ariaLabel="어르신 빠른 메뉴"
-        size={64} // 큰 사이즈
-        highContrast // 고대비 모드
-        backdropBlur
-        gameFeel
-        sx={SENIOR_FAB_STYLES}
-      />
     </MainLayout>
   )
 }
 
 export default SeniorDashboard
-
-const SENIOR_FAB_STYLES = {
-  '& .MuiSpeedDialAction-fab': {
-    width: 56,
-    height: 56,
-  },
-  '& .MuiSpeedDialAction-staticTooltipLabel': {
-    fontSize: '16px',
-    fontWeight: 800,
-    color: 'common.white',
-    bgcolor: 'rgba(0,0,0,0.8)',
-    p: 1.5,
-  },
-}
