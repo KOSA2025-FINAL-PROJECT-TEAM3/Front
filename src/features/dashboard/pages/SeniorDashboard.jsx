@@ -475,22 +475,24 @@ export const SeniorDashboard = () => {
         highContrast // 고대비 모드
         backdropBlur
         gameFeel
-        sx={{
-          '& .MuiSpeedDialAction-fab': {
-            width: 56,
-            height: 56,
-          },
-          '& .MuiSpeedDialAction-staticTooltipLabel': {
-            fontSize: '16px', // 큰 폰트
-            fontWeight: 800,
-            color: 'common.white',
-            bgcolor: 'rgba(0,0,0,0.8)',
-            p: 1.5,
-          }
-        }}
+        sx={SENIOR_FAB_STYLES}
       />
     </MainLayout>
   )
 }
 
 export default SeniorDashboard
+
+const SENIOR_FAB_STYLES = {
+  '& .MuiSpeedDialAction-fab': {
+    width: 56,
+    height: 56,
+  },
+  '& .MuiSpeedDialAction-staticTooltipLabel': {
+    fontSize: '16px',
+    fontWeight: 800,
+    color: 'common.white',
+    bgcolor: 'rgba(0,0,0,0.8)',
+    p: 1.5,
+  },
+}
