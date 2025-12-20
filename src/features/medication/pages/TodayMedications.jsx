@@ -7,7 +7,6 @@ import {
   Button,
   Chip,
   CircularProgress,
-  Alert,
   Paper,
   Accordion,
   AccordionSummary,
@@ -25,6 +24,7 @@ import MainLayout from '@shared/components/layout/MainLayout'
 import { PageHeader } from '@shared/components/layout/PageHeader'
 import { PageStack } from '@shared/components/layout/PageStack'
 import { BackButton } from '@shared/components/mui/BackButton'
+import { HeroMedicationCard } from '@features/dashboard/components/HeroMedicationCard'
 
 const TodayMedicationCard = ({ medication, onClick, onScheduleClick }) => {
   const name = medication?.name || '알 수 없는 약'
@@ -118,12 +118,15 @@ const SECTION_LABELS = {
 };
 
 const SECTION_ORDER = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
+const ALERT_TITLE = '복약 알림';
+const ALERT_CARD_MIN_HEIGHT = 220;
 
 const TodayMedications = () => {
     const pendingAction = useVoiceActionStore((state) => state.pendingAction); // [Voice] Subscribe
     const { consumeAction } = useVoiceActionStore(); // [Voice]
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [inlineAlert, setInlineAlert] = useState(null);
     const [logs, setLogs] = useState([]);
     const [medications, setMedications] = useState([]);
     const [expanded, setExpanded] = useState({});
@@ -193,10 +196,14 @@ const TodayMedications = () => {
 
         try {
             await medicationLogApiClient.completeMedication(schedule.id);
+            setInlineAlert(null);
         } catch (err) {
             logger.error('Failed to complete medication:', err);
             setLogs(previousLogs);
-            alert('복용 체크에 실패했습니다. 다시 시도해주세요.');
+            setInlineAlert({
+                title: ALERT_TITLE,
+                subtitle: '복용 체크에 실패했습니다. 다시 시도해주세요.'
+            });
         }
     }, [logs]);
 
@@ -279,7 +286,11 @@ const TodayMedications = () => {
             <MainLayout>
                 <PageStack>
                     <PageHeader leading={<BackButton />} title="오늘의 복약" subtitle="오늘의 복약 기록을 불러오지 못했습니다." />
-                    <Alert severity="error">{error}</Alert>
+                    <HeroMedicationCard
+                        title={ALERT_TITLE}
+                        subtitle={error}
+                        sx={{ minHeight: ALERT_CARD_MIN_HEIGHT }}
+                    />
                 </PageStack>
             </MainLayout>
         )
@@ -346,6 +357,14 @@ const TodayMedications = () => {
                     title="오늘의 복약"
                     subtitle={format(new Date(), 'M월 d일 (EEE)', { locale: ko })}
                 />
+
+                {inlineAlert && (
+                    <HeroMedicationCard
+                        title={inlineAlert.title}
+                        subtitle={inlineAlert.subtitle}
+                        sx={{ minHeight: ALERT_CARD_MIN_HEIGHT }}
+                    />
+                )}
 
                 <Paper variant="outlined" sx={{ p: 3, bgcolor: 'action.hover', borderRadius: 3 }}>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
