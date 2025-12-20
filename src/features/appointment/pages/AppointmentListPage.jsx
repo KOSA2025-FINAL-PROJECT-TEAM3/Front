@@ -100,7 +100,7 @@ const AppointmentListPage = () => {
     }
 
     return (
-        <MainLayout hideHeader>
+        <MainLayout>
             {/* 헤더 */}
             <Paper
                 elevation={0}

@@ -83,21 +83,21 @@ const buildMissedSummary = (notification) => {
  */
 export const NotificationPage = () => {
   const navigate = useNavigate()
-  const { 
-    notifications, 
+  const {
+    notifications,
     initialLoading,
     loadingMore,
     error,
     loadMoreError,
-    unreadCount, 
+    unreadCount,
     hasMore,
-    fetchNotifications, 
+    fetchNotifications,
     loadMoreNotifications,
     retryLoadMoreNotifications,
-    markAsRead, 
-    markAllAsRead, 
-    removeNotification, 
-    removeAllNotifications 
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+    removeAllNotifications
   } = useNotificationStore()
   const customerRole = useAuth((state) => state.customerRole)
   const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
@@ -164,9 +164,9 @@ export const NotificationPage = () => {
           key,
           n.scheduledTime
             ? {
-                ...n,
-                groupKey: key,
-              }
+              ...n,
+              groupKey: key,
+            }
             : n
         )
       }
@@ -690,7 +690,12 @@ export const NotificationPage = () => {
                       {isCaregiver ? '연락하여 확인이 필요합니다.' : '지금 바로 복용해주세요!'}
                     </Typography>
 
-                    <Stack direction="row" spacing={1} sx={{ pt: 0.5, flexWrap: 'wrap' }}>
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={1}
+                      alignItems={{ xs: 'flex-start', sm: 'center' }}
+                      sx={{ pt: 0.5, flexWrap: 'wrap' }}
+                    >
                       {isCaregiver ? (
                         <Button
                           variant="contained"
