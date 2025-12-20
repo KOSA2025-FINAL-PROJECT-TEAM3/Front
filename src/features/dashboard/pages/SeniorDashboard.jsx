@@ -460,11 +460,6 @@ export const SeniorDashboard = () => {
             onClick: () => navigate(ROUTE_PATHS.dietLog),
           },
           {
-            label: '약 검색',
-            icon: <SearchIcon sx={{ fontSize: 28 }} />,
-            onClick: () => openSearchOverlay('pill'),
-          },
-          {
             label: '질병 리포트',
             icon: <HealthAndSafetyIcon sx={{ fontSize: 28 }} />,
             onClick: () => navigate(ROUTE_PATHS.disease),
