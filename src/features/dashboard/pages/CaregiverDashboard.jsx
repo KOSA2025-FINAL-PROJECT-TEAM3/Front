@@ -496,7 +496,7 @@ export function CaregiverDashboard() {
                   title="진료 일정"
                   icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
                   color="#EEF2FF"
-                  onClick={() => navigate(ROUTE_PATHS.caregiverAppointmentAdd, {
+                  onClick={() => navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
                     state: {
                       targetUserId: activeSenior?.userId,
                       targetUserName: activeSenior?.name
@@ -628,7 +628,7 @@ export function CaregiverDashboard() {
               title="진료 일정"
               icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
               color="#EEF2FF"
-              onClick={() => navigate(ROUTE_PATHS.caregiverAppointmentAdd, {
+              onClick={() => navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
                 state: {
                   targetUserId: activeSenior?.userId,
                   targetUserName: activeSenior?.name

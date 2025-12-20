@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import {
     Box,
     Dialog,
@@ -67,6 +69,7 @@ const extractDepartment = (categoryName) => {
  * @param {() => void} onSuccess - 예약 성공 시 콜백 (선택)
  */
 export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) => {
+    const navigate = useNavigate()
     const { user } = useAuthStore()
     const { createAppointment, loading } = useAppointmentStore()
 
@@ -152,6 +155,9 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
 
             onClose?.()
             onSuccess?.()
+
+            // 예약 목록 페이지로 이동
+            navigate(ROUTE_PATHS.appointments)
         } catch (error) {
             logger.error('[QuickAppointmentModal] createAppointment failed:', error)
             toast.error('진료 일정 등록에 실패했습니다.')

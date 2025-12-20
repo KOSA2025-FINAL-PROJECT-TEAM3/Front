@@ -17,6 +17,7 @@ import { useAppointmentStore } from '../store/appointmentStore'
 import { AppointmentForm } from '../components/AppointmentForm'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { toast } from '@shared/components/toast/toastStore'
+import MainLayout from '@shared/components/layout/MainLayout'
 import logger from '@core/utils/logger'
 
 const EMPTY_FAMILY_GROUPS = []
@@ -85,26 +86,30 @@ const CaregiverAppointmentAddPage = () => {
     // familyStore 초기화 대기
     if (!initialized) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
-            </Box>
+            <MainLayout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <CircularProgress />
+                </Box>
+            </MainLayout>
         )
     }
 
     // 시니어가 없으면 안내 메시지
     if (seniorMembers.length === 0) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="warning">
-                    등록된 어르신이 없습니다. 먼저 가족 그룹에 시니어를 초대해주세요.
-                </Alert>
-            </Box>
+            <MainLayout>
+                <Box sx={{ p: 3 }}>
+                    <Alert severity="warning">
+                        등록된 어르신이 없습니다. 먼저 가족 그룹에 시니어를 초대해주세요.
+                    </Alert>
+                </Box>
+            </MainLayout>
         )
     }
 
     return (
-        <Box>
-            {/* 헤더 */}
+        <MainLayout>
+            {/* 페이지 헤더 */}
             <Box
                 sx={{
                     display: 'flex',
@@ -112,6 +117,7 @@ const CaregiverAppointmentAddPage = () => {
                     p: 2,
                     borderBottom: 1,
                     borderColor: 'divider',
+                    bgcolor: 'background.paper',
                 }}
             >
                 <IconButton onClick={handleCancel} edge="start">
@@ -148,7 +154,7 @@ const CaregiverAppointmentAddPage = () => {
             </Box>
 
             {/* 폼 */}
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 2, pb: 12 }}>
                 <AppointmentForm
                     onSubmit={handleSubmit}
                     onCancel={handleCancel}
@@ -157,7 +163,7 @@ const CaregiverAppointmentAddPage = () => {
                     targetUserId={targetUserId}
                 />
             </Box>
-        </Box>
+        </MainLayout>
     )
 }
 

@@ -16,8 +16,14 @@ import GroupIcon from '@mui/icons-material/Group'
 import SearchIcon from '@mui/icons-material/Search'
 import DescriptionIcon from '@mui/icons-material/Description'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import ChatIcon from '@mui/icons-material/Chat'
 import NotificationsIcon from '@mui/icons-material/Notifications'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import CameraAltIcon from '@mui/icons-material/CameraAlt'
+import RestaurantIcon from '@mui/icons-material/Restaurant'
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
 
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
@@ -88,13 +94,38 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
     }
   }
 
-  const menuItems = [
+  // 🎮 Game-feel: Haptic feedback helper
+  const triggerHaptic = (duration = 50) => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(duration)
+    }
+  }
+
+  // Common Actions removed as they are now explicit per role
+
+  // Caregiver Specific Actions
+  // Caregiver Specific Actions
+  const caregiverActions = [
     {
-      id: 'notifications',
-      label: '알림',
-      icon: <NotificationsIcon fontSize="small" />,
-      color: { bg: '#EFF6FF', fg: '#3B82F6' },
-      onClick: () => navigate(ROUTE_PATHS.notifications),
+      id: 'search',
+      label: '통합 검색',
+      icon: <SearchIcon fontSize="small" />,
+      color: { bg: '#ECFDF5', fg: '#10B981' },
+      onClick: () => openSearchOverlay('pill', { targetUserId: user?.id, targetUserName: user?.name }),
+    },
+    {
+      id: 'places',
+      label: '병원 검색',
+      icon: <LocalHospitalIcon fontSize="small" />,
+      color: { bg: '#FEE2E2', fg: '#EF4444' },
+      onClick: () => navigate(ROUTE_PATHS.places),
+    },
+    {
+      id: 'family',
+      label: '가족 관리',
+      icon: <ManageAccountsIcon fontSize="small" />,
+      color: { bg: '#F1F5F9', fg: '#475569' },
+      onClick: () => navigate(ROUTE_PATHS.family),
     },
     {
       id: 'chat',
@@ -105,36 +136,47 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
     },
     {
       id: 'invite',
-      label: isCaregiver ? '가족 초대' : '초대 코드',
+      label: '가족 초대',
       icon: <GroupIcon fontSize="small" />,
       color: { bg: '#EEF2FF', fg: '#6366F1' },
-      onClick: () => navigate(isCaregiver ? ROUTE_PATHS.familyInvite : ROUTE_PATHS.inviteCodeEntry),
+      onClick: () => navigate(ROUTE_PATHS.familyInvite),
+    },
+  ]
+
+  // Senior Specific Actions
+  const seniorActions = [
+    {
+      id: 'ocr',
+      label: '처방전 촬영',
+      icon: <CameraAltIcon fontSize="small" />,
+      color: { bg: '#EEF2FF', fg: '#6366F1' },
+      onClick: () => navigate(ROUTE_PATHS.ocrScan),
     },
     {
-      id: 'add_med',
-      label: '약 등록',
-      icon: <LocalPharmacyIcon fontSize="small" />,
+      id: 'diet',
+      label: '식단 기록',
+      icon: <RestaurantIcon fontSize="small" />,
       color: { bg: '#F0FDFA', fg: '#2EC4B6' },
-      onClick: () => navigate(ROUTE_PATHS.prescriptionAdd),
+      onClick: () => navigate(ROUTE_PATHS.dietLog),
     },
     {
-      id: 'search',
-      label: '통합 검색',
-      icon: <SearchIcon fontSize="small" />,
-      color: { bg: '#ECFDF5', fg: '#10B981' },
-      onClick: () => openSearchOverlay('pill'),
+      id: 'disease',
+      label: '질병 리포트',
+      icon: <HealthAndSafetyIcon fontSize="small" />,
+      color: { bg: '#FFFBEB', fg: '#F59E0B' },
+      onClick: () => navigate(ROUTE_PATHS.disease),
     },
     {
-      id: 'pdf',
-      label: exporting ? 'PDF 생성 중…' : 'PDF 내보내기',
-      icon: <DescriptionIcon fontSize="small" />,
-      color: { bg: '#F1F5F9', fg: '#475569' },
-      onClick: () => {
-        if (exporting) return
-        handleExportPdf()
-      },
+      id: 'medication_log',
+      label: '복용 기록',
+      icon: <LocalPharmacyIcon fontSize="small" />,
+      color: { bg: '#EFF6FF', fg: '#3B82F6' },
+      onClick: () => navigate(ROUTE_PATHS.medicationToday),
     },
-  ].filter((item) => !item.hidden)
+    // Senior can also have chat if needed, but per request consolidating mainly these 3 + Mic + Notification
+  ]
+
+  const menuItems = (isCaregiver ? caregiverActions : seniorActions).filter((item) => !item.hidden)
 
   const fontLabel = fontScaleLevel === 1 ? '표준' : fontScaleLevel === 2 ? '크게' : '더크게'
 
@@ -346,7 +388,10 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
 
         <Stack spacing={1.25} alignItems="flex-end" sx={{ pointerEvents: 'auto' }}>
           <ButtonBase
-            onClick={() => navigate(ROUTE_PATHS.notifications)}
+            onClick={() => {
+              triggerHaptic(30)
+              navigate(ROUTE_PATHS.notifications)
+            }}
             aria-label="알림"
             sx={{
               width: 56,
@@ -358,7 +403,8 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 160ms ease',
+              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              '&:active': { transform: 'scale(0.9)' },
             }}
           >
             <Badge badgeContent={unreadCount} color="error" max={99}>
@@ -367,7 +413,10 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
           </ButtonBase>
 
           <ButtonBase
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={() => {
+              triggerHaptic(50)
+              setMenuOpen((prev) => !prev)
+            }}
             aria-label={menuOpen ? '퀵 메뉴 닫기' : '퀵 메뉴 열기'}
             sx={{
               width: 56,
@@ -380,14 +429,18 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
               alignItems: 'center',
               justifyContent: 'center',
               transform: menuOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-              transition: 'all 160ms ease',
+              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)', // Bouncy transition
+              '&:active': { transform: menuOpen ? 'rotate(45deg) scale(0.9)' : 'scale(0.9)' },
             }}
           >
             {menuOpen ? <CloseIcon /> : <AddIcon />}
           </ButtonBase>
 
           <ButtonBase
-            onClick={toggleVoice}
+            onClick={() => {
+              triggerHaptic(40)
+              toggleVoice()
+            }}
             aria-label="음성 명령"
             sx={{
               width: 56,
@@ -399,8 +452,9 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'all 160ms ease',
-              ...(isListening ? { transform: 'scale(1.06)' } : null),
+              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transform: isListening ? 'scale(1.1)' : 'scale(1)',
+              '&:active': { transform: isListening ? 'scale(1.0) ' : 'scale(0.9)' },
             }}
           >
             <MicIcon />

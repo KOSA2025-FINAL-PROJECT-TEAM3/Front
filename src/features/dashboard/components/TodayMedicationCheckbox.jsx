@@ -12,7 +12,7 @@ import { parseServerLocalDateTime } from '@core/utils/formatting'
 import PropTypes from 'prop-types'
 import { memo } from 'react'
 
-export const TodayMedicationCheckbox = memo(({ schedules = [], onToggle }) => {
+export const TodayMedicationCheckbox = memo(({ schedules = [], onToggle, sx }) => {
   const now = new Date()
 
   // 시간대별 그룹화
@@ -31,8 +31,8 @@ export const TodayMedicationCheckbox = memo(({ schedules = [], onToggle }) => {
   }
 
   return (
-    <RoundedCard elevation={2} padding="large">
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+    <RoundedCard elevation={2} padding="default" sx={sx}>
+      <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
         오늘 복약
       </Typography>
 
@@ -58,7 +58,7 @@ export const TodayMedicationCheckbox = memo(({ schedules = [], onToggle }) => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                p: 2,
+                p: 1.5,
                 borderRadius: 2,
                 border: '2px solid',
                 borderColor: allCompleted ? 'success.main' : 'grey.300',

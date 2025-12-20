@@ -58,7 +58,7 @@ export const WeeklyStatsWidget = memo(({
       elevation={2}
       sx={{
         textAlign: 'left',
-        p: { xs: 1.5, md: 2.5 },
+        p: { xs: 1.5, md: 2 }, // Reduced padding
         ...(onClick
           ? {
             cursor: 'pointer',
@@ -67,12 +67,12 @@ export const WeeklyStatsWidget = memo(({
           : null),
       }}
     >
-      <Stack spacing={{ xs: 1, md: 2 }}>
+      <Stack spacing={{ xs: 1, md: 1.5 }}> {/* Reduced spacing */}
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: 13, md: 20 } }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: 13, md: 18 } }}> {/* Reduced font */}
             {title}
           </Typography>
-          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: 13, md: 20 } }} color="primary">
+          <Typography variant="h6" sx={{ fontWeight: 700, fontSize: { xs: 13, md: 18 } }} color="primary">
             {adherenceRate}%
           </Typography>
         </Stack>
@@ -81,7 +81,7 @@ export const WeeklyStatsWidget = memo(({
           variant="determinate"
           value={adherenceRate}
           sx={{
-            height: { xs: 6, md: 8 },
+            height: { xs: 6, md: 6 }, // Reduced height
             borderRadius: 4,
             bgcolor: 'grey.200',
             '& .MuiLinearProgress-bar': {
@@ -90,7 +90,7 @@ export const WeeklyStatsWidget = memo(({
           }}
         />
 
-        <Stack direction="row" justifyContent="space-between" sx={{ mt: { xs: 1, md: 2 } }}>
+        <Stack direction="row" justifyContent="space-between" sx={{ mt: { xs: 1, md: 1.5 } }}>
           {DAYS.map((day, index) => {
             const dayData = weeklyData[index] || { status: 'pending' }
 
@@ -98,18 +98,18 @@ export const WeeklyStatsWidget = memo(({
               <Box key={day} sx={{ textAlign: 'center' }}>
                 <Avatar
                   sx={{
-                    width: { xs: 28, md: 48 },
-                    height: { xs: 28, md: 48 },
+                    width: { xs: 28, md: 36 }, // Reduced size
+                    height: { xs: 28, md: 36 }, // Reduced size
                     bgcolor: getStatusColor(dayData.status),
-                    mb: { xs: 0.5, md: 1 },
+                    mb: { xs: 0.5, md: 0.5 },
                     '& .MuiSvgIcon-root': {
-                      fontSize: { xs: 14, md: 24 }
+                      fontSize: { xs: 14, md: 20 }
                     }
                   }}
                 >
                   {getStatusIcon(dayData.status)}
                 </Avatar>
-                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: 10, md: 12 } }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: 10, md: 11 } }}>
                   {day}
                 </Typography>
               </Box>
@@ -121,22 +121,22 @@ export const WeeklyStatsWidget = memo(({
           direction="row"
           spacing={{ xs: 1.5, md: 3 }}
           sx={{
-            mt: { xs: 1, md: 2 },
+            mt: { xs: 1, md: 1 },
             justifyContent: 'center',
             display: { xs: 'none', md: 'flex' }
           }}
         >
           <Stack direction="row" alignItems="center" spacing={0.5}>
-            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'success.main' }} />
-            <Typography variant="body2">완료</Typography>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
+            <Typography variant="caption" color="text.secondary">완료</Typography>
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5}>
-            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'warning.main' }} />
-            <Typography variant="body2">예정</Typography>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'warning.main' }} />
+            <Typography variant="caption" color="text.secondary">예정</Typography>
           </Stack>
           <Stack direction="row" alignItems="center" spacing={0.5}>
-            <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'error.main' }} />
-            <Typography variant="body2">미복용</Typography>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'error.main' }} />
+            <Typography variant="caption" color="text.secondary">미복용</Typography>
           </Stack>
         </Stack>
       </Stack>

@@ -210,7 +210,8 @@ export const AppointmentCalendarView = ({
                                 onClick={() => !isPastDate && handleDateClick(date)}
                                 sx={{
                                     flex: 1,
-                                    aspectRatio: '1 / 1',
+                                    // aspectRatio: '1 / 1', // Too tall
+                                    height: 44, // Fixed height for compact view
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',

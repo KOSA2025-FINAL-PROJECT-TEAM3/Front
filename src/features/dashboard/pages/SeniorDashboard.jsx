@@ -284,7 +284,28 @@ export const SeniorDashboard = () => {
 
   // 복약 완료 처리
   const handleConfirmMedication = async () => {
-    if (!nextMedication?.scheduleId) return
+    if (!nextMedication?.scheduleId) {
+      logger.warn('[SeniorDashboard] scheduleId is missing, cannot complete medication', nextMedication)
+      toast.error('해당 복용 일정을 찾을 수 없습니다. 약물 관리에서 스케줄을 확인해주세요.')
+      return
+    }
+
+    // 복약 시간 체크 (30분 전부터 가능하도록 설정)
+    if (nextMedication.time) {
+      const now = new Date()
+      const [hours, minutes] = nextMedication.time.split(':').map(Number)
+      const scheduledTime = new Date()
+      scheduledTime.setHours(hours, minutes, 0, 0)
+
+      // 만약 예정 시간이 현재 시간보다 30분 이상 미래라면 경고
+      const timeDiff = scheduledTime.getTime() - now.getTime()
+      const THIRTY_MINUTES = 30 * 60 * 1000
+
+      if (timeDiff > THIRTY_MINUTES) {
+        toast.warning(`아직 복용 시간이 아닙니다.\n(예정 시간: ${nextMedication.time})`)
+        return
+      }
+    }
 
     try {
       await medicationLogApiClient.completeMedication(nextMedication.scheduleId)
@@ -408,10 +429,7 @@ export const SeniorDashboard = () => {
             dietPath={ROUTE_PATHS.dietLog}
             chatPath={ROUTE_PATHS.familyChat}
           />
-        </Stack>
 
-        {/* Column 2 */}
-        <Stack spacing={{ xs: 3, md: 4 }}>
           {!isMobile ? (
             <TodaySummaryCard
               takenCount={takenCount}
@@ -419,8 +437,12 @@ export const SeniorDashboard = () => {
               onClick={() => navigate(ROUTE_PATHS.medicationToday)}
             />
           ) : null}
+        </Stack>
 
-          <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} />
+        {/* Column 2 */}
+        <Stack spacing={{ xs: 3, md: 4 }}>
+          {/* Desktop: TodayChecklist is here */}
+          {!isMobile ? <TodayMedicationCheckbox schedules={todaySchedules} onToggle={handleToggleTimeSection} /> : null}
 
           <WeeklyStatsWidget
             title="지난 7일 기록"
