@@ -138,7 +138,10 @@ export const useAuthStore = create(
           window.localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN)
           window.localStorage.removeItem(STORAGE_KEYS.USER_DATA)
           window.localStorage.removeItem(STORAGE_KEYS.ROLE)
+          window.localStorage.removeItem(STORAGE_KEYS.KAKAO_STATE)
           window.localStorage.removeItem('amapill-auth-storage-v2')
+          // 세션 관련 데이터도 정리 (보호자가 선택한 어르신 정보)
+          window.localStorage.removeItem('amapill-care-target-v1')
         }
 
         // 2. Zustand 상태 초기화 (persist가 빈 상태 저장할 수 있음)
@@ -199,26 +202,26 @@ export const useAuthStore = create(
           if (data.profileImageFile) {
             const imageResponse = await userApiClient.uploadProfileImage(data.profileImageFile)
             // imageResponse가 user 객체를 반환한다고 가정 (백엔드 로직에 따름)
-            updatedUser = imageResponse 
+            updatedUser = imageResponse
           }
 
           // 2. 텍스트 정보 업데이트 (이름, 전화번호 등)
           // 이미지만 바꾼 경우 텍스트 업데이트 생략 가능하지만, 
           // 안전하게 텍스트 정보도 같이 보냄 (또는 data에서 file 제외하고 보냄)
           const { profileImageFile, ...textData } = data
-          
+
           // 텍스트 데이터가 변경된 게 있으면 호출
           if (Object.keys(textData).length > 0) {
-             updatedUser = await userApiClient.updateMe(textData)
+            updatedUser = await userApiClient.updateMe(textData)
           }
 
           // 기존 토큰 등은 유지하고 user 정보만 업데이트
           const currentUser = get().user
           // updatedUser가 없으면(둘 다 실행 안됨?) 기존 유지
           const finalUser = updatedUser || currentUser
-          
+
           const newUserState = { ...currentUser, ...finalUser }
-          
+
           get().setAuthData({
             ...get(), // 기존 토큰 및 상태 유지
             user: newUserState

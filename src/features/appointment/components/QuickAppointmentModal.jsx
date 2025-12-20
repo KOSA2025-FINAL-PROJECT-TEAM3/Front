@@ -177,7 +177,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
         >
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pb: 1 }}>
                 <HospitalIcon color="primary" />
-                <Typography variant="h6" sx={{ fontWeight: 700, flex: 1 }}>
+                <Typography variant="h6" component="span" sx={{ fontWeight: 700, flex: 1 }}>
                     빠른 진료 일정 등록
                 </Typography>
                 <IconButton onClick={handleClose} edge="end" size="small">
