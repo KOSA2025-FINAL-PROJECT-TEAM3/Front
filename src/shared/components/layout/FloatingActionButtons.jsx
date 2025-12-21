@@ -37,17 +37,19 @@ import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import logger from '@core/utils/logger'
+import { DietEntryModal } from '@features/diet/components/DietEntryModal'
+import { MedicationEntryModal } from '@features/medication/components/MedicationEntryModal'
+import { DiseaseEntryModal } from '@features/disease/components/DiseaseEntryModal'
+import { OcrEntryModal } from '@features/ocr/components/OcrEntryModal'
+import { useFamilyStore } from '@features/family/store/familyStore'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
-import { DietEntryModal } from '@features/diet/components/DietEntryModal'
-import { useFamilyStore } from '@features/family/store/familyStore'
 
 export const FloatingActionButtons = ({ hasBottomDock = true }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [exporting, setExporting] = useState(false)
-  const [dietModalOpen, setDietModalOpen] = useState(false)
+  const [activeModal, setActiveModal] = useState(null) // 'diet', 'medication', 'disease', 'ocr'
 
   const { fontScaleLevel, increaseFontScaleLevel, decreaseFontScaleLevel } = useUiPreferencesStore((state) => ({
     fontScaleLevel: state.fontScaleLevel,
@@ -87,7 +89,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       return
     }
 
-    setExporting(true)
     try {
       const blob = await diseaseApiClient.exportPdf(userId)
       const url = window.URL.createObjectURL(blob)
@@ -100,8 +101,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
     } catch (error) {
       logger.error('PDF 다운로드 실패', error)
       toast.error('PDF 다운로드에 실패했습니다.')
-    } finally {
-      setExporting(false)
     }
   }
 
@@ -182,18 +181,33 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       onClick: () => navigate(ROUTE_PATHS.familyInvite),
     },
     {
+      id: 'medication',
+      label: '약 등록',
+      icon: <LocalPharmacyIcon fontSize="small" />,
+      color: { bg: '#EFF6FF', fg: '#3B82F6' },
+      onClick: () => {
+        // Only allow if specific target is identified, otherwise default to activeSenior or user (caregiver self?)
+        // Requirement implies linking to "selected group's senior"
+        setActiveModal('medication')
+      },
+    },
+    {
       id: 'disease',
-      label: '질병 관리',
+      label: '질병 등록',
       icon: <HealthAndSafetyIcon fontSize="small" />,
       color: { bg: '#FEF2F2', fg: '#EF4444' },
-      onClick: () => navigate(ROUTE_PATHS.disease),
+      onClick: () => {
+        setActiveModal('disease')
+      },
     },
     {
       id: 'ocr',
       label: 'OCR 약봉투',
       icon: <CameraAltIcon fontSize="small" />,
       color: { bg: '#F0FDFA', fg: '#2EC4B6' },
-      onClick: () => navigate(ROUTE_PATHS.ocrScan),
+      onClick: () => {
+        setActiveModal('ocr')
+      },
     },
   ]
 
@@ -204,14 +218,16 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       label: '처방전 촬영',
       icon: <CameraAltIcon fontSize="small" />,
       color: { bg: '#EEF2FF', fg: '#6366F1' },
-      onClick: () => navigate(ROUTE_PATHS.ocrScan),
+      onClick: () => {
+        setActiveModal('ocr')
+      },
     },
     {
       id: 'diet',
       label: '식단 기록',
       icon: <RestaurantIcon fontSize="small" />,
       color: { bg: '#F0FDFA', fg: '#2EC4B6' },
-      onClick: () => setDietModalOpen(true),
+      onClick: () => setActiveModal('diet'),
     },
     {
       id: 'disease',
@@ -524,8 +540,26 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       </Box>
 
       <DietEntryModal
-        open={dietModalOpen}
-        onClose={() => setDietModalOpen(false)}
+        open={activeModal === 'diet'}
+        onClose={() => setActiveModal(null)}
+      />
+      <MedicationEntryModal
+        open={activeModal === 'medication'}
+        onClose={() => setActiveModal(null)}
+        targetUserId={getActiveTarget()?.id}
+        targetUserName={getActiveTarget()?.name}
+      />
+      <DiseaseEntryModal
+        open={activeModal === 'disease'}
+        onClose={() => setActiveModal(null)}
+        targetUserId={getActiveTarget()?.id}
+        targetUserName={getActiveTarget()?.name}
+      />
+      <OcrEntryModal
+        open={activeModal === 'ocr'}
+        onClose={() => setActiveModal(null)}
+        targetUserId={getActiveTarget()?.id}
+        targetUserName={getActiveTarget()?.name}
       />
     </>
   )

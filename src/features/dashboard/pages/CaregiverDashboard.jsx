@@ -9,6 +9,7 @@ import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import TodaySummaryCard from '../components/TodaySummaryCard'
 import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
 import { NoFamilyModal } from '../components/NoFamilyModal'
+import CaregiverDashboardSkeleton from '../components/CaregiverDashboardSkeleton'
 import { DietSummaryCard } from '../components/DietSummaryCard'
 import { DiseaseSummaryCard } from '../components/DiseaseSummaryCard'
 import { DietDetailModal } from '../components/DietDetailModal'
@@ -433,20 +434,33 @@ export function CaregiverDashboard() {
   const shouldShowNoFamilyModal = !loading && !hasFamilyGroup && (initialized || !!token)
 
   if (loading && groupMembers.length === 0) {
-    return (
-      <MainLayout>
-        <Box sx={{ py: 4 }}>
-          <Typography>가족 데이터를 불러오는 중...</Typography>
-        </Box>
-      </MainLayout>
-    )
+    return <CaregiverDashboardSkeleton />
   }
 
   if (error) {
     return (
       <MainLayout>
-        <Box sx={{ py: 4 }}>
-          <Typography color="error">가족 데이터를 불러오지 못했습니다. {error.message}</Typography>
+        <Box sx={{ py: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <Typography color="error" variant="h6">
+            데이터를 불러오지 못했습니다.
+          </Typography>
+          <Typography color="text.secondary" variant="body2">
+            {error.message || '잠시 후 다시 시도해주세요.'}
+          </Typography>
+          <ButtonBase
+            onClick={() => initialize({ force: true }).catch(() => { })}
+            sx={{
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              bgcolor: 'primary.main',
+              color: 'white',
+              fontWeight: 'bold',
+              '&:hover': { bgcolor: 'primary.dark' }
+            }}
+          >
+            다시 시도
+          </ButtonBase>
         </Box>
       </MainLayout>
     )
