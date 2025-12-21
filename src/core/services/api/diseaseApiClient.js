@@ -16,7 +16,9 @@ export const diseaseApiClient = {
   },
 
   async create(payload) {
-    return client.post('', payload)
+    const { userId, ...data } = payload
+    const params = userId ? { userId } : undefined
+    return client.post('', data, { params })
   },
 
   async update(diseaseId, payload) {

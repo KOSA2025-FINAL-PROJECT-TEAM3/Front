@@ -27,6 +27,8 @@ import { useMedicationLogStore } from '@features/medication/store/medicationLogS
 import { useAppointmentStore } from '@features/appointment/store/appointmentStore'
 import { FoodWarningModal } from '@features/diet/components/FoodWarningModal'
 
+import SeniorDashboardSkeleton from '../components/SeniorDashboardSkeleton'
+
 const getLogScheduleId = (log) =>
   log?.medicationScheduleId ??
   log?.scheduleId ??
@@ -311,11 +313,9 @@ export const SeniorDashboard = () => {
   }, [today])
 
 
-
   useEffect(() => {
     loadWeeklyStats()
   }, [loadWeeklyStats])
-
 
 
   const adherenceRate = useMemo(() => {
@@ -394,6 +394,10 @@ export const SeniorDashboard = () => {
   const takenCount = useMemo(() => todaySchedules.filter((s) => s.status === 'completed').length, [todaySchedules])
   const totalCount = useMemo(() => todaySchedules.length, [todaySchedules])
 
+  if (loading) {
+    return <SeniorDashboardSkeleton />
+  }
+
   return (
     <MainLayout>
       <Box
@@ -406,9 +410,7 @@ export const SeniorDashboard = () => {
       >
         {/* Column 1 */}
         <Stack spacing={{ xs: 3, md: 4 }}>
-          {loading ? (
-            <HeroMedicationCard title="불러오는 중..." subtitle="오늘 복약 일정을 확인하고 있어요." medications={[]} sx={{ minHeight: 320 }} />
-          ) : nextMedication ? (
+          {nextMedication ? (
             <HeroMedicationCard
               title="복약 시간입니다 💊"
               subtitle="정확한 약품 정보를 확인하세요."
