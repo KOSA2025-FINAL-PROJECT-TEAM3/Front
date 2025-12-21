@@ -25,6 +25,7 @@ import { useAppointmentStore } from '../store/appointmentStore'
 import { CompleteActionModal } from '../components/CompleteActionModal'
 import { toast } from '@shared/components/toast/toastStore'
 import logger from '@core/utils/logger'
+import { MainLayout } from '@shared/components/layout/MainLayout'
 
 /**
  * 날짜+시간 포맷팅
@@ -132,20 +133,24 @@ const AppointmentDetailPage = () => {
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-                <CircularProgress />
-            </Box>
+            <MainLayout>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <CircularProgress />
+                </Box>
+            </MainLayout>
         )
     }
 
     if (error || !currentAppointment) {
         return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="error">진료 일정 정보를 불러올 수 없습니다.</Alert>
-                <Button onClick={() => navigate('/appointments')} sx={{ mt: 2 }}>
-                    목록으로 돌아가기
-                </Button>
-            </Box>
+            <MainLayout>
+                <Box sx={{ p: 3 }}>
+                    <Alert severity="error">진료 일정 정보를 불러올 수 없습니다.</Alert>
+                    <Button onClick={() => navigate('/appointments')} sx={{ mt: 2 }}>
+                        목록으로 돌아가기
+                    </Button>
+                </Box>
+            </MainLayout>
         )
     }
 
@@ -154,168 +159,170 @@ const AppointmentDetailPage = () => {
     const isActive = currentAppointment.status === 'SCHEDULED'
 
     return (
-        <Box sx={{ pb: 4 }}>
-            {/* 헤더 */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2,
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                }}
-            >
-                <Stack direction="row" alignItems="center">
-                    <IconButton onClick={() => navigate(-1)} edge="start">
-                        <ArrowBackIcon />
-                    </IconButton>
-                    <Typography variant="h6" sx={{ fontWeight: 700, ml: 1 }}>
-                        진료 일정 상세
-                    </Typography>
-                </Stack>
-                {isActive && (
-                    <Stack direction="row" spacing={1}>
-                        <IconButton onClick={handleEdit} color="primary">
-                            <EditIcon />
+        <MainLayout>
+            <Box sx={{ pb: 4 }}>
+                {/* 헤더 */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        p: 2,
+                        borderBottom: 1,
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Stack direction="row" alignItems="center">
+                        <IconButton onClick={() => navigate(-1)} edge="start">
+                            <ArrowBackIcon />
                         </IconButton>
-                        <IconButton onClick={handleDelete} color="error" disabled={actionLoading}>
-                            <DeleteIcon />
-                        </IconButton>
+                        <Typography variant="h6" sx={{ fontWeight: 700, ml: 1 }}>
+                            진료 일정 상세
+                        </Typography>
                     </Stack>
-                )}
-            </Box>
+                    {isActive && (
+                        <Stack direction="row" spacing={1}>
+                            <IconButton onClick={handleEdit} color="primary">
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={handleDelete} color="error" disabled={actionLoading}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Stack>
+                    )}
+                </Box>
 
-            {/* 메인 컨텐츠 */}
-            <Box sx={{ p: 2 }}>
-                <Stack spacing={2}>
-                    {/* 병원명 카드 */}
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                        <Stack direction="row" alignItems="center" spacing={2}>
-                            <Box
-                                sx={{
-                                    p: 1.5,
-                                    borderRadius: 2,
-                                    bgcolor: isCompleted ? 'success.50' : isCancelled ? 'grey.100' : 'info.50',
-                                }}
-                            >
-                                <HospitalIcon
+                {/* 메인 컨텐츠 */}
+                <Box sx={{ p: 2 }}>
+                    <Stack spacing={2}>
+                        {/* 병원명 카드 */}
+                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                            <Stack direction="row" alignItems="center" spacing={2}>
+                                <Box
                                     sx={{
-                                        fontSize: 32,
-                                        color: isCompleted ? 'success.main' : isCancelled ? 'grey.500' : 'info.main',
+                                        p: 1.5,
+                                        borderRadius: 2,
+                                        bgcolor: isCompleted ? 'success.50' : isCancelled ? 'grey.100' : 'info.50',
                                     }}
-                                />
-                            </Box>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                                    {currentAppointment.hospitalName}
-                                </Typography>
-                                {currentAppointment.department && (
-                                    <Typography variant="body2" color="text.secondary">
-                                        {currentAppointment.department}
-                                        {currentAppointment.doctorName && ` · ${currentAppointment.doctorName}`}
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Stack>
-                    </Paper>
-
-                    {/* 날짜/시간 */}
-                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                        <Stack direction="row" alignItems="center" spacing={1.5}>
-                            <ScheduleIcon color="action" />
-                            <Typography sx={{ fontWeight: 600 }}>
-                                {formatDateTime(currentAppointment.visitAt)}
-                            </Typography>
-                        </Stack>
-                    </Paper>
-
-                    {/* 위치 정보 */}
-                    {currentAppointment.address && (
-                        <Paper
-                            variant="outlined"
-                            sx={{ p: 2, borderRadius: 3, cursor: 'pointer' }}
-                            onClick={handleOpenMap}
-                        >
-                            <Stack direction="row" alignItems="center" spacing={1.5}>
-                                <LocationIcon color="primary" />
+                                >
+                                    <HospitalIcon
+                                        sx={{
+                                            fontSize: 32,
+                                            color: isCompleted ? 'success.main' : isCancelled ? 'grey.500' : 'info.main',
+                                        }}
+                                    />
+                                </Box>
                                 <Box sx={{ flex: 1 }}>
-                                    <Typography sx={{ fontWeight: 600 }}>
-                                        {currentAppointment.address}
+                                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                                        {currentAppointment.hospitalName}
                                     </Typography>
-                                    {currentAppointment.addressDetail && (
+                                    {currentAppointment.department && (
                                         <Typography variant="body2" color="text.secondary">
-                                            {currentAppointment.addressDetail}
+                                            {currentAppointment.department}
+                                            {currentAppointment.doctorName && ` · ${currentAppointment.doctorName}`}
                                         </Typography>
                                     )}
                                 </Box>
                             </Stack>
                         </Paper>
-                    )}
 
-                    {/* 전화번호 */}
-                    {currentAppointment.phoneNumber && (
-                        <Paper
-                            variant="outlined"
-                            sx={{ p: 2, borderRadius: 3, cursor: 'pointer' }}
-                            onClick={handleCall}
-                        >
+                        {/* 날짜/시간 */}
+                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
                             <Stack direction="row" alignItems="center" spacing={1.5}>
-                                <PhoneIcon color="primary" />
+                                <ScheduleIcon color="action" />
                                 <Typography sx={{ fontWeight: 600 }}>
-                                    {currentAppointment.phoneNumber}
+                                    {formatDateTime(currentAppointment.visitAt)}
                                 </Typography>
                             </Stack>
                         </Paper>
-                    )}
 
-                    {/* 메모 */}
-                    {currentAppointment.memo && (
-                        <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
-                                메모
-                            </Typography>
-                            <Typography>{currentAppointment.memo}</Typography>
-                        </Paper>
-                    )}
+                        {/* 위치 정보 */}
+                        {currentAppointment.address && (
+                            <Paper
+                                variant="outlined"
+                                sx={{ p: 2, borderRadius: 3, cursor: 'pointer' }}
+                                onClick={handleOpenMap}
+                            >
+                                <Stack direction="row" alignItems="center" spacing={1.5}>
+                                    <LocationIcon color="primary" />
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography sx={{ fontWeight: 600 }}>
+                                            {currentAppointment.address}
+                                        </Typography>
+                                        {currentAppointment.addressDetail && (
+                                            <Typography variant="body2" color="text.secondary">
+                                                {currentAppointment.addressDetail}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </Stack>
+                            </Paper>
+                        )}
 
-                    <Divider sx={{ my: 1 }} />
+                        {/* 전화번호 */}
+                        {currentAppointment.phoneNumber && (
+                            <Paper
+                                variant="outlined"
+                                sx={{ p: 2, borderRadius: 3, cursor: 'pointer' }}
+                                onClick={handleCall}
+                            >
+                                <Stack direction="row" alignItems="center" spacing={1.5}>
+                                    <PhoneIcon color="primary" />
+                                    <Typography sx={{ fontWeight: 600 }}>
+                                        {currentAppointment.phoneNumber}
+                                    </Typography>
+                                </Stack>
+                            </Paper>
+                        )}
 
-                    {/* 액션 버튼 */}
-                    {isActive && (
-                        <Button
-                            variant="contained"
-                            color="success"
-                            size="large"
-                            startIcon={<CheckIcon />}
-                            onClick={handleComplete}
-                            disabled={actionLoading}
-                            sx={{ fontWeight: 700 }}
-                        >
-                            방문 완료
-                        </Button>
-                    )}
+                        {/* 메모 */}
+                        {currentAppointment.memo && (
+                            <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+                                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                    메모
+                                </Typography>
+                                <Typography>{currentAppointment.memo}</Typography>
+                            </Paper>
+                        )}
 
-                    {isCompleted && (
-                        <Alert severity="success" icon={<CheckIcon />}>
-                            {formatDateTime(currentAppointment.completedAt)}에 방문 완료되었습니다.
-                        </Alert>
-                    )}
+                        <Divider sx={{ my: 1 }} />
 
-                    {isCancelled && (
-                        <Alert severity="warning">이 진료 일정은 취소되었습니다.</Alert>
-                    )}
-                </Stack>
+                        {/* 액션 버튼 */}
+                        {isActive && (
+                            <Button
+                                variant="contained"
+                                color="success"
+                                size="large"
+                                startIcon={<CheckIcon />}
+                                onClick={handleComplete}
+                                disabled={actionLoading}
+                                sx={{ fontWeight: 700 }}
+                            >
+                                방문 완료
+                            </Button>
+                        )}
+
+                        {isCompleted && (
+                            <Alert severity="success" icon={<CheckIcon />}>
+                                {formatDateTime(currentAppointment.completedAt)}에 방문 완료되었습니다.
+                            </Alert>
+                        )}
+
+                        {isCancelled && (
+                            <Alert severity="warning">이 진료 일정은 취소되었습니다.</Alert>
+                        )}
+                    </Stack>
+                </Box>
+
+                {/* 완료 후 OCR 유도 모달 */}
+                <CompleteActionModal
+                    open={showCompleteModal}
+                    onClose={() => setShowCompleteModal(false)}
+                    appointment={currentAppointment}
+                    loading={actionLoading}
+                />
             </Box>
-
-            {/* 완료 후 OCR 유도 모달 */}
-            <CompleteActionModal
-                open={showCompleteModal}
-                onClose={() => setShowCompleteModal(false)}
-                appointment={currentAppointment}
-                loading={actionLoading}
-            />
-        </Box>
+        </MainLayout>
     )
 }
 
