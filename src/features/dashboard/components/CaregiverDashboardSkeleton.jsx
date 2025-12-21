@@ -16,12 +16,9 @@ function CaregiverDashboardSkeleton() {
                     >
                         <Stack spacing={2.5}>
                             {/* Group Select */}
-                            <Box>
-                                <Skeleton variant="text" width={80} height={20} sx={{ mb: 1 }} />
-                                <Stack direction="row" spacing={1}>
-                                    <Skeleton variant="rounded" width={100} height={36} sx={{ borderRadius: 2.5 }} />
-                                    <Skeleton variant="rounded" width={100} height={36} sx={{ borderRadius: 2.5 }} />
-                                </Stack>
+                            <Box sx={{ mb: 1 }}>
+                                <Skeleton variant="text" width={60} height={20} sx={{ mb: 0.5 }} />
+                                <Skeleton variant="text" width={150} height={32} />
                             </Box>
 
                             {/* Active Senior Profile */}
