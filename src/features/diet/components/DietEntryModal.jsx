@@ -54,7 +54,7 @@ export const DietEntryModal = ({ open, onClose }) => {
             }}
         >
             <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: 'background.paper' }}>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography variant="h6" component="span" fontWeight="bold">
                     식단 기록
                 </Typography>
                 <IconButton

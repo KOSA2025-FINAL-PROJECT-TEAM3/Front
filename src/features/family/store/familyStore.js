@@ -306,6 +306,17 @@ export const useFamilyStore = create((set, get) => ({
   },
 
   refetchFamily: async () => get().loadFamily(),
+
+  reset: () => {
+    set(initialState)
+  },
 }))
+
+// 글로벌 로그아웃 이벤트 리스너 등록 (Store 외부에서 구독)
+if (typeof window !== 'undefined') {
+  window.addEventListener('app:auth:logout', () => {
+    useFamilyStore.getState().reset()
+  })
+}
 
 export default useFamilyStore

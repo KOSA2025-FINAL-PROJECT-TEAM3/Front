@@ -10,6 +10,9 @@ export const useCareTargetStore = create(
       activeSeniorMemberId: null,
       setActiveSeniorMemberId: (memberId) => set({ activeSeniorMemberId: memberId != null ? String(memberId) : null }),
       clearActiveSeniorMemberId: () => set({ activeSeniorMemberId: null }),
+
+      // 상태 초기화 (로그아웃 시 호출)
+      reset: () => set({ activeSeniorMemberId: null }),
     }),
     {
       name: STORAGE_KEY,
@@ -19,5 +22,12 @@ export const useCareTargetStore = create(
     },
   ),
 )
+
+// 글로벌 로그아웃 이벤트 리스너 등록
+if (typeof window !== 'undefined') {
+  window.addEventListener('app:auth:logout', () => {
+    useCareTargetStore.getState().reset()
+  })
+}
 
 export default useCareTargetStore

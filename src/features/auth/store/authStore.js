@@ -119,6 +119,20 @@ export const useAuthStore = create(
         const normalized = normalizeAuthPayload(payload)
         persistAuthToStorage(normalized)
 
+        // Safety Net: 사용자 변경 시(로그인, 계정전환) 기존 Feature Store 상태 초기화
+        // 이유: 브라우저 종료 후 재접속 시 Auth는 없지만 Feature Store(persisted)는 남아있을 수 있음
+        const currentUser = get().user
+        const newUser = normalized.user
+
+        // 1. 새로운 유저 로그인 (currentUser 없음 -> newUser 있음)
+        // 2. 유저 변경 (currentUser A -> newUser B)
+        // 주의: 리프레시나 역할 변경 시에는 id가 같으므로 트리거되지 않음
+        if (newUser && (!currentUser || String(currentUser.id) !== String(newUser.id))) {
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('app:auth:logout'))
+          }
+        }
+
         set((state) => ({
           ...state,
           user: normalized.user,
@@ -172,8 +186,10 @@ export const useAuthStore = create(
         // 2. Zustand 상태 초기화 (persist가 빈 상태 저장할 수 있음)
         set({ ...initialState, _hasHydrated: true })
 
-        // 3. persist가 재생성한 키 최종 삭제 (확실한 정리)
+        // 3. 글로벌 로그아웃 이벤트 발행 (다른 Store들이 구독하여 스스로 초기화)
+        // Decoupled Architecture: AuthStore는 누가 무엇을 초기화하는지 몰라도 됨
         if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('app:auth:logout'))
           window.localStorage.removeItem('amapill-auth-storage-v2')
         }
       },
