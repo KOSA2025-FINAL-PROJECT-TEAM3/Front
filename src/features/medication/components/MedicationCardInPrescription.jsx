@@ -76,8 +76,16 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes = [], onE
 
   const title = medication.name
   const category = medication.category || '분류 없음'
-  const dosageAmount = medication.dosageAmount || parseInt(medication.dosage, 10) || 1
-  const dosageText = `1회 ${dosageAmount}정`
+
+  // 3분할 표시: 1일 frequency회, 1회 dosePerIntake정, 총 quantity개
+  const frequency = medication.frequency || 1
+  const dosePerIntake = medication.dosePerIntake || medication.dosageAmount || parseInt(medication.dosage, 10) || 1
+  const totalQuantity = medication.quantity
+
+  const frequencyText = `1일 ${frequency}회`
+  const doseText = `1회 ${dosePerIntake}정`
+  const quantityText = totalQuantity ? `총 ${totalQuantity}정` : null
+
   const hasActions = Boolean(onEdit || onRemove)
   const hasImage = Boolean(medication.imageUrl) && !imageError
 
@@ -158,7 +166,9 @@ export const MedicationCardInPrescription = ({ medication, intakeTimes = [], onE
             </Stack>
 
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1 }}>
-              <Chip size="small" label={dosageText} sx={{ bgcolor: 'grey.50', fontWeight: 900 }} />
+              <Chip size="small" label={frequencyText} sx={{ bgcolor: 'primary.50', fontWeight: 900, color: 'primary.700' }} />
+              <Chip size="small" label={doseText} sx={{ bgcolor: 'grey.50', fontWeight: 900 }} />
+              {quantityText && <Chip size="small" label={quantityText} sx={{ bgcolor: 'grey.50', fontWeight: 900 }} />}
               {dayLabels.length === 1 ? (
                 <Chip size="small" label={dayLabels[0]} sx={{ bgcolor: 'grey.50', fontWeight: 900 }} />
               ) : (

@@ -75,7 +75,9 @@ export const PrescriptionAddPage = () => {
                         medications: (data.medications || []).map(med => ({
                             ...med,
                             category: med.ingredient, // DTO 매핑 차이 보정
-                            dosageAmount: parseInt(med.dosage) || 1,
+                            dosageAmount: med.dosePerIntake || parseInt(med.dosage) || 1,
+                            frequency: med.frequency || med.schedules?.length || 1,
+                            dosePerIntake: med.dosePerIntake || parseInt(med.dosage) || 1,
                             // 서버 응답에는 intakeTimeIndices가 없으므로 계산 필요하지만,
                             // 여기서는 단순화를 위해 null로 설정하거나 기존 로직 유지
                             intakeTimeIndices: null

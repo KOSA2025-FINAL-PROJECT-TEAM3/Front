@@ -70,6 +70,10 @@ export const DiseasePage = () => {
   const handleExportPdf = useCallback(async () => {
     // ... (unchanged)
     if (!userId) return
+    if (isProxyMode) {
+      toast.error('대리 PDF 출력은 보호자 대시보드에서만 가능합니다.')
+      return
+    }
     setExporting(true)
     try {
       const blob = await diseaseApiClient.exportPdf(userId)
@@ -87,7 +91,7 @@ export const DiseasePage = () => {
     } finally {
       setExporting(false)
     }
-  }, [userId])
+  }, [userId, isProxyMode])
 
   // 음성 명령 (질병 자동 입력 및 PDF 다운로드)
   useEffect(() => {
@@ -270,7 +274,11 @@ export const DiseasePage = () => {
               <AppButton variant="secondary" onClick={handleRefresh}>
                 새로고침
               </AppButton>
-              <AppButton variant="primary" onClick={handleExportPdf} disabled={exporting || !userId}>
+              <AppButton
+                variant="primary"
+                onClick={handleExportPdf}
+                disabled={exporting || !userId || isProxyMode}
+              >
                 {exporting ? '다운로드 중...' : 'PDF 다운로드'}
               </AppButton>
             </Stack>

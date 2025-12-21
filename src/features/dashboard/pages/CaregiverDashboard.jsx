@@ -161,10 +161,14 @@ export function CaregiverDashboard() {
       logger.warn('No active senior selected for PDF export')
       return
     }
+    if (!selectedGroupId) {
+      logger.warn('No family group selected for PDF export')
+      return
+    }
 
     try {
       logger.info('Exporting PDF for user:', activeSenior.userId)
-      const blob = await diseaseApiClient.exportPdf(activeSenior.userId)
+      const blob = await diseaseApiClient.exportPdf(activeSenior.userId, selectedGroupId)
 
       // Create download link
       const url = window.URL.createObjectURL(blob)
@@ -180,7 +184,7 @@ export function CaregiverDashboard() {
     } catch (error) {
       logger.error('Failed to export PDF:', error)
     }
-  }, [activeSenior])
+  }, [activeSenior, selectedGroupId])
 
   useEffect(() => {
     const loadRate = async () => {
@@ -922,4 +926,3 @@ const GuardianMenuCard = memo(({ title, icon, color, onClick }) => {
     </Paper>
   )
 })
-

@@ -39,8 +39,9 @@ export const diseaseApiClient = {
     return client.delete(`/user/${userId}/trash`)
   },
 
-  async exportPdf(userId) {
-    return client.get(`/user/${userId}/export/pdf`, { responseType: 'blob' })
+  async exportPdf(userId, familyGroupId) {
+    const params = familyGroupId ? { familyGroupId } : undefined
+    return client.get(`/user/${userId}/export/pdf`, { params, responseType: 'blob' })
   },
 }
 
