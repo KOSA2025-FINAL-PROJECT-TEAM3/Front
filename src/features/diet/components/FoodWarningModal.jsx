@@ -68,7 +68,7 @@ const parseJsonSafe = (value, fallback = []) => {
     }
 }
 
-export const FoodWarningModal = ({ open, onClose, userId }) => {
+export const FoodWarningModal = ({ open, onClose, userId, onRecordDiet }) => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [logs, setLogs] = useState([])
@@ -211,6 +211,15 @@ export const FoodWarningModal = ({ open, onClose, userId }) => {
             </DialogContent>
 
             <DialogActions>
+                <Button
+                    onClick={() => {
+                        onRecordDiet?.()
+                        onClose()
+                    }}
+                    sx={{ fontWeight: 800, color: 'text.secondary' }}
+                >
+                    식단 기록하러 가기
+                </Button>
                 <Button onClick={onClose} sx={{ fontWeight: 800 }}>
                     닫기
                 </Button>
