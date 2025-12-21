@@ -2,12 +2,84 @@ import logger from '@core/utils/logger'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { BackButton } from '@shared/components/mui/BackButton'
-import { Box, Button, Chip, LinearProgress, Paper, Stack, Typography } from '@mui/material'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  Chip,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { medicationLogApiClient } from '@/core/services/api/medicationLogApiClient'
 import { toast } from '@shared/components/toast/toastStore'
 import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore'
 import { PageHeader } from '@shared/components/layout/PageHeader'
 import { PageStack } from '@shared/components/layout/PageStack'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+
+const RECENT_DAYS = 14
+const LOG_STATUS_CONFIG = {
+  completed: { label: '복용완료', color: 'success' },
+  missed: { label: '미복용', color: 'error' },
+  pending: { label: '예정', color: 'warning' },
+}
+
+const normalizeStatus = (status) => {
+  if (typeof status !== 'string') return status
+  const normalized = status.trim().toLowerCase()
+  if (!normalized) return null
+  if (normalized === 'complete') return 'completed'
+  if (normalized === 'miss') return 'missed'
+  if (normalized === 'scheduled') return 'pending'
+  return normalized
+}
+
+const resolveLogStatus = (log) => {
+  const normalized = normalizeStatus(log?.status)
+  if (normalized && LOG_STATUS_CONFIG[normalized]) return normalized
+  if (log?.completed) return 'completed'
+  if (log?.missed) return 'missed'
+  return 'pending'
+}
+
+const formatDateKey = (dateInput) => {
+  if (!dateInput) return null
+
+  const raw = String(dateInput)
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/)
+  if (match) {
+    return match[1]
+  }
+
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput)
+  if (Number.isNaN(date.getTime())) return null
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const formatDisplayDate = (dateKey) => {
+  const normalizedKey = formatDateKey(dateKey)
+  if (!normalizedKey) return ''
+  const date = new Date(`${normalizedKey}T00:00:00`)
+  return date.toLocaleDateString('ko-KR', {
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+  })
+}
+
+const formatDisplayTime = (dateInput) => {
+  if (!dateInput) return '-'
+  const date = new Date(dateInput)
+  if (Number.isNaN(date.getTime())) return '-'
+  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+}
 
 /**
  * 복약 순응도 리포트 페이지 컴포넌트
@@ -17,6 +89,10 @@ export const AdherenceReportPage = () => {
   const [loading, setLoading] = useState(true)
   const [adherenceData, setAdherenceData] = useState(null)
   const [recentHistory, setRecentHistory] = useState([])
+  const [dailyLogs, setDailyLogs] = useState([])
+  const [dailyLogsError, setDailyLogsError] = useState(null)
+  const [expandedDate, setExpandedDate] = useState(null)
+  const [dateRangeKeys, setDateRangeKeys] = useState({ start: null, end: null })
   const { consumeAction } = useVoiceActionStore()
 
   const handleDownloadPdf = useCallback(async () => {
@@ -53,22 +129,33 @@ export const AdherenceReportPage = () => {
     const fetchAdherenceData = async () => {
       try {
         setLoading(true)
+        setDailyLogsError(null)
 
         // 복약 순응도 요약 (7/30/365일)
-        const summary = await medicationLogApiClient.getAdherenceSummary()
-
-        // 최근 14일 일별 순응도
         const endDate = new Date()
         const startDate = new Date()
-        startDate.setDate(startDate.getDate() - 14)
+        startDate.setDate(startDate.getDate() - (RECENT_DAYS - 1))
+        const startDateString = formatDateKey(startDate)
+        const endDateString = formatDateKey(endDate)
+        setDateRangeKeys({ start: startDateString, end: endDateString })
 
-        const dailyData = await medicationLogApiClient.getDailyAdherence(
-          startDate.toISOString().split('T')[0],
-          endDate.toISOString().split('T')[0]
-        )
+        const summaryPromise = medicationLogApiClient.getAdherenceSummary()
+        const dailyPromise = medicationLogApiClient.getDailyAdherence(startDateString, endDateString)
+        const dailyLogsPromise = medicationLogApiClient.getByDateRange(startDateString, endDateString)
+
+        const [summary, dailyData] = await Promise.all([summaryPromise, dailyPromise])
+        let logsResponse = []
+
+        try {
+          logsResponse = await dailyLogsPromise
+        } catch (logError) {
+          logger.error('일별 복약 기록 로딩 실패:', logError)
+          setDailyLogsError('일별 복약 기록을 불러오는데 실패했습니다')
+        }
 
         setAdherenceData(summary)
         setRecentHistory(dailyData || [])
+        setDailyLogs(Array.isArray(logsResponse) ? logsResponse : [])
       } catch (error) {
         logger.error('순응도 데이터 로딩 실패:', error)
         toast.error('순응도 데이터를 불러오는데 실패했습니다')
@@ -106,6 +193,10 @@ export const AdherenceReportPage = () => {
     }
   }
 
+  const getLogStatusLabel = (status) => LOG_STATUS_CONFIG[status]?.label || '미상'
+
+  const getLogStatusColor = (status) => LOG_STATUS_CONFIG[status]?.color || 'default'
+
   const calculateStatus = (completed, total) => {
     if (total === 0) return 'missed'
     const rate = completed / total
@@ -136,6 +227,35 @@ export const AdherenceReportPage = () => {
     }
     return lines
   }, [adherenceData])
+
+  const dailyLogGroups = useMemo(() => {
+    if (dailyLogs.length === 0) return []
+    const grouped = new Map()
+
+    dailyLogs.forEach((log) => {
+      const dateKey = formatDateKey(log?.scheduledTime || log?.completedTime || log?.createdAt)
+      if (!dateKey) return
+      if (dateRangeKeys.start && dateKey < dateRangeKeys.start) return
+      if (dateRangeKeys.end && dateKey > dateRangeKeys.end) return
+      if (!grouped.has(dateKey)) grouped.set(dateKey, [])
+      grouped.get(dateKey).push(log)
+    })
+
+    return Array.from(grouped.entries())
+      .map(([date, logs]) => ({
+        date,
+        logs: logs.sort((a, b) => {
+          const timeA = new Date(a?.scheduledTime || a?.completedTime || 0)
+          const timeB = new Date(b?.scheduledTime || b?.completedTime || 0)
+          return timeB - timeA
+        }),
+      }))
+      .sort((a, b) => new Date(`${b.date}T00:00:00`) - new Date(`${a.date}T00:00:00`))
+  }, [dailyLogs, dateRangeKeys.end, dateRangeKeys.start])
+
+  const handleAccordionChange = (dateKey) => (event, isExpanded) => {
+    setExpandedDate(isExpanded ? dateKey : null)
+  }
 
   if (loading) {
     return (
@@ -236,11 +356,7 @@ export const AdherenceReportPage = () => {
                   <Paper key={index} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Typography fontWeight={800}>
-                        {new Date(day.date).toLocaleDateString('ko-KR', {
-                          month: 'short',
-                          day: 'numeric',
-                          weekday: 'short',
-                        })}
+                        {formatDisplayDate(day.date)}
                       </Typography>
                       <Box sx={{ flex: 1 }} />
                       <Chip size="small" color={getStatusColor(status)} label={getStatusLabel(status)} />
@@ -255,6 +371,91 @@ export const AdherenceReportPage = () => {
                       </Typography>
                     </Stack>
                   </Paper>
+                )
+              })}
+            </Stack>
+          )}
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 2 }}>
+            일별 복약 상세
+          </Typography>
+
+          {dailyLogsError ? (
+            <Typography color="text.secondary">{dailyLogsError}</Typography>
+          ) : dailyLogGroups.length === 0 ? (
+            <Typography color="text.secondary">최근 복약 상세 기록이 없습니다</Typography>
+          ) : (
+            <Stack spacing={1}>
+              {dailyLogGroups.map((group) => {
+                const counts = group.logs.reduce(
+                  (acc, log) => {
+                    const statusKey = resolveLogStatus(log)
+                    if (statusKey === 'completed') acc.completed += 1
+                    else if (statusKey === 'missed') acc.missed += 1
+                    else if (statusKey === 'pending') acc.pending += 1
+                    return acc
+                  },
+                  { completed: 0, missed: 0, pending: 0 }
+                )
+
+                return (
+                  <Accordion
+                    key={group.date}
+                    expanded={expandedDate === group.date}
+                    onChange={handleAccordionChange(group.date)}
+                    disableGutters
+                    elevation={0}
+                    sx={{
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      '&:before': { display: 'none' },
+                    }}
+                  >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                        <Typography fontWeight={800}>{formatDisplayDate(group.date)}</Typography>
+                        <Chip size="small" label={`완료 ${counts.completed}`} color="success" />
+                        <Chip size="small" label={`예정 ${counts.pending}`} color="warning" />
+                        <Chip size="small" label={`미복용 ${counts.missed}`} color="error" />
+                      </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ pt: 0 }}>
+                      <Stack spacing={1}>
+                        {group.logs.map((log, index) => {
+                          const statusKey = resolveLogStatus(log)
+                          const displayTime = formatDisplayTime(
+                            log?.scheduledTime || log?.completedTime || log?.createdAt
+                          )
+
+                          return (
+                            <Paper
+                              key={log?.id ?? `${log?.medicationScheduleId || 'log'}-${index}`}
+                              variant="outlined"
+                              sx={{ p: 1.5, borderRadius: 2 }}
+                            >
+                              <Stack direction="row" spacing={1.5} alignItems="center">
+                                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 60 }}>
+                                  {displayTime}
+                                </Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 700, flex: 1 }} noWrap>
+                                  {log?.medicationName || '알 수 없는 약'}
+                                </Typography>
+                                <Chip
+                                  size="small"
+                                  label={getLogStatusLabel(statusKey)}
+                                  color={getLogStatusColor(statusKey)}
+                                />
+                              </Stack>
+                            </Paper>
+                          )
+                        })}
+                      </Stack>
+                    </AccordionDetails>
+                  </Accordion>
                 )
               })}
             </Stack>

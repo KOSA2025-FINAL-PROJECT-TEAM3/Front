@@ -476,6 +476,7 @@ export const SeniorDashboard = () => {
         open={dietWarningOpen}
         onClose={() => setDietWarningOpen(false)}
         userId={user?.id}
+        onRecordDiet={() => navigate(ROUTE_PATHS.dietLog)}
       />
     </MainLayout>
   )

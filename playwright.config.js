@@ -1,8 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const PORT = 4173
-const DEFAULT_BROWSER_CHANNEL = process.env.PLAYWRIGHT_BROWSER_CHANNEL || 'msedge'
-
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
@@ -20,7 +18,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Edge'], channel: DEFAULT_BROWSER_CHANNEL },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
   webServer: {
