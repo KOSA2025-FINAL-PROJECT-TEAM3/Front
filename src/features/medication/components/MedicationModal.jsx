@@ -124,11 +124,17 @@ export const MedicationModal = ({
       return
     }
 
+    // frequency = 선택된 복용 시간 개수, dosePerIntake = 1회 복용량
+    const frequency = medicationDetails.intakeTimeIndices?.length || 1
+    const dosePerIntake = medicationDetails.dosageAmount || 1
+
     const medicationData = {
       ...selectedMedication,
       name: selectedMedication.itemName || selectedMedication.name,
       category: selectedMedication.entpName || selectedMedication.category || selectedMedication.ingredient,
       dosageAmount: medicationDetails.dosageAmount,
+      frequency: frequency,
+      dosePerIntake: dosePerIntake,
       intakeTimeIndices: medicationDetails.intakeTimeIndices,
       daysOfWeek: medicationDetails.daysOfWeek,
       notes: medicationDetails.notes,
