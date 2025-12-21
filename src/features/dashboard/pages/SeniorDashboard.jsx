@@ -152,11 +152,10 @@ export const SeniorDashboard = () => {
   const todayStr = useMemo(() => today.toLocaleDateString('en-CA'), [today])
 
   // Medication Log Store 사용
-  const { logsByDate, fetchLogsByDate, updateLog } = useMedicationLogStore(
+  const { logsByDate, fetchLogsByDate } = useMedicationLogStore(
     (state) => ({
       logsByDate: state.logsByDate,
-      fetchLogsByDate: state.fetchLogsByDate,
-      updateLog: state.updateLog
+      fetchLogsByDate: state.fetchLogsByDate
     }),
     shallow
   )

@@ -43,7 +43,7 @@ const mapNotification = (n) => {
     ((n.scheduledTime || n.scheduleTime || n.scheduledAt) && typeKey.includes('missed')
       ? `${typeKey}-${n.scheduledTime || n.scheduleTime || n.scheduledAt}`
       : undefined)
-  
+
   if (!groupKey && isDietWarningType(typeKey)) {
     const dayKey = dayKeyFromDate(n.takenTime || n.createdAt)
     if (dayKey) groupKey = `${typeKey}-${dayKey}`
@@ -127,9 +127,9 @@ export const useNotificationStore = create((set, get) => ({
 
       if (listResponse && listResponse.content) {
         const notifications = listResponse.content.map(mapNotification)
-        set({ 
-          notifications, 
-          unreadCount: unreadResponse !== null ? Number(unreadResponse) : calculateUnreadCount(notifications), 
+        set({
+          notifications,
+          unreadCount: unreadResponse !== null ? Number(unreadResponse) : calculateUnreadCount(notifications),
           loading: false,
           initialLoading: false,
           loadingMore: false,
@@ -172,7 +172,7 @@ export const useNotificationStore = create((set, get) => ({
 
   // 추가 알림 로드 (무한 스크롤)
   loadMoreNotifications: async () => {
-    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications, unreadCount } = get()
+    const { initialLoading, loadingMore, loadMorePaused, hasMore, currentPage, notifications } = get()
     if (initialLoading || loadingMore || loadMorePaused || !hasMore) return
 
     set({
@@ -186,8 +186,8 @@ export const useNotificationStore = create((set, get) => ({
       if (response && response.content) {
         const newNotifications = response.content.map(mapNotification)
         const merged = [...notifications, ...newNotifications]
-        set({ 
-          notifications: merged, 
+        set({
+          notifications: merged,
           // 추가 로드 시에는 unreadCount를 유지 (이미 전체 개수를 알고 있으므로)
           // 만약 로컬 계산을 쓴다면 다시 계산해야겠지만, 서버 데이터를 쓴다면 업데이트 불필요
           loading: false,
@@ -294,11 +294,11 @@ export const useNotificationStore = create((set, get) => ({
       const target = state.notifications.find((t) => t.id === id)
       const targetGroup = target?.groupKey
       const isAlreadyRead = target?.read
-      
+
       const newNotifications = state.notifications.map((n) =>
         n.id === id || (targetGroup && n.groupKey === targetGroup) ? { ...n, read: true } : n
       )
-      
+
       return {
         notifications: newNotifications,
         // 안읽었던 알림일 경우에만 카운트 감소

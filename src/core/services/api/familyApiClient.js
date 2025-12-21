@@ -179,6 +179,8 @@ class FamilyApiClient extends ApiClient {
   getMedicationLogs(userId, options = {}) {
     const params = new URLSearchParams()
     if (options.date) params.append('date', options.date)
+    if (options.startDate) params.append('startDate', options.startDate)
+    if (options.endDate) params.append('endDate', options.endDate)
     if (options.status) params.append('status', options.status)
     if (options.limit) params.append('limit', options.limit)
 

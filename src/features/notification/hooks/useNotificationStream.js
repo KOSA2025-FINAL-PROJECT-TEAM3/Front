@@ -78,7 +78,7 @@ export const useNotificationStream = (onNotification) => {
         case 'diet.job.done':
           setDietJobResult(data)
           setDietAnalyzing(false) // 분석 완료 - 전역 로딩 상태 해제
-          
+
           if (data.status === 'DONE') {
             const result = data.result || (data.job && data.job.result)
             logger.info('Diet 분석 완료 알림 수신:', result)
@@ -198,5 +198,5 @@ export const useNotificationStream = (onNotification) => {
     return () => {
       notificationApiClient.disconnect()
     }
-  }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname])
+  }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname, navigate, setDietAnalyzing, setOcrScanning, userId])
 }

@@ -56,7 +56,7 @@ const PrescriptionScanPage = () => {
     setStep,
     handleFileSelect,
     handleCameraCapture,
-    startAnalysis,
+
     startAnalysisAsync,
     updateFormState,
     updateMedication,
@@ -88,7 +88,7 @@ const PrescriptionScanPage = () => {
           localStorage.removeItem(key)
         }
       }
-    } catch (e) {
+    } catch {
       // ignore
     }
   }, [userId])

@@ -13,7 +13,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy'
  * @param {boolean} allowImageUpload - 이미지 업로드 허용 여부
  * @param {string[]} quickChips - 빠른 전송 칩(선택)
  */
-export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true, quickChips = [] }) => {
+export const ChatInput = ({ onSend, disabled = false, allowImageUpload = true }) => {
   const [message, setMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState(null)
   const [isAiMode, setIsAiMode] = useState(false)

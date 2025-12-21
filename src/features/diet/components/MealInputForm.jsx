@@ -44,8 +44,7 @@ export const MealInputForm = ({
   const [analysisResult, setAnalysisResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [analysisError, setAnalysisError] = useState(null)
-  const lastRequestRef = useRef(null)
-  const currentJobIdRef = useRef(null)
+
 
   const isEditing = !!editingMeal
 

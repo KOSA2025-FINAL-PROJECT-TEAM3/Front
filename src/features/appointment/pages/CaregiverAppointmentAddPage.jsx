@@ -34,7 +34,6 @@ const CaregiverAppointmentAddPage = () => {
 
     // CaregiverDashboard에서 전달받은 targetUserId
     const initialTargetUserId = location.state?.targetUserId || ''
-    const initialTargetUserName = location.state?.targetUserName || ''
 
     // 가족 그룹에서 SENIOR 역할 멤버 목록 가져오기
     const familyGroups = useFamilyStore((state) => state.familyGroups) ?? EMPTY_FAMILY_GROUPS
