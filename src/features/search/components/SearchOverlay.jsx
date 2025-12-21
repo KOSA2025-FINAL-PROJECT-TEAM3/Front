@@ -26,7 +26,35 @@ import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore
 import { useSearchHistoryStore } from '@features/search/store/searchHistoryStore'
 import { PillSearchTab } from '@features/search/components/PillSearchTab'
 import { DiseaseSearchTab } from '@features/search/components/DiseaseSearchTab'
+import { PlaceSearchTab } from '@features/places/components/PlaceSearchTab'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { useAuth } from '@features/auth/hooks/useAuth'
+
+const PROXY_BANNER_STYLES = {
+  senior: {
+    fontWeight: 700,
+    bgcolor: '#FFFBEB',
+    color: '#B45309',
+    border: '1px solid',
+    borderColor: '#FCD34D',
+    '& .MuiAlert-icon': { color: '#F59E0B' },
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)',
+  },
+  default: {
+    fontWeight: 700,
+    bgcolor: '#EEF2FF', // fallback to hardcoded if theme colors not suitable for specific branding
+    color: '#4F46E5',
+    border: '1px solid #C7D2FE',
+    '& .MuiAlert-icon': { color: '#6366F1' },
+    transition: 'all 0.3s ease',
+    boxShadow: 'none',
+  },
+  text: (isSenior) => ({
+    fontSize: isSenior ? '1.1rem' : 'inherit',
+    mr: 0.5,
+  }),
+}
 
 const TransitionUp = forwardRef(function TransitionUp(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />
@@ -37,6 +65,9 @@ export const SearchOverlay = () => {
   const location = useLocation()
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'))
+
+  const { user } = useAuth((state) => ({ user: state.user }))
+
   const { isOpen, activeTab, openSeq, close, setActiveTab, targetUserId, targetUserName } = useSearchOverlayStore((state) => ({
     isOpen: state.isOpen,
     activeTab: state.activeTab,
@@ -47,8 +78,8 @@ export const SearchOverlay = () => {
     targetUserName: state.targetUserName,
   }))
 
-  // 대리 검색 여부
-  const isProxySearch = !!targetUserId && !!targetUserName
+  const isSelfSearch = String(targetUserId) === String(user?.id)
+  const isSeniorSearch = !isSelfSearch && !!targetUserId
 
   const { history, clearAll, requestSearch, clearPending } = useSearchHistoryStore((state) => ({
     history: state.history,
@@ -146,19 +177,16 @@ export const SearchOverlay = () => {
       <DialogContent sx={{ pt: 0 }}>
         <Stack spacing={2.25}>
           {/* 대리 검색 배너 */}
-          {isProxySearch && (
+          {targetUserName && (
             <Alert
-              severity="info"
+              severity={isSeniorSearch ? "warning" : "info"}
               icon={<PersonIcon />}
-              sx={{
-                fontWeight: 700,
-                bgcolor: '#EEF2FF',
-                color: '#4F46E5',
-                border: '1px solid #C7D2FE',
-                '& .MuiAlert-icon': { color: '#6366F1' }
-              }}
+              sx={isSeniorSearch ? PROXY_BANNER_STYLES.senior : PROXY_BANNER_STYLES.default}
             >
-              <strong>{targetUserName}</strong> 님을 위한 검색입니다
+              <Typography component="span" fontWeight={900} sx={PROXY_BANNER_STYLES.text(isSeniorSearch)}>
+                {targetUserName}
+              </Typography>
+              님을 위한 {isSeniorSearch ? '대리 검색 중입니다 🔍' : '검색입니다'}
             </Alert>
           )}
 
@@ -170,6 +198,7 @@ export const SearchOverlay = () => {
               variant="fullWidth"
             >
               <Tab value="pill" label="약" />
+              <Tab value="hospital" label="병원" />
               <Tab value="disease" label="질병" />
             </Tabs>
           </Box>
@@ -194,6 +223,13 @@ export const SearchOverlay = () => {
                     },
                   })
                 }}
+              />
+            ) : activeTab === 'hospital' ? (
+              <PlaceSearchTab
+                key={`hospital-${openSeq}`}
+                layout="overlay"
+                targetUserId={targetUserId}
+                targetUserName={targetUserName}
               />
             ) : (
               <DiseaseSearchTab

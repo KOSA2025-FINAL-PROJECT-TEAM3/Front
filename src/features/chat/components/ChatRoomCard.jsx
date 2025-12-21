@@ -10,7 +10,12 @@ export const ChatRoomCard = ({ room }) => {
   const navigate = useNavigate()
 
   const handleClick = () => {
-    navigate(ROUTE_PATHS.chatConversation.replace(':roomId', room.roomId))
+    const roomId = room?.roomId
+    if (!roomId) {
+      navigate(ROUTE_PATHS.familyChat)
+      return
+    }
+    navigate(ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', String(roomId)))
   }
 
   const formatTimestamp = (timestamp) => {

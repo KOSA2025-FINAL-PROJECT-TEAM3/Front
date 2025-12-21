@@ -9,7 +9,13 @@ import HistoryTimelineCard from '../components/HistoryTimelineCard'
 import TodaySummaryCard from '../components/TodaySummaryCard'
 import { WeeklyStatsWidget } from '../components/WeeklyStatsWidget'
 import { NoFamilyModal } from '../components/NoFamilyModal'
+import { DietSummaryCard } from '../components/DietSummaryCard'
+import { DiseaseSummaryCard } from '../components/DiseaseSummaryCard'
+import { DietDetailModal } from '../components/DietDetailModal'
+import { DiseaseDetailModal } from '../components/DiseaseDetailModal'
 import { familyApiClient } from '@core/services/api/familyApiClient'
+import { dietApiClient } from '@core/services/api/dietApiClient'
+import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
@@ -17,6 +23,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import ChatIcon from '@mui/icons-material/Chat'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
+import DownloadIcon from '@mui/icons-material/Download'
 import logger from '@core/utils/logger'
 import { endOfWeek, format, isAfter, startOfWeek, subDays, addDays } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
@@ -35,7 +42,7 @@ export function CaregiverDashboard() {
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
 
   // shallow 비교로 불필요한 리렌더링 방지
-  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize } = useFamilyStore(
+  const { familyGroups, selectedGroupId, members, loading, error, initialized, initialize, selectGroup } = useFamilyStore(
     (state) => ({
       familyGroups: state.familyGroups,
       selectedGroupId: state.selectedGroupId,
@@ -44,6 +51,7 @@ export function CaregiverDashboard() {
       error: state.error,
       initialized: state.initialized,
       initialize: state.initialize,
+      selectGroup: state.selectGroup,
     }),
     shallow
   )
@@ -71,6 +79,14 @@ export function CaregiverDashboard() {
   const [recentHistoryData, setRecentHistoryData] = useState([])
   const [recentHistoryLoading, setRecentHistoryLoading] = useState(false)
 
+  // 식단/질병 관련 상태
+  const [dietModalOpen, setDietModalOpen] = useState(false)
+  const [diseaseModalOpen, setDiseaseModalOpen] = useState(false)
+  const [todayDietCount, setTodayDietCount] = useState(0)
+  const [dietLoading, setDietLoading] = useState(false)
+  const [diseaseCount, setDiseaseCount] = useState(0)
+  const [diseaseLoading, setDiseaseLoading] = useState(false)
+
   const openActiveMemberDetail = useCallback(
     (target) => {
       if (!activeSeniorId) {
@@ -97,6 +113,8 @@ export function CaregiverDashboard() {
     },
     [activeSeniorId, navigate],
   )
+
+
 
   useEffect(() => {
     if (!initialized && token && !loading) {
@@ -137,6 +155,32 @@ export function CaregiverDashboard() {
       targetMembers.find((m) => String(m.id) === String(activeSeniorId)) || targetMembers[0] || null,
     [activeSeniorId, targetMembers],
   )
+
+  const handleExportPdf = useCallback(async () => {
+    if (!activeSenior?.userId) {
+      logger.warn('No active senior selected for PDF export')
+      return
+    }
+
+    try {
+      logger.info('Exporting PDF for user:', activeSenior.userId)
+      const blob = await diseaseApiClient.exportPdf(activeSenior.userId)
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${activeSenior.name || 'senior'}_disease_report_${format(new Date(), 'yyyyMMdd')}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      logger.info('PDF exported successfully')
+    } catch (error) {
+      logger.error('Failed to export PDF:', error)
+    }
+  }, [activeSenior])
 
   useEffect(() => {
     const loadRate = async () => {
@@ -245,8 +289,9 @@ export function CaregiverDashboard() {
     setRecentHistoryLoading(true)
     try {
       const dates = []
+      // 오늘부터 과거 3일치 기록 조회 (i=0: 오늘, i=1: 어제, ...)
       for (let i = 0; i <= 2; i += 1) {
-        const d = subDays(new Date(), 1 + i)
+        const d = subDays(new Date(), i)
         dates.push(format(d, 'yyyy-MM-dd'))
       }
 
@@ -326,6 +371,51 @@ export function CaregiverDashboard() {
     loadRecentHistory().catch(() => { })
   }, [loadRecentHistory])
 
+  // 식단 카운트 로딩
+  useEffect(() => {
+    const loadDietCount = async () => {
+      if (!activeSenior?.userId) {
+        setTodayDietCount(0)
+        return
+      }
+      setDietLoading(true)
+      try {
+        const today = format(new Date(), 'yyyy-MM-dd')
+        const response = await dietApiClient.getDietLogs({ date: today, userId: activeSenior.userId })
+        const logs = Array.isArray(response) ? response : response?.logs || []
+        setTodayDietCount(logs.length)
+      } catch (error) {
+        logger.warn('[CaregiverDashboard] loadDietCount failed', error)
+        setTodayDietCount(0)
+      } finally {
+        setDietLoading(false)
+      }
+    }
+    loadDietCount()
+  }, [activeSenior?.userId])
+
+  // 질병 카운트 로딩
+  useEffect(() => {
+    const loadDiseaseCount = async () => {
+      if (!activeSenior?.userId) {
+        setDiseaseCount(0)
+        return
+      }
+      setDiseaseLoading(true)
+      try {
+        const response = await diseaseApiClient.listByUser(activeSenior.userId)
+        const diseases = Array.isArray(response) ? response : response?.diseases || []
+        setDiseaseCount(diseases.length)
+      } catch (error) {
+        logger.warn('[CaregiverDashboard] loadDiseaseCount failed', error)
+        setDiseaseCount(0)
+      } finally {
+        setDiseaseLoading(false)
+      }
+    }
+    loadDiseaseCount()
+  }, [activeSenior?.userId])
+
   const adherenceRate = useMemo(() => {
     if (!weeklyStats?.length) return 0
     const completed = weeklyStats.filter((d) => d.status === 'completed').length
@@ -363,6 +453,20 @@ export function CaregiverDashboard() {
       {/* 가족 그룹 없음 강제 모달 - 별도 컴포넌트로 분리 */}
       <NoFamilyModal open={shouldShowNoFamilyModal} />
 
+      {/* 식단/질병 상세 모달 */}
+      <DietDetailModal
+        open={dietModalOpen}
+        onClose={() => setDietModalOpen(false)}
+        userId={activeSenior?.userId}
+        userName={activeSenior?.name}
+      />
+      <DiseaseDetailModal
+        open={diseaseModalOpen}
+        onClose={() => setDiseaseModalOpen(false)}
+        userId={activeSenior?.userId}
+        userName={activeSenior?.name}
+      />
+
       {isDesktop ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { md: '4fr 8fr' }, gap: 3 }}>
           <Stack spacing={2.5}>
@@ -375,6 +479,36 @@ export function CaregiverDashboard() {
               }}
             >
               <Stack spacing={2.5}>
+                {/* 가족 그룹 선택 드롭다운 */}
+                {familyGroups.length > 1 && (
+                  <Box>
+                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.disabled', mb: 1 }}>
+                      가족 그룹 선택
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {familyGroups.map((group) => (
+                        <ButtonBase
+                          key={group.id}
+                          onClick={() => selectGroup(group.id)}
+                          sx={{
+                            px: 2,
+                            py: 1,
+                            borderRadius: 2.5,
+                            border: '1px solid',
+                            borderColor: String(selectedGroupId) === String(group.id) ? '#7C8CFF' : 'divider',
+                            bgcolor: String(selectedGroupId) === String(group.id) ? '#EEF2FF' : 'common.white',
+                            color: 'text.primary',
+                            fontWeight: 900,
+                            fontSize: 14,
+                          }}
+                        >
+                          {group.name}
+                        </ButtonBase>
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Box
                     sx={{
@@ -478,82 +612,71 @@ export function CaregiverDashboard() {
               adherenceRate={adherenceRate}
               onClick={() => openActiveMemberDetail('medication')}
             />
-          </Stack>
 
-          <Stack spacing={2.5}>
-            <Paper variant="outlined" sx={{ borderRadius: 3, p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 2 }}>
-                케어 메뉴
-              </Typography>
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
-                  gap: 2,
-                }}
-              >
-                <GuardianMenuCard
-                  title="복약 관리"
-                  icon={<LocalPharmacyIcon sx={{ color: '#7C8CFF' }} />}
-                  color="#EEF2FF"
-                  onClick={() => openActiveMemberDetail('medication')}
-                />
-                <GuardianMenuCard
-                  title="식단 관리"
-                  icon={<RestaurantIcon sx={{ color: '#F59E0B' }} />}
-                  color="#FFFBEB"
-                  onClick={() => openActiveMemberDetail('diet')}
-                />
-                <GuardianMenuCard
-                  title="질병 관리"
-                  icon={<HealthAndSafetyIcon sx={{ color: '#EF4444' }} />}
-                  color="#FEF2F2"
-                  onClick={() => openActiveMemberDetail('disease')}
-                />
-                <GuardianMenuCard
-                  title="통합 검색"
-                  icon={<SearchIcon sx={{ color: '#10B981' }} />}
-                  color="#ECFDF5"
-                  onClick={() => openSearchOverlay('pill', { targetUserId: activeSenior?.userId, targetUserName: activeSenior?.name })}
-                />
-                <GuardianMenuCard
-                  title="OCR 약봉투"
-                  icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
-                  color="#F0FDFA"
-                  onClick={() => navigate(ROUTE_PATHS.ocrScan, {
-                    state: {
-                      targetUserId: activeSenior?.userId,
-                      targetUserName: activeSenior?.name
-                    }
-                  })}
-                />
-                <GuardianMenuCard
-                  title="가족 채팅"
-                  icon={<ChatIcon sx={{ color: '#F59E0B' }} />}
-                  color="#FFFBEB"
-                  onClick={() => navigate(ROUTE_PATHS.familyChat)}
-                />
-                <GuardianMenuCard
-                  title="진료 일정"
-                  icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
-                  color="#EEF2FF"
-                  onClick={() => navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
-                    state: {
-                      targetUserId: activeSenior?.userId,
-                      targetUserName: activeSenior?.name
-                    }
-                  })}
-                />
-              </Box>
-            </Paper>
-
-            <HistoryTimelineCard
-              title="최근 활동 로그"
-              emptyText={recentHistoryLoading ? '불러오는 중…' : '최근 기록이 없습니다.'}
-              historyData={recentHistoryData}
-              onOpenDetail={() => openActiveMemberDetail('medication')}
+            {/* 식단/질병 요약 카드 */}
+            <DietSummaryCard
+              count={todayDietCount}
+              loading={dietLoading}
+              onClick={() => setDietModalOpen(true)}
             />
+            <DiseaseSummaryCard
+              count={diseaseCount}
+              loading={diseaseLoading}
+              onClick={() => setDiseaseModalOpen(true)}
+            />
+
+            {/* PDF 내보내기 버튼 */}
+            <Paper
+              variant="outlined"
+              onClick={handleExportPdf}
+              sx={{
+                borderRadius: 3,
+                p: 2.5,
+                cursor: 'pointer',
+                border: '2px solid',
+                borderColor: '#E9D5FF',
+                bgcolor: '#FAF5FF',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  borderColor: '#A78BFA',
+                  bgcolor: '#F3E8FF',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)',
+                },
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Box
+                  sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 2,
+                    bgcolor: '#F3E8FF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <DownloadIcon sx={{ fontSize: 24, color: '#8B5CF6' }} />
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontSize: 14, fontWeight: 900, color: 'text.primary' }}>
+                    질환 PDF 출력
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, fontWeight: 600, color: 'text.secondary', mt: 0.25 }}>
+                    {activeSenior?.name || '케어 대상'}의 질환 리포트
+                  </Typography>
+                </Box>
+              </Stack>
+            </Paper>
           </Stack>
+
+          <HistoryTimelineCard
+            title="최근 활동 로그"
+            emptyText={recentHistoryLoading ? '불러오는 중…' : '최근 기록이 없습니다.'}
+            historyData={recentHistoryData}
+            onOpenDetail={() => openActiveMemberDetail('medication')}
+          />
         </Box>
       ) : (
         <Stack spacing={{ xs: 3, md: 4 }}>
@@ -568,6 +691,30 @@ export function CaregiverDashboard() {
             }}
           >
             <Stack spacing={2}>
+              {/* 가족 그룹 선택 (모바일) */}
+              {familyGroups.length > 1 && (
+                <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 0.5 }}>
+                  {familyGroups.map((group) => (
+                    <ButtonBase
+                      key={group.id}
+                      onClick={() => selectGroup(group.id)}
+                      sx={{
+                        px: 2,
+                        py: 0.75,
+                        borderRadius: 999,
+                        whiteSpace: 'nowrap',
+                        bgcolor: String(selectedGroupId) === String(group.id) ? 'common.white' : 'rgba(255,255,255,0.2)',
+                        color: String(selectedGroupId) === String(group.id) ? '#7C8CFF' : 'common.white',
+                        fontWeight: 900,
+                        fontSize: 14,
+                      }}
+                    >
+                      {group.name}
+                    </ButtonBase>
+                  ))}
+                </Box>
+              )}
+
               <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
@@ -646,35 +793,50 @@ export function CaregiverDashboard() {
               title="통합 검색"
               icon={<SearchIcon sx={{ color: '#10B981' }} />}
               color="#ECFDF5"
-              onClick={() => openSearchOverlay('pill', { targetUserId: activeSenior?.userId, targetUserName: activeSenior?.name })}
+              onClick={() =>
+                openSearchOverlay('pill', {
+                  targetUserId: activeSenior?.userId,
+                  targetUserName: activeSenior?.name,
+                })
+              }
             />
             <GuardianMenuCard
               title="OCR 약봉투"
               icon={<CameraAltIcon sx={{ color: '#2EC4B6' }} />}
               color="#F0FDFA"
-              onClick={() => navigate(ROUTE_PATHS.ocrScan, {
-                state: {
-                  targetUserId: activeSenior?.userId,
-                  targetUserName: activeSenior?.name
-                }
-              })}
+              onClick={() =>
+                navigate(ROUTE_PATHS.ocrScan, {
+                  state: {
+                    targetUserId: activeSenior?.userId,
+                    targetUserName: activeSenior?.name,
+                  },
+                })
+              }
             />
             <GuardianMenuCard
               title="가족 채팅"
               icon={<ChatIcon sx={{ color: '#F59E0B' }} />}
               color="#FFFBEB"
-              onClick={() => navigate(ROUTE_PATHS.familyChat)}
+              onClick={() => navigate(ROUTE_PATHS.familyChat, { state: { groupId: selectedGroupId } })}
+            />
+            <GuardianMenuCard
+              title="질환 PDF 출력"
+              icon={<DownloadIcon sx={{ color: '#8B5CF6' }} />}
+              color="#F3E8FF"
+              onClick={handleExportPdf}
             />
             <GuardianMenuCard
               title="진료 일정"
               icon={<CalendarMonthIcon sx={{ color: '#6366F1' }} />}
               color="#EEF2FF"
-              onClick={() => navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
-                state: {
-                  targetUserId: activeSenior?.userId,
-                  targetUserName: activeSenior?.name
-                }
-              })}
+              onClick={() =>
+                navigate(ROUTE_PATHS.appointmentCaregiverAdd, {
+                  state: {
+                    targetUserId: activeSenior?.userId,
+                    targetUserName: activeSenior?.name,
+                  },
+                })
+              }
             />
           </Box>
 
@@ -690,8 +852,21 @@ export function CaregiverDashboard() {
             adherenceRate={adherenceRate}
             onClick={() => openActiveMemberDetail('medication')}
           />
+
+          {/* 식단/질병 요약 카드 (Mobile) */}
+          <DietSummaryCard
+            count={todayDietCount}
+            loading={dietLoading}
+            onClick={() => setDietModalOpen(true)}
+          />
+          <DiseaseSummaryCard
+            count={diseaseCount}
+            loading={diseaseLoading}
+            onClick={() => setDiseaseModalOpen(true)}
+          />
         </Stack>
       )}
+
     </MainLayout>
   )
 }
@@ -747,3 +922,4 @@ const GuardianMenuCard = memo(({ title, icon, color, onClick }) => {
     </Paper>
   )
 })
+

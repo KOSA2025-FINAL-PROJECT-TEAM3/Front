@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@shared/components/layout/MainLayout';
 import { PageHeader } from '@shared/components/layout/PageHeader';
 import { PageStack } from '@shared/components/layout/PageStack';
 import { usePrescriptionStore } from '../store/prescriptionStore';
+import { useMedicationStore } from '../store/medicationStore';
 import { ROUTE_PATHS } from '@config/routes.config';
 import { BackButton } from '@shared/components/mui/BackButton';
+import MedicationDetailModal from '../components/MedicationDetailModal';
 import {
   Box,
   Button,
@@ -20,15 +22,47 @@ import {
 } from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { toast } from '@shared/components/toast/toastStore';
+import logger from '@core/utils/logger';
 
 export const MedicationManagement = () => {
   const navigate = useNavigate();
-  const { prescriptions, fetchPrescriptions, toggleActivePrescription, loading } = usePrescriptionStore();
+  const location = useLocation();
+  const { prescriptions, fetchPrescriptions, toggleActivePrescription, loading: prescriptionLoading } = usePrescriptionStore();
+  const {
+    medications,
+    fetchMedications,
+    updateMedication,
+    removeMedication,
+    toggleStatus,
+    loading: medicationLoading,
+  } = useMedicationStore();
   const [showInactive, setShowInactive] = useState(false);
+  const [selectedMedicationId, setSelectedMedicationId] = useState(null);
 
   useEffect(() => {
     fetchPrescriptions();
   }, [fetchPrescriptions]);
+
+  useEffect(() => {
+    const rawId = location.state?.selectedMedicationId;
+    const parsedId = rawId != null ? Number(rawId) : null;
+    if (parsedId != null && Number.isFinite(parsedId)) {
+      setSelectedMedicationId(parsedId);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (selectedMedicationId == null) return;
+    if (medications.length === 0) {
+      fetchMedications();
+    }
+  }, [selectedMedicationId, medications.length, fetchMedications]);
+
+  const selectedMedication = useMemo(() => {
+    if (selectedMedicationId == null) return null;
+    return medications.find((med) => Number(med.id) === Number(selectedMedicationId)) || null;
+  }, [medications, selectedMedicationId]);
 
   const handleAddClick = () => {
     navigate(ROUTE_PATHS.prescriptionAdd);
@@ -49,8 +83,47 @@ export const MedicationManagement = () => {
       await toggleActivePrescription(prescription.id);
       toast.success(`처방전 복용이 ${action}되었습니다.`);
     } catch (error) {
-      console.error('Failed to toggle active status:', error);
+      logger.error('Failed to toggle active status:', error);
       toast.error('상태 변경에 실패했습니다.');
+    }
+  };
+
+  const handleMedicationClose = () => {
+    setSelectedMedicationId(null);
+  };
+
+  const handleMedicationToggle = async (medicationId) => {
+    try {
+      await toggleStatus(medicationId);
+      toast.success('복용 상태를 변경했습니다.');
+    } catch (error) {
+      logger.error('Failed to toggle medication status:', error);
+      toast.error('복용 상태 변경에 실패했습니다.');
+    }
+  };
+
+  const handleMedicationRemove = async (medicationId) => {
+    if (!window.confirm('정말 이 약을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await removeMedication(medicationId);
+      toast.success('약을 삭제했습니다.');
+      handleMedicationClose();
+    } catch (error) {
+      logger.error('Failed to remove medication:', error);
+      toast.error('약 삭제에 실패했습니다.');
+    }
+  };
+
+  const handleMedicationUpdate = async (medicationId, values) => {
+    try {
+      await updateMedication(medicationId, values);
+      toast.success('약 정보를 저장했습니다.');
+    } catch (error) {
+      logger.error('Failed to update medication:', error);
+      toast.error('약 정보 저장에 실패했습니다.');
     }
   };
 
@@ -106,7 +179,7 @@ export const MedicationManagement = () => {
         </Paper>
 
         <Stack spacing={2}>
-          {loading && (
+          {prescriptionLoading && (
             <Paper variant="outlined" sx={{ p: 4, borderRadius: 3 }}>
               <Stack spacing={2} alignItems="center">
                 <CircularProgress />
@@ -117,7 +190,7 @@ export const MedicationManagement = () => {
             </Paper>
           )}
 
-          {!loading && activePrescriptions.length === 0 && !showInactive && (
+          {!prescriptionLoading && activePrescriptions.length === 0 && !showInactive && (
             <Paper variant="outlined" sx={{ p: 6, textAlign: 'center', borderStyle: 'dashed', borderRadius: 3 }}>
               <Typography variant="body1" sx={{ fontWeight: 800 }}>
                 표시할 처방전이 없습니다.
@@ -130,7 +203,7 @@ export const MedicationManagement = () => {
             </Paper>
           )}
 
-          {!loading ? (
+          {!prescriptionLoading ? (
             <Stack spacing={2}>
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1 }}>
@@ -269,6 +342,15 @@ export const MedicationManagement = () => {
             </Stack>
           ) : null}
         </Stack>
+
+        <MedicationDetailModal
+          medication={selectedMedication}
+          loading={medicationLoading}
+          onClose={handleMedicationClose}
+          onToggle={handleMedicationToggle}
+          onRemove={handleMedicationRemove}
+          onSubmit={handleMedicationUpdate}
+        />
       </PageStack>
     </MainLayout>
   );

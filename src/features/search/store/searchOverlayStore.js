@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-const normalizeTab = (value) => (value === 'pill' || value === 'diet' || value === 'disease' ? value : 'pill')
+const normalizeTab = (value) => (value === 'pill' || value === 'diet' || value === 'disease' || value === 'hospital' ? value : 'pill')
 
 export const useSearchOverlayStore = create((set) => ({
   isOpen: false,

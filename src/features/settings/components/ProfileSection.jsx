@@ -1,11 +1,104 @@
 import { useState } from 'react'
+import { Avatar, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import styles from './ProfileSection.module.scss'
+import logger from '@core/utils/logger'
+
+// Styles
+const STYLES = {
+  section: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 2,
+    p: 2.5,
+    borderRadius: 4,
+    bgcolor: 'background.paper',
+    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+    position: 'relative',
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    fontSize: '1.5rem',
+    fontWeight: 600,
+    bgcolor: 'primary.main',
+    color: 'white',
+    flexShrink: 0,
+  },
+  avatarPlaceholder: {
+    width: 64,
+    height: 64,
+    fontSize: '1.5rem',
+    fontWeight: 600,
+    bgcolor: 'grey.300',
+    color: 'text.secondary',
+    flexShrink: 0,
+  },
+  name: {
+    fontWeight: 600,
+    fontSize: '1.125rem',
+    color: 'text.primary',
+  },
+  email: {
+    fontSize: '0.875rem',
+    color: 'text.secondary',
+    mt: 0.5,
+  },
+  phone: {
+    fontSize: '0.8125rem',
+    color: 'text.disabled',
+    mt: 0.25,
+  },
+  editButton: {
+    bgcolor: 'grey.100',
+    color: 'text.secondary',
+    fontWeight: 500,
+    fontSize: '0.8125rem',
+    px: 1.5,
+    py: 0.75,
+    borderRadius: 1.5,
+    textTransform: 'none',
+    '&:hover': {
+      bgcolor: 'grey.200',
+      color: 'text.primary',
+    },
+  },
+  saveButton: {
+    fontWeight: 500,
+    fontSize: '0.8125rem',
+    px: 1.5,
+    py: 0.75,
+    borderRadius: 1.5,
+    textTransform: 'none',
+  },
+  cancelButton: {
+    fontWeight: 500,
+    fontSize: '0.8125rem',
+    px: 1.5,
+    py: 0.75,
+    borderRadius: 1.5,
+    textTransform: 'none',
+    color: 'text.secondary',
+    borderColor: 'divider',
+  },
+  withdrawButton: {
+    display: 'block',
+    mt: 1.5,
+    color: 'error.main',
+    fontSize: '0.9rem',
+    textDecoration: 'underline',
+    textTransform: 'none',
+    width: '100%',
+    '&:hover': {
+      bgcolor: 'transparent',
+      textDecoration: 'underline',
+    },
+  },
+}
 
 export const ProfileSection = ({ user }) => {
-  const { updateUser, withdraw } = useAuth((state) => ({ 
+  const { updateUser, withdraw } = useAuth((state) => ({
     updateUser: state.updateUser,
-    withdraw: state.withdraw 
+    withdraw: state.withdraw,
   }))
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -14,7 +107,6 @@ export const ProfileSection = ({ user }) => {
     phone: '',
   })
 
-  // 초기화 및 편집 모드 진입
   const handleEditClick = () => {
     setFormData({
       name: user?.name || '',
@@ -29,7 +121,7 @@ export const ProfileSection = ({ user }) => {
         await withdraw()
         alert('회원 탈퇴가 완료되었습니다.')
       } catch (error) {
-        console.error(error)
+        logger.error('회원 탈퇴 실패:', error)
         alert('회원 탈퇴 처리에 실패했습니다.')
       }
     }
@@ -52,11 +144,10 @@ export const ProfileSection = ({ user }) => {
       await updateUser({
         name: formData.name,
         phone: formData.phone,
-        // profileImage는 추후 파일 업로드 구현 시 추가
       })
       setIsEditing(false)
     } catch (error) {
-      console.error('Failed to update profile:', error)
+      logger.error('프로필 수정 실패:', error)
       alert('프로필 수정에 실패했습니다.')
     } finally {
       setIsLoading(false)
@@ -65,98 +156,80 @@ export const ProfileSection = ({ user }) => {
 
   if (!user) {
     return (
-      <section className={styles.profileSection}>
-        <div className={styles.avatarPlaceholder}>?</div>
-        <div>
-          <p className={styles.name}>게스트</p>
-          <p className={styles.email}>로그인이 필요합니다</p>
-        </div>
-      </section>
+      <Paper sx={STYLES.section}>
+        <Avatar sx={STYLES.avatarPlaceholder}>?</Avatar>
+        <Box>
+          <Typography sx={STYLES.name}>게스트</Typography>
+          <Typography sx={STYLES.email}>로그인이 필요합니다</Typography>
+        </Box>
+      </Paper>
     )
   }
 
   const initials = user.name?.[0] ?? 'U'
 
   return (
-    <section className={styles.profileSection}>
-      <div className={styles.avatar}>
-        {user.profileImage ? (
-          <img src={user.profileImage} alt="Profile" className={styles.avatarImage} />
-        ) : (
-          initials
-        )}
-      </div>
+    <Paper sx={STYLES.section}>
+      <Avatar src={user.profileImage} sx={STYLES.avatar}>
+        {!user.profileImage && initials}
+      </Avatar>
 
       {isEditing ? (
-        <div className={styles.editForm}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>닉네임</label>
-            <input
-              type="text"
-              name="name"
-              className={styles.input}
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="닉네임을 입력하세요"
-            />
-          </div>
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>전화번호</label>
-            <input
-              type="tel"
-              name="phone"
-              className={styles.input}
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="010-1234-5678"
-            />
-          </div>
-          <div className={styles.actions}>
-            <button 
-              className={styles.cancelButton} 
+        <Stack spacing={1} sx={{ flex: 1 }}>
+          <TextField
+            size="small"
+            label="닉네임"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="닉네임을 입력하세요"
+            fullWidth
+          />
+          <TextField
+            size="small"
+            label="전화번호"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="010-1234-5678"
+            fullWidth
+          />
+          <Stack direction="row" spacing={1} justifyContent="flex-end">
+            <Button
+              variant="outlined"
+              sx={STYLES.cancelButton}
               onClick={handleCancel}
               disabled={isLoading}
             >
               취소
-            </button>
-            <button 
-              className={styles.saveButton} 
+            </Button>
+            <Button
+              variant="contained"
+              sx={STYLES.saveButton}
               onClick={handleSave}
               disabled={isLoading}
             >
               {isLoading ? '저장 중...' : '저장'}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Stack>
+        </Stack>
       ) : (
         <>
-          <div className={styles.info}>
-            <p className={styles.name}>{user.name}</p>
-            <p className={styles.email}>{user.email}</p>
-            {user.phone && <p className={styles.phone}>{user.phone}</p>}
-          </div>
-          <button className={styles.editButton} onClick={handleEditClick}>
+          <Box sx={{ flex: 1 }}>
+            <Typography sx={STYLES.name}>{user.name}</Typography>
+            <Typography sx={STYLES.email}>{user.email}</Typography>
+            {user.phone && <Typography sx={STYLES.phone}>{user.phone}</Typography>}
+          </Box>
+          <Button sx={STYLES.editButton} onClick={handleEditClick}>
             수정
-          </button>
-          <button 
-            onClick={handleWithdraw}
-            style={{ 
-              display: 'block', 
-              marginTop: '12px', 
-              color: '#ff4444', 
-              fontSize: '0.9rem', 
-              background: 'none', 
-              border: 'none', 
-              textDecoration: 'underline', 
-              cursor: 'pointer',
-              width: '100%'
-            }}
-          >
+          </Button>
+          <Button sx={STYLES.withdrawButton} onClick={handleWithdraw}>
             회원탈퇴
-          </button>
+          </Button>
         </>
       )}
-    </section>
+    </Paper>
   )
 }
 

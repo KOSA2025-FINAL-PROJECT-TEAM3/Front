@@ -20,8 +20,27 @@ import PageHeader from '@shared/components/layout/PageHeader'
 import PageStack from '@shared/components/layout/PageStack'
 import { BackButton } from '@shared/components/mui/BackButton'
 
+import PersonIcon from '@mui/icons-material/Person'
+import { Alert } from '@mui/material'
+
+const PROXY_ALERT_STYLE = {
+  mb: 2,
+  fontWeight: 700,
+  bgcolor: '#EEF2FF',
+  color: '#4F46E5',
+  border: '1px solid #C7D2FE',
+  '& .MuiAlert-icon': { color: '#6366F1' },
+}
+
 export const DiseasePage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Proxy Registration Context
+  const targetUserId = location.state?.targetUserId
+  const targetUserName = location.state?.targetUserName
+  const isProxyMode = !!targetUserId
+
   const {
     userId,
     diseases,
@@ -35,7 +54,7 @@ export const DiseasePage = () => {
     createDisease,
     updateDisease,
     restoreDisease,
-  } = useDiseases()
+  } = useDiseases(targetUserId)
 
   const { consumeAction } = useVoiceActionStore()
 
@@ -49,10 +68,12 @@ export const DiseasePage = () => {
   const [confirmState, setConfirmState] = useState({ isOpen: false, type: null, data: null })
 
   const handleExportPdf = useCallback(async () => {
+    // ... (unchanged)
     if (!userId) return
     setExporting(true)
     try {
       const blob = await diseaseApiClient.exportPdf(userId)
+      // ... (unchanged)
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -86,15 +107,19 @@ export const DiseasePage = () => {
   }, [consumeAction, handleExportPdf])
 
   // 3. Navigation State (검색 탭에서 질병 등록으로 넘어온 경우)
-  const location = useLocation()
   useEffect(() => {
     if (location.state?.autoCreate) {
       setEditing({ name: location.state.autoCreate })
       setShowForm(true)
       // Clear state to prevent reopening on refresh (optional, but good practice if using replace)
-      navigate(location.pathname, { replace: true, state: {} })
+      // Note: We want to keep targetUserId so we don't clear everything, just autoCreate
+      // But navigating replace might clear targetUserId if we don't pass it back.
+      // Actually navigate(current, state: {}) clears it.
+      // To preserve context we should be careful.
+      // For now, let's just clear autoCreate trigger but keep context
+      navigate(location.pathname, { replace: true, state: { targetUserId, targetUserName } })
     }
-  }, [location.state, navigate])
+  }, [location, navigate, targetUserId, targetUserName])
 
   const fabActions = [
     {
@@ -251,6 +276,17 @@ export const DiseasePage = () => {
             </Stack>
           }
         />
+
+        {/* 대리 등록 배너 */}
+        {isProxyMode && (
+          <Alert
+            severity="info"
+            icon={<PersonIcon />}
+            sx={PROXY_ALERT_STYLE}
+          >
+            <strong>{targetUserName}</strong> 님의 질병 정보를 관리하고 있습니다
+          </Alert>
+        )}
 
         {!userId ? (
           <Typography variant="body2" color="text.secondary">

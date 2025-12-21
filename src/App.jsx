@@ -13,7 +13,7 @@ import React, { Suspense, useEffect, useMemo, lazy } from 'react'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { createAppTheme } from '@/styles/theme'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
@@ -149,6 +149,27 @@ function InviteAcceptRedirect() {
   return <Navigate to={targetPath} replace />
 }
 
+const resolveFamilyChatRedirect = (roomId) => {
+  if (!roomId) return ROUTE_PATHS.familyChat
+  return ROUTE_PATHS.familyChatByGroup.replace(':familyGroupId', roomId)
+}
+
+function LegacyPrescriptionEditRedirect() {
+  const { id } = useParams()
+  const targetPath = id ? ROUTE_PATHS.prescriptionDetail.replace(':id', id) : ROUTE_PATHS.medication
+  return <Navigate to={targetPath} replace />
+}
+
+function LegacyChatRedirect() {
+  const { roomId } = useParams()
+  return <Navigate to={resolveFamilyChatRedirect(roomId)} replace />
+}
+
+function LegacyFamilyChatRedirect() {
+  const { roomId } = useParams()
+  return <Navigate to={resolveFamilyChatRedirect(roomId)} replace />
+}
+
 /**
  * 메인 App 컴포넌트
  * @returns {JSX.Element}
@@ -200,6 +221,10 @@ function App() {
                   element={<PrivateRoute element={<RoleSelection />} />}
                 />
                 <Route
+                  path={ROUTE_PATHS.roleSelectionLegacy}
+                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.roleSelection} replace />} />}
+                />
+                <Route
                   path={ROUTE_PATHS.seniorDashboard}
                   element={<PrivateRoute element={<SeniorDashboard />} />}
                 />
@@ -217,6 +242,10 @@ function App() {
                   path={ROUTE_PATHS.medicationToday}
                   element={<PrivateRoute element={<TodayMedications />} />}
                 />
+                <Route
+                  path={ROUTE_PATHS.prescriptions}
+                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.medication} replace />} />}
+                />
 
                 {/* 처방전 관리 (신규) */}
                 <Route
@@ -226,6 +255,10 @@ function App() {
                 <Route
                   path={ROUTE_PATHS.prescriptionDetail}
                   element={<PrivateRoute element={<PrescriptionDetailPage />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.prescriptionEdit}
+                  element={<PrivateRoute element={<LegacyPrescriptionEditRedirect />} />}
                 />
 
                 {/* 약물 직접 등록 (복구) */}
@@ -364,7 +397,11 @@ function App() {
                 />
                 <Route
                   path={ROUTE_PATHS.chatConversation}
-                  element={<PrivateRoute element={<Navigate to={ROUTE_PATHS.familyChat} replace />} />}
+                  element={<PrivateRoute element={<LegacyChatRedirect />} />}
+                />
+                <Route
+                  path={ROUTE_PATHS.familyChatConversation}
+                  element={<PrivateRoute element={<LegacyFamilyChatRedirect />} />}
                 />
 
                 <Route

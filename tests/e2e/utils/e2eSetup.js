@@ -1,19 +1,21 @@
-export const setE2EAuth = async (page, { customerRole }) => {
-  const user = {
-    id: 1,
-    name: 'E2E 사용자',
-    email: 'e2e@example.com',
-    customerRole,
-    userRole: 'ROLE_USER',
+export const setE2EAuth = async (page, { customerRole, role, userId, user: providedUser, token } = {}) => {
+  const resolvedCustomerRole = providedUser?.customerRole || customerRole || role || 'SENIOR'
+  const resolvedUser = {
+    id: providedUser?.id ?? userId ?? 1,
+    name: providedUser?.name ?? 'E2E 사용자',
+    email: providedUser?.email ?? 'e2e@example.com',
+    customerRole: resolvedCustomerRole,
+    userRole: providedUser?.userRole ?? 'ROLE_USER',
   }
+  const resolvedToken = token || 'e2e-token'
 
   const persisted = {
     state: {
-      user,
-      token: 'e2e-token',
+      user: resolvedUser,
+      token: resolvedToken,
       refreshToken: null,
-      userRole: user.userRole,
-      customerRole: user.customerRole,
+      userRole: resolvedUser.userRole,
+      customerRole: resolvedUser.customerRole,
     },
     version: 0,
   }
@@ -25,7 +27,7 @@ export const setE2EAuth = async (page, { customerRole }) => {
       localStorage.setItem('amapill_user', JSON.stringify(rawUser))
       localStorage.setItem('amapill_role', customerRoleValue)
     },
-    { persistedState: persisted, rawUser: user, customerRoleValue: customerRole },
+    { persistedState: persisted, rawUser: resolvedUser, customerRoleValue: resolvedUser.customerRole },
   )
 
   await page.addInitScript(() => {
@@ -43,6 +45,8 @@ export const setE2EAuth = async (page, { customerRole }) => {
     window.EventSource = MockEventSource
   })
 }
+
+export const setE2EAuthState = async (page, options) => setE2EAuth(page, options)
 
 export const mockApi = async (page) => {
   const calls = []
@@ -78,7 +82,19 @@ export const mockApi = async (page) => {
     }
 
     if (method === 'GET' && normalizedPath === '/api/notifications') {
-      return route.fulfill({ status: 200, json: [] })
+      return route.fulfill({
+        status: 200,
+        json: {
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          last: true,
+        },
+      })
+    }
+
+    if (method === 'GET' && normalizedPath === '/api/notifications/unread-count') {
+      return route.fulfill({ status: 200, json: 0 })
     }
 
     if (method === 'GET' && normalizedPath === '/api/medications') {
@@ -99,6 +115,54 @@ export const mockApi = async (page) => {
 
     if (method === 'GET' && normalizedPath === '/api/family/invites') {
       return route.fulfill({ status: 200, json: [] })
+    }
+
+    if (method === 'GET' && normalizedPath === '/api/appointments') {
+      return route.fulfill({ status: 200, json: [] })
+    }
+
+    if (method === 'GET' && normalizedPath === '/api/prescriptions') {
+      return route.fulfill({
+        status: 200,
+        json: [
+          {
+            id: 1,
+            pharmacyName: '테스트 약국',
+            hospitalName: '테스트 병원',
+            startDate: '2025-12-01',
+            endDate: '2025-12-31',
+            medicationCount: 1,
+            active: true,
+          },
+        ],
+      })
+    }
+
+    if (method === 'GET') {
+      const prescriptionDetailMatch = normalizedPath.match(/^\/api\/prescriptions\/(\d+)$/)
+      if (prescriptionDetailMatch) {
+        const id = Number(prescriptionDetailMatch[1])
+        return route.fulfill({
+          status: 200,
+          json: {
+            id,
+            pharmacyName: '테스트 약국',
+            hospitalName: '테스트 병원',
+            startDate: '2025-12-01',
+            endDate: '2025-12-31',
+            intakeTimes: ['08:00'],
+            medications: [
+              {
+                id: 100,
+                name: '테스트약',
+                dosage: '1',
+              },
+            ],
+            paymentAmount: null,
+            notes: '',
+          },
+        })
+      }
     }
 
     unhandled.push({ method, path: normalizedPath, resourceType })

@@ -9,32 +9,41 @@ test.describe('스모크(시니어)', () => {
     api = await mockApi(page)
   })
 
-  test('대시보드 기본 렌더 + 확대모드 기본 ON', async ({ page }) => {
+  test('대시보드 기본 렌더 + 글자 크기 기본 설정', async ({ page }) => {
     await page.goto('/dashboard')
-    await expect(page.getByRole('heading', { name: '오늘의 복용' })).toBeVisible()
+    await expect(page.getByText('오늘 복약 일정이 없습니다')).toBeVisible()
 
     await expect.poll(async () => {
       return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
-    }).toBe('18px')
+    }).toBe('20px')
 
     expect(api.unhandled).toEqual([])
     expect(api.calls.some((c) => c.method === 'GET' && c.path === '/api/notifications')).toBe(true)
   })
 
-  test('설정에서 확대모드 토글 OFF', async ({ page }) => {
+  test('설정에서 글자 크기 단계 낮추기', async ({ page }) => {
     await page.goto('/settings')
     await expect(page.getByRole('heading', { name: '설정' })).toBeVisible()
 
-    const toggle = page.getByLabel('확대 모드')
-    await expect(toggle).toBeChecked()
+    const decreaseButton = page.getByLabel('글자 작게')
+    await expect(decreaseButton).toBeEnabled()
 
-    await toggle.click()
+    await expect.poll(async () => {
+      return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
+    }).toBe('20px')
 
+    await decreaseButton.click()
+    await expect.poll(async () => {
+      return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
+    }).toBe('18px')
+
+    await decreaseButton.click()
     await expect.poll(async () => {
       return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
     }).toBe('16px')
 
     const stored = await page.evaluate(() => localStorage.getItem('amapill-ui-preferences-v1'))
+    expect(stored).toContain('"fontScaleLevel":1')
     expect(stored).toContain('"accessibilityMode":false')
 
     expect(api.unhandled).toEqual([])

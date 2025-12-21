@@ -36,6 +36,10 @@ test('알림 20개 표시 확인', async ({ page }) => {
       return route.fulfill({ status: 200, contentType: 'text/event-stream', body: ': ok\n\n' })
     }
 
+    if (path.includes('/api/notifications/unread-count')) {
+      return route.fulfill({ status: 200, json: 0 })
+    }
+
     // Notifications - 페이지네이션 응답
     if (path.includes('/api/notifications')) {
       const notifications = []
@@ -71,6 +75,6 @@ test('알림 20개 표시 확인', async ({ page }) => {
   await page.waitForTimeout(3000)
 
   // 확인
-  await expect(page.getByText('알림1')).toBeVisible({ timeout: 15000 })
-  await expect(page.getByText('알림20')).toBeVisible()
+  await expect(page.getByText('알림1', { exact: true })).toBeVisible({ timeout: 15000 })
+  await expect(page.getByText('알림20', { exact: true })).toBeVisible()
 })
