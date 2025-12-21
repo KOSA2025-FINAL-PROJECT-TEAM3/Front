@@ -25,6 +25,8 @@ import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import ChatIcon from '@mui/icons-material/Chat'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import DownloadIcon from '@mui/icons-material/Download'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import { Menu, MenuItem } from '@mui/material'
 import logger from '@core/utils/logger'
 import { endOfWeek, format, isAfter, startOfWeek, subDays, addDays } from 'date-fns'
 import { parseServerLocalDateTime } from '@core/utils/formatting'
@@ -87,6 +89,15 @@ export function CaregiverDashboard() {
   const [dietLoading, setDietLoading] = useState(false)
   const [diseaseCount, setDiseaseCount] = useState(0)
   const [diseaseLoading, setDiseaseLoading] = useState(false)
+
+  // 가족 그룹 선택 메뉴
+  const [groupMenuAnchor, setGroupMenuAnchor] = useState(null)
+  const handleOpenGroupMenu = (event) => setGroupMenuAnchor(event.currentTarget)
+  const handleCloseGroupMenu = () => setGroupMenuAnchor(null)
+  const handleSelectGroup = (groupId) => {
+    selectGroup(groupId)
+    handleCloseGroupMenu()
+  }
 
   const openActiveMemberDetail = useCallback(
     (target) => {
@@ -497,35 +508,56 @@ export function CaregiverDashboard() {
               }}
             >
               <Stack spacing={2.5}>
-                {/* 가족 그룹 선택 드롭다운 */}
-                {familyGroups.length > 1 && (
-                  <Box>
-                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.disabled', mb: 1 }}>
-                      가족 그룹 선택
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {familyGroups.map((group) => (
-                        <ButtonBase
-                          key={group.id}
-                          onClick={() => selectGroup(group.id)}
-                          sx={{
-                            px: 2,
-                            py: 1,
-                            borderRadius: 2.5,
-                            border: '1px solid',
-                            borderColor: String(selectedGroupId) === String(group.id) ? '#7C8CFF' : 'divider',
-                            bgcolor: String(selectedGroupId) === String(group.id) ? '#EEF2FF' : 'common.white',
-                            color: 'text.primary',
-                            fontWeight: 900,
-                            fontSize: 14,
-                          }}
-                        >
-                          {group.name}
-                        </ButtonBase>
-                      ))}
-                    </Box>
-                  </Box>
-                )}
+                {/* 가족 그룹 선택 드롭다운 (Desktop) */}
+                <Box>
+                  <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.disabled', mb: 0.5 }}>
+                    가족 그룹
+                  </Typography>
+                  <ButtonBase
+                    onClick={handleOpenGroupMenu}
+                    disabled={familyGroups.length <= 1}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5,
+                      typography: 'h6',
+                      fontWeight: 900,
+                      color: 'text.primary',
+                      borderRadius: 1,
+                      pl: 0.5,
+                      pr: 1,
+                      py: 0.5,
+                      ml: -0.5, // align slightly left to match margin
+                      '&:hover': familyGroups.length > 1 ? { bgcolor: 'action.hover' } : {},
+                    }}
+                  >
+                    {familyGroups.find(g => String(g.id) === String(selectedGroupId))?.name || '가족 그룹 없음'}
+                    {familyGroups.length > 1 && <KeyboardArrowDownIcon sx={{ fontSize: 20, color: 'text.secondary' }} />}
+                  </ButtonBase>
+
+                  <Menu
+                    anchorEl={groupMenuAnchor}
+                    open={Boolean(groupMenuAnchor)}
+                    onClose={handleCloseGroupMenu}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                    PaperProps={{
+                      elevation: 3,
+                      sx: { mt: 1, borderRadius: 3, minWidth: 160 }
+                    }}
+                  >
+                    {familyGroups.map((group) => (
+                      <MenuItem
+                        key={group.id}
+                        onClick={() => handleSelectGroup(group.id)}
+                        selected={String(selectedGroupId) === String(group.id)}
+                        sx={{ fontWeight: 700, fontSize: 14 }}
+                      >
+                        {group.name}
+                      </MenuItem>
+                    ))}
+                  </Menu>
+                </Box>
 
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Box
