@@ -32,6 +32,7 @@ import { useVoiceRecognition } from '@features/voice/hooks/useVoiceRecognition'
 import { useVoiceStore } from '@features/voice/stores/voiceStore'
 import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { USER_ROLES } from '@config/constants'
+import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import { toast } from '@shared/components/toast/toastStore'
@@ -39,6 +40,7 @@ import logger from '@core/utils/logger'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { DietEntryModal } from '@features/diet/components/DietEntryModal'
+import { useFamilyStore } from '@features/family/store/familyStore'
 
 export const FloatingActionButtons = ({ hasBottomDock = true }) => {
   const navigate = useNavigate()
@@ -53,8 +55,14 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
     decreaseFontScaleLevel: state.decreaseFontScaleLevel,
   }))
 
+  // Dashboard에서 선택된 시니어 ID를 가져옴 (useCareTargetStore 사용)
+  const activeSeniorId = useCareTargetStore((state) => state.activeSeniorMemberId)
+
   const { customerRole, user } = useAuth((state) => ({ customerRole: state.customerRole, user: state.user }))
-  const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.SENIOR
+
+  // Default to CAREGIVER if role is unknown/loading
+  // This prevents Caregivers from seeing Senior FAB (SOS button) momentarily
+  const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.CAREGIVER
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
   const { unreadCount } = useNotificationStore((state) => ({
@@ -106,7 +114,30 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
 
   // Common Actions removed as they are now explicit per role
 
-  // Caregiver Specific Actions
+  // Helper to determine target user (Senior or Caregiver)
+  // Use reactive state for familyGroups to ensure we have data
+  const familyGroups = useFamilyStore((state) => state.familyGroups)
+
+  const getActiveTarget = () => {
+    if (activeSeniorId) {
+      // 1. Try to find in familyGroups store first
+      if (familyGroups && familyGroups.length > 0) {
+        for (const group of familyGroups) {
+          if (!group.members) continue
+          const member = group.members.find(m => String(m.id) === String(activeSeniorId) || String(m.userId) === String(activeSeniorId))
+          if (member) {
+            return { id: member.id, name: member.nickname || member.name }
+          }
+        }
+      }
+
+      // 2. Fallback
+      return { id: activeSeniorId, name: '어르신' }
+    }
+    // Default to caregiver if no senior selected
+    return { id: user?.id, name: user?.name }
+  }
+
   // Caregiver Specific Actions
   const caregiverActions = [
     {
@@ -114,14 +145,20 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       label: '통합 검색',
       icon: <SearchIcon fontSize="small" />,
       color: { bg: '#ECFDF5', fg: '#10B981' },
-      onClick: () => openSearchOverlay('pill', { targetUserId: user?.id, targetUserName: user?.name }),
+      onClick: () => {
+        const target = getActiveTarget()
+        openSearchOverlay('pill', { targetUserId: target.id, targetUserName: target.name })
+      },
     },
     {
       id: 'places',
       label: '병원 검색',
       icon: <LocalHospitalIcon fontSize="small" />,
       color: { bg: '#FEE2E2', fg: '#EF4444' },
-      onClick: () => navigate(ROUTE_PATHS.places),
+      onClick: () => {
+        const target = getActiveTarget()
+        openSearchOverlay('hospital', { targetUserId: target.id, targetUserName: target.name })
+      },
     },
     {
       id: 'family',
@@ -143,6 +180,20 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       icon: <GroupIcon fontSize="small" />,
       color: { bg: '#EEF2FF', fg: '#6366F1' },
       onClick: () => navigate(ROUTE_PATHS.familyInvite),
+    },
+    {
+      id: 'disease',
+      label: '질병 관리',
+      icon: <HealthAndSafetyIcon fontSize="small" />,
+      color: { bg: '#FEF2F2', fg: '#EF4444' },
+      onClick: () => navigate(ROUTE_PATHS.disease),
+    },
+    {
+      id: 'ocr',
+      label: 'OCR 약봉투',
+      icon: <CameraAltIcon fontSize="small" />,
+      color: { bg: '#F0FDFA', fg: '#2EC4B6' },
+      onClick: () => navigate(ROUTE_PATHS.ocrScan),
     },
   ]
 

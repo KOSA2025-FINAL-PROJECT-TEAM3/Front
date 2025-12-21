@@ -205,7 +205,7 @@ export const MyMedicationSchedule = ({
 
   const handleCardClick = (medicationId) => {
     // 약 관리 페이지로 이동하면서 해당 약의 상세 모달 열기
-    navigate(ROUTE_PATHS.medicationManagement, {
+    navigate(ROUTE_PATHS.medication, {
       state: { selectedMedicationId: medicationId },
     })
   }

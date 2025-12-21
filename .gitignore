@@ -104,6 +104,7 @@ $RECYCLE.BIN/
 .next/                                                                 
 .nuxt/                                                                 
 out/                                                                   
+vite.config.js.timestamp*
                                                                        
 # ═══════════════════════════════════════════════════════════          
 # Testing                                                              
@@ -113,6 +114,7 @@ coverage/
 junit.xml                                                              
 playwright-report/
 test-results/
+tests/
                                                                        
 # ═══════════════════════════════════════════════════════════          
 # OS temporary files                                                   

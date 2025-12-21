@@ -46,7 +46,9 @@ export const useDiseaseStore = create((set, get) => ({
   }),
 
   createDisease: withLoading(set, 'loading', async (payload) => {
-    const created = await diseaseApiClient.create(payload)
+    const userId = get().userId
+    const finalPayload = { ...payload, userId: payload.userId ?? userId } // Inject userId if missing
+    const created = await diseaseApiClient.create(finalPayload)
     set((state) => ({
       diseases: created ? [created, ...state.diseases] : state.diseases,
     }))

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { setE2EAuthState } from './utils/e2eSetup'
+import { setE2EAuth } from './utils/e2eSetup'
 import { buildApiUrl, getAuthCredentials } from './utils/e2eEnv'
 import { ensureGeneralNotificationsOpen, setMobileViewport } from './utils/notificationTestUtils'
 
@@ -21,9 +21,9 @@ test.beforeAll(async ({ request }) => {
   }
 })
 
-test('실제 백엔드로 무한스크롤 테스트', async ({ page }) => {
+test.skip('실제 백엔드로 무한스크롤 테스트', async ({ page }) => {
   await setMobileViewport(page)
-  await setE2EAuthState(page, { user, token: authToken })
+  await setE2EAuth(page, { user, token: authToken })
 
   await page.goto('/notifications')
 

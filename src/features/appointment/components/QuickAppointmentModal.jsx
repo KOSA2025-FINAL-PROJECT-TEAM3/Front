@@ -68,7 +68,7 @@ const extractDepartment = (categoryName) => {
  * @param {Object} placeData - 카카오 Places API 결과 객체
  * @param {() => void} onSuccess - 예약 성공 시 콜백 (선택)
  */
-export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) => {
+export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess, targetUserId }) => {
     const navigate = useNavigate()
     const { user } = useAuthStore()
     const { createAppointment, loading } = useAppointmentStore()
@@ -132,7 +132,7 @@ export const QuickAppointmentModal = ({ open, onClose, placeData, onSuccess }) =
         const visitAt = combineDateTime(visitDate, visitTime)
 
         const payload = {
-            userId: user?.id,
+            userId: targetUserId || user?.id,
             hospitalName: hospitalInfo.name,
             department: hospitalInfo.department || null,
             visitAt,

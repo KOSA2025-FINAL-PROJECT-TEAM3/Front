@@ -5,6 +5,7 @@ export const ROUTE_PATHS = {
   kakaoCallback: '/auth/kakao/callback',
   deeplink: '/deeplink',
   roleSelection: '/role-selection',
+  roleSelectionLegacy: '/select-role',
   seniorDashboard: '/dashboard',
   caregiverDashboard: '/caregiver',
 
@@ -60,11 +61,11 @@ export const ROUTE_PATHS = {
   inviteLanding: '/invites/enter', // ✅ InviteCodeEntry로 통합 (레거시 호환)
 
   chatList: '/chat',
-  chatConversation: '/chat/:roomId', // Legacy (1:1 chat not supported) - redirect to family chat
+  chatConversation: '/chat/:roomId', // Legacy - redirect to family group chat
 
-  // ⭐ roomId 기반 라우트 (정답)
+  // Family chat (groupId is canonical)
   familyChat: '/chat/family',
-  familyChatConversation: '/chat/family/:roomId',
+  familyChatConversation: '/chat/family/:roomId', // Legacy - redirect to familyChatByGroup
   familyChatByGroup: '/chat/family/group/:familyGroupId',
 
   notifications: '/notifications',
@@ -81,6 +82,7 @@ export const ROUTE_PATHS = {
 export const ROUTE_META = {
   protected: [
     ROUTE_PATHS.roleSelection,
+    ROUTE_PATHS.roleSelectionLegacy,
     ROUTE_PATHS.seniorDashboard,
     ROUTE_PATHS.caregiverDashboard,
 

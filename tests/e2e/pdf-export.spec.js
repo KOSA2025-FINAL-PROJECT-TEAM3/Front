@@ -293,7 +293,7 @@ test.describe('PDF 내보내기 기능 테스트', () => {
     await page.screenshot({ path: 'test-results/floating-menu-open.png', fullPage: true })
 
     // PDF 내보내기 버튼 찾기
-    const pdfExportButton = page.getByText('PDF 내보내기')
+    const pdfExportButton = page.getByText('PDF 출력')
     await expect(pdfExportButton).toBeVisible({ timeout: 5000 })
 
     // 클릭

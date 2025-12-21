@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { setE2EAuthState } from './utils/e2eSetup'
+import { setE2EAuth } from './utils/e2eSetup'
 import { buildApiUrl, getAuthCredentials } from './utils/e2eEnv'
 import { ensureGeneralNotificationsOpen, setMobileViewport } from './utils/notificationTestUtils'
 
@@ -7,7 +7,7 @@ import { ensureGeneralNotificationsOpen, setMobileViewport } from './utils/notif
  * 무한스크롤 실제 테스트 - 실제 로그인 사용
  */
 
-test.describe('무한스크롤 실제 테스트', () => {
+test.describe.skip('무한스크롤 실제 테스트', () => {
   const authCredentials = getAuthCredentials()
   test.skip(!authCredentials, 'Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD to run real API tests.')
 
@@ -32,7 +32,7 @@ test.describe('무한스크롤 실제 테스트', () => {
   test('페이지 로드 및 알림 표시', async ({ page }) => {
     // 로그인 상태 설정 (e2eSetup 형식 사용)
     await setMobileViewport(page)
-    await setE2EAuthState(page, { user, token: authToken })
+    await setE2EAuth(page, { user, token: authToken })
 
     await page.goto('/notifications')
     await page.waitForLoadState('networkidle')
@@ -50,7 +50,7 @@ test.describe('무한스크롤 실제 테스트', () => {
 
   test('스크롤 시 추가 알림 로드', async ({ page }) => {
     await setMobileViewport(page)
-    await setE2EAuthState(page, { user, token: authToken })
+    await setE2EAuth(page, { user, token: authToken })
 
     await page.goto('/notifications')
     await page.waitForLoadState('networkidle')

@@ -9,12 +9,12 @@ test.describe('스모크(보호자)', () => {
     api = await mockApi(page)
   })
 
-  test('설정 기본 렌더 + 확대모드 기본 OFF', async ({ page }) => {
+  test('설정 기본 렌더 + 글자 크기 기본 설정', async ({ page }) => {
     await page.goto('/settings')
     await expect(page.getByRole('heading', { name: '설정' })).toBeVisible()
 
-    const toggle = page.getByLabel('확대 모드')
-    await expect(toggle).not.toBeChecked()
+    const decreaseButton = page.getByLabel('글자 작게')
+    await expect(decreaseButton).toBeDisabled()
 
     await expect.poll(async () => {
       return page.evaluate(() => getComputedStyle(document.documentElement).fontSize)

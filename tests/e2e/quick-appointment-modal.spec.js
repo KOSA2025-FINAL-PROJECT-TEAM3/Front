@@ -6,7 +6,10 @@ import { mockApi, setE2EAuth } from './utils/e2eSetup'
  * 
  * PlaceSearchPage에서 병원 선택 후 빠른 예약 모달이 정상 동작하는지 검증
  */
+const hasKakaoKey = Boolean(process.env.VITE_KAKAO_JAVASCRIPT_KEY)
+
 test.describe('빠른 예약 모달 (QuickAppointmentModal)', () => {
+    test.skip(!hasKakaoKey, 'VITE_KAKAO_JAVASCRIPT_KEY 미설정으로 테스트 생략')
     let api
 
     test.beforeEach(async ({ page }) => {
