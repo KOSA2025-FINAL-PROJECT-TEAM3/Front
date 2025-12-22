@@ -146,8 +146,13 @@ export const useNotificationStream = (onNotification) => {
                 logger.debug('분석 완료 알림 클릭됨. 결과 데이터:', result)
                 if (result && result.medications) {
                   const medications = fromOCRResponse(result.medications)
-                  // 약 등록 페이지로 이동하며 데이터 전달
-                  // 약 등록 페이지로 이동하며 데이터 전달
+                  
+                  // 기간 계산
+                  const durationDays = medications[0]?.durationDays || 3
+                  const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+                  const endDate = new Date(startDate)
+                  endDate.setDate(endDate.getDate() + durationDays - 1)
+                  const endDateStr = endDate.toISOString().split('T')[0]
 
                   // 저장된 메타데이터(대리 등록 대상) 확인
                   let targetMeta = {}
@@ -160,7 +165,7 @@ export const useNotificationStream = (onNotification) => {
                         if (parsedJob.jobId === data.jobId && parsedJob.targetUserId) {
                           targetMeta = {
                             targetUserId: parsedJob.targetUserId,
-                            targetUserName: parsedJob.targetUserName // 저장했다면 사용
+                            targetUserName: parsedJob.targetUserName
                           }
                         }
                       }
@@ -176,7 +181,8 @@ export const useNotificationStream = (onNotification) => {
                         medications,
                         hospitalName: result.hospitalName || result.clinicName || '',
                         pharmacyName: result.pharmacyName || '',
-                        startDate: result.prescribedDate || new Date().toISOString().split('T')[0]
+                        startDate,
+                        endDate: endDateStr
                       }
                     }
                   })

@@ -186,14 +186,24 @@ export const NotificationPage = () => {
     // OCR 결과 알림 (히스토리: ocr_result, 실시간: ocr_job_done, ocr_job)
     const isOcrType = ['ocr_result', 'ocr_job_done', 'ocr_job'].includes(typeKey)
     if (isOcrType && notification.result?.medications) {
-      const medications = fromOCRResponse(notification.result.medications)
+      const result = notification.result
+      const medications = fromOCRResponse(result.medications)
+      
+      // 기간 계산
+      const durationDays = medications[0]?.durationDays || 3
+      const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+      const endDate = new Date(startDate)
+      endDate.setDate(endDate.getDate() + durationDays - 1)
+      const endDateStr = endDate.toISOString().split('T')[0]
+
       navigate(ROUTE_PATHS.prescriptionAdd, {
         state: {
           ocrData: {
             medications,
-            hospitalName: notification.result.hospitalName || notification.result.clinicName || '',
-            pharmacyName: notification.result.pharmacyName || '',
-            startDate: notification.result.prescribedDate || new Date().toISOString().split('T')[0]
+            hospitalName: result.hospitalName || result.clinicName || '',
+            pharmacyName: result.pharmacyName || '',
+            startDate,
+            endDate: endDateStr
           }
         }
       })
