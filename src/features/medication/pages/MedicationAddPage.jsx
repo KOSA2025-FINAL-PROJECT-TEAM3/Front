@@ -1,4 +1,4 @@
-import logger from '@core/utils/logger'
+
 /**
  * 약 등록 페이지
  * @page 08-medication-add

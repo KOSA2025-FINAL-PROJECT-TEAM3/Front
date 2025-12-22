@@ -3,7 +3,6 @@ import { useFocusModeStore } from '@shared/stores/focusModeStore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadKakaoMaps } from '../kakao/loadKakaoMaps'
 import { useAuth } from '@features/auth/hooks/useAuth'
-import { STORAGE_KEYS } from '@config/constants'
 import { diseaseApiClient } from '@core/services/api/diseaseApiClient'
 import AppDialog from '@shared/components/mui/AppDialog'
 import AppButton from '@shared/components/mui/AppButton'
@@ -26,15 +25,7 @@ const sanitizeTelHref = (raw) => {
     return value.replace(/[^0-9+]/g, '')
 }
 
-const getStoredUser = () => {
-    if (typeof window === 'undefined') return null
-    try {
-        const raw = window.localStorage.getItem(STORAGE_KEYS.USER_DATA)
-        return raw ? JSON.parse(raw) : null
-    } catch {
-        return null
-    }
-}
+
 
 const getUserIdFromUser = (user) => user?.id ?? user?.userId ?? null
 
@@ -630,7 +621,7 @@ export const PlaceSearchTab = ({ layout = 'page', targetUserId = null, targetUse
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tab, activeUserId])
 
-    const selectedCategoryLabel = useMemo(() => CATEGORY[tab].label, [tab])
+
 
     return (
         <>

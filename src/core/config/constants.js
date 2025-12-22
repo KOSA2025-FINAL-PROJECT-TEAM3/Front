@@ -114,6 +114,12 @@ export const NOTIFICATION_TIMEOUT = parseInt(
   10,
 )
 
+// OCR job cache TTL (ms) - align with backend job.registry.ttl-minutes
+export const OCR_JOB_TTL_MS = parseInt(
+  import.meta.env.VITE_OCR_JOB_TTL_MS || '300000',
+  10,
+)
+
 // 재시도 설정
 export const RETRY_CONFIG = {
   MAX_RETRIES: 3,

@@ -10,7 +10,9 @@ import {
 import { ROUTE_PATHS } from '@core/config/routes.config'
 import { toast } from '@shared/components/toast/toastStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 import logger from '@core/utils/logger'
+import { OCR_JOB_TTL_MS } from '@config/constants'
 
 /**
  * OCR 스캔 및 약물 등록 커스텀 훅
@@ -45,8 +47,13 @@ export function useOcrRegistration(options = {}) {
   const setOcrScanning = useNotificationStore((state) => state.setOcrScanning)
   const ocrJobsRef = useRef({})
 
+  // 사용자 ID (스토리지 키용)
+  const user = useAuthStore((state) => state.user)
+  const userId = user?.id || user?.userId
+
   // 대리 등록용 targetUserId
   const targetUserId = options.targetUserId || null
+
 
   // === 상태 ===
   const [step, setStep] = useState(isOcrScanning ? 'analyzing' : 'select')
@@ -194,6 +201,16 @@ export function useOcrRegistration(options = {}) {
 
       // Just return jobId, do not poll
       logger.debug('OCR Job Started:', jobId)
+
+      // 실행 중인 Job 저장 (새로고침/이동 후 복구용)
+      if (userId) {
+        localStorage.setItem(`ocr_running_job_${userId}`, JSON.stringify({
+          timestamp: Date.now(),
+          jobId,
+          targetUserId // 대리 등록 정보도 저장 가능 (필요 시 복구 로직 확장)
+        }))
+      }
+
       return { jobId }
     } catch (err) {
       logger.error('OCR Async Error:', err)
@@ -208,11 +225,33 @@ export function useOcrRegistration(options = {}) {
 
   // SSE로 완료된 Job 결과 감지 시 현재 Job과 일치하면 즉시 반영
   useEffect(() => {
+    // 1. 마운트 시 실행 중인 Job 복구
+    if (userId && isOcrScanning && !currentJobIdRef.current) {
+      try {
+        const saved = localStorage.getItem(`ocr_running_job_${userId}`)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          // 설정된 TTL 이내만 유효
+          if (Date.now() - parsed.timestamp < OCR_JOB_TTL_MS) {
+            currentJobIdRef.current = parsed.jobId
+            logger.debug('♻️ 실행 중인 OCR Job 복구:', parsed.jobId)
+          } else {
+            localStorage.removeItem(`ocr_running_job_${userId}`)
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
     const jobId = currentJobIdRef.current
     if (!jobId) return
     const job = ocrJobs?.[jobId]
     if (!job) return
     if (job.status === 'DONE' && job.result?.medications?.length > 0) {
+      // 완료 시 스토리지 정리
+      if (userId) localStorage.removeItem(`ocr_running_job_${userId}`)
+
       const medications = fromOCRResponse(job.result.medications)
       const durationDays = medications[0]?.durationDays || 3
       const payment = parsePaymentAmount(job.result.paymentAmount ?? job.result.totalAmount)
@@ -229,11 +268,14 @@ export function useOcrRegistration(options = {}) {
       setIsLoading(false)
       setError(null)
     } else if (job.status === 'FAILED') {
+      // 실패 시 스토리지 정리
+      if (userId) localStorage.removeItem(`ocr_running_job_${userId}`)
+
       setError(job.error || 'OCR 처리 실패')
       setIsLoading(false)
       setStep(file ? 'preview' : 'select')
     }
-  }, [ocrJobs, file])
+  }, [ocrJobs, file, userId, isOcrScanning])
 
   // === 폼 상태 업데이트 ===
   const updateFormState = useCallback((updates) => {
@@ -371,6 +413,27 @@ export function useOcrRegistration(options = {}) {
     }
   }, [formState, location.state, navigate, targetUserId])
 
+  // === 결과 객체로 폼 로드 (외부 주입용) ===
+  const loadFromResult = useCallback((result) => {
+    if (!result || !result.medications) return
+
+    const medications = fromOCRResponse(result.medications)
+    const durationDays = medications[0]?.durationDays || 3
+    const payment = parsePaymentAmount(result.paymentAmount ?? result.totalAmount)
+
+    setFormState((prev) => ({
+      ...prev,
+      medications,
+      endDate: calculateEndDate(durationDays),
+      intakeTimes: adjustIntakeTimes(prev.intakeTimes, medications[0]?.dailyFrequency || 5),
+      pharmacyName: result.pharmacyName || result.pharmacy || prev.pharmacyName || '',
+      hospitalName: result.hospitalName || result.clinicName || prev.hospitalName || '',
+      paymentAmount: payment ?? prev.paymentAmount,
+    }))
+    setStep('edit')
+  }, [])
+
+
   // === 초기화 ===
   const reset = useCallback(() => {
     setStep('select')
@@ -411,7 +474,8 @@ export function useOcrRegistration(options = {}) {
     addIntakeTime,
     removeIntakeTime,
     handleRegister,
-    reset
+    reset,
+    loadFromResult
   }
 }
 

@@ -78,7 +78,7 @@ export const useNotificationStream = (onNotification) => {
         case 'diet.job.done':
           setDietJobResult(data)
           setDietAnalyzing(false) // 분석 완료 - 전역 로딩 상태 해제
-          
+
           if (data.status === 'DONE') {
             const result = data.result || (data.job && data.job.result)
             logger.info('Diet 분석 완료 알림 수신:', result)
@@ -146,8 +146,31 @@ export const useNotificationStream = (onNotification) => {
                 if (result && result.medications) {
                   const medications = fromOCRResponse(result.medications)
                   // 약 등록 페이지로 이동하며 데이터 전달
+                  // 약 등록 페이지로 이동하며 데이터 전달
+
+                  // 저장된 메타데이터(대리 등록 대상) 확인
+                  let targetMeta = {}
+                  if (userId) {
+                    try {
+                      const savedJob = localStorage.getItem(`ocr_running_job_${userId}`)
+                      if (savedJob) {
+                        const parsedJob = JSON.parse(savedJob)
+                        // Job ID가 일치할 때만 타겟 정보 사용
+                        if (parsedJob.jobId === data.jobId && parsedJob.targetUserId) {
+                          targetMeta = {
+                            targetUserId: parsedJob.targetUserId,
+                            targetUserName: parsedJob.targetUserName // 저장했다면 사용
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      console.error(e)
+                    }
+                  }
+
                   navigate(ROUTE_PATHS.prescriptionAdd, {
                     state: {
+                      ...targetMeta,
                       ocrData: {
                         medications,
                         hospitalName: result.hospitalName || result.clinicName || '',
@@ -198,5 +221,5 @@ export const useNotificationStream = (onNotification) => {
     return () => {
       notificationApiClient.disconnect()
     }
-  }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname])
+  }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname, navigate, setDietAnalyzing, setOcrScanning, userId])
 }

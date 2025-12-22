@@ -304,22 +304,14 @@ export function CaregiverDashboard() {
 
     setRecentHistoryLoading(true)
     try {
-      const dates = []
-      // 오늘부터 과거 3일치 기록 조회 (i=0: 오늘, i=1: 어제, ...)
-      for (let i = 0; i <= 2; i += 1) {
-        const d = subDays(new Date(), i)
-        dates.push(format(d, 'yyyy-MM-dd'))
-      }
+      const endDate = format(new Date(), 'yyyy-MM-dd')
+      const startDate = format(subDays(new Date(), 2), 'yyyy-MM-dd')
 
-      const results = await Promise.all(
-        dates.map((date) =>
-          familyApiClient
-            .getMedicationLogs(activeSenior.userId, { date })
-            .then((response) => response?.logs || response || [])
-            .catch(() => []),
-        ),
-      )
-      const logs = results.flat().filter(Boolean)
+      const response = await familyApiClient.getMedicationLogs(activeSenior.userId, {
+        startDate,
+        endDate
+      })
+      const logs = response?.logs || [] // response가 배열이 아니라 객체(MedicationLogsResponse)이므로 .logs로 접근
 
       const byDate = new Map()
 
