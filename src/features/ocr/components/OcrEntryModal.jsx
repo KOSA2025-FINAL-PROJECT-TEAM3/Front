@@ -44,6 +44,7 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         handleFileSelect,
         handleCameraCapture,
         startAnalysis,
+        startAnalysisAsync,
         updateFormState,
         updateMedication,
         removeMedication,
@@ -52,7 +53,8 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         addIntakeTime,
         removeIntakeTime,
         handleRegister,
-        reset
+        reset,
+        loadFromResult
     } = useOcrRegistration({ targetUserId })
 
     const [cachedJobId, setCachedJobId] = useState(null)
@@ -89,15 +91,11 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
             const data = (response && response.data) ? response.data : response
 
             if (data && data.status === 'DONE' && data.result?.medications) {
-                // We need to manually inject this into formState via a reset or separate load function
-                // However, useOcrRegistration might not expose a direct load function easily.
-                // For now, we will try to use the hook's internal logic if possible,
-                // OR we might need to modify the hook.
-                // CHECK: useOcrRegistration implementation details.
-                // Assuming we can't easily inject without modifying the hook, let's just warn or skip for MVP modal.
-                // actually, let's try to pass it if possible.
-                // For this modal version, we'll keep it simple and focus on new capture.
-                toast.warning('모달에서는 이전 결과 불러오기가 제한될 수 있습니다.')
+                // 저장된 결과로 폼 상태 업데이트
+                loadFromResult(data.result)
+                toast.success('이전 분석 결과를 불러왔습니다.')
+            } else {
+                toast.warning('분석된 결과 정보를 찾을 수 없습니다.')
             }
         } catch {
             toast.error('불러오기 실패')
@@ -113,7 +111,19 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         }
     }
 
+
     const isProxyRegistration = !!targetUserId && !!targetUserName
+
+    const handleAsyncScan = () => {
+        // 1. 분석 시작 알림 즉시 표시 (서버 응답 기다리지 않음)
+        toast.success('처방전 분석이 시작되었습니다. 다른 작업을 하셔도 됩니다.')
+
+        // 2. 모달 닫기
+        onClose?.()
+
+        // 3. API 호출은 백그라운드에서 실행 (await 하지 않음)
+        startAnalysisAsync()
+    }
 
     return (
         <Dialog
@@ -196,9 +206,10 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
                         </Paper>
                         <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                             <Button fullWidth variant="outlined" onClick={() => setStep('select')} sx={{ fontWeight: 900 }}>다시 선택</Button>
-                            <Button fullWidth variant="contained" color="success" onClick={startAnalysis} disabled={isLoading} sx={{ fontWeight: 900 }}>
+                            <Button fullWidth variant="contained" color="success" onClick={handleAsyncScan} disabled={isLoading} sx={{ fontWeight: 900 }}>
                                 {isLoading ? '분석 중...' : '분석 시작'}
                             </Button>
+
                         </Stack>
                     </Box>
                 )}

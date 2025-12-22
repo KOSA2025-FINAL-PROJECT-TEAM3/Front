@@ -21,6 +21,7 @@ import { ROUTE_PATHS } from '@core/config/routes.config'
 import { fromOCRResponse } from '@/types/ocr.types'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
+import { OCR_JOB_TTL_MS } from '@config/constants'
 
 /**
  * 처방전 스캔 및 약물 등록 페이지
@@ -81,8 +82,8 @@ const PrescriptionScanPage = () => {
       const saved = localStorage.getItem(key)
       if (saved) {
         const parsed = JSON.parse(saved)
-        // 24시간 이내의 데이터만 유효하고, 사용자 ID가 일치해야 함
-        if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000 && String(parsed.userId) === String(userId)) {
+        // 설정된 TTL 이내의 데이터만 유효하고, 사용자 ID가 일치해야 함
+        if (Date.now() - parsed.timestamp < OCR_JOB_TTL_MS && String(parsed.userId) === String(userId)) {
           setCachedJobId(parsed.jobId)
         } else {
           localStorage.removeItem(key)

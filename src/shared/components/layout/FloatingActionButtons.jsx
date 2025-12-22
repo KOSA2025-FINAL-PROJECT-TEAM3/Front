@@ -115,26 +115,59 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
 
   // Helper to determine target user (Senior or Caregiver)
   // Use reactive state for familyGroups to ensure we have data
-  const familyGroups = useFamilyStore((state) => state.familyGroups)
+  const { familyGroups, familyMembers } = useFamilyStore((state) => ({
+    familyGroups: state.familyGroups,
+    familyMembers: state.members,
+  }))
+
+  const findMemberById = (members, targetId) => {
+    if (!Array.isArray(members)) return null
+    return members.find(
+      (member) => String(member.id) === String(targetId) || String(member.userId) === String(targetId),
+    )
+  }
+
+  const resolveMemberByActiveId = () => {
+    if (!activeSeniorId) return null
+
+    if (familyGroups && familyGroups.length > 0) {
+      for (const group of familyGroups) {
+        if (!group.members) continue
+        const member = findMemberById(group.members, activeSeniorId)
+        if (member) return member
+      }
+    }
+
+    return findMemberById(familyMembers, activeSeniorId)
+  }
+
+  const resolveCareTargetUser = () => {
+    const member = resolveMemberByActiveId()
+    if (!member || member.userId == null) return null
+    return { id: member.userId, name: member.nickname || member.name || '어르신' }
+  }
+
+  const ensureCareTarget = () => {
+    const target = resolveCareTargetUser()
+    if (!target?.id) {
+      toast.warning('등록할 어르신을 먼저 선택해주세요.')
+      return null
+    }
+    return target
+  }
 
   const getActiveTarget = () => {
     if (activeSeniorId) {
-      // 1. Try to find in familyGroups store first
-      if (familyGroups && familyGroups.length > 0) {
-        for (const group of familyGroups) {
-          if (!group.members) continue
-          const member = group.members.find(m => String(m.id) === String(activeSeniorId) || String(m.userId) === String(activeSeniorId))
-          if (member) {
-            return { id: member.id, name: member.nickname || member.name }
-          }
-        }
+      const resolvedMember = resolveMemberByActiveId()
+      if (resolvedMember) {
+        return { id: resolvedMember.userId ?? resolvedMember.id, name: resolvedMember.nickname || resolvedMember.name }
       }
 
       // 2. Fallback
       return { id: activeSeniorId, name: '어르신' }
     }
     // Default to caregiver if no senior selected
-    return { id: user?.id, name: user?.name }
+    return { id: user?.id || user?.userId, name: user?.name }
   }
 
   // Caregiver Specific Actions
@@ -186,8 +219,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       icon: <LocalPharmacyIcon fontSize="small" />,
       color: { bg: '#EFF6FF', fg: '#3B82F6' },
       onClick: () => {
-        // Only allow if specific target is identified, otherwise default to activeSenior or user (caregiver self?)
-        // Requirement implies linking to "selected group's senior"
+        if (!ensureCareTarget()) return
         setActiveModal('medication')
       },
     },
@@ -197,6 +229,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       icon: <HealthAndSafetyIcon fontSize="small" />,
       color: { bg: '#FEF2F2', fg: '#EF4444' },
       onClick: () => {
+        if (!ensureCareTarget()) return
         setActiveModal('disease')
       },
     },
@@ -206,6 +239,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       icon: <CameraAltIcon fontSize="small" />,
       color: { bg: '#F0FDFA', fg: '#2EC4B6' },
       onClick: () => {
+        if (!ensureCareTarget()) return
         setActiveModal('ocr')
       },
     },
@@ -256,6 +290,9 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
   const menuItems = (isCaregiver ? caregiverActions : seniorActions).filter((item) => !item.hidden)
 
   const fontLabel = fontScaleLevel === 1 ? '표준' : fontScaleLevel === 2 ? '크게' : '더크게'
+  const modalTarget = isCaregiver
+    ? resolveCareTargetUser()
+    : { id: user?.id || user?.userId, name: user?.name }
 
   return (
     <>
@@ -546,20 +583,20 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       <MedicationEntryModal
         open={activeModal === 'medication'}
         onClose={() => setActiveModal(null)}
-        targetUserId={getActiveTarget()?.id}
-        targetUserName={getActiveTarget()?.name}
+        targetUserId={modalTarget?.id}
+        targetUserName={modalTarget?.name}
       />
       <DiseaseEntryModal
         open={activeModal === 'disease'}
         onClose={() => setActiveModal(null)}
-        targetUserId={getActiveTarget()?.id}
-        targetUserName={getActiveTarget()?.name}
+        targetUserId={modalTarget?.id}
+        targetUserName={modalTarget?.name}
       />
       <OcrEntryModal
         open={activeModal === 'ocr'}
         onClose={() => setActiveModal(null)}
-        targetUserId={getActiveTarget()?.id}
-        targetUserName={getActiveTarget()?.name}
+        targetUserId={modalTarget?.id}
+        targetUserName={modalTarget?.name}
       />
     </>
   )
