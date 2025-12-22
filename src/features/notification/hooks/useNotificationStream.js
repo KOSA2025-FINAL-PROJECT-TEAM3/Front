@@ -156,7 +156,24 @@ export const useNotificationStream = (onNotification) => {
 
                   // 저장된 메타데이터(대리 등록 대상) 확인
                   let targetMeta = {}
-                  // ... (중략)
+                  if (userId) {
+                    try {
+                      const savedJob = localStorage.getItem(`ocr_running_job_${userId}`)
+                      if (savedJob) {
+                        const parsedJob = JSON.parse(savedJob)
+                        // Job ID가 일치할 때만 타겟 정보 사용
+                        if (parsedJob.jobId === data.jobId && parsedJob.targetUserId) {
+                          targetMeta = {
+                            targetUserId: parsedJob.targetUserId,
+                            targetUserName: parsedJob.targetUserName
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      console.error(e)
+                    }
+                  }
+
                   navigate(ROUTE_PATHS.prescriptionAdd, {
                     state: {
                       ...targetMeta,

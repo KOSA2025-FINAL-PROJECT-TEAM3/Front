@@ -68,7 +68,7 @@ const PrescriptionScanPage = () => {
     removeIntakeTime,
     handleRegister,
     reset
-  } = useOcrRegistration({ targetUserId })
+  } = useOcrRegistration({ targetUserId, targetUserName })
 
   const [cachedJobId, setCachedJobId] = useState(null)
   const [isRestoring, setIsRestoring] = useState(false)

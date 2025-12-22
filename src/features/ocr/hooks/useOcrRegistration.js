@@ -207,7 +207,8 @@ export function useOcrRegistration(options = {}) {
         localStorage.setItem(`ocr_running_job_${userId}`, JSON.stringify({
           timestamp: Date.now(),
           jobId,
-          targetUserId // 대리 등록 정보도 저장 가능 (필요 시 복구 로직 확장)
+          targetUserId,
+          targetUserName: options.targetUserName // 이름도 함께 저장
         }))
       }
 
@@ -249,6 +250,23 @@ export function useOcrRegistration(options = {}) {
     const job = ocrJobs?.[jobId]
     if (!job) return
     if (job.status === 'DONE' && job.result?.medications?.length > 0) {
+      // ✅ 대리 등록 정보 복구 (options에 없으면 로컬 스토리지에서 확인)
+      let finalTargetUserId = targetUserId;
+      let finalTargetUserName = options.targetUserName;
+
+      if (!finalTargetUserId && userId) {
+        try {
+          const saved = localStorage.getItem(`ocr_running_job_${userId}`);
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.jobId === jobId) {
+              finalTargetUserId = parsed.targetUserId;
+              finalTargetUserName = parsed.targetUserName;
+            }
+          }
+        } catch (e) { console.error(e); }
+      }
+
       // 완료 시 스토리지 정리
       if (userId) localStorage.removeItem(`ocr_running_job_${userId}`)
 
@@ -270,8 +288,8 @@ export function useOcrRegistration(options = {}) {
             startDate,
             endDate
           },
-          targetUserId: targetUserId || undefined,
-          targetUserName: options.targetUserName || undefined
+          targetUserId: finalTargetUserId || undefined,
+          targetUserName: finalTargetUserName || undefined
         }
       })
       

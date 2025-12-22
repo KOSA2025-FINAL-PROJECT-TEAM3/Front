@@ -58,7 +58,7 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         handleRegister,
         reset,
         loadFromResult
-    } = useOcrRegistration({ targetUserId })
+    } = useOcrRegistration({ targetUserId, targetUserName })
 
     const [cachedJobId, setCachedJobId] = useState(null)
 
