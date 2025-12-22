@@ -13,8 +13,8 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     plugins: [react()],
-    // Use '/Front/' for production (GitHub Pages), '/' for development
-    base: isProd ? '/Front/' : '/',
+    // Use root base path for Netlify deployments
+    base: '/',
     resolve: {
       // 경로 alias 설정으로 import 경로를 간단하게
       alias: {
