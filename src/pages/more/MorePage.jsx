@@ -117,7 +117,7 @@ export const MorePage = () => {
       onClick: () => handleNavigate(ROUTE_PATHS.notifications),
       badge: unreadCount > 0 ? unreadCount : undefined,
     },
-    isCaregiver && {
+    {
       id: 'adherenceReport',
       label: '복약 리포트',
       icon: '📊',

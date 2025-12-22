@@ -18,7 +18,7 @@ export const FamilyMemberDietPage = () => {
   const { data, isLoading, error } = useFamilyMemberDetail(id)
   const member = data?.member
 
-  const userId = useMemo(() => member?.userId ?? null, [member?.userId])
+  const userId = useMemo(() => member?.userId ?? member?.user?.id ?? null, [member?.userId, member?.user?.id])
 
   return (
     <MainLayout>

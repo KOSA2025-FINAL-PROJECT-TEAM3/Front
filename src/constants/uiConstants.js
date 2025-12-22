@@ -52,20 +52,6 @@ export const SETTINGS_MENU_DEFINITIONS = [
     path: ROUTE_PATHS.settingsNotifications,
   },
   {
-    id: 'medications',
-    label: '약 관리',
-    icon: '💊',
-    description: '약 목록 · 일정 확인',
-    path: ROUTE_PATHS.medication,
-  },
-  {
-    id: 'diseases',
-    label: '질병 관리',
-    icon: '📋',
-    description: '진단 정보 · 주의 식품',
-    path: ROUTE_PATHS.disease,
-  },
-  {
     id: 'privacy',
     label: '개인정보 처리방침',
     icon: '🔒',

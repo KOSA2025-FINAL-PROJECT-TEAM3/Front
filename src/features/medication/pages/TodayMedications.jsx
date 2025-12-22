@@ -192,12 +192,14 @@ const SECTION_LABELS = {
 
 const SECTION_ORDER = ['MORNING', 'LUNCH', 'DINNER', 'NIGHT'];
 const ALERT_TITLE = '복약 알림';
-const ALERT_CARD_MIN_HEIGHT = 220;
 
 const TodayMedications = () => {
     const pendingAction = useVoiceActionStore((state) => state.pendingAction);
     const { consumeAction } = useVoiceActionStore();
     const [loading, setLoading] = useState(true);
+    const [logsLoaded, setLogsLoaded] = useState(false);
+    const [medicationsLoaded, setMedicationsLoaded] = useState(false);
+    const [voiceDataReady, setVoiceDataReady] = useState(false);
     const [error, setError] = useState(null);
     const [inlineAlert, setInlineAlert] = useState(null);
     const [logs, setLogs] = useState([]);
@@ -220,6 +222,8 @@ const TodayMedications = () => {
                 setMedications(Array.isArray(data) ? data : []);
             } catch (err) {
                 logger.error('Failed to fetch medications:', err);
+            } finally {
+                setMedicationsLoaded(true);
             }
         };
         fetchMedications();
@@ -230,6 +234,7 @@ const TodayMedications = () => {
         const fetchLogs = async () => {
             try {
                 setLoading(true);
+                setLogsLoaded(false);
                 setError(null);
                 const logsResponse = await medicationLogApiClient.getByDate(selectedDate);
                 setLogs(Array.isArray(logsResponse) ? logsResponse : []);
@@ -241,6 +246,7 @@ const TodayMedications = () => {
                 setError('선택한 날짜의 복용 기록을 불러오는데 실패했습니다.');
             } finally {
                 setLoading(false);
+                setLogsLoaded(true);
             }
         };
         fetchLogs();
@@ -355,6 +361,72 @@ const TodayMedications = () => {
     const completionRate = useMemo(() => {
         return totalScheduledCount > 0 ? (totalCompletedCount / totalScheduledCount) * 100 : 0;
     }, [totalScheduledCount, totalCompletedCount]);
+
+    const isVoiceDataReady = medicationsLoaded && logsLoaded;
+
+    useEffect(() => {
+        if (!isVoiceDataReady) {
+            if (voiceDataReady) setVoiceDataReady(false);
+            return;
+        }
+        if (!voiceDataReady) setVoiceDataReady(true);
+    }, [isVoiceDataReady, voiceDataReady]);
+
+    // [Voice] 음성 명령 자동 복용 처리
+    useEffect(() => {
+        if (!voiceDataReady || pendingAction?.code !== 'AUTO_COMPLETE') return;
+
+        const action = consumeAction('AUTO_COMPLETE');
+        if (!action) return;
+
+        if (!hasItems) {
+            toast.info('처리할 복용 일정이 없습니다.');
+            return;
+        }
+
+        const timeSlot = action.params?.timeSlot || 'NOW';
+        const targetMedName = action.params?.medicationName;
+        const normalizedTarget = targetMedName ? targetMedName.replace(/\s+/g, '') : null;
+        const nowHour = new Date().getHours();
+
+        const schedules = SECTION_ORDER.flatMap((sectionKey) => {
+            const sectionItems = groupedData[sectionKey] || [];
+            return sectionItems.flatMap((med) =>
+                (med.schedules || []).map((schedule) => ({
+                    ...schedule,
+                    medicationName: med.name
+                }))
+            );
+        });
+
+        const targetSchedules = schedules.filter((schedule) => {
+            if (schedule.isTakenToday) return false;
+
+            if (normalizedTarget) {
+                const medName = (schedule.medicationName || '').replace(/\s+/g, '');
+                if (!medName.includes(normalizedTarget)) return false;
+            }
+
+            if (timeSlot === 'NOW') {
+                if (!schedule.time) return false;
+                const hour = parseInt(schedule.time.split(':')[0], 10);
+                if (Number.isNaN(hour)) return false;
+                return Math.abs(hour - nowHour) <= 2;
+            }
+
+            return getTimeCategoryFromStr(schedule.time) === timeSlot;
+        });
+
+        if (targetSchedules.length === 0) {
+            toast.info('해당하는 복용 일정이 없습니다.');
+            return;
+        }
+
+        targetSchedules.forEach((schedule) => handleScheduleClick(schedule));
+
+        const countMsg = normalizedTarget ? `'${targetMedName}'` : `${targetSchedules.length}건`;
+        toast.success(`${timeSlot === 'NOW' ? '현재' : timeSlot} 시간대 ${countMsg}을(를) 복용 처리했습니다.`);
+    }, [voiceDataReady, hasItems, pendingAction, consumeAction, groupedData, handleScheduleClick]);
 
     if (error && medications.length === 0) {
         return (
