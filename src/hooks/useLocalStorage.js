@@ -1,3 +1,4 @@
+import logger from "@core/utils/logger"
 /**
  * useLocalStorage Hook
  * - 로컬 스토리지와 동기화되는 상태 관리
@@ -19,7 +20,7 @@ export const useLocalStorage = (key, initialValue) => {
       const item = window.localStorage.getItem(key)
       return item ? JSON.parse(item) : initialValue
     } catch (error) {
-      console.error(`localStorage에서 '${key}' 읽기 실패:`, error)
+      logger.error(`localStorage에서 '${key}' 읽기 실패:`, error)
       return initialValue
     }
   })
@@ -33,7 +34,7 @@ export const useLocalStorage = (key, initialValue) => {
       setStoredValue(valueToStore)
       window.localStorage.setItem(key, JSON.stringify(valueToStore))
     } catch (error) {
-      console.error(`localStorage에 '${key}' 저장 실패:`, error)
+      logger.error(`localStorage에 '${key}' 저장 실패:`, error)
     }
   }
 
@@ -45,7 +46,7 @@ export const useLocalStorage = (key, initialValue) => {
       window.localStorage.removeItem(key)
       setStoredValue(initialValue)
     } catch (error) {
-      console.error(`localStorage에서 '${key}' 제거 실패:`, error)
+      logger.error(`localStorage에서 '${key}' 제거 실패:`, error)
     }
   }
 

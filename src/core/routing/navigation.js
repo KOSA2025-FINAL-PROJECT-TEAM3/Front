@@ -9,7 +9,7 @@ export const navigateTo = (path, options) => {
     try {
       navigatorFn(path, options)
       return
-    } catch (_) {
+    } catch {
       // fallback below
     }
   }

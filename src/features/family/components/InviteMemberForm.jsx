@@ -1,11 +1,9 @@
-import { useState } from 'react'
+import PropTypes from 'prop-types'
 import { useForm, Controller } from 'react-hook-form'
-import MemberRoleSelector from './MemberRoleSelector.jsx'
-import styles from './InviteMemberForm.module.scss'
+import { Alert, Box, Button, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { MEMBER_ROLE_OPTIONS } from '@/constants/uiConstants'
 
 export const InviteMemberForm = ({ onSubmit, loading }) => {
-  const [successMessage, setSuccessMessage] = useState(null)
-
   const {
     register,
     handleSubmit,
@@ -18,15 +16,20 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
     defaultValues: {
       name: '',
       email: '',
-      role: 'SENIOR',
+      suggestedRole: 'SENIOR',
     },
   })
 
   const handleInvite = async (formData) => {
     try {
-      await onSubmit?.(formData)
-      setSuccessMessage(`${formData.name}님에게 초대장을 전송했습니다.`)
-      reset({ name: '', email: '', role: 'SENIOR' })
+      // API call expects { email, name, ... }. For Open Invite, email might be empty.
+      await onSubmit?.({
+        ...formData,
+        email: formData.email || null, // Convert empty string to null if needed
+      })
+
+      // Form reset only on success
+      reset({ name: '', email: '', suggestedRole: 'SENIOR' })
     } catch (err) {
       setError('root', {
         type: 'server',
@@ -36,69 +39,90 @@ export const InviteMemberForm = ({ onSubmit, loading }) => {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit(handleInvite)}>
-      {errors.root && (
-        <p className={styles.error}>{errors.root.message}</p>
-      )}
-      {successMessage && (
-        <p className={styles.success}>{successMessage}</p>
-      )}
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Stack component="form" spacing={2} onSubmit={handleSubmit(handleInvite)}>
+        {errors.root ? <Alert severity="error">{errors.root.message}</Alert> : null}
 
-      <label className={styles.label}>
-        이름
-        <input
-          type="text"
-          placeholder="예: 김시니어"
+        <TextField
+          label="이름 (선택)"
+          placeholder="초대할 분의 이름"
+          disabled={loading}
+          error={Boolean(errors.name)}
+          helperText={errors.name?.message || ''}
           {...register('name', {
-            required: '이름을 입력해주세요.',
-            minLength: { value: 2, message: '이름은 최소 2자 이상이어야 합니다.' },
+            minLength: { value: 2, message: '이름은 최소 2글자 이상이어야 합니다.' },
           })}
-          disabled={loading}
+          fullWidth
         />
-        {errors.name && (
-          <span className={styles.fieldError}>{errors.name.message}</span>
-        )}
-      </label>
 
-      <label className={styles.label}>
-        이메일
-        <input
-          type="email"
-          placeholder="senior@example.com"
-          {...register('email', {
-            required: '이메일을 입력해주세요.',
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: '유효한 이메일 형식을 입력해주세요.',
-            },
-          })}
-          disabled={loading}
+        <Box>
+          <TextField
+            label="이메일 (선택 - 직접 발송용)"
+            placeholder="senior@example.com"
+            disabled={loading}
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message || '이메일을 입력하면 초대장이 메일로도 발송됩니다.'}
+            {...register('email', {
+              pattern: {
+                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                message: '유효한 이메일을 입력해주세요.',
+              },
+            })}
+            fullWidth
+          />
+        </Box>
+
+        <Controller
+          name="suggestedRole"
+          control={control}
+          render={({ field }) => (
+            <Box>
+              <Typography variant="caption" color="text.secondary">
+                역할
+              </Typography>
+              <ToggleButtonGroup
+                exclusive
+                value={field.value}
+                onChange={(_, nextValue) => {
+                  if (!nextValue) return
+                  field.onChange(nextValue)
+                }}
+                disabled={loading}
+                sx={{ mt: 1 }}
+                fullWidth
+              >
+                {MEMBER_ROLE_OPTIONS.map((option) => (
+                  <ToggleButton key={option.value} value={option.value} sx={{ py: 1.25 }}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography component="span" sx={{ fontSize: 18 }}>
+                        {option.icon}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                        {option.label}
+                      </Typography>
+                    </Stack>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+          )}
         />
-        {errors.email && (
-          <span className={styles.fieldError}>{errors.email.message}</span>
-        )}
-      </label>
 
-      <Controller
-        name="role"
-        control={control}
-        render={({ field }) => (
-          <div className={styles.roleSection}>
-            <span className={styles.label}>역할</span>
-            <MemberRoleSelector
-              value={field.value}
-              onChange={field.onChange}
-              disabled={loading}
-            />
-          </div>
-        )}
-      />
-
-      <button type="submit" className={styles.submit} disabled={loading}>
-        {loading ? '초대 중...' : '초대 보내기'}
-      </button>
-    </form>
+        <Button type="submit" variant="contained" disabled={loading} sx={{ fontWeight: 800, py: 1.25 }}>
+          {loading ? '초대 중...' : '초대 링크 생성'}
+        </Button>
+      </Stack>
+    </Paper>
   )
+}
+
+InviteMemberForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+}
+
+InviteMemberForm.defaultProps = {
+  loading: false,
 }
 
 export default InviteMemberForm

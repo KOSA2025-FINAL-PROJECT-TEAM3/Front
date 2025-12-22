@@ -1,56 +1,54 @@
 import ApiClient from './ApiClient'
+import envConfig from '@config/environment.config'
 
-const buildMockToken = (prefix) => `${prefix}_${Date.now()}`
-const maskEmail = (email = '') => email.split('@')[0] || 'user'
+const buildMockToken = (prefix = 'token') =>
+  `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
 class AuthApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/auth' })
+    super({
+      baseURL: envConfig.AUTH_API_URL,
+      basePath: '/api/auth',
+    })
   }
 
   login(email, password) {
     const payload = { email, password }
-    const mockResponse = () => ({
-      user: {
-        id: 'auth-mock-user',
-        email,
-        name: maskEmail(email),
-      },
-      accessToken: buildMockToken('accessToken'),
-      role: null,
-    })
-
-    return this.post('/login', payload, undefined, { mockResponse })
+    return this.post('/login', payload)
   }
 
-  signup(email, password, name, role) {
-    const payload = { email, password, name, role }
-    const mockResponse = () => ({
-      user: {
-        id: 'auth-mock-user',
-        email,
-        name,
-        role,
-      },
-      accessToken: buildMockToken('accessToken'),
-    })
+  signup(payloadOrEmail, password, name, role) {
+    const payload =
+      typeof payloadOrEmail === 'object' && payloadOrEmail !== null
+        ? payloadOrEmail
+        : {
+            email: payloadOrEmail,
+            password,
+            name,
+            customerRole: role,
+          }
+    const {
+      email,
+      password: userPassword,
+      name: displayName,
+      userRole = 'ROLE_USER',
+      customerRole,
+    } = payload
 
-    return this.post('/signup', payload, undefined, { mockResponse })
+    const requestPayload = {
+      email,
+      password: userPassword,
+      name: displayName,
+      userRole,
+      customerRole,
+    }
+
+    return this.post('/signup', requestPayload)
   }
 
   kakaoLogin(authorizationCode) {
     const payload = { authorizationCode }
-    const mockResponse = () => ({
-      user: {
-        id: 'kakao-user',
-        email: 'user@kakao.com',
-        name: '카카오 사용자',
-      },
-      accessToken: buildMockToken('accessToken'),
-      role: null,
-    })
-
-    return this.post('/kakao-login', payload, undefined, { mockResponse })
+    return this.post('/kakao-login', payload)
   }
 
   selectRole(token, role) {
@@ -60,27 +58,52 @@ class AuthApiClient extends ApiClient {
         Authorization: `Bearer ${token}`,
       },
     }
-    const mockResponse = () => ({
-      success: true,
-      role,
-    })
+    return this.post('/select-role', payload, config)
+  }
 
-    return this.post('/select-role', payload, config, { mockResponse })
+  refresh(refreshToken) {
+    const payload = { refreshToken }
+    return this.post('/refresh', payload)
   }
 
   logout(token) {
+    if (!token) {
+      return Promise.resolve({ success: true })
+    }
     const config = {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
-    const mockResponse = () => ({ success: true })
-
-    return this.post('/logout', {}, config, { mockResponse }).catch(() => ({
+    return this.post('/logout', {}, config).catch(() => ({
       success: true,
     }))
   }
+
+  resolveDeeplink(deeplinkToken, target) {
+    const payload = { deeplinkToken, target }
+    const mockResponse = () => ({
+      accessToken: buildMockToken('accessToken'),
+      refreshToken: buildMockToken('refreshToken'),
+      expiresIn: 900,
+      user: {
+        id: 'deeplink-user',
+        email: 'deeplink@example.com',
+        name: 'DeepLink User',
+        userRole: 'ROLE_USER',
+        customerRole: 'SENIOR',
+      },
+      target,
+    })
+
+    return this.post('/deeplink/resolve', payload, undefined, { mockResponse })
+  }
+
+  reactivate(token) {
+    return this.post('/users/reactivate', { token })
+  }
 }
+
 
 export const authApiClient = new AuthApiClient()
 export { AuthApiClient }

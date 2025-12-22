@@ -1,0 +1,214 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    TextField,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    Typography,
+    Box,
+    CircularProgress,
+    IconButton,
+    Chip,
+    Stack
+} from '@mui/material';
+import logger from '@core/utils/logger';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+
+// Fallback icons
+const CloseIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+);
+
+const CheckIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+);
+
+const DietAnalysisModal = ({ isOpen, onClose, analysisResult, onSave, isLoading, errorMessage, onRetry }) => {
+    const [editedResult, setEditedResult] = useState(null);
+
+    useEffect(() => {
+        if (analysisResult) {
+            logger.debug('[DietAnalysisModal] analysisResult received:', analysisResult);
+            setEditedResult(analysisResult);
+        } else {
+            logger.debug('[DietAnalysisModal] analysisResult is null/undefined');
+        }
+    }, [analysisResult]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditedResult(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSave = () => {
+        onSave(editedResult);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <Dialog
+            open={isOpen}
+            onClose={onClose}
+            fullWidth
+            maxWidth="sm"
+            PaperProps={{
+                sx: { borderRadius: 3 }
+            }}
+        >
+            <DialogTitle sx={{ pb: 1, px: 1.25, py: 1.25 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center' }}>
+                    <IconButton onClick={onClose} aria-label="뒤로">
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography fontWeight="bold" sx={{ textAlign: 'center' }}>음식 분석 결과</Typography>
+                    <IconButton onClick={onClose} size="small" aria-label="닫기">
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+            </DialogTitle>
+
+            <DialogContent dividers>
+                {isLoading ? (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 6 }}>
+                        <CircularProgress size={48} sx={{ mb: 2 }} />
+                        <Typography color="text.secondary">음식을 분석하는 중...</Typography>
+                    </Box>
+                ) : errorMessage ? (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                        <Typography color="error" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            {errorMessage}
+                        </Typography>
+                        <Stack direction="row" spacing={1} justifyContent="center">
+                            {onRetry && (
+                                <Button variant="contained" onClick={onRetry}>
+                                    재시도
+                                </Button>
+                            )}
+                            <Button variant="text" onClick={onClose}>
+                                닫기
+                            </Button>
+                        </Stack>
+                    </Box>
+                ) : editedResult ? (
+                    <Stack spacing={3} sx={{ py: 1 }}>
+                        {/* Food Name */}
+                        <TextField
+                            label="인식된 음식"
+                            name="foodName"
+                            value={editedResult.foodName || ''}
+                            onChange={handleChange}
+                            fullWidth
+                            variant="outlined"
+                        />
+
+                        {/* Drug Interactions */}
+                        {editedResult.drugInteractions && editedResult.drugInteractions.length > 0 && (
+                            <Box>
+                                <Typography variant="subtitle2" gutterBottom fontWeight="bold">약물 상호작용</Typography>
+                                <Stack spacing={1}>
+                                    {editedResult.drugInteractions.map((interaction, idx) => (
+                                        <Box key={idx} sx={{ p: 1.5, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'grey.200' }}>
+                                            <Typography variant="subtitle2" color="text.primary">{interaction.medicationName}</Typography>
+                                            <Typography variant="body2" color="text.secondary">{interaction.description}</Typography>
+                                            {interaction.recommendation && (
+                                                <Typography variant="body2" color="primary.main" sx={{ mt: 0.5 }}>
+                                                    권장: {interaction.recommendation}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {/* Disease Interactions */}
+                        {editedResult.diseaseInteractions && editedResult.diseaseInteractions.length > 0 && (
+                            <Box>
+                                <Typography variant="subtitle2" gutterBottom fontWeight="bold">질병 관련 주의사항</Typography>
+                                <Stack spacing={1}>
+                                    {editedResult.diseaseInteractions.map((interaction, idx) => (
+                                        <Box key={idx} sx={{ p: 1.5, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'grey.200' }}>
+                                            <Typography variant="subtitle2" color="text.primary">{interaction.diseaseName}</Typography>
+                                            <Typography variant="body2" color="text.secondary">{interaction.description}</Typography>
+                                            {interaction.recommendation && (
+                                                <Typography variant="body2" color="primary.main" sx={{ mt: 0.5 }}>
+                                                    권장: {interaction.recommendation}
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    ))}
+                                </Stack>
+                            </Box>
+                        )}
+
+                        {/* Meal Type */}
+                        <FormControl fullWidth>
+                            <InputLabel>식사 구분</InputLabel>
+                            <Select
+                                name="mealType"
+                                value={editedResult.mealType || 'breakfast'}
+                                onChange={handleChange}
+                                label="식사 구분"
+                            >
+                                <MenuItem value="breakfast">아침</MenuItem>
+                                <MenuItem value="lunch">점심</MenuItem>
+                                <MenuItem value="dinner">저녁</MenuItem>
+                                <MenuItem value="snack">간식</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                ) : (
+                    <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
+                        분석 결과가 없습니다.
+                    </Box>
+                )}
+            </DialogContent>
+
+            <DialogActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
+                {/* Warning message when isFood is false */}
+                {editedResult && editedResult.isFood === false && (
+                    <Typography
+                        variant="body2"
+                        color="error"
+                        sx={{ width: '100%', textAlign: 'center', mb: 1 }}
+                    >
+                        ⚠️ 음식으로 인식되지 않아 등록할 수 없습니다.
+                    </Typography>
+                )}
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', gap: 1 }}>
+                    <Button onClick={onClose} color="inherit">
+                        취소
+                    </Button>
+                    {editedResult && (
+                        <Button
+                            onClick={handleSave}
+                            variant="contained"
+                            startIcon={<CheckIcon />}
+                            sx={{ borderRadius: 2 }}
+                            disabled={editedResult.isFood === false || editedResult.foodName === '알 수 없음'}
+                        >
+                            확인 및 저장
+                        </Button>
+                    )}
+                </Box>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+export default DietAnalysisModal;

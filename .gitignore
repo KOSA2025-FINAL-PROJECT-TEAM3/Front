@@ -1,123 +1,128 @@
-# ═══════════════════════════════════════════════════════════
-# Dependencies
-# ═══════════════════════════════════════════════════════════
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# ═══════════════════════════════════════════════════════════
-# Build outputs
-# ═══════════════════════════════════════════════════════════
-dist/
-dist-ssr/
-build/
-*.local
-*.tsbuildinfo
-
-# ═══════════════════════════════════════════════════════════
-# Logs
-# ═══════════════════════════════════════════════════════════
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# ═══════════════════════════════════════════════════════════
-# Environment variables
-# ═══════════════════════════════════════════════════════════
-.env
-.env.local
-.env.*.local
-.env.production.local
-.env.development.local
-
-# ═══════════════════════════════════════════════════════════
-# IDE / Editor
-# ═══════════════════════════════════════════════════════════
-# VSCode
-.vscode/
-!.vscode/extensions.json
-.vscode/*.log
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
-
-# IntelliJ IDEA / WebStorm
-.idea/
-*.iml
-*.iws
-*.ipr
-*.sublime-project
-*.sublime-workspace
-
-# Eclipse
-.classpath
-.project
-.settings/
-*.launch
-.c9/
-
-# Vim
-*.swp
-*.swo
-*~
-.vim/
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# ═══════════════════════════════════════════════════════════
-# OS specific files
-# ═══════════════════════════════════════════════════════════
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-.Spotlight-V100
-.Trashes
-._*
-.env.macos
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.lnk
-.windows
-
-# Linux
-.directory
-.Trash-*
-
-# ═══════════════════════════════════════════════════════════
-# Cache
-# ═══════════════════════════════════════════════════════════
-.cache/
-.eslintcache
-.stylelintcache
-.next/
-.nuxt/
-out/
-
-# ═══════════════════════════════════════════════════════════
-# Testing
-# ═══════════════════════════════════════════════════════════
-coverage/
-.nyc_output/
-junit.xml
-
-# ═══════════════════════════════════════════════════════════
-# OS temporary files
-# ═══════════════════════════════════════════════════════════
-*.tmp
-*.temp
-*.bak
-*.orig
-BACKEND_INITIALIZATION_GUIDE.md
+# ═══════════════════════════════════════════════════════════          
+# Dependencies                                                         
+# ═══════════════════════════════════════════════════════════          
+node_modules/                                                          
+package-lock.json                                                      
+yarn.lock                                                              
+pnpm-lock.yaml                                                         
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# Build outputs                                                        
+# ═══════════════════════════════════════════════════════════          
+dist/                                                                  
+dist-ssr/                                                              
+build/                                                                 
+*.local                                                                
+*.tsbuildinfo                                                          
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# Logs                                                                 
+# ═══════════════════════════════════════════════════════════          
+logs                                                                   
+*.log                                                                  
+npm-debug.log*                                                         
+yarn-debug.log*                                                        
+yarn-error.log*                                                        
+pnpm-debug.log*                                                        
+lerna-debug.log*                                                       
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# Environment variables                                                
+# ═══════════════════════════════════════════════════════════          
+.env                                                                   
+.env.local                                                             
+.env.*.local                                                           
+.env.production.local                                                  
+.env.development.local                                                 
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# IDE / Editor                                                         
+# ═══════════════════════════════════════════════════════════          
+# VSCode                                                               
+.vscode/                                                               
+!.vscode/extensions.json                                               
+.vscode/*.log                                                          
+.vscode/settings.json                                                  
+.vscode/launch.json                                                    
+.vscode/tasks.json                                                     
+                                                                       
+# IntelliJ IDEA / WebStorm                                             
+.idea/                                                                 
+*.iml                                                                  
+*.iws                                                                  
+*.ipr                                                                  
+*.sublime-project                                                      
+*.sublime-workspace                                                    
+                                                                       
+# Eclipse                                                              
+.classpath                                                             
+.project                                                               
+.settings/                                                             
+*.launch                                                               
+.c9/                                                                   
+                                                                       
+# Vim                                                                  
+*.swp                                                                  
+*.swo                                                                  
+*~                                                                     
+.vim/                                                                  
+                                                                       
+# Sublime Text                                                         
+*.sublime-project                                                      
+*.sublime-workspace                                                    
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# OS specific files                                                    
+# ═══════════════════════════════════════════════════════════          
+# macOS                                                                
+.DS_Store                                                              
+.AppleDouble                                                           
+.LSOverride                                                            
+.Spotlight-V100                                                        
+.Trashes                                                               
+._*                                                                    
+.env.macos                                                             
+                                                                       
+# Windows                                                              
+Thumbs.db                                                              
+ehthumbs.db                                                            
+Desktop.ini                                                            
+$RECYCLE.BIN/                                                          
+*.lnk                                                                  
+.windows                                                               
+                                                                       
+# Linux                                                                
+.directory                                                             
+.Trash-*                                                               
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# Cache                                                                
+# ═══════════════════════════════════════════════════════════          
+.cache/                                                                
+.eslintcache                                                           
+.stylelintcache                                                        
+.next/                                                                 
+.nuxt/                                                                 
+out/                                                                   
+vite.config.js.timestamp*
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# Testing                                                              
+# ═══════════════════════════════════════════════════════════          
+coverage/                                                              
+.nyc_output/                                                           
+junit.xml                                                              
+playwright-report/
+test-results/
+tests/
+                                                                       
+# ═══════════════════════════════════════════════════════════          
+# OS temporary files                                                   
+# ═══════════════════════════════════════════════════════════          
+*.tmp                                                                  
+*.temp                                                                 
+*.bak                                                                  
+*.orig                                                                 
+BACKEND_INITIALIZATION_GUIDE.md                                        
 CONSISTENCY_CHECK_REPORT.md
+.serena/

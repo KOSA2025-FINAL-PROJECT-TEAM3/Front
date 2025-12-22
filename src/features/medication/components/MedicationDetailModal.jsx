@@ -1,10 +1,19 @@
 import MedicationForm from './MedicationForm.jsx'
-import styles from './MedicationDetailModal.module.scss'
-
-const STATUS_LABEL = {
-  ACTIVE: '복용 중',
-  PAUSED: '일시중지',
-}
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const formatDate = (value) => {
   if (!value) return '정보 없음'
@@ -28,65 +37,91 @@ export const MedicationDetailModal = ({
   onRemove,
   onSubmit,
 }) => {
-  if (!medication) return null
-
-  const handleBackdropClick = (event) => {
-    if (event.target === event.currentTarget) {
-      onClose?.()
-    }
-  }
+  const open = Boolean(medication)
+  if (!open) return null
 
   const handleUpdate = async (values) => {
     await onSubmit?.(medication.id, values)
   }
 
   return (
-    <div
-      className={styles.backdrop}
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
+    <Dialog
+      open={open}
+      onClose={(_, reason) => {
+        if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+          onClose?.()
+        }
+      }}
+      fullWidth
+      maxWidth="md"
+      PaperProps={{ sx: { borderRadius: 4, bgcolor: 'grey.50' } }}
     >
-      <div className={styles.modal}>
-        <header className={styles.header}>
-          <div>
-            <p className={styles.meta}>
-              {medication.updatedAt ? '최근 수정' : '등록일'} ·{' '}
-              {formatDate(medication.updatedAt || medication.createdAt)}
-            </p>
-            <h2 className={styles.title}>{medication.name}</h2>
-            <p className={styles.subtitle}>{medication.dosage}</p>
-          </div>
-          <div className={styles.headerActions}>
-            <span className={styles.statusBadge}>
-              {STATUS_LABEL[medication.status] || '상태 미정'}
-            </span>
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="닫기"
-            >
-              ✕
-            </button>
-          </div>
-        </header>
+      <DialogTitle sx={{ pb: 1.5 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 1 }}>
+          <IconButton aria-label="뒤로" onClick={() => onClose?.()}>
+            <ArrowBackIcon />
+          </IconButton>
 
-        <section className={styles.infoGrid}>
-          <div>
-            <p className={styles.label}>복용 일정</p>
-            <p className={styles.value}>{medication.schedule || '미입력'}</p>
-          </div>
-          <div>
-            <p className={styles.label}>주의사항</p>
-            <p className={styles.value}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 900 }}>
+              {medication.updatedAt ? '최근 수정' : '등록일'} · {formatDate(medication.updatedAt || medication.createdAt)}
+            </Typography>
+            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5, minWidth: 0 }}>
+              <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                {medication.name}
+              </Typography>
+              <Chip
+                label={medication.active ? '복용 중' : '일시중지'}
+                size="small"
+                color={medication.active ? 'success' : 'default'}
+                sx={{ fontWeight: 900 }}
+              />
+            </Stack>
+            <Typography variant="body2" color="text.secondary">
+              {medication.dosage || '용량 정보 없음'}
+            </Typography>
+          </Box>
+
+          <IconButton onClick={() => onClose?.()} aria-label="닫기">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
+
+      <DialogContent sx={{ pt: 0 }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 2,
+            mb: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 900 }}>
+              복용 일정
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5 }}>
+              {medication.schedule || '미입력'}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 900 }}>
+              주의사항
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 0.5, whiteSpace: 'pre-wrap' }}>
               {medication.instructions || '미입력'}
-            </p>
-          </div>
-        </section>
+            </Typography>
+          </Box>
+        </Paper>
 
-        <section className={styles.formSection}>
-          <h3>정보 수정</h3>
+        <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1.5 }}>
+            정보 수정
+          </Typography>
           <MedicationForm
             initialValues={medication}
             onSubmit={handleUpdate}
@@ -95,28 +130,32 @@ export const MedicationDetailModal = ({
             submitLabel="변경 저장"
             onCancel={onClose}
           />
-        </section>
+        </Paper>
+      </DialogContent>
 
-        <footer className={styles.footer}>
-          <button
-            type="button"
-            className={styles.toggleButton}
-            onClick={() => onToggle?.(medication.id)}
-            disabled={loading}
-          >
-            {medication.status === 'ACTIVE' ? '일시중지' : '복용 재개'}
-          </button>
-          <button
-            type="button"
-            className={styles.deleteButton}
-            onClick={() => onRemove?.(medication.id)}
-            disabled={loading}
-          >
-            약 삭제
-          </button>
-        </footer>
-      </div>
-    </div>
+      <DialogActions sx={{ px: 3, pb: 2.5 }}>
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={() => onToggle?.(medication.id)}
+          disabled={loading}
+          sx={{ fontWeight: 900 }}
+        >
+          {medication.active ? '일시중지' : '복용 재개'}
+        </Button>
+        <Button
+          type="button"
+          color="error"
+          variant="contained"
+          onClick={() => onRemove?.(medication.id)}
+          disabled={loading || medication.hasLogsToday}
+          title={medication.hasLogsToday ? '오늘 복용 기록이 있어 삭제할 수 없습니다.' : ''}
+          sx={{ fontWeight: 900 }}
+        >
+          약 삭제
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 

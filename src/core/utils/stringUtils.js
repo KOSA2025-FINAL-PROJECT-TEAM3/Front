@@ -3,6 +3,8 @@
  * - 문자열 변환, 조작 등
  */
 
+import logger from './logger'
+
 /**
  * 문자열을 camelCase로 변환
  * @param {string} str - 변환할 문자열
@@ -186,7 +188,7 @@ export const decodeBase64 = (str) => {
   try {
     return decodeURIComponent(escape(atob(str)))
   } catch (error) {
-    console.error('Base64 디코딩 실패:', error)
+    logger.error('Base64 디코딩 실패:', error)
     return ''
   }
 }

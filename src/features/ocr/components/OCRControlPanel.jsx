@@ -1,25 +1,15 @@
-import styles from './OCRControlPanel.module.scss'
+import { Button, Stack } from '@mui/material'
 
 export const OCRControlPanel = ({ onRecognize, onReset, isProcessing }) => {
   return (
-    <div className={styles.controlPanel}>
-      <button
-        type="button"
-        className={styles.primary}
-        onClick={onRecognize}
-        disabled={isProcessing}
-      >
+    <Stack direction="row" spacing={2}>
+      <Button type="button" variant="contained" onClick={onRecognize} disabled={isProcessing} fullWidth sx={{ fontWeight: 900 }}>
         {isProcessing ? '인식 중...' : 'AI로 인식하기'}
-      </button>
-      <button
-        type="button"
-        className={styles.secondary}
-        onClick={onReset}
-        disabled={isProcessing}
-      >
+      </Button>
+      <Button type="button" variant="outlined" onClick={onReset} disabled={isProcessing} fullWidth sx={{ fontWeight: 900 }}>
         초기화
-      </button>
-    </div>
+      </Button>
+    </Stack>
   )
 }
 

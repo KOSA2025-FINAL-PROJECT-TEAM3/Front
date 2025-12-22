@@ -1,35 +1,35 @@
 import ApiClient from './ApiClient'
-import { MOCK_SYMPTOMS, MOCK_SYMPTOM_DETAILS } from '@features/search/data/mockSymptoms'
+import envConfig from '@config/environment.config'
+
+const medicationSearchClient = new ApiClient({
+  baseURL: envConfig.MEDICATION_API_URL || envConfig.API_BASE_URL,
+  basePath: '/api/medications',
+})
 
 class SearchApiClient extends ApiClient {
   constructor() {
-    super({ basePath: '/api/search' })
+    super({
+      baseURL: envConfig.SEARCH_API_URL || envConfig.API_BASE_URL,
+      basePath: '/api/search',
+    })
   }
 
-  suggestSymptoms(query) {
-    const q = (query || '').trim()
-    const mockResponse = () => {
-      if (!q) return []
-      return MOCK_SYMPTOMS.filter((s) => s.includes(q)).slice(0, 10)
-    }
-    return this.get('/symptoms', undefined, { mockResponse })
+  searchSymptomsWithAI(query) {
+    const name = (query || '').trim()
+    return medicationSearchClient.get('/search/symptoms/ai', { params: { query: name } })
   }
 
-  getSymptomDetail(symptomName) {
-    const name = (symptomName || '').trim()
-    const mockResponse = () => {
-      if (!name) return null
-      return (
-        MOCK_SYMPTOM_DETAILS[name] || {
-          name,
-          description: '등록된 상세 정보가 없습니다.',
-          possibleCauses: [],
-          severity: '정보 없음',
-          recommendedActions: [],
-        }
-      )
-    }
-    return this.get(`/symptoms/${encodeURIComponent(name)}`, undefined, { mockResponse })
+  searchDrugs(itemName, options = {}) {
+    const query = (itemName || '').trim()
+    const numOfRows = Number(options?.numOfRows ?? 10) || 10
+    const params = { itemName: query, numOfRows }
+    return medicationSearchClient.get('/search', { params })
+  }
+
+  searchDrugsWithAI(itemName) {
+    const query = (itemName || '').trim()
+    const params = { itemName: query }
+    return medicationSearchClient.get('/search/ai', { params, timeout: 30000 })
   }
 }
 

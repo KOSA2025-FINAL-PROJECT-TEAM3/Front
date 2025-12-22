@@ -1,4 +1,4 @@
-import styles from './InventoryTracker.module.scss'
+import { Box, Paper, Stack, Typography } from '@mui/material'
 
 const formatDisplayDate = (isoString) => {
   if (!isoString) return '기록 없음'
@@ -16,7 +16,7 @@ const formatDisplayDate = (isoString) => {
 
 export const InventoryTracker = ({ medications = [] }) => {
   const total = medications.length
-  const active = medications.filter((med) => med.status === 'ACTIVE').length
+  const active = medications.filter((med) => med.active).length
   const paused = total - active
 
   const lastUpdatedMed = medications.reduce(
@@ -32,31 +32,85 @@ export const InventoryTracker = ({ medications = [] }) => {
   )
 
   return (
-    <section className={styles.tracker}>
-      <div className={styles.statCard}>
-        <p className={styles.label}>등록된 약</p>
-        <p className={styles.primaryValue}>{total}</p>
-        <p className={styles.caption}>총 관리 대상</p>
-      </div>
-      <div className={styles.statCard}>
-        <p className={styles.label}>복용 중</p>
-        <p className={styles.primaryValue}>{active}</p>
-        <p className={styles.caption}>일시중지 {paused}건</p>
-      </div>
-      <div className={styles.statCardWide}>
-        <p className={styles.label}>최근 업데이트</p>
-        <p className={styles.meta}>
+    <Box
+      component="section"
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 2,
+        mb: 2.5,
+      }}
+    >
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          borderRadius: 4,
+          background: 'linear-gradient(135deg, #eef2ff, #f8fafc)',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.05)',
+        }}
+      >
+        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 900, letterSpacing: 0.5 }}>
+          등록된 약
+        </Typography>
+        <Typography sx={{ mt: 0.75, fontSize: 32, fontWeight: 900, color: 'text.primary' }}>{total}</Typography>
+        <Typography variant="caption" color="text.secondary">
+          총 관리 대상
+        </Typography>
+      </Paper>
+
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          borderRadius: 4,
+          background: 'linear-gradient(135deg, #eef2ff, #f8fafc)',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.05)',
+        }}
+      >
+        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 900, letterSpacing: 0.5 }}>
+          복용 중
+        </Typography>
+        <Typography sx={{ mt: 0.75, fontSize: 32, fontWeight: 900, color: 'text.primary' }}>{active}</Typography>
+        <Typography variant="caption" color="text.secondary">
+          일시중지 {paused}건
+        </Typography>
+      </Paper>
+
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          borderRadius: 4,
+          background: 'linear-gradient(135deg, #eef2ff, #f8fafc)',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.05)',
+          gridColumn: { xs: 'span 1', md: 'span 2' },
+        }}
+      >
+        <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 900, letterSpacing: 0.5 }}>
+          최근 업데이트
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="baseline" sx={{ mt: 0.75, color: 'text.primary' }}>
           {lastUpdatedMed.name ? (
             <>
-              <strong>{lastUpdatedMed.name}</strong> ·{' '}
-              {formatDisplayDate(lastUpdatedMed.value)}
+              <Typography component="strong" sx={{ fontWeight: 900 }}>
+                {lastUpdatedMed.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                · {formatDisplayDate(lastUpdatedMed.value)}
+              </Typography>
             </>
           ) : (
-            '기록 없음'
+            <Typography variant="body2" color="text.secondary">
+              기록 없음
+            </Typography>
           )}
-        </p>
-      </div>
-    </section>
+        </Stack>
+      </Paper>
+    </Box>
   )
 }
 
