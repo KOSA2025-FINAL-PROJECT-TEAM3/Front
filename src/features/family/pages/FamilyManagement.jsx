@@ -210,11 +210,15 @@ export const FamilyManagementPage = () => {
       if (errorCode === 'FAMILY_009' || message.includes('소유자') && message.includes('새 소유자')) {
         // 소유자 양도 모달을 표시 - 에러 토스트 표시하지 않음
         setDelegationModal({ open: true, memberId, newRole })
-        // refetchFamily를 호출하지 않음 - 모달 확인/취소 시 처리
+        // 모달에서 사용자가 선택할 수 있도록 상태 유지
         setRoleChangingMemberId(null)
         return // finally를 건너뛰고 여기서 종료
       } else {
+        // 일반 에러: 토스트 표시 후 화면 새로고침하여 정상 상태로 복구
         toast.error(message)
+        await refetchFamily?.().catch((refetchError) => {
+          logger.warn('[FamilyManagement] refetchFamily after role change error failed', refetchError)
+        })
       }
     } finally {
       setRoleChangingMemberId(null)
