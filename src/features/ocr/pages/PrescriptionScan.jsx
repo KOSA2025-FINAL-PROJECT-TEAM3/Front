@@ -106,6 +106,13 @@ const PrescriptionScanPage = () => {
       if (data && data.status === 'DONE' && data.result?.medications) {
         const result = data.result
         const medications = fromOCRResponse(result.medications)
+        
+        // 기간 계산
+        const durationDays = medications[0]?.durationDays || 3
+        const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+        const endDate = new Date(startDate)
+        endDate.setDate(endDate.getDate() + durationDays - 1)
+        const endDateStr = endDate.toISOString().split('T')[0]
 
         navigate(ROUTE_PATHS.prescriptionAdd, {
           state: {
@@ -113,7 +120,8 @@ const PrescriptionScanPage = () => {
               medications,
               hospitalName: result.hospitalName || result.clinicName || '',
               pharmacyName: result.pharmacyName || '',
-              startDate: result.prescribedDate || new Date().toISOString().split('T')[0]
+              startDate,
+              endDate: endDateStr
             },
             targetUserId: targetUserId || undefined,
             targetUserName: targetUserName || undefined

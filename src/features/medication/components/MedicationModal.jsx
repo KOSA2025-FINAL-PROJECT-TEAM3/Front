@@ -36,6 +36,7 @@ export const MedicationModal = ({
   const [searchResults, setSearchResults] = useState([])
   const [selectedMedication, setSelectedMedication] = useState(initialMedication)
   const [medicationDetails, setMedicationDetails] = useState({
+    name: '',
     dosageAmount: 1,
     intakeTimeIndices: intakeTimes.map((_, i) => i),
     daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
@@ -53,17 +54,18 @@ export const MedicationModal = ({
   )
 
   useEffect(() => {
-    if (!initialMedication) return
+    if (!selectedMedication) return
 
-    setSelectedMedication(initialMedication)
+    setMedicationDetails((prev) => ({
+      ...prev,
+      name: selectedMedication.itemName || selectedMedication.name || '',
+      dosageAmount: initialMedication?.dosageAmount || prev.dosageAmount || 1,
+      intakeTimeIndices: initialMedication?.intakeTimeIndices || prev.intakeTimeIndices || intakeTimes.map((_, i) => i),
+      daysOfWeek: initialMedication?.daysOfWeek || prev.daysOfWeek || 'MON,TUE,WED,THU,FRI,SAT,SUN',
+      notes: initialMedication?.notes || prev.notes || '',
+    }))
     setStep('detail')
-    setMedicationDetails({
-      dosageAmount: initialMedication.dosageAmount || 1,
-      intakeTimeIndices: initialMedication.intakeTimeIndices || intakeTimes.map((_, i) => i),
-      daysOfWeek: initialMedication.daysOfWeek || 'MON,TUE,WED,THU,FRI,SAT,SUN',
-      notes: initialMedication.notes || '',
-    })
-  }, [initialMedication, intakeTimes])
+  }, [initialMedication, selectedMedication, intakeTimes])
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -124,13 +126,18 @@ export const MedicationModal = ({
       return
     }
 
+    if (!medicationDetails.name.trim()) {
+      toast.error('약 이름을 입력해주세요')
+      return
+    }
+
     // frequency = 선택된 복용 시간 개수, dosePerIntake = 1회 복용량
     const frequency = medicationDetails.intakeTimeIndices?.length || 1
     const dosePerIntake = medicationDetails.dosageAmount || 1
 
     const medicationData = {
       ...selectedMedication,
-      name: selectedMedication.itemName || selectedMedication.name,
+      name: medicationDetails.name.trim(),
       category: selectedMedication.entpName || selectedMedication.category || selectedMedication.ingredient,
       dosageAmount: medicationDetails.dosageAmount,
       frequency: frequency,
@@ -245,10 +252,25 @@ export const MedicationModal = ({
         {step === 'detail' && selectedMedication ? (
           <Box sx={{ p: 2, borderRadius: 3, border: 1, borderColor: 'divider', bgcolor: 'grey.50' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 900, mb: 1.5 }}>
-              {selectedMedication.itemName || selectedMedication.name} 복용 정보
+              복용 정보 입력
             </Typography>
 
             <Stack spacing={2}>
+              <TextField
+                label="약 이름"
+                value={medicationDetails.name}
+                onChange={(e) =>
+                  setMedicationDetails((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
+                placeholder="약 이름을 입력하세요"
+                fullWidth
+                size="small"
+                required
+              />
+
               <TextField
                 type="number"
                 label="1회 복용량 (정)"
