@@ -63,6 +63,7 @@ const mapNotification = (n) => {
       n.missedMedicationCount ??
       (Array.isArray(n.missedMedications) ? n.missedMedications.length : undefined),
     groupKey,
+    result: n.result,
   }
 }
 
@@ -277,6 +278,7 @@ export const useNotificationStore = create((set, get) => ({
         missedMedications,
         missedCount,
         groupKey,
+        result: payload.result || payload.notification?.result || notification.result,
       }
 
       const newNotifications = [newNotification, ...state.notifications]

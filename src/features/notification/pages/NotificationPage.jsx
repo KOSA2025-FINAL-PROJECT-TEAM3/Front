@@ -183,8 +183,9 @@ export const NotificationPage = () => {
       markAsRead(notification.id)
     }
 
-    // OCR 완료 알림인 경우 약 등록 페이지로 이동
-    if (notification.type === 'ocr.job.done' && notification.result?.medications) {
+    // OCR 결과 알림 (히스토리: ocr_result, 실시간: ocr_job_done, ocr_job)
+    const isOcrType = ['ocr_result', 'ocr_job_done', 'ocr_job'].includes(typeKey)
+    if (isOcrType && notification.result?.medications) {
       const medications = fromOCRResponse(notification.result.medications)
       navigate(ROUTE_PATHS.prescriptionAdd, {
         state: {
@@ -194,6 +195,17 @@ export const NotificationPage = () => {
             pharmacyName: notification.result.pharmacyName || '',
             startDate: notification.result.prescribedDate || new Date().toISOString().split('T')[0]
           }
+        }
+      })
+      return
+    }
+
+    // 식단 분석 결과 알림 (히스토리: diet_result, 실시간: diet_job_done, diet_job)
+    const isDietType = ['diet_result', 'diet_job_done', 'diet_job'].includes(typeKey)
+    if (isDietType && notification.result) {
+      navigate(ROUTE_PATHS.dietLog, {
+        state: {
+          initialAnalysisResult: notification.result
         }
       })
       return
