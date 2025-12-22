@@ -9,6 +9,7 @@ import logger from "@core/utils/logger"
 
 import { useEffect } from 'react'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useFamilyStore } from '@features/family/store/familyStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 import { notificationApiClient } from '@core/services/api/notificationApiClient'
 import { toast } from '@shared/components/toast/toastStore'
@@ -193,9 +194,7 @@ export const useNotificationStream = (onNotification) => {
 
         case 'invite.accepted':
           // 초대 수락 알림 - 보낸 초대 목록에서 제거
-          import('@features/family/store/familyStore').then(({ useFamilyStore }) => {
-            useFamilyStore.getState().removeInviteById(data.inviteId)
-          })
+          useFamilyStore.getState().removeInviteById(data.inviteId)
           toast.success(data.message || '초대가 수락되었습니다')
           break
 

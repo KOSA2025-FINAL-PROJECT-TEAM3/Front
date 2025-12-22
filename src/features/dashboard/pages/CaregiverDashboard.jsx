@@ -179,8 +179,8 @@ export function CaregiverDashboard() {
     }
 
     try {
-      logger.info('Exporting PDF for user:', activeSenior.userId)
-      const blob = await diseaseApiClient.exportPdf(activeSenior.userId, selectedGroupId)
+      logger.info('Exporting PDF for user:', activeSenior?.userId)
+      const blob = await diseaseApiClient.exportPdf(activeSenior?.userId, selectedGroupId)
 
       // Create download link
       const url = window.URL.createObjectURL(blob)
@@ -196,7 +196,7 @@ export function CaregiverDashboard() {
     } catch (error) {
       logger.error('Failed to export PDF:', error)
     }
-  }, [activeSenior, selectedGroupId])
+  }, [activeSenior?.userId, selectedGroupId])
 
   useEffect(() => {
     const loadRate = async () => {
@@ -209,7 +209,7 @@ export function CaregiverDashboard() {
       try {
         const today = new Date().toISOString().split('T')[0]
 
-        const response = await familyApiClient.getMedicationLogs(activeSenior.userId, { date: today })
+        const response = await familyApiClient.getMedicationLogs(activeSenior?.userId, { date: today })
         const logs = response?.logs || response || []
         const total = logs.length
         const completed = logs.filter((l) => l.status === 'completed' || l.completed === true).length
@@ -244,7 +244,7 @@ export function CaregiverDashboard() {
           dates.map((date) => {
             if (isAfter(date, end)) return Promise.resolve([])
             return familyApiClient
-              .getMedicationLogs(activeSenior.userId, { date: format(date, 'yyyy-MM-dd') })
+              .getMedicationLogs(activeSenior?.userId, { date: format(date, 'yyyy-MM-dd') })
               .then((response) => response?.logs || response || [])
               .catch(() => [])
           }),
@@ -307,7 +307,7 @@ export function CaregiverDashboard() {
       const endDate = format(new Date(), 'yyyy-MM-dd')
       const startDate = format(subDays(new Date(), 2), 'yyyy-MM-dd')
 
-      const response = await familyApiClient.getMedicationLogs(activeSenior.userId, {
+      const response = await familyApiClient.getMedicationLogs(activeSenior?.userId, {
         startDate,
         endDate
       })
@@ -389,7 +389,7 @@ export function CaregiverDashboard() {
       setDietLoading(true)
       try {
         const today = format(new Date(), 'yyyy-MM-dd')
-        const response = await dietApiClient.getDietLogs({ date: today, userId: activeSenior.userId })
+        const response = await dietApiClient.getDietLogs({ date: today, userId: activeSenior?.userId })
         const logs = Array.isArray(response) ? response : response?.logs || []
         setTodayDietCount(logs.length)
       } catch (error) {
@@ -411,7 +411,7 @@ export function CaregiverDashboard() {
       }
       setDiseaseLoading(true)
       try {
-        const response = await diseaseApiClient.listByUser(activeSenior.userId)
+        const response = await diseaseApiClient.listByUser(activeSenior?.userId)
         const diseases = Array.isArray(response) ? response : response?.diseases || []
         setDiseaseCount(diseases.length)
       } catch (error) {

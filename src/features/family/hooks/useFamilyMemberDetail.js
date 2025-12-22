@@ -20,7 +20,7 @@ export const useFamilyMemberDetail = (memberId) => {
       let target = members.find(
         (m) => m?.id?.toString() === memberId?.toString(),
       )
-      
+
       // 2. 못 찾으면 모든 그룹의 members에서 찾기
       if (!target) {
         const allMembers = familyGroups.flatMap((group) => group.members || [])
@@ -28,16 +28,18 @@ export const useFamilyMemberDetail = (memberId) => {
           (m) => m?.id?.toString() === memberId?.toString(),
         )
       }
-      
+
       if (!target) {
         throw new Error('구성원을 찾을 수 없습니다.')
       }
 
       // 가족 구성원의 약 목록 조회
       let medications = []
+      // Support both flat (target.userId) and nested (target.user.id) structures
+      const targetUserId = target.userId ?? target.user?.id
       try {
-        if (target.userId) {
-          medications = await familyApiClient.getMemberMedications(target.userId)
+        if (targetUserId) {
+          medications = await familyApiClient.getMemberMedications(targetUserId)
         }
       } catch (error) {
         logger.error('약 목록 조회 실패:', error)

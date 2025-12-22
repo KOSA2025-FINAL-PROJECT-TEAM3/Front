@@ -61,7 +61,8 @@ export const FamilyMemberDetailPage = () => {
 
   const member = data?.member
   const medications = data?.medications ?? []
-  const targetUserId = member?.userId ? Number(member.userId) : null
+  // Support both flat (member.userId) and nested (member.user.id) structures from backend
+  const targetUserId = (member?.userId ?? member?.user?.id) ? Number(member?.userId ?? member?.user?.id) : null
   const pageLoading = familyLoading || !familyInitialized || isLoading
 
   useEffect(() => {
@@ -84,16 +85,17 @@ export const FamilyMemberDetailPage = () => {
     (group?.members || []).some((m) => String(m?.id) === String(id)),
   )?.id
 
+  // Use targetUserId which already handles both flat and nested structures
   const canManageMemberNotifications = Boolean(
-    isCaregiver && familyGroupId && member?.userId && currentUserId && String(member.userId) !== String(currentUserId),
+    isCaregiver && familyGroupId && targetUserId && currentUserId && String(targetUserId) !== String(currentUserId),
   )
 
   const handleOpenNotificationSettings = async () => {
-    if (!familyGroupId || !member?.userId) return
+    if (!familyGroupId || !targetUserId) return
     setShowNotificationModal(true)
     setNotificationLoading(true)
     try {
-      const settings = await familyApiClient.getMemberNotificationSettings(familyGroupId, member.userId)
+      const settings = await familyApiClient.getMemberNotificationSettings(familyGroupId, targetUserId)
       if (settings) {
         setNotificationSettings((prev) => ({
           ...prev,
@@ -111,12 +113,12 @@ export const FamilyMemberDetailPage = () => {
   }
 
   const handleSaveNotificationSettings = async () => {
-    if (!familyGroupId || !member?.userId) return
+    if (!familyGroupId || !targetUserId) return
     setNotificationLoading(true)
     try {
-      await familyApiClient.updateMemberNotificationSettings(familyGroupId, member.userId, {
+      await familyApiClient.updateMemberNotificationSettings(familyGroupId, targetUserId, {
         familyGroupId,
-        targetUserId: member.userId,
+        targetUserId: targetUserId,
         ...notificationSettings,
       })
       toast.success('알림 설정이 저장되었습니다.')

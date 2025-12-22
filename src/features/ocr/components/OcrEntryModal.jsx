@@ -43,7 +43,6 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         setStep,
         handleFileSelect,
         handleCameraCapture,
-        startAnalysis,
         startAnalysisAsync,
         updateFormState,
         updateMedication,

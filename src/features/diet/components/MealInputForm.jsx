@@ -267,12 +267,28 @@ export const MealInputForm = ({
     await handleStartAnalysis()
   }
 
-  const handleAnalysisSave = (result) => {
-    setFoodName(result.foodName)
-    setMealType(result.mealType)
-    setAnalysisResult(result)
-    setIsModalOpen(false)
-    // Note: form will be reset after successful submission in handleSubmit
+  const handleAnalysisSave = async (result) => {
+    // Build meal data from analysis result
+    const mealData = {
+      mealType: result.mealType,
+      foodName: result.foodName,
+      imageUrl: imageUrl || result.imageUrl || '',
+      overallLevel: result.overallLevel || null,
+      summary: result.summary || null,
+      drugInteractions: result.drugInteractions ? JSON.stringify(result.drugInteractions) : null,
+      diseaseInteractions: result.diseaseInteractions ? JSON.stringify(result.diseaseInteractions) : null
+    }
+
+    // Actually save to the server
+    try {
+      await onAddMeal(mealData)
+      setIsModalOpen(false)
+      resetForm()
+      toast.success('식단이 성공적으로 등록되었습니다.')
+    } catch (error) {
+      logger.error('Failed to save diet log from modal:', error)
+      toast.error('식단 등록에 실패했습니다.')
+    }
   }
 
 

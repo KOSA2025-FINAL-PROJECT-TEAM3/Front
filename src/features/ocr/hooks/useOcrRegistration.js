@@ -221,7 +221,7 @@ export function useOcrRegistration(options = {}) {
     } finally {
       setIsLoading(false)
     }
-  }, [file, setOcrScanning])
+  }, [file, setOcrScanning, targetUserId, userId])
 
   // SSE로 완료된 Job 결과 감지 시 현재 Job과 일치하면 즉시 반영
   useEffect(() => {
