@@ -252,21 +252,34 @@ export function useOcrRegistration(options = {}) {
       // 완료 시 스토리지 정리
       if (userId) localStorage.removeItem(`ocr_running_job_${userId}`)
 
-      const medications = fromOCRResponse(job.result.medications)
+      const result = job.result
+      const medications = fromOCRResponse(result.medications)
+      
+      // ✅ 처방 일수(durationDays)를 바탕으로 종료일 계산
       const durationDays = medications[0]?.durationDays || 3
-      const payment = parsePaymentAmount(job.result.paymentAmount ?? job.result.totalAmount)
-      setFormState((prev) => ({
-        ...prev,
-        medications,
-        endDate: calculateEndDate(durationDays),
-        intakeTimes: adjustIntakeTimes(prev.intakeTimes, medications[0]?.dailyFrequency || 5),
-        pharmacyName: job.result.pharmacyName || prev.pharmacyName || '',
-        hospitalName: job.result.hospitalName || job.result.clinicName || prev.hospitalName || '',
-        paymentAmount: payment ?? prev.paymentAmount,
-      }))
-      setStep('edit')
+      const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+      const endDate = calculateEndDateFromDate(startDate, durationDays)
+
+      // ✅ edit 단계로 가는 대신 전용 등록 페이지로 이동
+      navigate(ROUTE_PATHS.prescriptionAdd, {
+        state: {
+          ocrData: {
+            medications,
+            hospitalName: result.hospitalName || result.clinicName || '',
+            pharmacyName: result.pharmacyName || '',
+            startDate,
+            endDate
+          },
+          targetUserId: targetUserId || undefined,
+          targetUserName: options.targetUserName || undefined
+        }
+      })
+      
       setIsLoading(false)
+      setOcrScanning(false)
       setError(null)
+      // 초기화 (필요 시)
+      currentJobIdRef.current = null;
     } else if (job.status === 'FAILED') {
       // 실패 시 스토리지 정리
       if (userId) localStorage.removeItem(`ocr_running_job_${userId}`)
@@ -483,6 +496,13 @@ export function useOcrRegistration(options = {}) {
 
 function calculateEndDate(days) {
   const date = new Date()
+  date.setDate(date.getDate() + days - 1)
+  return date.toISOString().split('T')[0]
+}
+
+function calculateEndDateFromDate(startDateStr, days) {
+  const date = new Date(startDateStr)
+  if (isNaN(date.getTime())) return calculateEndDate(days)
   date.setDate(date.getDate() + days - 1)
   return date.toISOString().split('T')[0]
 }
