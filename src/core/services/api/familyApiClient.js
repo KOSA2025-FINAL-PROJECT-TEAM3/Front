@@ -13,6 +13,37 @@ const normalizeFamilyRole = (role) => {
   return upper
 }
 
+const normalizeInvite = (invite) => {
+  if (!invite) return invite
+
+  const shortCode =
+    invite.shortCode || invite.inviteCode || invite.invite_code || invite.short_code || null
+  const inviteUrl =
+    invite.inviteUrl || invite.inviteLink || invite.invite_link || invite.link || null
+  const longToken = invite.longToken || invite.long_token || invite.token || null
+
+  return {
+    ...invite,
+    shortCode: invite.shortCode || shortCode,
+    inviteCode: invite.inviteCode || shortCode,
+    inviteUrl,
+    longToken,
+  }
+}
+
+const normalizeInvitesResponse = (data) => {
+  if (!data) return data
+  if (Array.isArray(data)) {
+    return data.map((invite) => normalizeInvite(invite))
+  }
+
+  return {
+    ...data,
+    sent: Array.isArray(data.sent) ? data.sent.map(normalizeInvite) : data.sent,
+    received: Array.isArray(data.received) ? data.received.map(normalizeInvite) : data.received,
+  }
+}
+
 class FamilyApiClient extends ApiClient {
   constructor() {
     super({
@@ -124,18 +155,21 @@ class FamilyApiClient extends ApiClient {
 
   getInvites(groupId) {
     const query = groupId ? `?groupId=${groupId}` : ''
-    return this.get(`/invites${query}`)
+    return this.get(`/invites${query}`).then((data) => normalizeInvitesResponse(data))
   }
 
   inviteMember(payload) {
     const suggestedRole = payload.suggestedRole || payload.role
     const body = { ...payload, suggestedRole }
-    return this.post('/invites', body).then((data) => ({
-      ...data,
-      inviteCode: data?.shortCode,
-      inviteeEmail: body.email,
-      suggestedRole,
-    }))
+    return this.post('/invites', body).then((data) => {
+      const normalized = normalizeInvite(data)
+      return {
+        ...normalized,
+        inviteCode: normalized?.inviteCode || data?.shortCode,
+        inviteeEmail: normalized?.inviteeEmail || body.email,
+        suggestedRole: normalized?.suggestedRole || suggestedRole,
+      }
+    })
   }
 
   /**
