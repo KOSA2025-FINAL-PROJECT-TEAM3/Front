@@ -12,8 +12,8 @@ class VoiceApiClient extends ApiClient {
   /**
    * 음성 텍스트를 백엔드로 보내 의도를 파악하고 결과를 받습니다.
    * @param {string} text - 인식된 음성 텍스트
-   * @param {string|number} targetUserId - 작업을 수행할 대상 사용자 ID
-   * @returns {Promise<Object>} - { type, message, target, data }
+   * @param {string|number|null} targetUserId - 대리 조작할 대상 어르신의 ID (보호자 전용)
+   * @returns {Promise<Object>} - { type, message, target, actionCode, parameters }
    */
   processCommand(text, targetUserId = null) {
     return this.post('/process', { text, targetUserId }, undefined, {

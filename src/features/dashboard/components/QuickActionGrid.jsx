@@ -190,9 +190,9 @@ export const QuickActionGrid = memo(({
               <WarningAmberIcon />
             </Box>
             <Box sx={{ textAlign: 'center', flex: 1 }}>
-              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>식이 경고</Typography>
+              <Typography sx={{ fontWeight: 900, color: 'text.primary' }}>최근 식단</Typography>
               <Typography variant="caption" sx={{ color: 'text.disabled', fontWeight: 800 }}>
-                주의할 음식
+                식이 경고
               </Typography>
             </Box>
           </Stack>

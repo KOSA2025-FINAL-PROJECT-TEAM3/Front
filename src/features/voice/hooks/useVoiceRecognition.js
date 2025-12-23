@@ -32,6 +32,8 @@ export const useVoiceRecognition = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
+
+
   // 실제 명령 처리 로직
   const processCommand = useCallback(async (finalTranscript) => {
     if (!finalTranscript) return
@@ -39,16 +41,20 @@ export const useVoiceRecognition = () => {
     setFeedbackMessage('잠시만요, 찾아볼게요...')
     
     try {
-      // 1. 현재 보호자 대시보드인지 확인
+      // 1. 현재 보호자 대시보드인지 확인 및 타겟 데이터 추출
       const isCaregiverDashboard = location.pathname === ROUTE_PATHS.caregiverDashboard
-      
-      // 2. 보호자 대시보드일 때만 선택된 어르신 ID를 타겟으로 설정
       let targetUserId = null
+      let targetUserName = null
+
       if (isCaregiverDashboard && activeSeniorMemberId) {
         const selectedMember = members?.find(m => String(m.id) === String(activeSeniorMemberId))
-        targetUserId = selectedMember?.userId || null
+        if (selectedMember) {
+          targetUserId = selectedMember.userId
+          targetUserName = selectedMember.nickname || selectedMember.name
+        }
       }
 
+      // 2. API 호출 시 타겟 ID 전달
       const response = await voiceApiClient.processCommand(finalTranscript, targetUserId)
       
       if (response) {
@@ -69,9 +75,12 @@ export const useVoiceRecognition = () => {
               })
             }
 
+            // 보호자 대시보드 컨텍스트 유지 (이동 시 state 전달)
+            const navState = targetUserId ? { targetUserId, targetUserName } : {}
+
             // [Improvement] 3초 대기 (사용자가 메시지를 읽을 시간 확보)
             setTimeout(() => {
-              navigate(response.target)
+              navigate(response.target, { state: navState })
               reset()
             }, 3000)
             return
@@ -90,7 +99,7 @@ export const useVoiceRecognition = () => {
       setTimeout(reset, 1500)
     }
 
-  }, [navigate, reset, setFeedbackMessage, setPendingAction, activeSeniorMemberId, location.pathname, members])
+  }, [navigate, reset, setFeedbackMessage, setPendingAction, location.pathname, activeSeniorMemberId, members])
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition

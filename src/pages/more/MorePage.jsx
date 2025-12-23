@@ -124,7 +124,7 @@ export const MorePage = () => {
       description: '복약 이행률 · 통계',
       onClick: () => handleNavigate(ROUTE_PATHS.adherenceReport),
     },
-    isCaregiver && {
+    {
       id: 'weeklyStats',
       label: '주간 통계',
       icon: '📈',
@@ -222,7 +222,7 @@ export const MorePage = () => {
   const dietManagementItems = [
     {
       id: 'dietWarning',
-      label: '식이 경고',
+      label: '식단 히스토리',
       icon: '⚠️',
       description: '약-음식 상호작용 경고',
       onClick: () => handleNavigate(ROUTE_PATHS.dietWarning),

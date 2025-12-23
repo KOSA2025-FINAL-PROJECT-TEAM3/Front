@@ -1,10 +1,11 @@
 /**
- * 식단 경고 모달 컴포넌트
- * - 최근 24시간 내 WARNING/DANGER 레벨 음식만 표시
- * - 대시보드에서 모달로 호출
+ * 식단 경고/분석 모달 컴포넌트
+ * - 가장 최근 식단 기록의 상세 분석 결과(약물/질병 상호작용)를 표시
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ROUTE_PATHS } from '@config/routes.config'
 import {
     Dialog,
     DialogTitle,
@@ -19,11 +20,11 @@ import {
     Stack,
     Card,
     CardContent,
+    Divider,
     IconButton,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { dietApiClient } from '@/core/services/api/dietApiClient'
-import { DIET_WARNING_FILTER } from '@config/constants'
 import logger from '@core/utils/logger'
 
 const getLevelColor = (level) => {
@@ -69,19 +70,31 @@ const parseJsonSafe = (value, fallback = []) => {
 }
 
 export const FoodWarningModal = ({ open, onClose, userId, onRecordDiet }) => {
+    const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const [logs, setLogs] = useState([])
+    const [recentLog, setRecentLog] = useState(null)
 
     useEffect(() => {
         if (!open) return
 
-        const fetchLogs = async () => {
+        const fetchLatestLog = async () => {
             try {
                 setLoading(true)
                 setError(null)
+                // 단순히 가장 최근 로그 1개만 가져오거나 리스트 중 0번째 사용
                 const data = await dietApiClient.getDietLogs(userId ? { userId } : undefined)
-                setLogs(Array.isArray(data) ? data : [])
+
+                if (Array.isArray(data) && data.length > 0) {
+                    const latest = data[0]
+                    setRecentLog({
+                        ...latest,
+                        drugInteractions: parseJsonSafe(latest.drugInteractions),
+                        diseaseInteractions: parseJsonSafe(latest.diseaseInteractions),
+                    })
+                } else {
+                    setRecentLog(null)
+                }
             } catch (err) {
                 logger.error('Failed to fetch diet logs:', err)
                 setError('식단 기록을 불러오는데 실패했습니다.')
@@ -90,39 +103,14 @@ export const FoodWarningModal = ({ open, onClose, userId, onRecordDiet }) => {
             }
         }
 
-        fetchLogs()
+        fetchLatestLog()
     }, [open, userId])
 
-    // 최근 24시간 내 WARNING/DANGER 레벨만 필터링
-    const filteredLogs = useMemo(() => {
-        const now = Date.now()
-        const windowMs = DIET_WARNING_FILTER.HOURS_WINDOW * 60 * 60 * 1000
-
-        return logs.filter((log) => {
-            // 시간 필터
-            const logTime = new Date(log.createdAt || log.loggedAt || log.logTime).getTime()
-            if (isNaN(logTime)) return false
-            const isWithinWindow = now - logTime < windowMs
-
-            // 경고 레벨 필터
-            const level = log.overallLevel?.toUpperCase?.() || log.overallLevel
-            const hasWarning = DIET_WARNING_FILTER.WARNING_LEVELS.some(
-                (wl) => wl.toUpperCase() === level || wl === log.overallLevel
-            )
-
-            return isWithinWindow && hasWarning
-        }).map((log) => ({
-            ...log,
-            drugInteractions: parseJsonSafe(log.drugInteractions),
-            diseaseInteractions: parseJsonSafe(log.diseaseInteractions),
-        }))
-    }, [logs])
-
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h6" component="span" sx={{ fontWeight: 900 }}>
-                    🍽️ 식단 경고 (최근 {DIET_WARNING_FILTER.HOURS_WINDOW}시간)
+                    🍽️ 최근 식단 분석 결과
                 </Typography>
                 <IconButton onClick={onClose} size="small">
                     <CloseIcon />
@@ -136,76 +124,116 @@ export const FoodWarningModal = ({ open, onClose, userId, onRecordDiet }) => {
                     </Box>
                 ) : error ? (
                     <Alert severity="error">{error}</Alert>
-                ) : filteredLogs.length === 0 ? (
-                    <Alert severity="success">
-                        최근 {DIET_WARNING_FILTER.HOURS_WINDOW}시간 내 경고할 음식이 없습니다. 안심하세요! 🎉
-                    </Alert>
+                ) : !recentLog ? (
+                    <Box textAlign="center" py={4}>
+                        <Typography color="text.secondary" gutterBottom>
+                            아직 기록된 식단이 없습니다.
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            식단을 기록하고 AI 분석 결과를 확인해보세요!
+                        </Typography>
+                    </Box>
                 ) : (
-                    <Stack spacing={2}>
-                        {filteredLogs.map((log, idx) => (
-                            <Card key={log.id || idx} variant="outlined" sx={{ borderRadius: 2 }}>
-                                <CardContent>
-                                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                                        <Typography variant="h6" fontWeight="bold">
-                                            {log.foodName}
-                                        </Typography>
-                                        <Chip
-                                            label={getLevelLabel(log.overallLevel)}
-                                            color={getLevelColor(log.overallLevel)}
-                                            size="small"
-                                        />
-                                    </Box>
-
-                                    <Typography variant="body2" color="text.secondary" paragraph>
-                                        {log.summary}
+                    <Stack spacing={3}>
+                        {/* Main Summary Card */}
+                        <Card variant="outlined" sx={{ borderRadius: 2, borderColor: 'primary.light', borderWidth: 1 }}>
+                            <CardContent>
+                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                                    <Typography variant="h6" fontWeight="bold">
+                                        {recentLog.foodName}
                                     </Typography>
+                                    <Chip
+                                        label={getLevelLabel(recentLog.overallLevel)}
+                                        color={getLevelColor(recentLog.overallLevel)}
+                                        size="small"
+                                    />
+                                </Box>
+                                <Stack direction="row" spacing={1} mb={2}>
+                                    <Typography variant="caption" color="text.secondary">
+                                        {new Date(recentLog.createdAt || recentLog.loggedAt).toLocaleString('ko-KR')}
+                                    </Typography>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Typography variant="caption" color="text.secondary">
+                                        {recentLog.mealType}
+                                    </Typography>
+                                </Stack>
 
-                                    {/* 약물 상호작용 */}
-                                    {log.drugInteractions?.length > 0 && (
-                                        <Box mt={2}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>
-                                                💊 약물 상호작용 ({log.drugInteractions.length})
-                                            </Typography>
-                                            <Stack spacing={1}>
-                                                {log.drugInteractions.map((interaction, i) => (
-                                                    <Alert
-                                                        key={i}
-                                                        severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
-                                                        sx={{ py: 0.5 }}
-                                                    >
-                                                        <Typography variant="body2">
-                                                            <strong>{interaction.medicationName}</strong>: {interaction.description}
-                                                        </Typography>
-                                                    </Alert>
-                                                ))}
-                                            </Stack>
-                                        </Box>
-                                    )}
+                                <Typography variant="body2" color="text.primary" paragraph sx={{ whiteSpace: 'pre-wrap' }}>
+                                    {recentLog.summary}
+                                </Typography>
+                            </CardContent>
+                        </Card>
 
-                                    {/* 질병 상호작용 */}
-                                    {log.diseaseInteractions?.length > 0 && (
-                                        <Box mt={2}>
-                                            <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>
-                                                🏥 질병 관련 주의 ({log.diseaseInteractions.length})
-                                            </Typography>
-                                            <Stack spacing={1}>
-                                                {log.diseaseInteractions.map((interaction, i) => (
-                                                    <Alert
-                                                        key={i}
-                                                        severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
-                                                        sx={{ py: 0.5 }}
-                                                    >
-                                                        <Typography variant="body2">
-                                                            <strong>{interaction.diseaseName}</strong>: {interaction.description}
+                        {/* Interactions */}
+                        {(recentLog.drugInteractions?.length > 0 || recentLog.diseaseInteractions?.length > 0) ? (
+                            <Box>
+                                {/* Drug Interactions */}
+                                {recentLog.drugInteractions?.length > 0 && (
+                                    <Box mb={2}>
+                                        <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'bold' }}>
+                                            💊 약물 상호작용
+                                            <Chip label={recentLog.drugInteractions.length} size="small" color="error" variant="outlined" />
+                                        </Typography>
+                                        <Stack spacing={1}>
+                                            {recentLog.drugInteractions.map((interaction, idx) => (
+                                                <Alert
+                                                    key={idx}
+                                                    severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
+                                                    sx={{ borderRadius: 2 }}
+                                                >
+                                                    <Typography variant="subtitle2" fontWeight="bold">
+                                                        {interaction.medicationName} ({getLevelLabel(interaction.level)})
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                                        {interaction.description}
+                                                    </Typography>
+                                                    {interaction.recommendation && (
+                                                        <Typography variant="caption" display="block" sx={{ mt: 1, fontWeight: 'bold' }}>
+                                                            💡 {interaction.recommendation}
                                                         </Typography>
-                                                    </Alert>
-                                                ))}
-                                            </Stack>
-                                        </Box>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))}
+                                                    )}
+                                                </Alert>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                )}
+
+                                {/* Disease Interactions */}
+                                {recentLog.diseaseInteractions?.length > 0 && (
+                                    <Box>
+                                        <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'bold' }}>
+                                            🏥 질병 관련 주의사항
+                                            <Chip label={recentLog.diseaseInteractions.length} size="small" color="warning" variant="outlined" />
+                                        </Typography>
+                                        <Stack spacing={1}>
+                                            {recentLog.diseaseInteractions.map((interaction, idx) => (
+                                                <Alert
+                                                    key={idx}
+                                                    severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
+                                                    sx={{ borderRadius: 2 }}
+                                                >
+                                                    <Typography variant="subtitle2" fontWeight="bold">
+                                                        {interaction.diseaseName} ({getLevelLabel(interaction.level)})
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                                        {interaction.description}
+                                                    </Typography>
+                                                    {interaction.recommendation && (
+                                                        <Typography variant="caption" display="block" sx={{ mt: 1, fontWeight: 'bold' }}>
+                                                            💡 {interaction.recommendation}
+                                                        </Typography>
+                                                    )}
+                                                </Alert>
+                                            ))}
+                                        </Stack>
+                                    </Box>
+                                )}
+                            </Box>
+                        ) : (
+                            <Alert severity="success" sx={{ borderRadius: 2 }}>
+                                발견된 위험 상호작용이 없습니다. 안심하고 드셔도 됩니다!
+                            </Alert>
+                        )}
                     </Stack>
                 )}
             </DialogContent>
@@ -213,12 +241,21 @@ export const FoodWarningModal = ({ open, onClose, userId, onRecordDiet }) => {
             <DialogActions>
                 <Button
                     onClick={() => {
+                        navigate(ROUTE_PATHS.dietWarning)
+                        onClose()
+                    }}
+                    sx={{ fontWeight: 800, color: 'primary.main' }}
+                >
+                    식단 기록 보기
+                </Button>
+                <Button
+                    onClick={() => {
                         onRecordDiet?.()
                         onClose()
                     }}
-                    sx={{ fontWeight: 800, color: 'text.secondary' }}
+                    sx={{ fontWeight: 800, color: 'primary.main' }}
                 >
-                    식단 기록하러 가기
+                    새로운 식단 기록하기
                 </Button>
                 <Button onClick={onClose} sx={{ fontWeight: 800 }}>
                     닫기
