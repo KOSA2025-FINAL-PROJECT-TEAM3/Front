@@ -7,9 +7,12 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useVoiceStore } from '../stores/voiceStore'
 import { useVoiceActionStore } from '../stores/voiceActionStore'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from '@shared/components/toast/toastStore'
 import { voiceApiClient } from '@core/services/api/voiceApiClient'
+import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
+import { useFamilyStore } from '@features/family/store/familyStore'
+import { ROUTE_PATHS } from '@config/routes.config'
 
 export const useVoiceRecognition = () => {
   const { 
@@ -21,10 +24,13 @@ export const useVoiceRecognition = () => {
   } = useVoiceStore()
   
   const { setPendingAction } = useVoiceActionStore()
+  const activeSeniorMemberId = useCareTargetStore((state) => state.activeSeniorMemberId)
+  const { members } = useFamilyStore((state) => ({ members: state.members }))
   
   const recognitionRef = useRef(null)
   const silenceTimer = useRef(null) // 침묵 감지용 타이머
   const navigate = useNavigate()
+  const location = useLocation()
 
   // 실제 명령 처리 로직
   const processCommand = useCallback(async (finalTranscript) => {
@@ -33,7 +39,17 @@ export const useVoiceRecognition = () => {
     setFeedbackMessage('잠시만요, 찾아볼게요...')
     
     try {
-      const response = await voiceApiClient.processCommand(finalTranscript)
+      // 1. 현재 보호자 대시보드인지 확인
+      const isCaregiverDashboard = location.pathname === ROUTE_PATHS.caregiverDashboard
+      
+      // 2. 보호자 대시보드일 때만 선택된 어르신 ID를 타겟으로 설정
+      let targetUserId = null
+      if (isCaregiverDashboard && activeSeniorMemberId) {
+        const selectedMember = members?.find(m => String(m.id) === String(activeSeniorMemberId))
+        targetUserId = selectedMember?.userId || null
+      }
+
+      const response = await voiceApiClient.processCommand(finalTranscript, targetUserId)
       
       if (response) {
         setFeedbackMessage(response.message)
@@ -74,7 +90,7 @@ export const useVoiceRecognition = () => {
       setTimeout(reset, 1500)
     }
 
-  }, [navigate, reset, setFeedbackMessage, setPendingAction])
+  }, [navigate, reset, setFeedbackMessage, setPendingAction, activeSeniorMemberId, location.pathname, members])
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
