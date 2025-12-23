@@ -16,6 +16,8 @@ import { toast } from '@shared/components/toast/toastStore'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { fromOCRResponse } from '@/types/ocr.types'
+import { STORAGE_KEYS } from '@config/constants'
+import { isJwtExpiredOrNearExpiry, refreshAuthToken } from '@core/interceptors/authInterceptor'
 
 const PUBLIC_PATHS = new Set([
   ROUTE_PATHS.login,
@@ -216,14 +218,35 @@ export const useNotificationStream = (onNotification) => {
       // 토큰 만료 등의 에러는 auth interceptor가 처리
     }
 
-    try {
-      notificationApiClient.subscribe(token, handleMessage, handleError)
-    } catch (error) {
-      logger.error('Failed to subscribe to notifications:', error)
+    let cancelled = false
+
+    const startSubscription = async () => {
+      try {
+        let nextToken = token
+        if (typeof window !== 'undefined') {
+          nextToken = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || token
+        }
+
+        if (nextToken && isJwtExpiredOrNearExpiry(nextToken)) {
+          nextToken = await refreshAuthToken()
+        }
+
+        if (cancelled || !nextToken) {
+          logger.warn('Notification SSE subscribe halted: missing or expired token')
+          return
+        }
+
+        notificationApiClient.subscribe(nextToken, handleMessage, handleError)
+      } catch (error) {
+        logger.error('Failed to subscribe to notifications:', error)
+      }
     }
+
+    startSubscription()
 
     // Cleanup: 언마운트 시 연결 해제
     return () => {
+      cancelled = true
       notificationApiClient.disconnect()
     }
   }, [isAuthenticated, token, onNotification, addRealtimeNotification, setDietJobResult, setOcrJobResult, location.pathname, navigate, setDietAnalyzing, setOcrScanning, userId])

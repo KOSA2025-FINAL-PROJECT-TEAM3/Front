@@ -1,7 +1,8 @@
 import logger from "@core/utils/logger"
 import ApiClient from './ApiClient'
 import envConfig from '@config/environment.config'
-import { NOTIFICATION_PAGINATION } from '@config/constants'
+import { NOTIFICATION_PAGINATION, STORAGE_KEYS } from '@config/constants'
+import { isJwtExpiredOrNearExpiry, refreshAuthToken } from '@core/interceptors/authInterceptor'
 
 class NotificationApiClient extends ApiClient {
     constructor() {
@@ -227,10 +228,29 @@ class NotificationApiClient extends ApiClient {
         const delay = Math.min(maxDelay, baseDelay * Math.pow(2, this.reconnectAttempts))
         this.reconnectAttempts += 1
 
-        this.reconnectTimer = setTimeout(() => {
+        this.reconnectTimer = setTimeout(async () => {
             this.reconnectTimer = null
             try {
-                this.subscribe(token, onMessage, onError)
+                let nextToken = token
+                if (typeof window !== 'undefined') {
+                    const storedToken = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+                    nextToken = storedToken || token
+                }
+
+                if (nextToken && isJwtExpiredOrNearExpiry(nextToken)) {
+                    nextToken = await refreshAuthToken()
+                }
+
+                if (!nextToken) {
+                    logger.warn('SSE reconnect halted: missing or expired token')
+                    this.disconnect()
+                    if (onError) {
+                        onError(new Error('SSE reconnect halted: missing or expired token'))
+                    }
+                    return
+                }
+
+                this.subscribe(nextToken, onMessage, onError)
             } catch (e) {
                 logger.error('SSE reconnect failed:', e)
                 this.scheduleReconnect()
