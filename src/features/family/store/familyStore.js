@@ -24,6 +24,48 @@ const normalizeInvites = (invites = {}) => ({
   received: Array.isArray(invites.received) ? invites.received : [],
 })
 
+const getInviteKey = (invite) => {
+  if (!invite) return null
+  const raw = invite.id ?? invite.shortCode ?? invite.inviteCode
+  return raw != null ? String(raw) : null
+}
+
+const mergeInviteUrls = (targetInvites, sourceInvites) => {
+  const cache = new Map()
+
+  const addToCache = (invite) => {
+    const key = getInviteKey(invite)
+    if (!key) return
+    if (invite?.inviteUrl || invite?.longToken) {
+      cache.set(key, {
+        inviteUrl: invite.inviteUrl,
+        longToken: invite.longToken,
+      })
+    }
+  }
+
+  ;(sourceInvites?.sent || []).forEach(addToCache)
+  ;(sourceInvites?.received || []).forEach(addToCache)
+
+  if (cache.size === 0) return targetInvites
+
+  const mergeInvite = (invite) => {
+    const key = getInviteKey(invite)
+    const cached = key ? cache.get(key) : null
+    if (!cached) return invite
+    return {
+      ...invite,
+      inviteUrl: invite.inviteUrl || cached.inviteUrl,
+      longToken: invite.longToken || cached.longToken,
+    }
+  }
+
+  return {
+    sent: (targetInvites?.sent || []).map(mergeInvite),
+    received: (targetInvites?.received || []).map(mergeInvite),
+  }
+}
+
 /**
  * Normalize a member object to ensure userId is available at the top level.
  * Backend may return userId nested as user.id - this flattens it for consistent access.
@@ -135,12 +177,16 @@ export const useFamilyStore = create((set, get) => ({
       const isValidGroupId = groups.some(g => g.id === currentGroupId)
       const nextSelectedGroupId = isValidGroupId ? currentGroupId : (groups[0]?.id || null)
 
+      const normalizedInvites = normalizeInvites(inviteList)
+      const mergedInvites = mergeInviteUrls(normalizedInvites, get().invites)
+
+
       const nextState = {
         // Normalize groups and members to ensure userId is available at top level
         familyGroups: (summary?.groups || []).map(normalizeGroup),
         selectedGroupId: nextSelectedGroupId,
         members: normalizeMembers(summary?.members || []),
-        invites: normalizeInvites(inviteList),
+        invites: mergedInvites,
         error: summaryError ? summaryError : null,
         initialized: true,
       }
@@ -192,8 +238,13 @@ export const useFamilyStore = create((set, get) => ({
       // 초대 생성 후 현재 그룹의 초대 목록 다시 로드
       try {
         const inviteList = await familyApiClient.getInvites(groupId)
+        const normalizedInvites = normalizeInvites(inviteList)
+        const mergedInvites = mergeInviteUrls(normalizedInvites, get().invites)
+        const enrichedInvites = res
+          ? mergeInviteUrls(mergedInvites, { sent: [res], received: [] })
+          : mergedInvites
         set({
-          invites: normalizeInvites(inviteList),
+          invites: enrichedInvites,
           error: null,
         })
       } catch (e) {
@@ -250,8 +301,10 @@ export const useFamilyStore = create((set, get) => ({
     withLoading(set, async () => {
       const groupId = get().selectedGroupId
       const invites = await familyApiClient.getInvites(groupId)
+      const normalizedInvites = normalizeInvites(invites)
+      const mergedInvites = mergeInviteUrls(normalizedInvites, get().invites)
       set((prev) => ({
-        invites: normalizeInvites(invites),
+        invites: mergedInvites,
         error: null,
         initialized: prev.initialized,
       }))
