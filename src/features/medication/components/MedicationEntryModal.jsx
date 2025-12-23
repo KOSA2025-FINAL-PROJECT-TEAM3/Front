@@ -5,6 +5,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import MedicationForm from './MedicationForm'
 import { prescriptionApiClient } from '@core/services/api/prescriptionApiClient'
 import { toast } from '@shared/components/toast/toastStore'
+import { formatDate } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
 
 export const MedicationEntryModal = ({ open, onClose, targetUserId, targetUserName }) => {
@@ -64,19 +65,19 @@ export const MedicationEntryModal = ({ open, onClose, targetUserId, targetUserNa
                 const start = new Date(formData.startDate)
                 const end = new Date(start)
                 end.setDate(start.getDate() + 30) // Default 30 days
-                endDate = end.toISOString().split('T')[0]
+                endDate = formatDate(end)
             } else if (!endDate) {
                 // Fallback if both missing
                 const today = new Date()
                 const end = new Date(today)
                 end.setDate(today.getDate() + 30)
-                endDate = end.toISOString().split('T')[0]
+                endDate = formatDate(end)
             }
 
             const prescriptionPayload = {
                 pharmacyName: '직접 등록',
                 hospitalName: '직접 등록',
-                startDate: formData.startDate || new Date().toISOString().split('T')[0],
+                startDate: formData.startDate || formatDate(new Date()),
                 endDate: endDate,
                 intakeTimes: uniqueIntakeTimes,
                 medications: [medicationPayload],
@@ -134,7 +135,7 @@ export const MedicationEntryModal = ({ open, onClose, targetUserId, targetUserNa
                     submitLabel="등록하기"
                     // We can provide initial values for simplified "Quick Add" experience if needed
                     initialValues={{
-                        startDate: new Date().toISOString().split('T')[0],
+                        startDate: formatDate(new Date()),
                         // Default 7 days?
                     }}
                 />

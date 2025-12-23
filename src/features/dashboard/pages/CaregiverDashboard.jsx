@@ -29,7 +29,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import { Menu, MenuItem } from '@mui/material'
 import logger from '@core/utils/logger'
 import { endOfWeek, format, isAfter, startOfWeek, subDays, addDays } from 'date-fns'
-import { parseServerLocalDateTime } from '@core/utils/formatting'
+import { parseServerLocalDateTime, formatDate } from '@core/utils/formatting'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
 import { useAuth } from '@features/auth/hooks/useAuth'
@@ -207,7 +207,7 @@ export function CaregiverDashboard() {
       }
       setTodayRateLoading(true)
       try {
-        const today = new Date().toISOString().split('T')[0]
+        const today = formatDate(new Date())
 
         const response = await familyApiClient.getMedicationLogs(activeSenior?.userId, { date: today })
         const logs = response?.logs || response || []
@@ -327,7 +327,7 @@ export function CaregiverDashboard() {
         const scheduledDate = log?.scheduledTime ? parseServerLocalDateTime(log.scheduledTime) : null
         if (!scheduledDate) return
 
-        const dateKey = format(scheduledDate, 'yyyy-MM-dd')
+        const dateKey = formatDate(scheduledDate)
         const time = format(scheduledDate, 'HH:mm')
         const label = getTimeSectionLabel(time)
         const medicationName = log?.medicationName || log?.name || '알 수 없는 약'
@@ -339,12 +339,13 @@ export function CaregiverDashboard() {
 
         const entry = byDate.get(dateKey)
         if (!entry.sections.has(label)) {
-          entry.sections.set(label, { label, time, names: [], completed: true })
+          entry.sections.set(label, { label, time, medications: [], completed: true })
         }
 
         const section = entry.sections.get(label)
-        section.names.push(medicationName)
+        section.medications.push({ name: medicationName, completed: isCompleted })
         section.completed = section.completed && Boolean(isCompleted)
+
         if (time && section.time && time < section.time) {
           section.time = time
         }
@@ -353,16 +354,22 @@ export function CaregiverDashboard() {
       const groups = Array.from(byDate.values())
         .sort((a, b) => b.dateKey.localeCompare(a.dateKey))
         .map((group) => {
-          const items = Array.from(group.sections.values()).sort((a, b) => String(a.time).localeCompare(String(b.time)))
+          const items = Array.from(group.sections.values())
+            .sort((a, b) => String(a.time).localeCompare(String(b.time)))
+
           return {
             key: group.dateKey,
             date: group.date,
             dateLabel: group.date?.toLocaleDateString?.('ko-KR', { month: 'long', day: 'numeric' }) || group.dateKey,
             dayLabel: group.date?.toLocaleDateString?.('ko-KR', { weekday: 'long' }) || '',
-            items: items.map((item) => ({
-              ...item,
-              names: Array.from(new Set(item.names)).join(', '),
-            })),
+            items: items.map((item) => {
+              // 중복 약 이름 제거는 필요할 수 있으나 상태가 다를 수 있으므로 유지하거나 
+              // 동일 약이 여러 번 있을 경우에 대한 처리가 필요하면 여기서 수행
+              return {
+                ...item,
+                pillDetails: item.medications // 개별 약 상세 정보 전달
+              }
+            }),
           }
         })
 
@@ -388,7 +395,7 @@ export function CaregiverDashboard() {
       }
       setDietLoading(true)
       try {
-        const today = format(new Date(), 'yyyy-MM-dd')
+        const today = formatDate(new Date())
         const response = await dietApiClient.getDietLogs({ date: today, userId: activeSenior?.userId })
         const logs = Array.isArray(response) ? response : response?.logs || []
         setTodayDietCount(logs.length)

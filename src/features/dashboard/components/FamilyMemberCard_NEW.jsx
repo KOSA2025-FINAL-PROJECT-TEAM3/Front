@@ -22,6 +22,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { RoundedCard } from '@shared/components/mui/RoundedCard'
 import { StatusBadge } from '@shared/components/mui/StatusBadge'
 import { familyApiClient } from '@core/services/api/familyApiClient'
+import { formatDate } from '@core/utils/formatting'
 import logger from '@core/utils/logger'
 import PropTypes from 'prop-types'
 
@@ -76,7 +77,7 @@ export const FamilyMemberCard = ({ member, onDetail }) => {
 
     setLoading(true)
     try {
-      const today = new Date().toISOString().split('T')[0]
+      const today = formatDate(new Date())
       const response = await familyApiClient.getMedicationLogs(member.userId, { date: today })
       const logs = response?.logs || response || []
       setTodayLogs(logs)
