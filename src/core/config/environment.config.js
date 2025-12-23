@@ -34,6 +34,11 @@ export const getEnvironmentConfig = () => {
     return window.location.origin
   }
 
+  const isLocalhostUrl = (value) => {
+    if (!value) return false
+    return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:\/|$)/i.test(value)
+  }
+
   // API Configuration - Priority: env var > production detection > development default
   const getApiBaseURL = () => {
     // 1. Explicit environment variable (highest priority)
@@ -95,23 +100,27 @@ export const getEnvironmentConfig = () => {
 
   // Frontend URL Configuration
   const getFrontendURL = () => {
+    const frontendEnv = import.meta.env.VITE_FRONTEND_URL
+
     // 1. Explicit environment variable
-    if (import.meta.env.VITE_FRONTEND_URL) {
-      return import.meta.env.VITE_FRONTEND_URL
+    if (frontendEnv) {
+      if (!isProduction || !isLocalhostUrl(frontendEnv)) {
+        return frontendEnv
+      }
     }
 
-    // 2. Development default
-    if (isDevelopment) {
-      return 'http://localhost:5173'
-    }
-
-    // 3. Production auto-detection
+    // 2. Production auto-detection
     if (isProduction && typeof window !== 'undefined') {
       return window.location.origin
     }
 
+    // 3. Development default
+    if (isDevelopment) {
+      return 'http://localhost:5173'
+    }
+
     // Fallback
-    return 'http://localhost:5173'
+    return frontendEnv || 'http://localhost:5173'
   }
 
   // Service-specific URLs (for microservices architecture)
