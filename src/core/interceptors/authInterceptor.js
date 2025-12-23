@@ -37,7 +37,7 @@ const decodeJwtPayload = (token) => {
   }
 }
 
-const isJwtExpiredOrNearExpiry = (token, skewSeconds = EXPIRY_SKEW_SECONDS) => {
+export const isJwtExpiredOrNearExpiry = (token, skewSeconds = EXPIRY_SKEW_SECONDS) => {
   const payload = decodeJwtPayload(token)
   const exp = payload?.exp
   if (!exp) return false
@@ -66,7 +66,7 @@ const logoutFallback = () => {
   window.location.href = '/login'
 }
 
-const performRefresh = async () => {
+export const refreshAuthToken = async () => {
   if (refreshPromise) return refreshPromise
 
   const refreshToken = window.localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
@@ -125,7 +125,7 @@ export const attachAuthInterceptor = (axiosInstance) => {
 
       // JWT 만료(또는 임박) 시, 요청 전에 refresh 시도
       if (token && isJwtExpiredOrNearExpiry(token)) {
-        const newToken = await performRefresh()
+        const newToken = await refreshAuthToken()
         token = newToken || null
       }
 
@@ -163,7 +163,7 @@ export const attachAuthInterceptor = (axiosInstance) => {
       ) {
         originalRequest._retry = true
 
-        const newToken = await performRefresh()
+        const newToken = await refreshAuthToken()
         if (newToken) {
           originalRequest.headers = originalRequest.headers || {}
           originalRequest.headers.Authorization = `Bearer ${newToken}`
