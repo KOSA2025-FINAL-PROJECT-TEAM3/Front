@@ -195,7 +195,7 @@ export const FamilyMemberCard = memo(({
 
       <Stack
         direction="row"
-        spacing={1}
+        spacing={{ xs: 0.5, md: 1 }}
         alignItems="center"
         sx={{ flexShrink: 0, position: 'relative', zIndex: 1 }}
       >
@@ -206,25 +206,35 @@ export const FamilyMemberCard = memo(({
             e.stopPropagation()
             onDetail?.(member.id)
           }}
-          sx={{ fontWeight: 900, minWidth: 60 }}
+          sx={{
+            fontWeight: 900,
+            minWidth: { xs: 'auto', md: 60 },
+            fontSize: { xs: 11, md: 14 },
+            px: { xs: 1, md: 2 },
+            py: { xs: 0.5, md: 0.75 }
+          }}
         >
           상세
         </Button>
 
         {canOpenSettings ? (
-          <Button
+          <IconButton
             size="small"
-            variant="outlined"
             onClick={(e) => {
               e.stopPropagation()
               onSettings?.(member.userId)
             }}
             title="알림 설정"
             aria-label="알림 설정"
-            sx={{ fontWeight: 900, minWidth: 0, px: 1 }}
+            sx={{
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              p: { xs: 0.5, md: 0.75 }
+            }}
           >
-            <SettingsIcon fontSize="small" />
-          </Button>
+            <SettingsIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
+          </IconButton>
         ) : null}
 
         {showRemove ? (
@@ -238,7 +248,13 @@ export const FamilyMemberCard = memo(({
             }}
             disabled={isRemoving}
             aria-busy={isRemoving}
-            sx={{ fontWeight: 900, minWidth: 60 }}
+            sx={{
+              fontWeight: 900,
+              minWidth: { xs: 'auto', md: 60 },
+              fontSize: { xs: 11, md: 14 },
+              px: { xs: 1, md: 2 },
+              py: { xs: 0.5, md: 0.75 }
+            }}
           >
             {isRemoving ? `${removeLabel} 중...` : removeLabel}
           </Button>
