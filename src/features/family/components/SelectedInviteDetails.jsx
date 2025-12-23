@@ -32,13 +32,17 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
 
   const inviteLink = useMemo(() => {
     if (!invite) return ''
+
+    // 1. 백엔드에서 제공한 URL을 최우선 사용 (서버에서 올바른 도메인으로 생성됨)
+    if (invite.inviteUrl) {
+      return invite.inviteUrl
+    }
+
+    // 2. 백엔드 URL이 없는 경우에만 프론트엔드에서 생성
     const origin = envConfig.FRONTEND_URL
 
     if (invite.longToken) {
       return `${origin}${ROUTE_PATHS.inviteLanding}?token=${invite.longToken}`
-    }
-    if (invite.inviteUrl) {
-      return invite.inviteUrl
     }
     if (invite.shortCode || invite.inviteCode) {
       const code = invite.shortCode || invite.inviteCode
