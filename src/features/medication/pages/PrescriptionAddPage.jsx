@@ -12,10 +12,12 @@ import { usePrescriptionStore } from '../store/prescriptionStore';
 import { toast } from '@shared/components/toast/toastStore';
 import { ROUTE_PATHS } from '@config/routes.config';
 import logger from '@core/utils/logger';
+import { useVoiceActionStore } from '@/features/voice/stores/voiceActionStore';
 
 export const PrescriptionAddPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { consumeAction } = useVoiceActionStore();
     const {
         createPrescription,
         updatePrescription,
@@ -95,8 +97,28 @@ export const PrescriptionAddPage = () => {
         }
     }, [isEditMode, editPrescriptionId, fetchPrescription, navigate]);
 
-    // OCR 결과 또는 약 검색 결과 자동 입력
+    // OCR 결과 또는 약 검색 결과 자동 입력 & Voice Action Consumption
     useEffect(() => {
+        // 1. Voice Action Check
+        const action = consumeAction('AUTO_FILL_REGISTER');
+        if (action && action.params?.medicationName) {
+            const newMed = {
+                name: action.params.medicationName,
+                category: '', // API doesn't usually give this unless specific
+                dosageAmount: 1,
+                intakeTimeIndices: null,
+                daysOfWeek: 'MON,TUE,WED,THU,FRI,SAT,SUN',
+                notes: '',
+                totalIntakes: 30
+            };
+
+            setPrescriptionData(prev => ({
+                ...prev,
+                medications: [...prev.medications, newMed]
+            }));
+            toast.info(`'${action.params.medicationName}' 정보를 자동으로 입력했습니다.`);
+        }
+
         if (location.state?.ocrData) {
             const ocrData = location.state.ocrData;
             logger.debug('🔄 OCR 데이터 로드 시작:', ocrData);
@@ -149,7 +171,7 @@ export const PrescriptionAddPage = () => {
 
             toast.info(`${drug.itemName}이(가) 추가되었습니다. 저장을 눌러야 등록이 완료됩니다.`);
         }
-    }, [location.state]);
+    }, [location.state, consumeAction]);
 
     const handleAddTime = () => {
         if (!newTime) return;
