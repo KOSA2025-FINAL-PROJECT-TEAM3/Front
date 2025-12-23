@@ -5,6 +5,8 @@ import { notificationApiClient } from '@core/services/api/notificationApiClient'
 import { useAuthStore } from '@features/auth/store/authStore';
 import { useEffect } from 'react';
 import logger from '@core/utils/logger';
+import { STORAGE_KEYS } from '@config/constants';
+import { isJwtExpiredOrNearExpiry, refreshAuthToken } from '@core/interceptors/authInterceptor';
 
 /**
  * 안 읽은 채팅 메시지 개수를 조회하고 SSE 이벤트를 통해 갱신하는 Hook
@@ -84,9 +86,34 @@ export const useUnreadBadge = (targetGroupId = null) => {
       logger.error('SSE connection error in useUnreadBadge:', error);
     };
 
-    notificationApiClient.subscribe(token, handleSseMessage, handleError);
+    let cancelled = false;
+
+    const startSubscription = async () => {
+      try {
+        let nextToken = token;
+        if (typeof window !== 'undefined') {
+          nextToken = window.localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || token;
+        }
+
+        if (nextToken && isJwtExpiredOrNearExpiry(nextToken)) {
+          nextToken = await refreshAuthToken();
+        }
+
+        if (cancelled || !nextToken) {
+          logger.warn('SSE chat subscription halted: missing or expired token');
+          return;
+        }
+
+        notificationApiClient.subscribe(nextToken, handleSseMessage, handleError);
+      } catch (error) {
+        logger.error('SSE chat subscription failed:', error);
+      }
+    };
+
+    startSubscription();
 
     return () => {
+      cancelled = true;
       notificationApiClient.disconnect();
     };
   }, [token, currentUserId, queryClient, targetGroupId]);
