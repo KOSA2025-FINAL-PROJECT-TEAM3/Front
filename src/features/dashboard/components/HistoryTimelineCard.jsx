@@ -121,12 +121,38 @@ export const HistoryTimelineCard = memo(({
                             </Typography>
                             <Typography sx={{ fontSize: 12, color: 'text.disabled' }}>{item.time}</Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-                            {item.names}
+                          <Typography component="div" variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+                            {Array.isArray(item.pillDetails) ? (
+                              <Stack spacing={0.5}>
+                                {item.pillDetails.map((pill, pIdx) => (
+                                  <Box key={pIdx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Typography
+                                      component="span"
+                                      variant="body2"
+                                      sx={{
+                                        fontWeight: 700,
+                                        color: pill.completed ? 'text.primary' : 'text.disabled'
+                                      }}
+                                    >
+                                      {pill.name}
+                                    </Typography>
+                                    {pill.completed ? (
+                                      <CheckIcon sx={{ fontSize: 14, color: '#34D399' }} />
+                                    ) : (
+                                      <Typography component="span" sx={{ fontSize: 10, color: 'text.disabled', fontWeight: 900 }}>
+                                        (대기)
+                                      </Typography>
+                                    )}
+                                  </Box>
+                                ))}
+                              </Stack>
+                            ) : (
+                              item.names
+                            )}
                           </Typography>
                         </Box>
 
-                        {item.completed ? (
+                        {!Array.isArray(item.pillDetails) && item.completed ? (
                           <Box sx={{ color: '#34D399', pt: 0.5 }}>
                             <CheckIcon fontSize="small" />
                           </Box>

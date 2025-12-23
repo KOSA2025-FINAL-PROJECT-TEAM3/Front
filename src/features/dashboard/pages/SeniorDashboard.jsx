@@ -26,6 +26,7 @@ import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore
 import { useMedicationLogStore } from '@features/medication/store/medicationLogStore'
 import { useAppointmentStore } from '@features/appointment/store/appointmentStore'
 import { FoodWarningModal } from '@features/diet/components/FoodWarningModal'
+import { AppConfirmDialog } from '@shared/components/mui/AppConfirmDialog'
 
 import SeniorDashboardSkeleton from '../components/SeniorDashboardSkeleton'
 
@@ -50,6 +51,7 @@ export const SeniorDashboard = () => {
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
   const [loading, setLoading] = useState(true)
   const [dietWarningOpen, setDietWarningOpen] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, items: [], loading: false })
 
   // Appointment Store
   const { appointments: appointmentList, fetchAppointments } = useAppointmentStore(
@@ -364,19 +366,27 @@ export const SeniorDashboard = () => {
   }
 
   // 시간대별 일괄 복약 처리
-  const handleToggleTimeSection = async (section, items) => {
+  const handleToggleTimeSection = (section, items) => {
     // 이미 완료된 항목은 제외, 스케줄 ID가 있는 항목만 처리
     const pendingItems = items.filter((item) => item.status === 'pending' && getLogScheduleId(item.log))
 
     if (pendingItems.length === 0) return
 
-    if (!window.confirm(`${pendingItems.length}개의 약을 복용 완료 처리하시겠습니까?`)) {
-      return
-    }
+    setConfirmDialog({
+      open: true,
+      items: pendingItems,
+      loading: false,
+    })
+  }
+
+  // 다이얼로그 확인 핸들러
+  const handleConfirmBatch = async () => {
+    const { items } = confirmDialog
+    setConfirmDialog((prev) => ({ ...prev, loading: true }))
 
     try {
       await Promise.all(
-        pendingItems.map((item) => {
+        items.map((item) => {
           const scheduleId = getLogScheduleId(item.log)
           return medicationLogApiClient.completeMedication(scheduleId)
         })
@@ -384,9 +394,11 @@ export const SeniorDashboard = () => {
       toast.success('복용 처리가 완료되었습니다.')
       await fetchLogsByDate(todayStr, true)
       await loadWeeklyStats()
+      setConfirmDialog({ open: false, items: [], loading: false })
     } catch (error) {
       logger.error('Failed to complete medications:', error)
       toast.error('일괄 처리 중 오류가 발생했습니다.')
+      setConfirmDialog((prev) => ({ ...prev, loading: false }))
     }
   }
 
@@ -478,6 +490,15 @@ export const SeniorDashboard = () => {
         onClose={() => setDietWarningOpen(false)}
         userId={user?.id}
         onRecordDiet={() => navigate(ROUTE_PATHS.dietLog)}
+      />
+      <AppConfirmDialog
+        open={confirmDialog.open}
+        title="복약 완료 확인"
+        description={`${confirmDialog.items.length}개의 약을 복용 완료 처리하시겠습니까?`}
+        onConfirm={handleConfirmBatch}
+        onCancel={() => setConfirmDialog({ open: false, items: [], loading: false })}
+        confirmLabel="복용 완료"
+        loading={confirmDialog.loading}
       />
     </MainLayout>
   )

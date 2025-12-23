@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
     Dialog,
     DialogContent,
@@ -28,8 +29,11 @@ import {
 } from '../components'
 import { ocrApiClient } from '@core/services/api/ocrApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { fromOCRResponse } from '@/types/ocr.types'
+import { ROUTE_PATHS } from '@config/routes.config'
 
 export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) => {
+    const navigate = useNavigate()
     const user = useAuthStore((state) => state.user)
     const userId = user?.id || user?.userId
 
@@ -43,7 +47,6 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         setStep,
         handleFileSelect,
         handleCameraCapture,
-        startAnalysis,
         startAnalysisAsync,
         updateFormState,
         updateMedication,
@@ -55,7 +58,7 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         handleRegister,
         reset,
         loadFromResult
-    } = useOcrRegistration({ targetUserId })
+    } = useOcrRegistration({ targetUserId, targetUserName })
 
     const [cachedJobId, setCachedJobId] = useState(null)
 
@@ -83,25 +86,48 @@ export const OcrEntryModal = ({ open, onClose, targetUserId, targetUserName }) =
         }
     }, [open, setStep, userId])
 
-    const handleLoadCachedResult = async () => {
-        if (!cachedJobId) return
-        try {
-            toast.info('서버에서 이전 분석 결과를 불러오는 중입니다...')
-            const response = await ocrApiClient.getScanJob(cachedJobId)
-            const data = (response && response.data) ? response.data : response
-
-            if (data && data.status === 'DONE' && data.result?.medications) {
-                // 저장된 결과로 폼 상태 업데이트
-                loadFromResult(data.result)
-                toast.success('이전 분석 결과를 불러왔습니다.')
-            } else {
-                toast.warning('분석된 결과 정보를 찾을 수 없습니다.')
+        const handleLoadCachedResult = async () => {
+            if (!cachedJobId) return
+            try {
+                toast.info('서버에서 이전 분석 결과를 불러오는 중입니다...')
+                const response = await ocrApiClient.getScanJob(cachedJobId)
+                const data = (response && response.data) ? response.data : response
+    
+                if (data && data.status === 'DONE' && data.result?.medications) {
+                    const result = data.result
+                    const medications = fromOCRResponse(result.medications)
+    
+                    // 기간 계산
+                    const durationDays = medications[0]?.durationDays || 3
+                    const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+                    const endDate = new Date(startDate)
+                    endDate.setDate(endDate.getDate() + durationDays - 1)
+                    const endDateStr = endDate.toISOString().split('T')[0]
+    
+                    // 모달 닫기 및 이동
+                    onClose?.()
+                    navigate(ROUTE_PATHS.prescriptionAdd, {
+                        state: {
+                            ocrData: {
+                                medications,
+                                hospitalName: result.hospitalName || result.clinicName || '',
+                                pharmacyName: result.pharmacyName || '',
+                                startDate,
+                                endDate: endDateStr
+                            },
+                            targetUserId: targetUserId || undefined,
+                            targetUserName: targetUserName || undefined
+                        }
+                    })
+                    toast.success('이전 분석 결과를 불러왔습니다.')
+                } else {
+                    toast.warning('분석된 결과 정보를 찾을 수 없습니다.')
+                }
+            } catch (e) {
+                console.error('OCR 복구 실패:', e)
+                toast.error('불러오기 실패')
             }
-        } catch {
-            toast.error('불러오기 실패')
         }
-    }
-
     // Override handleRegister to close modal on success
     const onRegisterClick = async () => {
         const success = await handleRegister()

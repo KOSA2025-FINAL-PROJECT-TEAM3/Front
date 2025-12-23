@@ -183,17 +183,39 @@ export const NotificationPage = () => {
       markAsRead(notification.id)
     }
 
-    // OCR 완료 알림인 경우 약 등록 페이지로 이동
-    if (notification.type === 'ocr.job.done' && notification.result?.medications) {
-      const medications = fromOCRResponse(notification.result.medications)
+    // OCR 결과 알림 (히스토리: ocr_result, 실시간: ocr_job_done, ocr_job)
+    const isOcrType = ['ocr_result', 'ocr_job_done', 'ocr_job'].includes(typeKey)
+    if (isOcrType && notification.result?.medications) {
+      const result = notification.result
+      const medications = fromOCRResponse(result.medications)
+      
+      // 기간 계산
+      const durationDays = medications[0]?.durationDays || 3
+      const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+      const endDate = new Date(startDate)
+      endDate.setDate(endDate.getDate() + durationDays - 1)
+      const endDateStr = endDate.toISOString().split('T')[0]
+
       navigate(ROUTE_PATHS.prescriptionAdd, {
         state: {
           ocrData: {
             medications,
-            hospitalName: notification.result.hospitalName || notification.result.clinicName || '',
-            pharmacyName: notification.result.pharmacyName || '',
-            startDate: notification.result.prescribedDate || new Date().toISOString().split('T')[0]
+            hospitalName: result.hospitalName || result.clinicName || '',
+            pharmacyName: result.pharmacyName || '',
+            startDate,
+            endDate: endDateStr
           }
+        }
+      })
+      return
+    }
+
+    // 식단 분석 결과 알림 (히스토리: diet_result, 실시간: diet_job_done, diet_job)
+    const isDietType = ['diet_result', 'diet_job_done', 'diet_job'].includes(typeKey)
+    if (isDietType && notification.result) {
+      navigate(ROUTE_PATHS.dietLog, {
+        state: {
+          initialAnalysisResult: notification.result
         }
       })
       return
@@ -201,7 +223,7 @@ export const NotificationPage = () => {
 
     if (typeKey.includes('missed')) {
       if (isCaregiver) {
-        const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+        const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
         if (senior?.id) {
           navigate(ROUTE_PATHS.familyMemberMedication.replace(':id', String(senior.id)))
           return
@@ -225,7 +247,7 @@ export const NotificationPage = () => {
 
   const resolveDietWarningPath = () => {
     if (!isCaregiver) return ROUTE_PATHS.dietWarning
-    const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+    const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
     if (!senior?.userId) return ROUTE_PATHS.dietWarning
     return `${ROUTE_PATHS.dietWarning}?userId=${encodeURIComponent(String(senior.userId))}`
   }
@@ -709,7 +731,7 @@ export const NotificationPage = () => {
                         variant="contained"
                         onClick={() => {
                           if (isCaregiver) {
-                            const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+                            const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
                             if (senior?.id) {
                               navigate(ROUTE_PATHS.familyMemberMedication.replace(':id', String(senior.id)))
                               return

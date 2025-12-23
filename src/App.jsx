@@ -16,11 +16,14 @@ import { createAppTheme } from '@/styles/theme'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 import { FamilyProvider } from '@features/family/context/FamilyContext'
 import { PrivateRoute } from './core/routing/PrivateRoute'
 import LoadingSpinner from '@shared/components/LoadingSpinner'
 import envConfig from '@config/environment.config'
 import { useUiPreferencesStore } from '@shared/stores/uiPreferencesStore'
+
+import { USER_ROLES } from '@config/constants'
 
 // Lazy-loaded page components
 const Login = lazy(() => import('@features/auth/pages/Login'))
@@ -124,10 +127,11 @@ function HomeRedirect() {
 
   // isAuthenticated + 실제 token 존재 여부 확인
   if (isAuthenticated && token) {
-    if (customerRole === 'SENIOR') {
+    const normalizedRole = normalizeCustomerRole(customerRole)
+    if (normalizedRole === USER_ROLES.SENIOR) {
       return <Navigate to={ROUTE_PATHS.seniorDashboard} replace />
     }
-    if (customerRole === 'CAREGIVER') {
+    if (normalizedRole === USER_ROLES.CAREGIVER) {
       return <Navigate to={ROUTE_PATHS.caregiverDashboard} replace />
     }
     // 역할이 선택되지 않은 경우 역할 선택 페이지로 (혹은 기본 대시보드)

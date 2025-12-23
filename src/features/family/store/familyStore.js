@@ -7,7 +7,7 @@ import { create } from 'zustand'
 import { familyApiClient } from '@core/services/api/familyApiClient'
 import { STORAGE_KEYS } from '@config/constants'
 import logger from '@core/utils/logger'
-// 순환 참조 방지: useAuthStore는 동적 import로 사용
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const initialState = {
   familyGroups: [],         // 여러 그룹 지원
@@ -24,6 +24,40 @@ const normalizeInvites = (invites = {}) => ({
   received: Array.isArray(invites.received) ? invites.received : [],
 })
 
+/**
+ * Normalize a member object to ensure userId is available at the top level.
+ * Backend may return userId nested as user.id - this flattens it for consistent access.
+ */
+const normalizeMember = (member) => {
+  if (!member) return member
+  return {
+    ...member,
+    // Flatten userId: prefer existing userId, fallback to user.id
+    userId: member.userId ?? member.user?.id ?? null,
+    // Flatten name if needed
+    name: member.name ?? member.user?.name ?? null,
+  }
+}
+
+/**
+ * Normalize an array of members
+ */
+const normalizeMembers = (members) => {
+  if (!Array.isArray(members)) return []
+  return members.map(normalizeMember)
+}
+
+/**
+ * Normalize a family group and its nested members
+ */
+const normalizeGroup = (group) => {
+  if (!group) return group
+  return {
+    ...group,
+    members: normalizeMembers(group.members),
+  }
+}
+
 const withLoading = async (set, fn) => {
   set({ loading: true, error: null })
   try {
@@ -38,9 +72,7 @@ const withLoading = async (set, fn) => {
 
 export const useFamilyStore = create((set, get) => ({
   ...initialState,
-  _clearAuth: async () => {
-    // 동적 import로 순환 참조 방지
-    const { useAuthStore } = await import('@features/auth/store/authStore')
+  _clearAuth: () => {
     useAuthStore.getState().clearAuthState()
   },
 
@@ -104,9 +136,10 @@ export const useFamilyStore = create((set, get) => ({
       const nextSelectedGroupId = isValidGroupId ? currentGroupId : (groups[0]?.id || null)
 
       const nextState = {
-        familyGroups: summary?.groups || [],
+        // Normalize groups and members to ensure userId is available at top level
+        familyGroups: (summary?.groups || []).map(normalizeGroup),
         selectedGroupId: nextSelectedGroupId,
-        members: summary?.members || [],
+        members: normalizeMembers(summary?.members || []),
         invites: normalizeInvites(inviteList),
         error: summaryError ? summaryError : null,
         initialized: true,

@@ -15,7 +15,7 @@ class DietApiClient extends ApiClient {
 
   // Get all diet logs
   async getDietLogs(params) {
-    return this.get('/logs', params)
+    return this.get('/logs', { params })
   }
 
   // Add a new diet log

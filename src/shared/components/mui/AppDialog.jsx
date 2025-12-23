@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import {
@@ -19,12 +20,32 @@ export const AppDialog = ({
   onBack,
   children,
   footer,
+  PaperProps: paperProps,
   maxWidth = 'sm',
   fullWidth = true,
   ...props
 }) => {
   const resolvedOpen = Boolean(open ?? isOpen)
   const handleBack = onBack || onClose
+  const paperRef = useRef(null)
+
+  useEffect(() => {
+    if (!resolvedOpen) return
+    if (typeof document === 'undefined') return
+    const active = document.activeElement
+    if (active && active instanceof HTMLElement) {
+      active.blur()
+    }
+    requestAnimationFrame(() => {
+      paperRef.current?.focus()
+    })
+  }, [resolvedOpen])
+
+  const mergedPaperProps = {
+    tabIndex: -1,
+    ...paperProps,
+    ref: paperRef,
+  }
 
   return (
     <Dialog
@@ -32,6 +53,7 @@ export const AppDialog = ({
       onClose={onClose}
       maxWidth={maxWidth}
       fullWidth={fullWidth}
+      PaperProps={mergedPaperProps}
       {...props}
     >
       {(title || onClose) && (

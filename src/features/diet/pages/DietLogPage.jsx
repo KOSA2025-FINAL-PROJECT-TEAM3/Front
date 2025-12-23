@@ -1,26 +1,22 @@
 import logger from "@core/utils/logger"
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useEffect, useState, useCallback } from 'react'
+import { useLocation, Link } from 'react-router-dom'
 import MainLayout from '@shared/components/layout/MainLayout'
 import { MealInputForm } from '../components/MealInputForm'
-import { MealHistory } from '../components/MealHistory'
 import { dietApiClient } from '@core/services/api/dietApiClient'
 import { useVoiceActionStore } from '@features/voice/stores/voiceActionStore'
-import { Box, Divider, TextField, Stack, Typography, Alert, Button, Collapse } from '@mui/material'
+import { Box, Typography, Alert, Button, Collapse, Stack, Card, CardContent, Chip, Divider } from '@mui/material'
 import { toast } from '@shared/components/toast/toastStore'
 import { PageHeader } from '@shared/components/layout/PageHeader'
 import { PageStack } from '@shared/components/layout/PageStack'
 import { BackButton } from '@shared/components/mui/BackButton'
+import { ROUTE_PATHS } from '@config/routes.config'
 
 export const DietLogPage = () => {
   const location = useLocation()
-  const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(true)
   const [editingMeal, setEditingMeal] = useState(null)
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0] // 오늘 날짜 기본값
-  )
-  const [allMeals, setAllMeals] = useState([])
+  const [recentLog, setRecentLog] = useState(null) // Only show the most recent log
 
   // Recovery State
   const [recoveredJob, setRecoveredJob] = useState(null)
@@ -28,7 +24,7 @@ export const DietLogPage = () => {
 
   // Voice Action State
   const [autoFillData, setAutoFillData] = useState(null)
-  const pendingAction = useVoiceActionStore((state) => state.pendingAction) // [Voice] Subscribe
+  const pendingAction = useVoiceActionStore((state) => state.pendingAction)
   const { consumeAction } = useVoiceActionStore()
 
   useEffect(() => {
@@ -36,7 +32,6 @@ export const DietLogPage = () => {
     if (navAutoFill && (navAutoFill.foodName || navAutoFill.mealType)) {
       setAutoFillData(navAutoFill)
     }
-    // Location state로 전달된 초기 분석 결과가 있으면 설정
     if (location.state?.initialAnalysisResult) {
       setInitialAnalysis(location.state.initialAnalysisResult)
     }
@@ -50,7 +45,7 @@ export const DietLogPage = () => {
 
       try {
         const resp = await dietApiClient.getAnalysisJob(lastJobId)
-        const jobData = (resp && resp.data) ? resp.data : resp // Handle axios wrapper
+        const jobData = (resp && resp.data) ? resp.data : resp
 
         if (jobData && jobData.status === 'DONE' && jobData.result) {
           logger.info('Found recoverable diet job:', jobData)
@@ -59,11 +54,10 @@ export const DietLogPage = () => {
             result: jobData.result
           })
         } else if (jobData && jobData.status === 'FAILED') {
-          localStorage.removeItem('last_diet_job_id') // Clean up failed job
+          localStorage.removeItem('last_diet_job_id')
         }
       } catch (error) {
         logger.warn('Failed to check recovery job:', error)
-        // 404 등 에러 시 cleanup
         localStorage.removeItem('last_diet_job_id')
       }
     }
@@ -77,7 +71,6 @@ export const DietLogPage = () => {
       setRecoveredJob(null)
       localStorage.removeItem('last_diet_job_id')
       toast.success('분석 결과를 불러왔습니다.')
-      // Scroll to form
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
@@ -101,11 +94,40 @@ export const DietLogPage = () => {
     }
   }, [pendingAction, consumeAction])
 
-  const fetchMeals = useCallback(async () => {
+  const fetchRecentLog = useCallback(async () => {
     setLoading(true)
     try {
-      const fetchedMeals = await dietApiClient.getDietLogs()
-      setAllMeals(fetchedMeals)
+      const logs = await dietApiClient.getDietLogs()
+      if (logs && logs.length > 0) {
+        const latest = logs[0]
+
+        let drugInteractions = []
+        let diseaseInteractions = []
+
+        try {
+          drugInteractions = typeof latest.drugInteractions === 'string'
+            ? JSON.parse(latest.drugInteractions)
+            : latest.drugInteractions || []
+        } catch (e) {
+          logger.error('Failed to parse drugInteractions', e)
+        }
+
+        try {
+          diseaseInteractions = typeof latest.diseaseInteractions === 'string'
+            ? JSON.parse(latest.diseaseInteractions)
+            : latest.diseaseInteractions || []
+        } catch (e) {
+          logger.error('Failed to parse diseaseInteractions', e)
+        }
+
+        setRecentLog({
+          ...latest,
+          drugInteractions,
+          diseaseInteractions
+        })
+      } else {
+        setRecentLog(null)
+      }
     } catch (error) {
       logger.error('Failed to fetch diet logs:', error)
       toast.error('식단 기록을 불러오는데 실패했습니다.')
@@ -114,103 +136,61 @@ export const DietLogPage = () => {
     }
   }, [])
 
-  // 선택된 날짜에 따라 식단 필터링
-  const filteredMeals = useMemo(() => {
-    if (!allMeals.length) return []
-
-    return allMeals.filter((meal) => {
-      const mealDate = new Date(meal.recordedAt || meal.createdAt)
-        .toISOString()
-        .split('T')[0]
-      return mealDate === selectedDate
-    })
-  }, [allMeals, selectedDate])
-
-  // 날짜 비교 함수
-  const getTodayDate = () => new Date().toISOString().split('T')[0]
-  const today = getTodayDate()
-  const isToday = selectedDate === today
-  const isFuture = selectedDate > today
-  const isPast = selectedDate < today
-
   useEffect(() => {
-    setMeals(filteredMeals)
-  }, [filteredMeals])
+    fetchRecentLog()
+  }, [fetchRecentLog])
 
-  useEffect(() => {
-    fetchMeals()
-  }, [fetchMeals])
 
   const handleAddMeal = useCallback(
     async (newMeal) => {
       try {
         await dietApiClient.addDietLog(newMeal)
-        setEditingMeal(null) // Reset form after successful submission
-        fetchMeals() // Re-fetch to update the list
+        setEditingMeal(null)
+        fetchRecentLog() // Update to show the newest log
       } catch (error) {
         logger.error('Failed to add diet log:', error)
         toast.error('식단 기록 추가에 실패했습니다.')
       }
     },
-    [fetchMeals],
+    [fetchRecentLog],
   )
 
-  const handleDeleteMeal = useCallback(
-    async (mealId) => {
-      // 오늘이 아닌 경우 삭제 불가능
-      if (!isToday) {
-        const message = isFuture
-          ? '미래 날짜의 식단은 삭제할 수 없습니다.'
-          : '과거 식단은 삭제할 수 없습니다.'
-        toast.info(message)
-        return
-      }
-
-      if (window.confirm('이 식단 기록을 삭제하시겠습니까?')) {
-        try {
-          await dietApiClient.deleteDietLog(mealId)
-          fetchMeals() // Re-fetch to update the list
-        } catch (error) {
-          logger.error('Failed to delete diet log:', error)
-          toast.error('식단 기록 삭제에 실패했습니다.')
-        }
-      }
-    },
-    [isToday, isFuture, fetchMeals],
-  )
-
-  // 오늘 식단만 수정 가능
-  const handleEditMeal = useCallback((meal) => {
-    if (!isToday) {
-      const message = isFuture
-        ? '미래 날짜의 식단은 수정할 수 없습니다.'
-        : '과거 식단은 수정할 수 없습니다.'
-      toast.info(message)
-      return
-    }
-    setEditingMeal(meal)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [isToday, isFuture])
-
-  // New handler for canceling an edit
-  const handleCancelEdit = useCallback(() => {
-    setEditingMeal(null)
-  }, [])
-
-  // New handler for submitting an update
   const handleUpdateMeal = useCallback(
     async (mealId, updatedData) => {
       try {
         await dietApiClient.updateDietLog(mealId, updatedData)
-        setEditingMeal(null) // Reset form after successful submission
-        fetchMeals() // Re-fetch
+        setEditingMeal(null)
+        fetchRecentLog()
       } catch (error) {
         logger.error('Failed to update diet log:', error)
         toast.error('식단 기록 수정에 실패했습니다.')
       }
     },
-    [fetchMeals],
+    [fetchRecentLog],
   )
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingMeal(null)
+  }, [])
+
+  // Helpers for Warning Display
+  const getLevelColor = (level) => {
+    switch (level) {
+      case 'DANGER': return 'error'
+      case 'WARNING': return 'warning'
+      case 'GOOD': return 'success'
+      default: return 'default'
+    }
+  }
+
+  const getLevelLabel = (level) => {
+    switch (level) {
+      case 'DANGER': return '경고'
+      case 'WARNING': return '주의'
+      case 'GOOD': return '안전'
+      default: return level
+    }
+  }
 
   return (
     <MainLayout>
@@ -218,7 +198,7 @@ export const DietLogPage = () => {
         <PageHeader
           leading={<BackButton />}
           title={editingMeal ? '식단 수정' : '식단 기록'}
-          subtitle={editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 관리하세요.'}
+          subtitle={editingMeal ? '선택한 식단을 수정하세요.' : '오늘의 식단을 기록하고 결과를 확인하세요.'}
         />
 
         {/* Recovery Alert */}
@@ -243,42 +223,8 @@ export const DietLogPage = () => {
           )}
         </Collapse>
 
-        {/* 날짜 선택기 & 날짜 표시 통합 */}
-        <Box sx={{ mb: 3, p: 2, backgroundColor: 'grey.50', borderRadius: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center">
-            <TextField
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              size="small"
-              sx={{ width: 180 }}
-            />
-            <Typography variant="subtitle2" fontWeight="bold">
-              {isToday ? '📅 오늘' : isPast ? '📅 과거' : '📅 미래'} {new Date(selectedDate).toLocaleDateString('ko-KR', { weekday: 'long' })}
-            </Typography>
-            <Divider orientation="vertical" sx={{ my: 1 }} />
-            {!isToday && (
-              <Typography
-                variant="caption"
-                sx={{
-                  ml: 'auto',
-                  p: 1,
-                  borderRadius: 1,
-                  backgroundColor: isFuture ? 'info.50' : 'warning.50',
-                  color: isFuture ? 'info.dark' : 'warning.dark',
-                }}
-              >
-                {isFuture
-                  ? '🔮 미래 날짜는 식단을 추가할 수 없습니다.'
-                  : '⏰ 과거 식단은 수정/삭제할 수 없습니다.'}
-              </Typography>
-            )}
-          </Stack>
-        </Box>
-
-        {/* 오늘 날짜일 때만 입력 폼 표시 */}
-        {isToday && (
+        {/* Input Form */}
+        <Box sx={{ mb: 4 }}>
           <MealInputForm
             onAddMeal={handleAddMeal}
             onUpdateMeal={handleUpdateMeal}
@@ -287,25 +233,138 @@ export const DietLogPage = () => {
             autoFillData={autoFillData}
             initialAnalysisResult={initialAnalysis}
           />
-        )}
+        </Box>
 
-        {loading ? (
-          <Typography textAlign="center" color="text.secondary" sx={{ py: 3 }}>
-            식단 기록을 불러오는 중...
-          </Typography>
-        ) : meals.length === 0 ? (
-          <Typography textAlign="center" color="text.secondary" sx={{ py: 3 }}>
-            {isToday ? '오늘의 식단을 추가하세요.' : '이 날짜의 기록된 식단이 없습니다.'}
-          </Typography>
-        ) : (
-          <MealHistory
-            meals={meals}
-            onEdit={handleEditMeal}
-            onDelete={handleDeleteMeal}
-            readOnly={!isToday}
-            selectedDate={selectedDate}
-          />
-        )}
+        {/* Latest Warning / Result Section */}
+        <Box>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" fontWeight="bold">
+              🔍 최근 식단 분석 결과
+            </Typography>
+            <Link to={ROUTE_PATHS.dietWarning} style={{ textDecoration: 'none' }}>
+              <Button size="small" variant="text">
+                전체 히스토리 보기 {'>'}
+              </Button>
+            </Link>
+          </Box>
+
+          {loading ? (
+            <Typography textAlign="center" color="text.secondary" sx={{ py: 3 }}>
+              분석 결과를 불러오는 중...
+            </Typography>
+          ) : !recentLog ? (
+            <Card variant="outlined" sx={{ borderStyle: 'dashed', borderRadius: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                <Typography color="text.secondary">
+                  최근 기록된 식단이 없습니다.<br />
+                  위에서 식단을 추가해보세요!
+                </Typography>
+              </CardContent>
+            </Card>
+          ) : (
+            <Stack spacing={3}>
+              {/* Main Summary Card */}
+              <Card variant="outlined" sx={{ borderRadius: 2, borderColor: 'primary.light', borderWidth: 1 }}>
+                <CardContent>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                    <Typography variant="h6" fontWeight="bold">
+                      {recentLog.foodName}
+                    </Typography>
+                    <Chip
+                      label={recentLog.overallLevel}
+                      color={getLevelColor(recentLog.overallLevel === '주의' ? 'WARNING' : recentLog.overallLevel === '경고' ? 'DANGER' : 'GOOD')}
+                      size="small"
+                    />
+                  </Box>
+                  <Stack direction="row" spacing={1} mb={2}>
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(recentLog.recordedAt || recentLog.createdAt).toLocaleString('ko-KR')}
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="caption" color="text.secondary">
+                      {recentLog.mealType}
+                    </Typography>
+                  </Stack>
+
+                  <Typography variant="body2" color="text.primary" paragraph sx={{ whiteSpace: 'pre-wrap' }}>
+                    {recentLog.summary}
+                  </Typography>
+                </CardContent>
+              </Card>
+
+              {/* Interactions */}
+              {(recentLog.drugInteractions.length > 0 || recentLog.diseaseInteractions.length > 0) ? (
+                <Box>
+                  {/* Drug Interactions */}
+                  {recentLog.drugInteractions.length > 0 && (
+                    <Box mb={2}>
+                      <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'bold' }}>
+                        💊 약물 상호작용
+                        <Chip label={recentLog.drugInteractions.length} size="small" color="error" variant="outlined" />
+                      </Typography>
+                      <Stack spacing={1}>
+                        {recentLog.drugInteractions.map((interaction, idx) => (
+                          <Alert
+                            key={idx}
+                            severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
+                            sx={{ borderRadius: 2 }}
+                          >
+                            <Typography variant="subtitle2" fontWeight="bold">
+                              {interaction.medicationName} ({getLevelLabel(interaction.level)})
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
+                              {interaction.description}
+                            </Typography>
+                            {interaction.recommendation && (
+                              <Typography variant="caption" display="block" sx={{ mt: 1, fontWeight: 'bold' }}>
+                                💡 {interaction.recommendation}
+                              </Typography>
+                            )}
+                          </Alert>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {/* Disease Interactions */}
+                  {recentLog.diseaseInteractions.length > 0 && (
+                    <Box>
+                      <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 'bold' }}>
+                        🏥 질병 관련 주의사항
+                        <Chip label={recentLog.diseaseInteractions.length} size="small" color="warning" variant="outlined" />
+                      </Typography>
+                      <Stack spacing={1}>
+                        {recentLog.diseaseInteractions.map((interaction, idx) => (
+                          <Alert
+                            key={idx}
+                            severity={interaction.level === 'DANGER' ? 'error' : 'warning'}
+                            sx={{ borderRadius: 2 }}
+                          >
+                            <Typography variant="subtitle2" fontWeight="bold">
+                              {interaction.diseaseName} ({getLevelLabel(interaction.level)})
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 0.5 }}>
+                              {interaction.description}
+                            </Typography>
+                            {interaction.recommendation && (
+                              <Typography variant="caption" display="block" sx={{ mt: 1, fontWeight: 'bold' }}>
+                                💡 {interaction.recommendation}
+                              </Typography>
+                            )}
+                          </Alert>
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+              ) : (
+                <Alert severity="success" sx={{ borderRadius: 2 }}>
+                  발견된 위험 상호작용이 없습니다. 안심하고 드셔도 됩니다!
+                </Alert>
+              )}
+            </Stack>
+          )}
+        </Box>
       </PageStack>
     </MainLayout>
   )
