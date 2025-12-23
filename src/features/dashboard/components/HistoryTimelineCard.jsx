@@ -121,7 +121,7 @@ export const HistoryTimelineCard = memo(({
                             </Typography>
                             <Typography sx={{ fontSize: 12, color: 'text.disabled' }}>{item.time}</Typography>
                           </Stack>
-                          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+                          <Typography component="div" variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
                             {Array.isArray(item.pillDetails) ? (
                               <Stack spacing={0.5}>
                                 {item.pillDetails.map((pill, pIdx) => (

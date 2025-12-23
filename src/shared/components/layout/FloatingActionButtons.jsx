@@ -16,10 +16,8 @@ import GroupIcon from '@mui/icons-material/Group'
 import SearchIcon from '@mui/icons-material/Search'
 import DescriptionIcon from '@mui/icons-material/Description'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import ChatIcon from '@mui/icons-material/Chat'
 import NotificationsIcon from '@mui/icons-material/Notifications'
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
@@ -39,7 +37,6 @@ import { toast } from '@shared/components/toast/toastStore'
 import logger from '@core/utils/logger'
 import { DietEntryModal } from '@features/diet/components/DietEntryModal'
 import { MedicationEntryModal } from '@features/medication/components/MedicationEntryModal'
-import { DiseaseEntryModal } from '@features/disease/components/DiseaseEntryModal'
 import { OcrEntryModal } from '@features/ocr/components/OcrEntryModal'
 import { useFamilyStore } from '@features/family/store/familyStore'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
@@ -183,23 +180,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       },
     },
     {
-      id: 'places',
-      label: '병원 검색',
-      icon: <LocalHospitalIcon fontSize="small" />,
-      color: { bg: '#FEE2E2', fg: '#EF4444' },
-      onClick: () => {
-        const target = getActiveTarget()
-        openSearchOverlay('hospital', { targetUserId: target.id, targetUserName: target.name })
-      },
-    },
-    {
-      id: 'family',
-      label: '가족 관리',
-      icon: <ManageAccountsIcon fontSize="small" />,
-      color: { bg: '#F1F5F9', fg: '#475569' },
-      onClick: () => navigate(ROUTE_PATHS.family),
-    },
-    {
       id: 'chat',
       label: '가족 채팅',
       icon: <ChatIcon fontSize="small" />,
@@ -221,16 +201,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       onClick: () => {
         if (!ensureCareTarget()) return
         setActiveModal('medication')
-      },
-    },
-    {
-      id: 'disease',
-      label: '질병 등록',
-      icon: <HealthAndSafetyIcon fontSize="small" />,
-      color: { bg: '#FEF2F2', fg: '#EF4444' },
-      onClick: () => {
-        if (!ensureCareTarget()) return
-        setActiveModal('disease')
       },
     },
     {
@@ -582,12 +552,6 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
       />
       <MedicationEntryModal
         open={activeModal === 'medication'}
-        onClose={() => setActiveModal(null)}
-        targetUserId={modalTarget?.id}
-        targetUserName={modalTarget?.name}
-      />
-      <DiseaseEntryModal
-        open={activeModal === 'disease'}
         onClose={() => setActiveModal(null)}
         targetUserId={modalTarget?.id}
         targetUserName={modalTarget?.name}

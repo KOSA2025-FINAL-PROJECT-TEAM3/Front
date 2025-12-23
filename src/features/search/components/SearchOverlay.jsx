@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo } from 'react'
+import { forwardRef, useEffect, useMemo, useRef } from 'react'
 import {
   Alert,
   Box,
@@ -87,6 +87,7 @@ export const SearchOverlay = () => {
     requestSearch: state.requestSearch,
     clearPending: state.clearPending,
   }))
+  const dialogPaperRef = useRef(null)
 
   useEffect(() => {
     if (!isOpen) return
@@ -94,6 +95,17 @@ export const SearchOverlay = () => {
     return () => {
       document.body.style.overflow = ''
     }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const active = document.activeElement
+    if (active && active instanceof HTMLElement) {
+      active.blur()
+    }
+    requestAnimationFrame(() => {
+      dialogPaperRef.current?.focus()
+    })
   }, [isOpen])
 
   const overlayTitle = activeTab === 'pill' ? '약 검색' : '질병 검색'
@@ -155,6 +167,8 @@ export const SearchOverlay = () => {
         sx: {
           borderRadius: fullScreen ? 0 : 4,
         },
+        tabIndex: -1,
+        ref: dialogPaperRef,
       }}
     >
       <DialogTitle sx={{ pb: 1.5 }}>
