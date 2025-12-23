@@ -223,7 +223,7 @@ export const NotificationPage = () => {
 
     if (typeKey.includes('missed')) {
       if (isCaregiver) {
-        const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+        const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
         if (senior?.id) {
           navigate(ROUTE_PATHS.familyMemberMedication.replace(':id', String(senior.id)))
           return
@@ -247,7 +247,7 @@ export const NotificationPage = () => {
 
   const resolveDietWarningPath = () => {
     if (!isCaregiver) return ROUTE_PATHS.dietWarning
-    const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+    const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
     if (!senior?.userId) return ROUTE_PATHS.dietWarning
     return `${ROUTE_PATHS.dietWarning}?userId=${encodeURIComponent(String(senior.userId))}`
   }
@@ -731,7 +731,7 @@ export const NotificationPage = () => {
                         variant="contained"
                         onClick={() => {
                           if (isCaregiver) {
-                            const senior = (familyMembers || []).find((m) => m.role === 'SENIOR') || null
+                            const senior = (familyMembers || []).find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || null
                             if (senior?.id) {
                               navigate(ROUTE_PATHS.familyMemberMedication.replace(':id', String(senior.id)))
                               return

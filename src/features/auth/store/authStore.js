@@ -11,6 +11,7 @@ import { persist } from 'zustand/middleware'
 import { authApiClient } from '@core/services/api/authApiClient'
 import { userApiClient } from '@core/services/api/userApiClient'
 import { STORAGE_KEYS } from '@config/constants'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 
 const initialState = {
   isAuthenticated: false,
@@ -139,7 +140,7 @@ export const useAuthStore = create(
           token: normalized.token,
           refreshToken: normalized.refreshToken,
           userRole: normalized.userRole,
-          customerRole: normalized.customerRole,
+          customerRole: normalizeCustomerRole(normalized.customerRole),
           isAuthenticated: Boolean(normalized.user && normalized.token),
           _hasHydrated: true,  // 로그인 성공 후 항상 true
         }))
@@ -319,7 +320,8 @@ export const useAuthStore = create(
           if (state.customerRole) {
             window.localStorage.setItem(STORAGE_KEYS.ROLE, state.customerRole)
           }
-          state.isAuthenticated = Boolean(state.user && state.token)
+          const normalizedRole = normalizeCustomerRole(state.customerRole)
+          state.isAuthenticated = Boolean(state.user && state.token && normalizedRole)
           state._hasHydrated = true
         } else {
           // 저장된 상태가 없는 경우 (첫 방문 등)

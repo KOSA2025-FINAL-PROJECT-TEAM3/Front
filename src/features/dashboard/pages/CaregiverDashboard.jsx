@@ -33,6 +33,8 @@ import { parseServerLocalDateTime, formatDate } from '@core/utils/formatting'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useCareTargetStore } from '@features/dashboard/store/careTargetStore'
 import { useAuth } from '@features/auth/hooks/useAuth'
+import { USER_ROLES } from '@config/constants'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 
 /**
  * CaregiverDashboard - 보호자/케어기버용 대시보드
@@ -151,13 +153,13 @@ export function CaregiverDashboard() {
   useEffect(() => {
     if (targetMembers.length === 0) return
     if (!activeSeniorId) {
-      const preferred = targetMembers.find((m) => m.role === 'SENIOR') || targetMembers[0]
+      const preferred = targetMembers.find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || targetMembers[0]
       setActiveSeniorId(preferred?.id ?? null)
       return
     }
     const stillExists = targetMembers.some((m) => String(m.id) === String(activeSeniorId))
     if (!stillExists) {
-      const preferred = targetMembers.find((m) => m.role === 'SENIOR') || targetMembers[0]
+      const preferred = targetMembers.find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || targetMembers[0]
       setActiveSeniorId(preferred?.id ?? null)
     }
   }, [activeSeniorId, setActiveSeniorId, targetMembers])
@@ -437,7 +439,7 @@ export function CaregiverDashboard() {
     return Math.round((completed / weeklyStats.length) * 100)
   }, [weeklyStats])
 
-  const activeRoleLabel = activeSenior?.role === 'CAREGIVER' ? '보호자' : '어르신'
+  const activeRoleLabel = normalizeCustomerRole(activeSenior?.role) === USER_ROLES.CAREGIVER ? '보호자' : '어르신'
 
   // Hook 규칙 준수: early return 이전에 모든 Hook 호출
   const hasFamilyGroup = useMemo(() => Array.isArray(familyGroups) && familyGroups.length > 0, [familyGroups])
