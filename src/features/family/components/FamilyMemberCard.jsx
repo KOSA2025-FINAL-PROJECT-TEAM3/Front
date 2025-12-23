@@ -3,10 +3,12 @@ import PropTypes from 'prop-types'
 import { Avatar, Box, Button, IconButton, Menu, MenuItem, Paper, Stack, Typography } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { USER_ROLES } from '@config/constants'
+import { normalizeCustomerRole } from '@features/auth/utils/roleUtils'
 
 const roleLabels = {
-  SENIOR: '어르신(부모)',
-  CAREGIVER: '보호자(자녀)',
+  [USER_ROLES.SENIOR]: '어르신(부모)',
+  [USER_ROLES.CAREGIVER]: '보호자(자녀)',
 }
 
 
@@ -47,8 +49,8 @@ export const FamilyMemberCard = memo(({
     (isViewerGroupOwner && !isCardSelf) || (isCardSelf && !isCardGroupOwner)
 
   const removeLabel = isCardSelf ? '탈퇴' : '추방'
-  const currentRole = member.role
-  const oppositeRole = currentRole === 'SENIOR' ? 'CAREGIVER' : 'SENIOR'
+  const currentRole = normalizeCustomerRole(member.role)
+  const oppositeRole = currentRole === USER_ROLES.SENIOR ? USER_ROLES.CAREGIVER : USER_ROLES.SENIOR
 
   const handleRoleToggle = () => {
     if (!canChangeRole || isRoleChanging) return
@@ -251,7 +253,7 @@ FamilyMemberCard.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
-    role: PropTypes.oneOf(['SENIOR', 'CAREGIVER']).isRequired,
+    role: PropTypes.oneOf(Object.values(USER_ROLES)).isRequired,
     joinedAt: PropTypes.string.isRequired,
     avatarColor: PropTypes.string,
     userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

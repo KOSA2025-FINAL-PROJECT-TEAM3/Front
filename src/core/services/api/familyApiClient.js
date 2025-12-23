@@ -1,14 +1,15 @@
 ﻿import ApiClient from './ApiClient'
 import logger from '@core/utils/logger'
 import envConfig from '@config/environment.config'
+import { USER_ROLES } from '@config/constants'
 
 const normalizeFamilyRole = (role) => {
   const raw = role == null ? '' : String(role)
   const upper = raw.trim().toUpperCase()
-  if (!upper) return 'SENIOR'
-  if (upper === 'PARENT' || upper === 'ELDER' || upper === 'ELDERLY') return 'SENIOR'
-  if (upper === 'CHILD' || upper === 'GUARDIAN') return 'CAREGIVER'
-  if (upper === 'SENIOR' || upper === 'CAREGIVER') return upper
+  if (!upper) return USER_ROLES.SENIOR
+  if (upper === 'PARENT' || upper === 'ELDER' || upper === 'ELDERLY') return USER_ROLES.SENIOR
+  if (upper === 'CHILD' || upper === 'GUARDIAN') return USER_ROLES.CAREGIVER
+  if (upper === USER_ROLES.SENIOR || upper === USER_ROLES.CAREGIVER) return upper
   return upper
 }
 

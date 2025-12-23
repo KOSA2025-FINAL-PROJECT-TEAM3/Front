@@ -3,13 +3,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { authApiClient } from '@core/services/api/authApiClient'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
 import { toast } from '@shared/components/toast/toastStore'
 import { BackButton } from '@shared/components/mui/BackButton'
 
 const resolveFallbackPath = (user) => {
-  const role = user?.customerRole || user?.userRole
-  if (role === 'CAREGIVER') return ROUTE_PATHS.caregiverDashboard
-  if (role === 'SENIOR') return ROUTE_PATHS.seniorDashboard
+  const role = (user?.customerRole || user?.userRole)?.toUpperCase()
+  if (role === USER_ROLES.CAREGIVER) return ROUTE_PATHS.caregiverDashboard
+  if (role === USER_ROLES.SENIOR) return ROUTE_PATHS.seniorDashboard
   return ROUTE_PATHS.roleSelection
 }
 

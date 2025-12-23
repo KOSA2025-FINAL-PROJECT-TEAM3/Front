@@ -9,6 +9,7 @@ import logger from '@core/utils/logger'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ROUTE_PATHS } from '@config/routes.config'
+import { USER_ROLES } from '@config/constants'
 import { useAuth } from '@features/auth/hooks/useAuth'
 import { Box, ButtonBase, Paper, Stack, Typography } from '@mui/material'
 import { BackButton } from '@shared/components/mui/BackButton'
@@ -21,9 +22,10 @@ export const RoleSelection = () => {
   }))
 
   useEffect(() => {
-    if (customerRole === 'senior') {
+    const normalizedRole = customerRole?.toUpperCase()
+    if (normalizedRole === USER_ROLES.SENIOR) {
       navigate(ROUTE_PATHS.seniorDashboard)
-    } else if (customerRole === 'caregiver') {
+    } else if (normalizedRole === USER_ROLES.CAREGIVER) {
       navigate(ROUTE_PATHS.caregiverDashboard)
     }
   }, [customerRole, navigate])
@@ -31,9 +33,10 @@ export const RoleSelection = () => {
   const handleSelectRole = async (role) => {
     try {
       await selectRole(role)
-      if (role === 'senior') {
+      const normalizedRole = role?.toUpperCase()
+      if (normalizedRole === USER_ROLES.SENIOR) {
         navigate(ROUTE_PATHS.seniorDashboard)
-      } else if (role === 'caregiver') {
+      } else if (normalizedRole === USER_ROLES.CAREGIVER) {
         navigate(ROUTE_PATHS.caregiverDashboard)
       }
     } catch (err) {
@@ -75,7 +78,7 @@ export const RoleSelection = () => {
             </Typography>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <ButtonBase
-                onClick={() => handleSelectRole('senior')}
+                onClick={() => handleSelectRole(USER_ROLES.SENIOR)}
                 sx={{ flex: 1, textAlign: 'left', borderRadius: 2 }}
               >
                 <Paper variant="outlined" sx={{ p: 3, width: '100%' }}>
@@ -94,7 +97,7 @@ export const RoleSelection = () => {
               </ButtonBase>
 
               <ButtonBase
-                onClick={() => handleSelectRole('caregiver')}
+                onClick={() => handleSelectRole(USER_ROLES.CAREGIVER)}
                 sx={{ flex: 1, textAlign: 'left', borderRadius: 2 }}
               >
                 <Paper variant="outlined" sx={{ p: 3, width: '100%' }}>
