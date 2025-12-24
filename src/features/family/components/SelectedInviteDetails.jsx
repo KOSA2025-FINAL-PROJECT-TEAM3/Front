@@ -62,7 +62,8 @@ const SelectedInviteDetails = ({ invite, onClose, onCancel, onRoleChange, cancel
 
   const handleKakaoShare = () => {
     if (!inviteLink) return
-    shareInvite(inviteLink, invite.inviterName || '가족')
+    // [FIX] inviteeName(초대받는 사람), groupName(가족 그룹명) 전달
+    shareInvite(inviteLink, invite.inviteeName || '가족', invite.groupName || '가족 그룹')
   }
 
   const handleSaveRole = () => {

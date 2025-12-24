@@ -91,6 +91,10 @@ export const FamilyInvitePage = () => {
         ...response,
         id: response.id || response.shortCode, // Ensure ID
         inviteUrl: response.inviteUrl || inviteLinkGenerator(response),
+        // [FIX] 백엔드 응답에 inviteeName이 없을 경우, 입력한 이름을 직접 주입 (Kakao 공유 시 사용)
+        inviteeName: response.inviteeName || formData.name,
+        // [FIX] 가족 그룹명도 주입 (Kakao 공유 시 사용)
+        groupName: response.groupName || familyGroup?.name || '가족 그룹',
       }
       setLatestInvite(fullInvite)
       return response
