@@ -119,7 +119,10 @@ export const AppShell = ({
 
       <SearchOverlay />
       <GlobalOcrStatus />
-      {!hideFloatingActions && <FloatingActionButtons hasBottomDock={showMobileBottomNav} />}
+      <FloatingActionButtons 
+        hasBottomDock={showMobileBottomNav} 
+        hidden={hideFloatingActions} 
+      />
     </Box>
   )
 }

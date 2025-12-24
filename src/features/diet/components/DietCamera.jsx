@@ -1,7 +1,8 @@
 import logger from "@core/utils/logger"
-import React, { useRef, useState, useCallback } from 'react';
-import { Box, Button, IconButton, Typography, Paper } from '@mui/material';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
+import { Box, Button, IconButton, Typography } from '@mui/material';
 import { CameraAlt, CloudUpload, Close } from '@mui/icons-material';
+import Webcam from 'react-webcam';
 
 // Fallback icons if @mui/icons-material is not installed
 const CameraIcon = () => (
@@ -26,38 +27,25 @@ const CloseIcon = () => (
     </svg>
 );
 
+const videoConstraints = {
+    facingMode: 'environment'
+};
+
 const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, ref) => {
     const galleryInputRef = useRef(null);
-    const videoRef = useRef(null);
-    const canvasRef = useRef(null);
+    const webcamRef = useRef(null);
 
     const [preview, setPreview] = useState(null);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
-    const [stream, setStream] = useState(null);
-
-    const stopCamera = useCallback(() => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-        }
-        setIsCameraOpen(false);
-    }, [stream]);
 
     // 초기 프리뷰 동기화 (기존 이미지 표시용)
-    React.useEffect(() => {
+    useEffect(() => {
         if (initialPreview) {
             setPreview(initialPreview);
         } else {
             setPreview(null);
         }
     }, [initialPreview]);
-
-    // Cleanup on unmount
-    React.useEffect(() => {
-        return () => {
-            stopCamera();
-        };
-    }, [stopCamera]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -81,63 +69,29 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
         onImageCapture(null, null);
     };
 
-    const startCamera = async () => {
-        try {
-            // First attempt with back camera
-            let constraints = { video: { facingMode: 'environment' } };
-            let mediaStream;
-            
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-            } catch (e) {
-                logger.warn("Environment camera not found, falling back to default video", e);
-                // Fallback to any camera if 'environment' is not available (e.g. PC)
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            }
-
-            setStream(mediaStream);
-            setIsCameraOpen(true);
-            // Wait for state update and ref to be attached
-            setTimeout(() => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = mediaStream;
-                }
-            }, 100);
-        } catch (err) {
-            logger.error("Error accessing camera:", err);
-            if (err.name === 'NotAllowedError') {
-                alert("카메라 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해주세요.");
-            } else if (err.name === 'NotFoundError') {
-                alert("카메라 장치를 찾을 수 없습니다.");
-            } else {
-                alert("카메라에 접근할 수 없습니다: " + err.message);
-            }
-        }
+    const startCamera = () => {
+        setIsCameraOpen(true);
     };
 
-    const capturePhoto = () => {
-        if (videoRef.current && canvasRef.current) {
-            const video = videoRef.current;
-            const canvas = canvasRef.current;
-            const context = canvas.getContext('2d');
+    const stopCamera = () => {
+        setIsCameraOpen(false);
+    };
 
-            // Set canvas dimensions to match video
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            // Draw video frame to canvas
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert to blob/file
-            canvas.toBlob((blob) => {
-                if (blob) {
+    const capturePhoto = useCallback(() => {
+        const imageSrc = webcamRef.current?.getScreenshot?.();
+        if (imageSrc) {
+            fetch(imageSrc)
+                .then((res) => res.blob())
+                .then((blob) => {
                     const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
                     processFile(file);
                     stopCamera();
-                }
-            }, 'image/jpeg', 0.8);
+                })
+                .catch(err => {
+                    logger.error("Error processing captured image:", err);
+                });
         }
-    };
+    }, [webcamRef]);
 
     // 외부에서 초기화할 수 있도록 ref 노출
     React.useImperativeHandle(ref, () => ({
@@ -156,9 +110,6 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
                 onChange={handleFileChange}
             />
 
-            {/* Hidden Canvas for Capture */}
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
-
             {isCameraOpen ? (
                 <Box sx={{ width: '100%', maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{
@@ -169,10 +120,11 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
                         borderRadius: 3,
                         overflow: 'hidden'
                     }}>
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            playsInline
+                        <Webcam
+                            audio={false}
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            videoConstraints={videoConstraints}
                             style={{
                                 position: 'absolute',
                                 top: 0,
@@ -180,6 +132,11 @@ const DietCamera = React.forwardRef(({ onImageCapture, initialPreview = null }, 
                                 width: '100%',
                                 height: '100%',
                                 objectFit: 'cover'
+                            }}
+                            onUserMediaError={(err) => {
+                                logger.error("Webcam Error:", err);
+                                alert("카메라를 실행할 수 없습니다. 권한을 확인해주세요.");
+                                setIsCameraOpen(false);
                             }}
                         />
                     </Box>
