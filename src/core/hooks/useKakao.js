@@ -30,16 +30,16 @@ export const useKakao = () => {
     loadSdk()
   }, [])
 
-  const shareInvite = (inviteUrl, inviterName = '가족') => {
+  const shareInvite = (inviteUrl, inviteeName = '가족', groupName = '가족 그룹') => {
     if (!isInitialized || !window.Kakao) {
       alert('카카오톡 SDK가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.')
       return
     }
 
-    console.log('[useKakao] Sharing Invite:', { inviteUrl, inviterName }) // Debug Log
+    console.log('[useKakao] Sharing Invite:', { inviteUrl, inviteeName, groupName }) // Debug Log
 
     const title = '💌 가족 그룹 초대장이 도착했습니다!'
-    const description = `${inviterName}님을 가족 그룹에 초대합니다.\n함께 건강 관리를 시작해보세요.`
+    const description = `${inviteeName}님을 ${groupName}에 초대합니다.\n함께 건강 관리를 시작해보세요.`
 
     window.Kakao.Share.sendDefault({
       objectType: 'feed',
