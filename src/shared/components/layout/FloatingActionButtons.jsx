@@ -42,7 +42,7 @@ import { useFamilyStore } from '@features/family/store/familyStore'
 import { useSearchOverlayStore } from '@features/search/store/searchOverlayStore'
 import { useNotificationStore } from '@features/notification/store/notificationStore'
 
-export const FloatingActionButtons = ({ hasBottomDock = true }) => {
+export const FloatingActionButtons = ({ hasBottomDock = true, hidden = false }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -266,285 +266,289 @@ export const FloatingActionButtons = ({ hasBottomDock = true }) => {
 
   return (
     <>
-      {menuOpen ? (
-        <Box
-          onClick={() => setMenuOpen(false)}
-          aria-hidden
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            bgcolor: 'rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(2px)',
-            zIndex: 2000,
-          }}
-        />
-      ) : null}
+      {!hidden && (
+        <>
+          {menuOpen ? (
+            <Box
+              onClick={() => setMenuOpen(false)}
+              aria-hidden
+              sx={{
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0,0,0,0.4)',
+                backdropFilter: 'blur(2px)',
+                zIndex: 2000,
+              }}
+            />
+          ) : null}
 
-      {isListening ? (
-        <Box
-          sx={{
-            position: 'fixed',
-            inset: 0,
-            bgcolor: 'rgba(0, 0, 0, 0.7)',
-            zIndex: 2100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'common.white',
-            pointerEvents: 'none',
-          }}
-        >
-          <Paper
-            sx={{
-              pointerEvents: 'none',
-              bgcolor: 'common.white',
-              color: 'text.primary',
-              px: 3.5,
-              py: 2.5,
-              borderRadius: 4,
-              textAlign: 'center',
-              minWidth: 300,
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-              mb: 15,
-            }}
-          >
-            <Typography variant="subtitle1" sx={{ m: 0, mb: 1, color: 'text.secondary', fontWeight: 800 }}>
-              {feedbackMessage || '말씀해주세요...'}
-            </Typography>
-            <Typography variant="h5" sx={{ m: 0, fontWeight: 900 }}>
-              {transcript}
-            </Typography>
-          </Paper>
-        </Box>
-      ) : null}
+          {isListening ? (
+            <Box
+              sx={{
+                position: 'fixed',
+                inset: 0,
+                bgcolor: 'rgba(0, 0, 0, 0.7)',
+                zIndex: 2100,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'common.white',
+                pointerEvents: 'none',
+              }}
+            >
+              <Paper
+                sx={{
+                  pointerEvents: 'none',
+                  bgcolor: 'common.white',
+                  color: 'text.primary',
+                  px: 3.5,
+                  py: 2.5,
+                  borderRadius: 4,
+                  textAlign: 'center',
+                  minWidth: 300,
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                  mb: 15,
+                }}
+              >
+                <Typography variant="subtitle1" sx={{ m: 0, mb: 1, color: 'text.secondary', fontWeight: 800 }}>
+                  {feedbackMessage || '말씀해주세요...'}
+                </Typography>
+                <Typography variant="h5" sx={{ m: 0, fontWeight: 900 }}>
+                  {transcript}
+                </Typography>
+              </Paper>
+            </Box>
+          ) : null}
 
-      <Box
-        sx={{
-          position: 'fixed',
-          right: { xs: 12, md: 20 },
-          bottom: { xs: bottom, md: 40 },
-          zIndex: 2101,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: 1.5,
-          // 메뉴가 닫혀 있어도 내부 리스트(Box)가 DOM에 남아 높이를 차지해서
-          // 투명한 컨테이너가 콘텐츠 클릭을 가리는 이슈가 발생할 수 있어,
-          // 외곽은 클릭을 통과시키고 실제 인터랙션 요소만 pointer-events를 받도록 처리한다.
-          pointerEvents: 'none',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: 1.25,
-            opacity: menuOpen ? 1 : 0,
-            transform: menuOpen ? 'translateY(0)' : 'translateY(10px)',
-            pointerEvents: menuOpen ? 'auto' : 'none',
-            transition: 'all 160ms ease',
-          }}
-        >
-          <Paper
-            variant="outlined"
+          <Box
             sx={{
+              position: 'fixed',
+              right: { xs: 12, md: 20 },
+              bottom: { xs: bottom, md: 40 },
+              zIndex: 2101,
               display: 'flex',
-              alignItems: 'center',
-              gap: 1.25,
-              px: 2,
-              py: 1.25,
-              borderRadius: 4,
-              bgcolor: 'common.white',
-              boxShadow: '0 10px 25px rgba(15, 23, 42, 0.12)',
-              mb: 0.5,
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: 1.5,
+              // 메뉴가 닫혀 있어도 내부 리스트(Box)가 DOM에 남아 높이를 차지해서
+              // 투명한 컨테이너가 콘텐츠 클릭을 가리는 이슈가 발생할 수 있어,
+              // 외곽은 클릭을 통과시키고 실제 인터랙션 요소만 pointer-events를 받도록 처리한다.
+              pointerEvents: 'none',
             }}
           >
-            <Typography sx={{ fontSize: 13, fontWeight: 900, color: 'text.secondary' }}>글자 크기</Typography>
             <Box
               sx={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                bgcolor: '#F1F5F9',
-                borderRadius: 999,
-                border: '1px solid',
-                borderColor: 'divider',
-                p: 0.5,
-              }}
-            >
-              <ButtonBase
-                onClick={(e) => {
-                  e.stopPropagation()
-                  decreaseFontScaleLevel()
-                }}
-                disabled={fontScaleLevel <= 1}
-                aria-label="글자 작게"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 999,
-                  bgcolor: 'common.white',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  color: 'text.secondary',
-                  opacity: fontScaleLevel <= 1 ? 0.35 : 1,
-                }}
-              >
-                <RemoveIcon fontSize="small" />
-              </ButtonBase>
-              <Box sx={{ width: 52, textAlign: 'center' }}>
-                <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.primary', lineHeight: 1.2 }}>
-                  {fontLabel}
-                </Typography>
-              </Box>
-              <ButtonBase
-                onClick={(e) => {
-                  e.stopPropagation()
-                  increaseFontScaleLevel()
-                }}
-                disabled={fontScaleLevel >= 3}
-                aria-label="글자 크게"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 999,
-                  bgcolor: 'common.white',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  color: 'text.secondary',
-                  opacity: fontScaleLevel >= 3 ? 0.35 : 1,
-                }}
-              >
-                <AddIcon fontSize="small" />
-              </ButtonBase>
-            </Box>
-          </Paper>
-
-          {menuItems.map((item) => (
-            <ButtonBase
-              key={item.id}
-              onClick={() => {
-                item.onClick()
-                setMenuOpen(false)
-              }}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
                 gap: 1.25,
-                borderRadius: 999,
+                opacity: menuOpen ? 1 : 0,
+                transform: menuOpen ? 'translateY(0)' : 'translateY(10px)',
+                pointerEvents: menuOpen ? 'auto' : 'none',
+                transition: 'all 160ms ease',
               }}
             >
               <Paper
                 variant="outlined"
                 sx={{
-                  px: 1.5,
-                  py: 0.9,
-                  borderRadius: 999,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.25,
+                  px: 2,
+                  py: 1.25,
+                  borderRadius: 4,
                   bgcolor: 'common.white',
                   boxShadow: '0 10px 25px rgba(15, 23, 42, 0.12)',
+                  mb: 0.5,
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: 900, color: 'text.secondary' }}>
-                  {item.label}
-                </Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 900, color: 'text.secondary' }}>글자 크기</Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    bgcolor: '#F1F5F9',
+                    borderRadius: 999,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    p: 0.5,
+                  }}
+                >
+                  <ButtonBase
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      decreaseFontScaleLevel()
+                    }}
+                    disabled={fontScaleLevel <= 1}
+                    aria-label="글자 작게"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 999,
+                      bgcolor: 'common.white',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      color: 'text.secondary',
+                      opacity: fontScaleLevel <= 1 ? 0.35 : 1,
+                    }}
+                  >
+                    <RemoveIcon fontSize="small" />
+                  </ButtonBase>
+                  <Box sx={{ width: 52, textAlign: 'center' }}>
+                    <Typography sx={{ fontSize: 12, fontWeight: 900, color: 'text.primary', lineHeight: 1.2 }}>
+                      {fontLabel}
+                    </Typography>
+                  </Box>
+                  <ButtonBase
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      increaseFontScaleLevel()
+                    }}
+                    disabled={fontScaleLevel >= 3}
+                    aria-label="글자 크게"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 999,
+                      bgcolor: 'common.white',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      color: 'text.secondary',
+                      opacity: fontScaleLevel >= 3 ? 0.35 : 1,
+                    }}
+                  >
+                    <AddIcon fontSize="small" />
+                  </ButtonBase>
+                </Box>
               </Paper>
-              <Box
+
+              {menuItems.map((item) => (
+                <ButtonBase
+                  key={item.id}
+                  onClick={() => {
+                    item.onClick()
+                    setMenuOpen(false)
+                  }}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.25,
+                    borderRadius: 999,
+                  }}
+                >
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      px: 1.5,
+                      py: 0.9,
+                      borderRadius: 999,
+                      bgcolor: 'common.white',
+                      boxShadow: '0 10px 25px rgba(15, 23, 42, 0.12)',
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ fontWeight: 900, color: 'text.secondary' }}>
+                      {item.label}
+                    </Typography>
+                  </Paper>
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 999,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: item.color.bg,
+                      color: item.color.fg,
+                      border: '2px solid',
+                      borderColor: 'divider',
+                      boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                </ButtonBase>
+              ))}
+            </Box>
+
+            <Stack spacing={1.25} alignItems="flex-end" sx={{ pointerEvents: 'auto' }}>
+              <ButtonBase
+                onClick={() => {
+                  triggerHaptic(30)
+                  navigate(ROUTE_PATHS.notifications)
+                }}
+                aria-label="알림"
                 sx={{
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   borderRadius: 999,
+                  bgcolor: '#3B82F6',
+                  color: 'common.white',
+                  boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  bgcolor: item.color.bg,
-                  color: item.color.fg,
-                  border: '2px solid',
-                  borderColor: 'divider',
-                  boxShadow: '0 10px 25px rgba(15, 23, 42, 0.15)',
+                  transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  '&:active': { transform: 'scale(0.9)' },
                 }}
               >
-                {item.icon}
-              </Box>
-            </ButtonBase>
-          ))}
-        </Box>
+                <Badge badgeContent={unreadCount} color="error" max={99}>
+                  <NotificationsIcon />
+                </Badge>
+              </ButtonBase>
 
-        <Stack spacing={1.25} alignItems="flex-end" sx={{ pointerEvents: 'auto' }}>
-          <ButtonBase
-            onClick={() => {
-              triggerHaptic(30)
-              navigate(ROUTE_PATHS.notifications)
-            }}
-            aria-label="알림"
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: 999,
-              bgcolor: '#3B82F6',
-              color: 'common.white',
-              boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-              '&:active': { transform: 'scale(0.9)' },
-            }}
-          >
-            <Badge badgeContent={unreadCount} color="error" max={99}>
-              <NotificationsIcon />
-            </Badge>
-          </ButtonBase>
+              <ButtonBase
+                onClick={() => {
+                  triggerHaptic(50)
+                  setMenuOpen((prev) => !prev)
+                }}
+                aria-label={menuOpen ? '퀵 메뉴 닫기' : '퀵 메뉴 열기'}
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 999,
+                  bgcolor: menuOpen ? '#475569' : '#2EC4B6',
+                  color: 'common.white',
+                  boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transform: menuOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                  transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)', // Bouncy transition
+                  '&:active': { transform: menuOpen ? 'rotate(45deg) scale(0.9)' : 'scale(0.9)' },
+                }}
+              >
+                {menuOpen ? <CloseIcon /> : <AddIcon />}
+              </ButtonBase>
 
-          <ButtonBase
-            onClick={() => {
-              triggerHaptic(50)
-              setMenuOpen((prev) => !prev)
-            }}
-            aria-label={menuOpen ? '퀵 메뉴 닫기' : '퀵 메뉴 열기'}
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: 999,
-              bgcolor: menuOpen ? '#475569' : '#2EC4B6',
-              color: 'common.white',
-              boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transform: menuOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)', // Bouncy transition
-              '&:active': { transform: menuOpen ? 'rotate(45deg) scale(0.9)' : 'scale(0.9)' },
-            }}
-          >
-            {menuOpen ? <CloseIcon /> : <AddIcon />}
-          </ButtonBase>
-
-          <ButtonBase
-            onClick={() => {
-              triggerHaptic(40)
-              toggleVoice()
-            }}
-            aria-label="음성 명령"
-            sx={{
-              width: 56,
-              height: 56,
-              borderRadius: 999,
-              bgcolor: isListening ? '#EF4444' : '#7C8CFF',
-              color: 'common.white',
-              boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-              transform: isListening ? 'scale(1.1)' : 'scale(1)',
-              '&:active': { transform: isListening ? 'scale(1.0) ' : 'scale(0.9)' },
-            }}
-          >
-            <MicIcon />
-          </ButtonBase>
-        </Stack>
-      </Box>
+              <ButtonBase
+                onClick={() => {
+                  triggerHaptic(40)
+                  toggleVoice()
+                }}
+                aria-label="음성 명령"
+                sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 999,
+                  bgcolor: isListening ? '#EF4444' : '#7C8CFF',
+                  color: 'common.white',
+                  boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: isListening ? 'scale(1.1)' : 'scale(1)',
+                  '&:active': { transform: isListening ? 'scale(1.0) ' : 'scale(0.9)' },
+                }}
+              >
+                <MicIcon />
+              </ButtonBase>
+            </Stack>
+          </Box>
+        </>
+      )}
 
       <DietEntryModal
         open={activeModal === 'diet'}
