@@ -144,8 +144,13 @@ export function CaregiverDashboard() {
     return Array.isArray(members) ? members : []
   }, [familyGroups, members, selectedGroupId])
 
+  // 보호자 대시보드는 시니어만 모니터링 (AISTART.md: 보호자는 시니어를 관리)
+  // m.role: 그룹 내 역할 (백엔드가 familyRole 대신 role로 전송)
   const targetMembers = useMemo(() => {
-    const list = groupMembers.filter(Boolean).filter((m) => m.userId != null)
+    const list = groupMembers
+      .filter(Boolean)
+      .filter((m) => m.userId != null)
+      .filter((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR)
     if (!currentUserId) return list
     return list.filter((m) => String(m.userId) !== String(currentUserId))
   }, [currentUserId, groupMembers])
@@ -153,13 +158,14 @@ export function CaregiverDashboard() {
   useEffect(() => {
     if (targetMembers.length === 0) return
     if (!activeSeniorId) {
-      const preferred = targetMembers.find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || targetMembers[0]
+      // targetMembers는 이미 시니어만 포함하므로 별도 필터링 불필요
+      const preferred = targetMembers[0]
       setActiveSeniorId(preferred?.id ?? null)
       return
     }
     const stillExists = targetMembers.some((m) => String(m.id) === String(activeSeniorId))
     if (!stillExists) {
-      const preferred = targetMembers.find((m) => normalizeCustomerRole(m.role) === USER_ROLES.SENIOR) || targetMembers[0]
+      const preferred = targetMembers[0]
       setActiveSeniorId(preferred?.id ?? null)
     }
   }, [activeSeniorId, setActiveSeniorId, targetMembers])
@@ -439,7 +445,8 @@ export function CaregiverDashboard() {
     return Math.round((completed / weeklyStats.length) * 100)
   }, [weeklyStats])
 
-  const activeRoleLabel = normalizeCustomerRole(activeSenior?.role) === USER_ROLES.CAREGIVER ? '보호자' : '어르신'
+  // targetMembers는 시니어만 포함하므로 항상 '어르신'
+  const activeRoleLabel = '어르신'
 
   // Hook 규칙 준수: early return 이전에 모든 Hook 호출
   const hasFamilyGroup = useMemo(() => Array.isArray(familyGroups) && familyGroups.length > 0, [familyGroups])
@@ -560,47 +567,58 @@ export function CaregiverDashboard() {
                   </Menu>
                 </Box>
 
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: 999,
-                      bgcolor: '#EEF2FF',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 30,
-                      flex: '0 0 auto',
-                    }}
-                    aria-hidden
-                  >
-                    👴
-                  </Box>
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-                      <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
-                        {activeSenior?.name ? `${activeSenior.name} 님` : '케어 대상'}
-                      </Typography>
-                      <Box
-                        sx={{
-                          px: 1,
-                          py: 0.25,
-                          borderRadius: 999,
-                          bgcolor: '#EEF2FF',
-                          color: '#7C8CFF',
-                          fontSize: 12,
-                          fontWeight: 900,
-                        }}
-                      >
-                        {activeRoleLabel}
-                      </Box>
-                    </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontWeight: 700 }}>
-                      오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                {targetMembers.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 3 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'text.secondary', mb: 1 }}>
+                      👴 어르신이 없습니다
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      가족 그룹에 어르신을 초대하면 여기에 표시됩니다.
                     </Typography>
                   </Box>
-                </Stack>
+                ) : (
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 999,
+                        bgcolor: '#EEF2FF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 30,
+                        flex: '0 0 auto',
+                      }}
+                      aria-hidden
+                    >
+                      👴
+                    </Box>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                          {activeSenior?.name ? `${activeSenior.name} 님` : '케어 대상'}
+                        </Typography>
+                        <Box
+                          sx={{
+                            px: 1,
+                            py: 0.25,
+                            borderRadius: 999,
+                            bgcolor: '#EEF2FF',
+                            color: '#7C8CFF',
+                            fontSize: 12,
+                            fontWeight: 900,
+                          }}
+                        >
+                          {activeRoleLabel}
+                        </Box>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontWeight: 700 }}>
+                        오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                )}
 
                 {targetMembers.length > 1 ? (
                   <Box>
@@ -766,30 +784,41 @@ export function CaregiverDashboard() {
                 </Box>
               )}
 
-              <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
-                    {activeSenior?.name ? `${activeSenior.name} 님 케어 현황` : '케어 대상 없음'}
+              {targetMembers.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 2 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 900, color: 'common.white', mb: 0.5 }}>
+                    👴 어르신이 없습니다
                   </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-                    오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                    가족 그룹에 어르신을 초대하면 여기에 표시됩니다.
                   </Typography>
                 </Box>
-                <Box
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 999,
-                    bgcolor: 'rgba(255,255,255,0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 22,
-                  }}
-                >
-                  {todayRate !== null && todayRate >= 90 ? '✅' : '⚠️'}
-                </Box>
-              </Stack>
+              ) : (
+                <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900 }} noWrap>
+                      {activeSenior?.name ? `${activeSenior.name} 님 케어 현황` : '케어 대상 없음'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+                      오늘 복약 달성률: {todayRateLoading ? '불러오는 중…' : todayRate === null ? '-' : `${todayRate}%`}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 999,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                    }}
+                  >
+                    {todayRate !== null && todayRate >= 90 ? '✅' : '⚠️'}
+                  </Box>
+                </Stack>
+              )}
 
               {targetMembers.length > 1 ? (
                 <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 0.5 }}>
