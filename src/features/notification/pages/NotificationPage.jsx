@@ -185,39 +185,44 @@ export const NotificationPage = () => {
 
     // OCR 결과 알림 (히스토리: ocr_result, 실시간: ocr_job_done, ocr_job)
     const isOcrType = ['ocr_result', 'ocr_job_done', 'ocr_job'].includes(typeKey)
-    if (isOcrType && notification.result?.medications) {
+    if (isOcrType) {
       const result = notification.result
-      const medications = fromOCRResponse(result.medications)
-      
-      // 기간 계산
-      const durationDays = medications[0]?.durationDays || 3
-      const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
-      const endDate = new Date(startDate)
-      endDate.setDate(endDate.getDate() + durationDays - 1)
-      const endDateStr = endDate.toISOString().split('T')[0]
+      if (result?.medications) {
+        const medications = fromOCRResponse(result.medications)
 
-      navigate(ROUTE_PATHS.prescriptionAdd, {
-        state: {
-          ocrData: {
-            medications,
-            hospitalName: result.hospitalName || result.clinicName || '',
-            pharmacyName: result.pharmacyName || '',
-            startDate,
-            endDate: endDateStr
+        // 기간 계산
+        const durationDays = medications[0]?.durationDays || 3
+        const startDate = result.prescribedDate || new Date().toISOString().split('T')[0]
+        const endDate = new Date(startDate)
+        endDate.setDate(endDate.getDate() + durationDays - 1)
+        const endDateStr = endDate.toISOString().split('T')[0]
+
+        navigate(ROUTE_PATHS.prescriptionAdd, {
+          state: {
+            ocrData: {
+              medications,
+              hospitalName: result.hospitalName || result.clinicName || '',
+              pharmacyName: result.pharmacyName || '',
+              startDate,
+              endDate: endDateStr
+            }
           }
-        }
-      })
+        })
+        return
+      }
+
+      navigate(ROUTE_PATHS.ocrScan)
       return
     }
 
     // 식단 분석 결과 알림 (히스토리: diet_result, 실시간: diet_job_done, diet_job)
     const isDietType = ['diet_result', 'diet_job_done', 'diet_job'].includes(typeKey)
-    if (isDietType && notification.result) {
-      navigate(ROUTE_PATHS.dietLog, {
+    if (isDietType) {
+      navigate(ROUTE_PATHS.dietLog, notification.result ? {
         state: {
           initialAnalysisResult: notification.result
         }
-      })
+      } : undefined)
       return
     }
 
@@ -761,7 +766,7 @@ export const NotificationPage = () => {
                   }}
                 >
                   <Stack spacing={1.25}>
-                    <Typography sx={{ fontWeight: 900, color: '#92400E' }}>식이 경고</Typography>
+                    <Typography sx={{ fontWeight: 900, color: '#92400E' }}>식단 경고</Typography>
                     <Typography variant="body2" sx={{ color: '#B45309', lineHeight: 1.6 }}>
                       {dietWarningNotifications.length > 1
                         ? `식단 경고 알림이 ${dietWarningNotifications.length}개 있습니다.`
@@ -774,7 +779,7 @@ export const NotificationPage = () => {
                         onClick={() => navigate(resolveDietWarningPath())}
                         sx={{ fontWeight: 900 }}
                       >
-                        식이 경고 보기
+                        식단 경고 보기
                       </Button>
                     </Stack>
                   </Stack>
