@@ -17,7 +17,7 @@ import SearchIcon from '@mui/icons-material/Search'
 import DescriptionIcon from '@mui/icons-material/Description'
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy'
 import ChatIcon from '@mui/icons-material/Chat'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CameraAltIcon from '@mui/icons-material/CameraAlt'
 import RestaurantIcon from '@mui/icons-material/Restaurant'
@@ -64,9 +64,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true, hidden = false }) 
   const roleKey = normalizeCustomerRole(customerRole) || USER_ROLES.CAREGIVER
   const isCaregiver = roleKey === USER_ROLES.CAREGIVER
   const openSearchOverlay = useSearchOverlayStore((state) => state.open)
-  const { unreadCount } = useNotificationStore((state) => ({
-    unreadCount: state.unreadCount,
-  }))
+
 
   const { isListening, toggleVoice } = useVoiceRecognition()
   const { transcript, feedbackMessage } = useVoiceStore()
@@ -473,30 +471,7 @@ export const FloatingActionButtons = ({ hasBottomDock = true, hidden = false }) 
             </Box>
 
             <Stack spacing={1.25} alignItems="flex-end" sx={{ pointerEvents: 'auto' }}>
-              <ButtonBase
-                onClick={() => {
-                  triggerHaptic(30)
-                  navigate(ROUTE_PATHS.notifications)
-                }}
-                aria-label="알림"
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 999,
-                  bgcolor: '#3B82F6',
-                  color: 'common.white',
-                  boxShadow: '0 16px 30px rgba(15, 23, 42, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 160ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  '&:active': { transform: 'scale(0.9)' },
-                }}
-              >
-                <Badge badgeContent={unreadCount} color="error" max={99}>
-                  <NotificationsIcon />
-                </Badge>
-              </ButtonBase>
+
 
               <ButtonBase
                 onClick={() => {
