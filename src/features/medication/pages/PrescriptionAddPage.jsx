@@ -247,16 +247,27 @@ export const PrescriptionAddPage = () => {
             toast.error('최소 1개 이상의 약을 등록해주세요');
             return;
         }
+        const normalizedIntakeTimes = (prescriptionData.intakeTimes || []).filter(Boolean);
+        if (normalizedIntakeTimes.length === 0) {
+            toast.error('최소 1개 이상의 복용 시간을 설정해주세요');
+            return;
+        }
 
         try {
             if (isEditMode) {
                 logger.debug('📤 처방전 수정 요청:', prescriptionData);
-                await updatePrescription(editPrescriptionId, prescriptionData);
+                await updatePrescription(editPrescriptionId, {
+                    ...prescriptionData,
+                    intakeTimes: normalizedIntakeTimes
+                });
                 toast.success('처방전이 수정되었습니다');
                 navigate(ROUTE_PATHS.prescriptionDetail.replace(':id', editPrescriptionId), { replace: true });
             } else {
                 logger.debug('📤 처방전 등록 요청:', prescriptionData, 'targetUserId:', targetUserId);
-                await createPrescription(prescriptionData, targetUserId);
+                await createPrescription({
+                    ...prescriptionData,
+                    intakeTimes: normalizedIntakeTimes
+                }, targetUserId);
                 toast.success(isProxyRegistration ? `${targetUserName} 님의 처방전이 등록되었습니다` : '처방전이 등록되었습니다');
                 navigate(ROUTE_PATHS.medication, { replace: true });
             }

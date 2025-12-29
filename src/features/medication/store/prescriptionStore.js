@@ -39,13 +39,18 @@ export const usePrescriptionStore = create((set, get) => ({
         try {
             logger.debug('Creating prescription with raw data:', prescriptionData, 'targetUserId:', targetUserId);
 
+            const normalizedIntakeTimes = (prescriptionData.intakeTimes || []).filter(Boolean);
+            if (normalizedIntakeTimes.length === 0) {
+                throw new Error('복용 시간을 최소 1개 이상 등록해주세요.');
+            }
+
             // 데이터 형식 변환
             const formattedData = {
                 pharmacyName: prescriptionData.pharmacyName || '',
                 hospitalName: prescriptionData.hospitalName || '',
                 startDate: prescriptionData.startDate, // yyyy-MM-dd 형식
                 endDate: prescriptionData.endDate,     // yyyy-MM-dd 형식
-                intakeTimes: (prescriptionData.intakeTimes || []).map(time => {
+                intakeTimes: normalizedIntakeTimes.map(time => {
                     // HH:mm 형식을 HH:mm:ss 형식으로 변환
                     return time.length === 5 ? time + ':00' : time;
                 }),
@@ -84,13 +89,18 @@ export const usePrescriptionStore = create((set, get) => ({
     updatePrescription: async (id, prescriptionData) => {
         set({ loading: true, error: null });
         try {
+            const normalizedIntakeTimes = (prescriptionData.intakeTimes || []).filter(Boolean);
+            if (normalizedIntakeTimes.length === 0) {
+                throw new Error('복용 시간을 최소 1개 이상 등록해주세요.');
+            }
+
             // 데이터 형식 변환 (createPrescription과 동일)
             const formattedData = {
                 pharmacyName: prescriptionData.pharmacyName || '',
                 hospitalName: prescriptionData.hospitalName || '',
                 startDate: prescriptionData.startDate,
                 endDate: prescriptionData.endDate,
-                intakeTimes: (prescriptionData.intakeTimes || []).map(time => {
+                intakeTimes: normalizedIntakeTimes.map(time => {
                     // HH:mm 형식을 HH:mm:ss 형식으로 변환
                     return time.length === 5 ? time + ':00' : time;
                 }),

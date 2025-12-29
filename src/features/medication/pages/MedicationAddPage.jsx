@@ -58,7 +58,16 @@ export const MedicationAddPage = () => {
     setLoading(true)
     try {
       // 1. Payload Construction (Logic from MedicationEntryModal)
-      const uniqueIntakeTimes = [...new Set((formData.schedules || []).map(s => s.time))].sort()
+      const uniqueIntakeTimes = [...new Set((formData.schedules || [])
+        .map((s) => s.time)
+        .filter(Boolean))]
+        .sort()
+
+      if (uniqueIntakeTimes.length === 0) {
+        toast.error('최소 1개 이상의 복용 시간을 설정해주세요.')
+        setLoading(false)
+        return
+      }
 
       const medicationPayload = {
         medicationName: formData.name,
