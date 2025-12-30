@@ -3,10 +3,28 @@ import { useFocusModeStore } from '@shared/stores/focusModeStore'
 import { useCallback, useEffect, useRef } from 'react'
 import Webcam from 'react-webcam'
 
+const FACING_MODE_ENVIRONMENT = 'environment'
+
 const videoConstraints = {
-  width: 1280,
-  height: 720,
-  facingMode: 'environment',
+  facingMode: FACING_MODE_ENVIRONMENT,
+  advanced: [
+    { width: { exact: 2560 }, height: { exact: 1440 } }, // QHD
+    { width: { exact: 1920 }, height: { exact: 1080 } }, // Full HD
+    { width: { exact: 1280 }, height: { exact: 720 } }, // HD
+    { width: { exact: 1024 }, height: { exact: 576 } }, // 1024x576
+    { width: { exact: 900 }, height: { exact: 506 } }, // 900x506
+    { width: { exact: 800 }, height: { exact: 450 } }, // 800x450
+    { width: { exact: 640 }, height: { exact: 360 } }, // nHD
+    { width: { exact: 320 }, height: { exact: 180 } }, // QVGA
+  ],
+}
+
+const onMediaSuccess = () => {
+  console.log('Camera loaded successfully')
+}
+
+const onMediaError = (error) => {
+  console.error('Camera load failed:', error)
 }
 
 const CameraCapture = ({ onCapture, onCancel }) => {
@@ -48,6 +66,8 @@ const CameraCapture = ({ onCapture, onCancel }) => {
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        onUserMedia={onMediaSuccess}
+        onUserMediaError={onMediaError}
       />
 
       <Box
