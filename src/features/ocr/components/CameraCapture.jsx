@@ -8,6 +8,7 @@ const FACING_MODE_ENVIRONMENT = 'environment'
 const videoConstraints = {
   facingMode: FACING_MODE_ENVIRONMENT,
   advanced: [
+    { focusMode: 'continuous' }, // 연속 자동 초점 활성화
     { width: { exact: 2560 }, height: { exact: 1440 } }, // QHD
     { width: { exact: 1920 }, height: { exact: 1080 } }, // Full HD
     { width: { exact: 1280 }, height: { exact: 720 } }, // HD
