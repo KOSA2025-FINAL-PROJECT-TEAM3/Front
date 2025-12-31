@@ -212,8 +212,8 @@ export const SearchOverlay = () => {
               variant="fullWidth"
             >
               <Tab value="pill" label="약" />
-              <Tab value="hospital" label="병원" />
               <Tab value="disease" label="질병" />
+              <Tab value="hospital" label="병원" />
             </Tabs>
           </Box>
 
